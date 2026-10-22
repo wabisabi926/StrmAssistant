@@ -60,11 +60,18 @@ echo "==> Merging dependencies via ILRepack (dotnet) ..."
 ILREPACK="/root/.nuget/packages/ilrepack/2.0.42/tools/ILRepack.exe"
 MERGED="$PROJ/bin/$CONFIG/StrmAssistant.merged.dll"
 rm -f "$MERGED"
+# 合并清单必须与 StrmAssistant.csproj 的 PostBuildMerge 保持一致。
+# 漏掉 DiscUtils.* 时，只部署合并 DLL 的机器会在 ISO 解析路径上遇到依赖加载失败
+# （/lib: 只是依赖解析搜索目录，不会把库合并进产物）。
 dotnet "$ILREPACK" /out:"$MERGED" \
     "$RAW" \
     "$OUT/0Harmony.dll" \
     "$OUT/ChineseConverter.dll" \
     "$OUT/TinyPinyin.dll" \
+    "$OUT/DiscUtils.Core.dll" \
+    "$OUT/DiscUtils.Streams.dll" \
+    "$OUT/DiscUtils.Udf.dll" \
+    "$OUT/DiscUtils.Iso9660.dll" \
     /lib:"$OUT" > /tmp/ilrepack.log 2>&1 || { echo "ILRepack failed:"; cat /tmp/ilrepack.log; exit 1; }
 
 echo "==> Merged -> $MERGED ($(stat -c%s "$MERGED") bytes)"

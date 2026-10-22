@@ -4,7 +4,7 @@ using MediaBrowser.Model.Services;
 namespace StrmAssistant.Web.Api
 {
     [Route("/Douban/Ratings", "GET", IsHidden = true)]
-    [Unauthenticated]
+    [Authenticated]
     public class GetDoubanRatings
     {
         [ApiMember(Name = "Ids", Description = "Comma separated item ids", IsRequired = false,

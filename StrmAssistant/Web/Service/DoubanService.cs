@@ -1,3 +1,4 @@
+using MediaBrowser.Controller.Api;
 using MediaBrowser.Model.Services;
 using StrmAssistant.Provider.Douban;
 using StrmAssistant.Web.Api;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace StrmAssistant.Web.Service
 {
-    public class DoubanService : IService
+    public class DoubanService : BaseApiService
     {
         public class DoubanRatingsResponse
         {
@@ -20,6 +21,13 @@ namespace StrmAssistant.Web.Service
             if (!Plugin.IsPluginEnabled) return null;
 
             var response = new DoubanRatingsResponse();
+
+            // 必须登录：该端点会暴露「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系，
+            // 匿名可读等于把私有媒体库的片单泄露给任何能访问 Emby 的人（由 [Authenticated] 拦住）。
+            //
+            // user == null 只可能出现在「服务端 API Key」调用（无用户上下文），
+            // API Key 权限等价管理员，此时不做可见性过滤，保持既有集成可用。
+            var user = GetUserForRequest(null, true);
 
             if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
             {
@@ -40,7 +48,8 @@ namespace StrmAssistant.Web.Service
                 .Take(80)
                 .ToList();
 
-            response.Ratings = Plugin.DoubanAssist.GetRatings(itemIds);
+            // 逐条按当前用户可见性过滤，与 MultiVersionService 保持一致
+            response.Ratings = Plugin.DoubanAssist.GetRatings(itemIds, user);
 
             return response;
         }

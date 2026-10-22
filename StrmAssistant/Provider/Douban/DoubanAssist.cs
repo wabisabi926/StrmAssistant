@@ -347,7 +347,14 @@ namespace StrmAssistant.Provider.Douban
         /// <summary>
         /// 按条目 ID 列表解析豆瓣评分快照（经条目上的 Douban ProviderId 关联），供徽章端点使用。
         /// </summary>
-        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds)
+        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds) => GetRatings(itemIds, null);
+
+        /// <summary>
+        /// 同上，但按 <paramref name="user"/> 的可见性过滤：外部端点必须传当前用户，
+        /// 否则匿名/越权请求能拿到「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系。
+        /// 内部任务（如扫库填充）传 null 表示不做可见性过滤。
+        /// </summary>
+        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds, User user)
         {
             var result = new List<DoubanRatingInfo>();
 
@@ -362,7 +369,10 @@ namespace StrmAssistant.Provider.Douban
                     try
                     {
                         var item = Plugin.LibraryManager.GetItemById(long.Parse(itemId));
-                        var subjectId = item?.GetProviderId(DoubanProviderId);
+                        if (item == null) continue;
+                        if (user != null && !item.IsVisible(user)) continue;
+
+                        var subjectId = item.GetProviderId(DoubanProviderId);
 
                         if (string.IsNullOrEmpty(subjectId)) continue;
 

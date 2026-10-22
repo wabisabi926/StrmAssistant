@@ -37,9 +37,24 @@ namespace StrmAssistant.Common
         private static readonly object _lock = new object();
         private static string _root;
 
-        private static readonly Regex EntityUrl = new Regex(
-            @"^https?://[^/]+/3/(movie|tv|collection)/(\d+)(?:/season/(\d+))?(?:/episode/(\d+))?",
+        /// <summary>
+        /// 只匹配**完整**的实体资源路径（锚定结尾）。
+        ///
+        /// ⚠️ 不能只匹配前缀：/3/movie/123 与 /3/movie/123/credits 会落到同一个 all.json，
+        /// 详情响应被当成演职员响应喂给 Emby（反之亦然）。未列入白名单的子资源一律放行、不缓存。
+        /// </summary>
+        private static readonly Regex EntityPath = new Regex(
+            @"^/3/(movie|tv|collection)/(\d+)(?:/season/(\d+)(?:/episode/(\d+))?)?/?$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        /// <summary>
+        /// 影响响应结构的查询参数：不隔离会让同一个文件承载多种 JSON 结构。
+        /// append_to_response 是 Emby 的 MovieDb provider 最常用的参数，必须进键。
+        /// </summary>
+        private static readonly string[] VariantQueryKeys =
+        {
+            "append_to_response", "language", "include_image_language"
+        };
 
         public static string Root => _root;
 
@@ -212,7 +227,7 @@ namespace StrmAssistant.Common
         }
 
         /// <summary>
-        /// 把 MovieDb 元数据请求 URL 解析为 TMDB 实体条目；非实体请求（人物/搜索/配置等）返回 false。
+        /// 把 MovieDb 元数据请求 URL 解析为 TMDB 实体条目；非实体请求（人物/搜索/配置/子资源）返回 false。
         /// </summary>
         public static bool TryParseEntity(string url, out CacheEntry entry)
         {
@@ -221,7 +236,10 @@ namespace StrmAssistant.Common
 
             try
             {
-                var match = EntityUrl.Match(url);
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return false;
+
+                // 只认白名单内的完整资源路径；/credits、/images、/external_ids 等子资源一律放行
+                var match = EntityPath.Match(uri.AbsolutePath);
                 if (!match.Success) return false;
 
                 var kind = match.Groups[1].Value.ToLowerInvariant();
@@ -251,6 +269,13 @@ namespace StrmAssistant.Common
                         break;
                 }
 
+                // 影响响应结构的参数必须隔离，否则 append_to_response 的多种结构会互相覆盖
+                var variant = BuildVariantSuffix(uri.Query);
+                if (variant.Length > 0)
+                {
+                    fileName = fileName.Substring(0, fileName.Length - ".json".Length) + "." + variant + ".json";
+                }
+
                 entry = new CacheEntry { TypeDir = typeDir, TmdbId = id, FileName = fileName };
                 return true;
             }
@@ -258,6 +283,33 @@ namespace StrmAssistant.Common
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 把影响响应结构的查询参数规范化后取短哈希，作为文件名后缀。
+        /// 只取白名单参数（api_key / page 等不影响实体响应结构的不参与），保证键稳定。
+        /// </summary>
+        private static string BuildVariantSuffix(string query)
+        {
+            if (string.IsNullOrEmpty(query)) return string.Empty;
+
+            var parts = query.TrimStart('?')
+                .Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Split('='))
+                .Where(kv => kv.Length == 2)
+                .Where(kv => VariantQueryKeys.Any(k => kv[0].Equals(k, StringComparison.OrdinalIgnoreCase)))
+                .Select(kv => kv[0].ToLowerInvariant() + "=" + Uri.UnescapeDataString(kv[1]).ToLowerInvariant())
+                .OrderBy(s => s, StringComparer.Ordinal)
+                .ToList();
+
+            if (parts.Count == 0) return string.Empty;
+
+            using var sha = System.Security.Cryptography.SHA1.Create();
+            var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("&", parts)));
+
+            var sb = new StringBuilder(6);
+            for (var i = 0; i < 3; i++) sb.Append(hash[i].ToString("x2"));
+            return sb.ToString();
         }
 
         private static string BuildPath(string scope, CacheEntry entry)

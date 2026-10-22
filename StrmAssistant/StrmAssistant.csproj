@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
-    <!-- 版本号与 Releases 仓库的 tag 体系保持一致（v3.0.0.x），显示为 3.0.0.59 -->
-    <AssemblyVersion>3.0.0.59</AssemblyVersion>
-    <FileVersion>3.0.0.59</FileVersion>
-    <Version>3.0.0.59</Version>
-    <InformationalVersion>3.0.0.59</InformationalVersion>
+    <!-- 版本号与 Releases 仓库的 tag 体系保持一致（v3.0.0.x），显示为 3.0.0.60 -->
+    <AssemblyVersion>3.0.0.60</AssemblyVersion>
+    <FileVersion>3.0.0.60</FileVersion>
+    <Version>3.0.0.60</Version>
+    <InformationalVersion>3.0.0.60</InformationalVersion>
     <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <LangVersion>latest</LangVersion>
@@ -73,7 +73,7 @@
     <!-- 显式拼接输出目录，避免 Build 目标里 TargetPath/TargetDir 为空 -->
     <StrmAssistantBuildOutputDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\</StrmAssistantBuildOutputDir>
     <StrmAssistantMergedAssembly>$(StrmAssistantBuildOutputDir)$(AssemblyName).dll</StrmAssistantMergedAssembly>
-    <!-- 发布包命名：StrmAssistantPlus_v3.0.0.59.dll；部署文件名保持 StrmAssistant.dll，避免多版本副本被 Emby 同时加载 -->
+    <!-- 发布包命名：StrmAssistantPlus_v3.0.0.60.dll；部署文件名保持 StrmAssistant.dll，避免多版本副本被 Emby 同时加载 -->
     <StrmAssistantPackageAssembly>$(StrmAssistantBuildOutputDir)StrmAssistantPlus_v$(Version).dll</StrmAssistantPackageAssembly>
 
     <!-- ILRepack 可执行文件：优先使用 NuGet 包目录，避免 $(ILRepack) 这类空属性 -->

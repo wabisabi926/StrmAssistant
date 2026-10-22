@@ -141,7 +141,7 @@ namespace StrmAssistant.Mod
         }
 
         [HarmonyPrefix]
-        private static void GetMediaInfoInternalPrefix(ref string inputPath, out IsoMounter.TitleHint __state)
+        private static void GetMediaInfoInternalPrefix(ref string inputPath, ref MediaProtocol protocol, out IsoMounter.TitleHint __state)
         {
             __state = null;
 
@@ -157,20 +157,23 @@ namespace StrmAssistant.Mod
                 // titles keep their original ISO path and must not receive a single clip's metadata.
                 if (IsoMounter.TryNormalizeRemoteIso(inputPath, out var isoUrl))
                 {
+                    var originalProtocol = protocol;
                     var tempPath = IsoMounter.GetRemoteProbePath(isoUrl);
                     if (!string.IsNullOrEmpty(tempPath))
                     {
-                        inputPath = tempPath;
-                        logger.Info($"IsoExtraction - remote iso probing via downloaded window -> {tempPath}");
+                        inputPath = '"' + tempPath + '"';
+                        protocol = MediaProtocol.File;
+                        logger.Info($"IsoExtraction - remote iso probing via title sample -> {tempPath}");
                     }
                     else
                     {
-                        logger.Info($"IsoExtraction - remote iso window unavailable; leaving input unchanged: {isoUrl}");
+                        logger.Info($"IsoExtraction - remote ISO title sample unavailable; leaving input unchanged: {isoUrl}");
                     }
 
                     // 章节：远程 ISO 走 Range 流 + 进程内 UDF（不落盘、按需取 UDF 元数据区）。
                     // 失败（不支持 Range / 无 mpls / 超时）静默回退，不影响探测本身。
                     __state = BuildRemoteHint(isoUrl);
+                    if (__state != null) __state.OriginalProtocol = (int)originalProtocol;
 
                     return;
                 }
@@ -181,7 +184,8 @@ namespace StrmAssistant.Mod
                     var probePath = IsoMounter.GetProbePath(isoPath);
                     if (!string.IsNullOrEmpty(probePath))
                     {
-                        inputPath = probePath;
+                        inputPath = '"' + probePath + '"';
+                        protocol = MediaProtocol.File;
                         logger.Info($"IsoExtraction - probing mounted title for {isoPath} -> {probePath}");
 
                         // ★ 章节补写（本地）：m2ts 无章节原子，ffprobe 即便带 -show_chapters 也取不到；
@@ -256,6 +260,9 @@ namespace StrmAssistant.Mod
         {
             var mediaInfo = await probeTask.ConfigureAwait(false);
             if (mediaInfo == null) return null;
+            // The temporary sample is a file; the actual library source remains HTTP.
+            if (hint.IsProbeSample && hint.OriginalProtocol.HasValue)
+                mediaInfo.Protocol = (MediaProtocol)hint.OriginalProtocol.Value;
 
             try
             {
@@ -277,8 +284,9 @@ namespace StrmAssistant.Mod
         /// <summary>探测结果没有时长时，用 playlist 各 PlayItem 时长之和补上。</summary>
         private static void ApplyRuntime(ProbeMediaInfo mediaInfo, IsoMounter.TitleHint hint)
         {
-            if (mediaInfo.RunTimeTicks.HasValue && mediaInfo.RunTimeTicks.Value > 0) return;
-            if (hint.DurationSeconds <= 0) return;
+            if (hint.IsProbeSample && hint.SourceSize > 0) mediaInfo.Size = hint.SourceSize;
+            if (!hint.IsProbeSample && mediaInfo.RunTimeTicks.HasValue && mediaInfo.RunTimeTicks.Value > 0) return;
+            if (hint.DurationSeconds <= 0 || double.IsNaN(hint.DurationSeconds) || double.IsInfinity(hint.DurationSeconds)) return;
 
             mediaInfo.RunTimeTicks = (long)(hint.DurationSeconds * TimeSpan.TicksPerSecond);
             Plugin.Instance.Logger.Info(

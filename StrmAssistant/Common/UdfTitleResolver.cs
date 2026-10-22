@@ -1,3 +1,5 @@
+using DiscUtils;
+using DiscUtils.Iso9660;
 using DiscUtils.Udf;
 using System;
 using System.Buffers.Binary;
@@ -34,6 +36,9 @@ namespace StrmAssistant.Common
 
             /// <summary>碟内相对路径（统一以 <c>\</c> 分隔），如 <c>BDMV\STREAM\00001.m2ts</c>。</summary>
             public string RelativePath;
+
+            // Ordered playlist streams used only to sample metadata, never as a substitute playback title.
+            public List<string> ProbePaths = new List<string>();
 
             /// <summary>选中的 playlist 名（如 00001.mpls）或 VOB 名，仅用于日志。</summary>
             public string SourceName;
@@ -144,13 +149,72 @@ namespace StrmAssistant.Common
 
             try
             {
-                using var udf = new UdfReader(stream);
+                using var udf = OpenDisc(stream);
                 return Resolve(new UdfDiscFs(udf));
             }
             catch (Exception e)
             {
                 Log($"resolve failed for {label}: {e.Message}");
                 return null;
+            }
+        }
+
+        private static DiscFileSystem OpenDisc(Stream stream)
+        {
+            try { return new UdfReader(stream); }
+            catch
+            {
+                // Some DVD images contain ISO9660/Joliet instead of UDF.
+                stream.Position = 0;
+                return new CDReader(stream, true);
+            }
+        }
+
+        internal static TitleInfo WriteProbeSample(Stream image, string destination, long maxBytes)
+        {
+            using var disc = OpenDisc(image);
+            var title = Resolve(new UdfDiscFs(disc), true);
+            if (title == null) throw new InvalidDataException("No supported Blu-ray/DVD title found in ISO");
+            var paths = title.ProbePaths.Count > 0 ? title.ProbePaths :
+                string.IsNullOrEmpty(title.RelativePath) ? new List<string>() : new List<string> { title.RelativePath };
+            if (paths.Count == 0 || paths.Any(path => !disc.FileExists(path)))
+                throw new InvalidDataException("The selected playlist contains missing media streams");
+            if (paths.Count > 256) throw new InvalidDataException("Playlist exceeds metadata sample limit (256 clips)");
+
+            // Reserve a tail segment as well, so MPEG streams without a playlist duration can
+            // expose their final timestamps. Bound aggregate I/O regardless of playlist length.
+            var alignment = title.IsBluray ? 192 : 2048;
+            var perPart = Math.Min(8L * 1024 * 1024, maxBytes / (paths.Count + 1));
+            perPart = perPart / alignment * alignment;
+            if (perPart < 64 * 1024) throw new InvalidDataException("Playlist too large for the metadata budget");
+            using var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
+            for (var i = 0; i < paths.Count; i++)
+            {
+                using var input = disc.OpenFile(paths[i], FileMode.Open, FileAccess.Read);
+                if (input.Length == 0) throw new InvalidDataException("Empty media stream in ISO");
+                var head = Math.Min(input.Length, perPart);
+                CopyProbeBytes(input, output, head);
+                if (i == paths.Count - 1 && input.Length > head)
+                {
+                    var tailStart = Math.Max(head, input.Length - perPart);
+                    tailStart = (tailStart + alignment - 1) / alignment * alignment;
+                    input.Position = Math.Min(tailStart, input.Length);
+                    CopyProbeBytes(input, output, input.Length - input.Position);
+                }
+            }
+            output.Flush();
+            return title;
+        }
+
+        private static void CopyProbeBytes(Stream input, Stream output, long count)
+        {
+            var buffer = new byte[64 * 1024];
+            while (count > 0)
+            {
+                var read = input.Read(buffer, 0, (int)Math.Min(buffer.Length, count));
+                if (read <= 0) throw new EndOfStreamException("ISO range read ended before the selected stream");
+                output.Write(buffer, 0, read);
+                count -= read;
             }
         }
 
@@ -168,11 +232,11 @@ namespace StrmAssistant.Common
             }
         }
 
-        private static TitleInfo Resolve(IDiscFs fs)
+        private static TitleInfo Resolve(IDiscFs fs, bool metadataProbe = false)
         {
             if (fs.DirectoryExists(BlurayPlaylistDir) && fs.DirectoryExists(BlurayStreamDir))
             {
-                var bluray = ResolveBluray(fs);
+                var bluray = ResolveBluray(fs, metadataProbe);
                 if (bluray != null) return bluray;
             }
 
@@ -185,9 +249,10 @@ namespace StrmAssistant.Common
             return null;
         }
 
-        private static TitleInfo ResolveBluray(IDiscFs fs)
+        private static TitleInfo ResolveBluray(IDiscFs fs, bool metadataProbe = false)
         {
             PlaylistEntry best = null;
+            var hadParsedPlaylist = false;
 
             foreach (var path in fs.GetFiles(BlurayPlaylistDir))
             {
@@ -204,13 +269,30 @@ namespace StrmAssistant.Common
                 }
 
                 if (entry == null || entry.Clips.Count == 0) continue;
+                hadParsedPlaylist = true;
+                var reason = GetPlaylistRejectionReason(entry);
+                var uniquePaths = entry.Clips.Select(c => BlurayStreamDir + "\\" + c.Name + ".m2ts")
+                    .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+                if (reason == null && metadataProbe && uniquePaths.Length > 256)
+                    reason = "more than 256 distinct stream files exceed the metadata sampling budget";
+                if (reason == null && uniquePaths.Any(path => !fs.FileExists(path)))
+                    reason = "playlist references missing stream files";
+                if (reason != null)
+                {
+                    Plugin.Instance?.Logger?.Info($"UdfTitleResolver - skipped playlist {entry.Name}: {reason}");
+                    continue;
+                }
 
-                if (best == null || entry.TotalSeconds > best.TotalSeconds) best = entry;
+                // A stable tie break avoids depending on the physical UDF directory order.
+                if (best == null || entry.TotalSeconds > best.TotalSeconds + 1.0 / TicksPerSecond ||
+                    (Math.Abs(entry.TotalSeconds - best.TotalSeconds) <= 1.0 / TicksPerSecond &&
+                     string.Compare(entry.Name, best.Name, StringComparison.OrdinalIgnoreCase) < 0)) best = entry;
             }
 
             if (best != null)
             {
-                if (best.Clips.Count != 1)
+                Plugin.Instance?.Logger?.Info($"UdfTitleResolver - selected playlist {best.Name}: {best.Clips.Count} play items, {best.TotalSeconds:F1}s");
+                if (best.Clips.Count != 1 && !metadataProbe)
                 {
                     return new TitleInfo
                     {
@@ -233,7 +315,11 @@ namespace StrmAssistant.Common
                     return new TitleInfo
                     {
                         IsBluray = true,
-                        RelativePath = relative,
+                        RelativePath = best.Clips.Count == 1 ? relative : null,
+                        ProbePaths = metadataProbe
+                            ? best.Clips.Select(c => BlurayStreamDir + "\\" + c.Name + ".m2ts")
+                                .Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+                            : new List<string>(),
                         SourceName = best.Name,
                         DurationSeconds = best.TotalSeconds,
                         AudioStreams = streams.Where(s => s.Kind == BlurayStreamKind.Audio).ToList(),
@@ -245,7 +331,36 @@ namespace StrmAssistant.Common
                 Log($"selected stream {relative} not found; falling back to largest m2ts");
             }
 
+            if (hadParsedPlaylist)
+                return new TitleInfo { IsBluray = true, UnsupportedReason =
+                    "No reliable playable playlist remains after validation; refusing an arbitrary stream fallback." };
             return LargestFile(fs, BlurayStreamDir, ".m2ts", true);
+        }
+
+        internal static string GetPlaylistRejectionReason(PlaylistEntry entry)
+        {
+            if (entry == null || entry.Clips.Count == 0 || entry.TotalSeconds <= 0 ||
+                double.IsNaN(entry.TotalSeconds) || double.IsInfinity(entry.TotalSeconds))
+                return "empty or invalid duration";
+            if (entry.Clips.Any(c => string.IsNullOrWhiteSpace(c.Name) || c.Duration <= 0 ||
+                c.InTime < 0 || double.IsNaN(c.Duration) || double.IsInfinity(c.Duration) ||
+                double.IsNaN(c.InTime) || double.IsInfinity(c.InTime)))
+                return "invalid play item";
+
+            // Reusing a file at DIFFERENT in/out times is legitimate seamless branching.
+            // Only count exact repetitions of the same segment at the 45 kHz MPLS clock.
+            var repeats = entry.Clips.GroupBy(c => new
+            {
+                Name = c.Name.ToUpperInvariant(),
+                In = (long)Math.Round(c.InTime * TicksPerSecond),
+                Length = (long)Math.Round(c.Duration * TicksPerSecond)
+            }).ToList();
+            var repeatedCount = repeats.Sum(g => g.Count() - 1);
+            var repeatedSeconds = repeats.Sum(g => (g.Count() - 1) * g.First().Duration);
+            if (entry.Clips.Count >= 16 && repeatedCount >= 8 &&
+                repeatedCount >= entry.Clips.Count * 0.75 && repeatedSeconds >= entry.TotalSeconds * 0.5)
+                return $"abnormally repeated segments ({entry.Clips.Count} play items, {repeats.Count} distinct segments)";
+            return null;
         }
 
         private static TitleInfo ResolveDvd(IDiscFs fs)
@@ -735,9 +850,9 @@ namespace StrmAssistant.Common
 
         private sealed class UdfDiscFs : IDiscFs
         {
-            private readonly UdfReader _udf;
+            private readonly DiscFileSystem _udf;
 
-            public UdfDiscFs(UdfReader udf)
+            public UdfDiscFs(DiscFileSystem udf)
             {
                 _udf = udf;
             }

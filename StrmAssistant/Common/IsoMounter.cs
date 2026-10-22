@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,8 +26,8 @@ namespace StrmAssistant.Common
     ///
     /// **远程 ISO（strm/http）**：无法挂载，且 Windows 版 libbluray 无法直读 UDF（实测
     /// <c>bluray:</c> 协议在文件路径/挂载盘/HTTP 上均失败）。改为：
-    /// <see cref="GetRemoteProbePath"/> 用 HTTP Range 拉取 ISO **头部窗口**（默认 8MB）
-    /// 落到本地临时文件，再由 ffprobe 探测该临时文件——实测可正确得到正片流信息。
+    /// <see cref="GetRemoteProbePath"/> 用 HTTP Range 定位碟内标题，读取各片段的影音样本。
+    /// ffprobe 处理影音样本，完整标题时长和章节由播放列表补充，不截取ISO头冒充影音数据。
     /// 临时文件按 URL 缓存并有空闲清理。
     /// </summary>
     public static class IsoMounter
@@ -65,7 +65,7 @@ namespace StrmAssistant.Common
         }
 
         private static readonly ConcurrentDictionary<string, RemoteEntry> RemoteIsos =
-            new ConcurrentDictionary<string, RemoteEntry>(StringComparer.OrdinalIgnoreCase);
+            new ConcurrentDictionary<string, RemoteEntry>(StringComparer.Ordinal);
 
         private static readonly ConcurrentDictionary<string, MountEntry> Mounts =
             new ConcurrentDictionary<string, MountEntry>(StringComparer.OrdinalIgnoreCase);
@@ -85,8 +85,11 @@ namespace StrmAssistant.Common
             public List<UdfTitleResolver.MplsStreamInfo> AudioStreams = new List<UdfTitleResolver.MplsStreamInfo>();
             public List<UdfTitleResolver.MplsStreamInfo> SubtitleStreams = new List<UdfTitleResolver.MplsStreamInfo>();
             public double DurationSeconds;
+            public bool IsProbeSample;
+            public int? OriginalProtocol;
+            public long SourceSize;
 
-            public bool IsEmpty => Chapters.Count == 0 && AudioStreams.Count == 0 &&
+            public bool IsEmpty => !IsProbeSample && Chapters.Count == 0 && AudioStreams.Count == 0 &&
                                    SubtitleStreams.Count == 0 && DurationSeconds <= 0;
         }
 
@@ -237,72 +240,119 @@ namespace StrmAssistant.Common
             if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri)) return false;
             if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) return false;
 
-            // 以「路径部分」（剥离 query/fragment）判断是否 .iso，避免查询串影响
-            if (!uri.AbsolutePath.EndsWith(".iso", StringComparison.OrdinalIgnoreCase) &&
-                !candidate.EndsWith(".iso", StringComparison.OrdinalIgnoreCase))
-                return false;
+            // Inspect decoded filename hints without decoding/rebuilding the signed URL itself.
+            var isIso = Uri.UnescapeDataString(uri.AbsolutePath).EndsWith(".iso", StringComparison.OrdinalIgnoreCase);
+            if (!isIso)
+            {
+                foreach (var part in uri.Query.TrimStart('?').Split('&'))
+                {
+                    var pair = part.Split(new[] { '=' }, 2);
+                    if (pair.Length != 2) continue;
+                    var key = Uri.UnescapeDataString(pair[0]);
+                    if (!new[] { "file", "filename", "file_name", "name", "path" }.Contains(key, StringComparer.OrdinalIgnoreCase)) continue;
+                    var name = Uri.UnescapeDataString(pair[1]);
+                    if (name.EndsWith(".iso", StringComparison.OrdinalIgnoreCase)) { isIso = true; break; }
+                }
+            }
+            if (!isIso)
+            {
+                // 115 STRM links commonly expose only ?pickcode=...; the ISO filename appears
+                // after redirect. Do not bypass the ISO sampler merely because the proxy URL
+                // itself has no extension. This requests headers and at most a one-byte range.
+                var is115Link = uri.Query.TrimStart('?').Split('&').Any(part =>
+                    string.Equals(Uri.UnescapeDataString(part.Split('=')[0]), "pickcode", StringComparison.OrdinalIgnoreCase));
+                if (!is115Link || !RedirectTargetsIso(candidate)) return false;
+            }
 
             isoUrl = candidate;
             return true;
         }
 
+        private static bool RedirectTargetsIso(string url)
+        {
+            try
+            {
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                using var client = new System.Net.Http.HttpClient(new System.Net.Http.HttpClientHandler
+                {
+                    AllowAutoRedirect = true,
+                    AutomaticDecompression = System.Net.DecompressionMethods.None
+                });
+                using var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
+                request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(0, 0);
+                request.Headers.UserAgent.ParseAdd("Emby/4.10 StrmAssistant");
+                using var response = client.Send(request,
+                    System.Net.Http.HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+                if (!response.IsSuccessStatusCode) return false;
+                var path = response.RequestMessage?.RequestUri?.AbsolutePath;
+                var disposition = response.Content.Headers.ContentDisposition;
+                var name = disposition?.FileNameStar ?? disposition?.FileName;
+                return (!string.IsNullOrEmpty(path) && Uri.UnescapeDataString(path)
+                            .EndsWith(".iso", StringComparison.OrdinalIgnoreCase)) ||
+                       (!string.IsNullOrEmpty(name) && Uri.UnescapeDataString(name.Trim('"'))
+                            .EndsWith(".iso", StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance?.Logger?.Warn("IsoExtraction - 115 redirect detection failed: " + e.GetType().Name);
+                return false;
+            }
+        }
+
         /// <summary>
         /// 远程 ISO → 本地临时文件（可交给 ffprobe 探测）。
         ///
-        /// 做法：用 HTTP Range 拉取 ISO 的**头部窗口**（<see cref="RemoteWindowBytes"/>），
-        /// 落盘到临时目录并缓存（按 URL，TTL <see cref="RemoteCacheTtl"/>）。
-        /// 实测该窗口足以让 ffprobe 正确识别正片流（4K BL + 1080p EL）。
+        /// 用带真实总长度的 Range 流解析光盘目录，采样选中标题的影音数据而非 ISO 文件头。
+        /// 临时文件仅用于媒体信息探测，playlist 提供完整标题时长与章节。
         ///
         /// 失败返回 null（调用方保持原路径放行）。
         /// </summary>
         public static string GetRemoteProbePath(string isoUrl)
         {
             if (string.IsNullOrEmpty(isoUrl)) return null;
-
-            TryGetRemoteHint(isoUrl, out _);
-            if (RemoteHints.TryGetValue(isoUrl, out var title) && !string.IsNullOrEmpty(title.UnsupportedReason))
-            {
-                Plugin.Instance?.Logger?.Warn("IsoExtraction - " + title.UnsupportedReason);
-                return null;
-            }
-
+            string tempFile = null;
             try
             {
                 EnsureSweeper();
-
-                if (RemoteIsos.TryGetValue(isoUrl, out var cached) &&
-                    File.Exists(cached.TempFile))
+                if (RemoteIsos.TryGetValue(isoUrl, out var cached) && File.Exists(cached.TempFile))
                 {
                     cached.LastUsedUtc = DateTime.UtcNow;
-                    Plugin.Instance?.Logger?.Info($"IsoExtraction - using cached remote iso window {cached.TempFile}");
+                    if (RemoteHints.TryGetValue(isoUrl, out var cachedHint)) cachedHint.LastUsedUtc = DateTime.UtcNow;
                     return cached.TempFile;
                 }
-
-                var tempDir = Path.Combine(Path.GetTempPath(), "strmassistant_iso");
-                Directory.CreateDirectory(tempDir);
-
-                var fileName = "iso_" + Math.Abs(isoUrl.GetHashCode()).ToString("x8") + "_" +
-                               Guid.NewGuid().ToString("N").Substring(0, 8) + ".iso";
-                var tempFile = Path.Combine(tempDir, fileName);
-
-                Plugin.Instance?.Logger?.Info(
-                    $"IsoExtraction - downloading remote iso window ({RemoteWindowBytes / (1024 * 1024)}MB) for {SafeShorten(isoUrl)}");
-
-                if (!DownloadRange(isoUrl, 0, RemoteWindowBytes - 1, tempFile))
+                if (!HttpRangeStream.TryOpen(isoUrl, out var image, out var error,
+                        TimeSpan.FromMilliseconds(RemoteDownloadTimeoutMs)))
                 {
-                    TryDelete(tempFile);
+                    Plugin.Instance?.Logger?.Warn("IsoExtraction - cannot read remote ISO ranges: " + error);
                     return null;
                 }
-
-                var len = new FileInfo(tempFile).Length;
-                Plugin.Instance?.Logger?.Info($"IsoExtraction - remote iso window saved: {tempFile} ({len} bytes)");
-
-                RemoteIsos[isoUrl] = new RemoteEntry { TempFile = tempFile, LastUsedUtc = DateTime.UtcNow };
-                return tempFile;
+                using (image)
+                {
+                    var tempDir = Path.Combine(Path.GetTempPath(), "strmassistant_iso");
+                    Directory.CreateDirectory(tempDir);
+                    tempFile = Path.Combine(tempDir, "title_" + Guid.NewGuid().ToString("N") + ".ts");
+                    var title = UdfTitleResolver.WriteProbeSample(image, tempFile, 64L * 1024 * 1024);
+                    var hint = new TitleHint
+                    {
+                        Chapters = title.Chapters ?? new List<double>(),
+                        AudioStreams = title.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
+                        SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
+                        DurationSeconds = title.DurationSeconds,
+                        IsProbeSample = true,
+                        SourceSize = image.Length
+                    };
+                    // Multi-clip metadata samples cover each play item. This does not enable
+                    // returning one clip as a complete mounted playback title.
+                    RemoteHints[isoUrl] = new RemoteHintEntry { Hint = hint, LastUsedUtc = DateTime.UtcNow };
+                    RemoteIsos[isoUrl] = new RemoteEntry { TempFile = tempFile, LastUsedUtc = DateTime.UtcNow };
+                    Plugin.Instance?.Logger?.Info($"IsoExtraction - remote title sample saved: {new FileInfo(tempFile).Length} bytes, playlist={title.SourceName}, duration={title.DurationSeconds:F1}s");
+                    return tempFile;
+                }
             }
             catch (Exception e)
             {
-                Plugin.Instance?.Logger?.Warn("IsoExtraction - remote iso download failed: " + e.Message);
+                TryDelete(tempFile);
+                Plugin.Instance?.Logger?.Warn("IsoExtraction - remote title sample failed: " + e.Message);
                 return null;
             }
         }
@@ -586,7 +636,7 @@ namespace StrmAssistant.Common
         }
 
         private static readonly ConcurrentDictionary<string, RemoteHintEntry> RemoteHints =
-            new ConcurrentDictionary<string, RemoteHintEntry>(StringComparer.OrdinalIgnoreCase);
+            new ConcurrentDictionary<string, RemoteHintEntry>(StringComparer.Ordinal);
 
         /// <summary>
         /// 远程 ISO（strm → http）的章节解析：用 <see cref="HttpRangeStream"/> 提供真实长度的可 Seek 流，

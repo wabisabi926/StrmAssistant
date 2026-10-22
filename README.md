@@ -14,7 +14,7 @@
 
 ## 版本信息
 
-- **插件版本**: 3.0.0.59
+- **插件版本**: 3.0.0.60
 - **最低Emby版本**: 4.9.1.90
 - **推荐Emby版本**: 4.10.1.0
 - **测试通过版本**: 4.9.1.90、4.10.0.29、4.10.1.0
@@ -95,7 +95,7 @@
 
 ### 方式一：GitHub Actions（推荐）
 
-在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 手动触发；构建完成后从 [Releases](https://github.com/myp015/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.59`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistant.dll` 覆盖到 `config/plugins/StrmAssistant.dll` 后重启 Emby。
+在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 手动触发；构建完成后从 [Releases](https://github.com/myp015/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.60`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistant.dll` 覆盖到 `config/plugins/StrmAssistant.dll` 后重启 Emby。
 
 ### 方式二：本地构建
 

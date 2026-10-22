@@ -31,7 +31,7 @@ namespace StrmAssistant.Mod
     /// - 只在命中 CUVA 时改写 <c>MediaStream.Comment</c>（Emby 定义为可写），未命中一律不动。
     /// - 显示覆写同样只在 Comment 命中时生效，其余条目走原逻辑。
     /// - 不改 <c>MediaSourceInfo.Path</c>，播放路径与条目身份不受影响。
-    /// - 开关沿用 <c>EnableIsoExtraction</c>（与 <see cref="DolbyVisionProfile"/> 一致，默认 OFF）。
+    /// - 开关见 <see cref="Options.HdrTaggingOptions"/>（3.0.0.62 起与 ISO 提取解耦，默认 OFF）。
     /// </summary>
     public class HdrVividTagging : PatchBase<HdrVividTagging>
     {
@@ -48,7 +48,10 @@ namespace StrmAssistant.Mod
         {
             Initialize();
 
-            if (Plugin.Instance.MediaInfoExtractStore.GetOptions().IsoTool.EnableIsoExtraction)
+            // 与 ISO 提取解耦：改由「HDR 标注」分组控制（3.0.0.62 起）
+            var hdr = Plugin.Instance.MediaInfoExtractStore.GetOptions().HdrTagging;
+
+            if (hdr.EnableHdrTagging && hdr.EnableHdrVividTagging)
             {
                 Patch();
             }

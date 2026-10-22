@@ -38,6 +38,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("MediaInfoExtractOptions_Group_IsoTool", typeof(Resources))]
         public IsoToolOptions IsoTool { get; set; } = new IsoToolOptions();
 
+        /// <summary>HDR 标注：双层杜比视界 P7 与 HDR Vivid 的画质标签（与 ISO 提取解耦）。</summary>
+        [DisplayNameL("MediaInfoExtractOptions_Group_HdrTagging", typeof(Resources))]
+        public HdrTaggingOptions HdrTagging { get; set; } = new HdrTaggingOptions();
+
         /// <summary>结果与持久化：探测结果清洗、JSON 持久化 / 恢复模式。</summary>
         [DisplayNameL("MediaInfoExtractOptions_Group_MediaInfoPersist", typeof(Resources))]
         public MediaInfoPersistOptions MediaInfoPersist { get; set; } = new MediaInfoPersistOptions();

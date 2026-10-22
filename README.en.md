@@ -146,7 +146,7 @@ The plugin settings are organized into 6 tabs, with a **master switch** at the t
 |---|---|
 | Basic | Master switch, task concurrency, memory management, Chinese search, UI features, runtime status & maintenance |
 | Advanced | Multi-version merge & display, playback & cleanup, notifications, item display, library & sorting, search & logs |
-| Media Info | Extraction scope, image capture, ISO extraction, persistence, performance & exclusivity |
+| Media Info | Extraction scope, image capture, ISO extraction, HDR tagging, persistence, performance & exclusivity |
 | Metadata | Chinese metadata, episode groups, scraping optimization, person enhancement, Douban assist, poster & sorting, metadata refresh, local metadata cache |
 | Intro & Credits | Fingerprint detection, behavior detection, online scraping |
 | Network | Network & local discovery, media direct link, TMDB replacement |

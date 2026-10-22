@@ -172,6 +172,10 @@ namespace StrmAssistant.Options.Store
                         : options.ImageCapture.ImageCapturePostProcessMode);
                 _logger.Info("ExclusiveExtract is set to {0}", options.ExtractionPerformance.ExclusiveExtract);
                 _logger.Info("ClearEmbeddedMetadata is set to {0}", options.MediaInfoPersist.ClearEmbeddedMetadata);
+                _logger.Info("HdrTagging is set to {0} (DV P7={1}, Vivid={2})",
+                    options.HdrTagging.EnableHdrTagging,
+                    options.HdrTagging.EnableDolbyVisionProfileTagging,
+                    options.HdrTagging.EnableHdrVividTagging);
 
                 var controlFeatures = GetSelectedExclusiveFeatureDescription();
                 _logger.Info("ExclusiveExtract - ControlFeatures is set to {0}",

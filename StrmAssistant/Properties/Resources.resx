@@ -1460,6 +1460,27 @@
   <data name="MediaInfoExtractOptions_Group_IsoTool" xml:space="preserve">
     <value>ISO Extraction</value>
   </data>
+  <data name="MediaInfoExtractOptions_Group_HdrTagging" xml:space="preserve">
+    <value>HDR Tagging</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrTagging_Enable_HDR_tagging" xml:space="preserve">
+    <value>Enable HDR tagging</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
+    <value>Tag CUVA (HDR Vivid) and the enhancement layer of dual-layer Dolby Vision. Requires a server restart. Default is OFF.</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
+    <value>Tag dual-layer Dolby Vision as Profile 7</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
+    <value>Marks the 1080p enhancement layer as Dolby Vision Profile 7.6. Keep ON unless your player mishandles it.</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
+    <value>Show HDR Vivid label</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
+    <value>Detects CUVA dynamic metadata and shows the video range label as HDR Vivid.</value>
+  </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>Persistence</value>
   </data>

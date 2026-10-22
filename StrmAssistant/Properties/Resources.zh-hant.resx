@@ -1373,6 +1373,27 @@
   <data name="MediaInfoExtractOptions_Group_IsoTool" xml:space="preserve">
     <value>ISO 擷取</value>
   </data>
+  <data name="MediaInfoExtractOptions_Group_HdrTagging" xml:space="preserve">
+    <value>HDR 標註</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrTagging_Enable_HDR_tagging" xml:space="preserve">
+    <value>啟用 HDR 標註</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
+    <value>為 CUVA（HDR Vivid）與雙層杜比視界的增強層打畫質標籤。修改後需重新啟動伺服器，預設關閉。</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
+    <value>標註雙層杜比視界為 Profile 7</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
+    <value>把 1080p 增強層標註為杜比視界 Profile 7.6。除非播放器異常，建議保持開啟。</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
+    <value>顯示 HDR Vivid 標籤</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
+    <value>辨識 CUVA 動態中繼資料，把畫質標籤顯示為 HDR Vivid。</value>
+  </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>資訊持久化</value>
   </data>

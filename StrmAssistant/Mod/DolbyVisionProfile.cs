@@ -24,7 +24,7 @@ namespace StrmAssistant.Mod
     ///   <c>VideoRange</c>、<c>ExtendedVideoSubTypeDescription</c> 只读，不动。
     /// - **不改** <c>MediaSourceInfo.Path</c>，播放路径与条目身份不受影响。
     /// - 未命中（单层 / 非 hevc / 非 HDR10 基础层 / 非 2 倍几何）一律不改，行为与原来完全一致。
-    /// - 开关沿用 <c>EnableIsoExtraction</c>（默认 OFF）。
+    /// - 开关见 <see cref="Options.HdrTaggingOptions"/>（3.0.0.62 起与 ISO 提取解耦，默认 OFF）。
     /// </summary>
     public class DolbyVisionProfile : PatchBase<DolbyVisionProfile>
     {
@@ -34,7 +34,10 @@ namespace StrmAssistant.Mod
         {
             Initialize();
 
-            if (Plugin.Instance.MediaInfoExtractStore.GetOptions().IsoTool.EnableIsoExtraction)
+            // 与 ISO 提取解耦：改由「HDR 标注」分组控制（3.0.0.62 起）
+            var hdr = Plugin.Instance.MediaInfoExtractStore.GetOptions().HdrTagging;
+
+            if (hdr.EnableHdrTagging && hdr.EnableDolbyVisionProfileTagging)
             {
                 Patch();
             }

@@ -1,23 +1,31 @@
 # 更新日志 / Changelog
 
+## [3.0.0.62] - 2026-10-22
+
+### ✨ 功能新增
+- 设置页「媒体信息」新增「HDR 标注」分组，把双层杜比视界 Profile 7 与 HDR Vivid 的标签开关从「ISO 提取」里独立出来。
+- 关闭 ISO 提取不再连带关闭 HDR 标注；分组内含总开关与两个子开关，修改后需重启服务器。
+
+### 🐛 修复
+- 升级后 HDR 标注开关自动沿用原 ISO 提取的开关状态，标签不会因升级而消失。
+
+### 🧪 测试
+- 新增配置迁移用例：旧配置沿用 ISO 开关、已迁移配置幂等、备份文件生成。
+
 ## [3.0.0.61] - 2026-10-22
 
 ### 🐛 修复
-- **删除版本误删其他影片附属文件**：附属文件归属判定从「前缀匹配」改为「名称边界匹配」。此前删除 `Movie.mkv` 会连带删除同目录 `Movie2.nfo` / `Movie2.en.srt` / `Movie2-poster.jpg` / `Movie2-mediainfo.json`，属于数据丢失级缺陷。
-- **远程 ISO 响应体停传会绕过超时预算**：块读取改为带取消令牌的异步读取，空闲 20 秒或总预算耗尽即中止。此前服务器回 206 响应头后不发送正文会永久阻塞，长期占用提取队列的并发名额。
-- **豆瓣评分徽章不显示**：`Applied` 改为以「当前 CommunityRating 实测」为准。此前快照标记写坏一次（`Applied=false`）就永久不显示徽章，无法自愈。
-- **MPLS/STN 解析重写**：按 libbluray 的真实结构解析 PlayItem 与 STN_table。此前把 `UO_mask_table` 前 4 字节当成 STN 的地址/长度（全零 UO mask 导致整段跳过）、流计数按 2 字节读、entry 与 attributes 当成分离数组、`coding_type` 截成高 4 位（0x90 字幕被误判成 0x09 DTS-HD MA）、属性段多读 1 个保留字节。**3.0.0.59 的「从播放列表补音轨/字幕语言、声道、采样率」此前静默失效，本版起真正生效。**
-- **豆瓣评分端点要求登录并按条目可见性过滤**：`/Douban/Ratings` 此前 `[Unauthenticated]` 且不校验用户可见性，匿名请求可枚举「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系，泄露私有媒体库片单。
-- **本地 TMDB 缓存键按完整资源路径隔离**：此前正则未锚定结尾，`/3/movie/123` 与 `/3/movie/123/credits` 共用 `all.json`；`append_to_response` / `language` 也不参与键，同一文件会承载多种 JSON 结构。
-- **Linux 打包补回 DiscUtils 依赖**：`build-local.sh` 的 ILRepack 清单补齐 `DiscUtils.Core/Streams/Udf/Iso9660`，与 csproj 的 `PostBuildMerge` 一致。
-- **HDR Vivid 标签不显示**：Emby 4.10 的 `MediaStream.VideoRange` getter 调用 `GenerateVideoRange(false)`（IL 为 `ldarg.0; ldc.i4.0; call`），而原实现只在 `isForDisplay == true` 时覆写，导致标签永远打不出来。改为挂 `get_VideoRange` 的 Postfix。探测与落库本就正常，参考实现同样踩了这个坑。
+- 删除某个版本时，不再连带删掉同目录另一部影片的海报、字幕和 NFO。
+- 网盘卡住不回数据时，媒体信息提取会到时间自动放弃，不再长期占着任务队列。
+- 豆瓣评分图标恢复显示：只要条目上的分数确实是豆瓣分，图标就会显示。
+- 原盘的音轨、字幕语言和声道数能真正补全了，这项功能此前一直没有生效。
+- 豆瓣评分接口改为需要登录，未登录的人查不到你库里有哪些片子。
+- 本地元数据缓存不再把影片详情和演职员混成同一份文件，避免刮削时串数据。
+- 在 Linux 上自行构建的插件包补齐了缺失组件，ISO 功能不会因为缺件报错。
+- HDR Vivid 片源的画质标签现在能正确显示为「HDR Vivid」，此前标签永远不出现。
 
 ### 🧪 测试
-- 新增附属文件边界匹配用例（24 项）、响应体停传中止与正常读取回归用例。
-- 新增 MPLS/STN 端到端样本用例（合成 MPLS：视频 + AC3 英语 5.1 + PGS 中文字幕，含非零 UO mask、多角度、多 PlayItem、Text 字幕）。
-- 新增缓存键用例（子资源拒绝、append_to_response / language 隔离、参数顺序稳定）。
-- 新增 HDR Vivid 用例（真实 Harmony 补丁验证显示覆写生效，并锁死「VideoRange 传 false」这一事实）。
-- 131 项全绿。
+- 新增 26 项自动化测试，覆盖附属文件匹配、网盘停传、原盘音轨字幕、缓存命名与 HDR 标签显示。
 
 ## [3.0.0.60] - 2026-10-22
 

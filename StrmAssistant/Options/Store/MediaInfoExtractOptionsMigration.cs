@@ -16,6 +16,7 @@ namespace StrmAssistant.Options.Store
     {
         private const string FlagFileName = "StrmAssistant_MediaInfoExtractOptions_grouped_v1.flag";
         private const string PostProcessFlagFileName = "StrmAssistant_MediaInfoExtractOptions_postprocess_v2.flag";
+        private const string HdrTaggingFlagFileName = "StrmAssistant_MediaInfoExtractOptions_hdrtagging_v1.flag";
 
         /// <summary>
         /// 旧字段 → 新分组 的映射表（Group 取新分组属性名，用 nameof 保证编译期同步）。
@@ -62,6 +63,60 @@ namespace StrmAssistant.Options.Store
         {
             MigrateToGroupedLayout(optionsFilePath, jsonSerializer, logger);
             MigrateImageCapturePostProcess(optionsFilePath, jsonSerializer, logger);
+            MigrateHdrTagging(optionsFilePath, jsonSerializer, logger);
+        }
+
+        /// <summary>
+        /// HDR 标注（双层杜比视界 P7 / HDR Vivid）此前沿用 <c>EnableIsoExtraction</c>。
+        /// 3.0.0.62 起独立成组：首次升级时把旧开关的值搬过来，避免用户升级后标签集体消失。
+        /// </summary>
+        private static void MigrateHdrTagging(string optionsFilePath, IJsonSerializer jsonSerializer, ILogger logger)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(optionsFilePath);
+
+                if (string.IsNullOrEmpty(directory)) return;
+
+                var flagPath = Path.Combine(directory, HdrTaggingFlagFileName);
+
+                if (File.Exists(flagPath) || !File.Exists(optionsFilePath)) return;
+
+                var text = File.ReadAllText(optionsFilePath);
+
+                // 已存在新分组（用户已用新版本保存过设置）：无需改写，只写 flag
+                if (text.Contains("\"HdrTagging\""))
+                {
+                    File.WriteAllText(flagPath, DateTime.UtcNow.ToString("O"));
+                    return;
+                }
+
+                var options = jsonSerializer.DeserializeFromString<MediaInfoExtractOptions>(text);
+
+                // 旧用户沿用 ISO 提取的开关状态，保证升级前后标签表现一致
+                options.HdrTagging.EnableHdrTagging = options.IsoTool.EnableIsoExtraction;
+
+                byte[] bytes;
+
+                using (var stream = new MemoryStream())
+                {
+                    jsonSerializer.SerializeToStream(options, stream, new JsonSerializerOptions { Indent = true });
+                    bytes = stream.ToArray();
+                }
+
+                var backupPath = optionsFilePath + ".hdrtagging.bak";
+                File.WriteAllText(backupPath, text);
+                File.WriteAllBytes(optionsFilePath, bytes);
+                File.WriteAllText(flagPath, DateTime.UtcNow.ToString("O"));
+
+                logger.Info(
+                    "MediaInfoExtractOptions: migrated HdrTagging.EnableHdrTagging from EnableIsoExtraction = {0}. Backup: {1}",
+                    options.HdrTagging.EnableHdrTagging, backupPath);
+            }
+            catch (Exception e)
+            {
+                logger.Warn("MediaInfoExtractOptions HdrTagging migration failed: " + e.Message);
+            }
         }
 
         private static void MigrateToGroupedLayout(string optionsFilePath, IJsonSerializer jsonSerializer, ILogger logger)

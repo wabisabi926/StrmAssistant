@@ -2,8 +2,12 @@
 using HarmonyLib;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.MediaInfo;
+using StrmAssistant.Common;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using static StrmAssistant.Mod.PatchManager;
@@ -39,6 +43,16 @@ namespace StrmAssistant.Mod
 
         private const string VideoCodecType = "video";
         private const string CuvaMarker = "CUVA";
+
+        /// <summary>首帧补探的超时（毫秒）。正常 1~2 秒，留足余量给慢网盘。</summary>
+        private const int FrameProbeTimeoutMs = 10_000;
+
+        /// <summary>
+        /// 首帧补探结果缓存（key = 目标地址 + 视频流序号）。
+        /// 每条目在进程生命周期内只探一次，避免重复探测拖慢整库扫描。
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, bool> FrameProbeCache =
+            new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
         private static MethodInfo _getMediaInfo;
         private static MethodInfo _generateVideoRange;
@@ -121,20 +135,124 @@ namespace StrmAssistant.Mod
                 foreach (var probe in data.streams)
                 {
                     if (!string.Equals(probe?.codec_type, VideoCodecType, StringComparison.OrdinalIgnoreCase)) continue;
-                    if (!HasVividSideData(probe.side_data_list)) continue;
 
                     var stream = FindVideoStream(__result.MediaStreams, probe.index);
                     if (stream == null) continue;
+
+                    // ① 快路径：Emby 的 stream 级 side_data（部分封装/ffprobe 会带）
+                    var vivid = HasVividSideData(probe.side_data_list);
+
+                    // ② 补探：CUVA 属动态元数据，ffprobe 只在**帧级** side_data 里输出
+                    //    （实测 ffprobe 5.1 与 9.0.2 的 -show_streams 均为 0 条），
+                    //    所以 HDR 片源要再读一帧确认。结果按目标缓存，每条目只探一次。
+                    if (!vivid) vivid = TryFrameProbe(data, probe, stream);
+
+                    if (!vivid) continue;
                     if (string.Equals(stream.Comment, VividLabel, StringComparison.Ordinal)) continue;
 
                     stream.Comment = VividLabel;
-                    Plugin.Instance.Logger.Info($"HdrVividTagging - HDR Vivid tagged (probe index={probe.index})");
+                    Plugin.Instance.Logger.Info(
+                        $"HdrVividTagging - HDR Vivid tagged (probe index={probe.index}, stream-level={HasVividSideData(probe.side_data_list)})");
                 }
             }
             catch (Exception ex)
             {
                 Plugin.Instance.Logger.Debug("HdrVividTagging GetMediaInfoPostfix failed: " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// 只在 HDR 片源上补探，避免给 SDR 条目平白多跑一次 ffprobe。
+        /// 目标取 ffprobe 实际读的地址（<c>ProbeResult.format.filename</c>），strm 已由 Emby 解析过。
+        /// </summary>
+        private static bool TryFrameProbe(ProbeResult data, ProbeStream probe, MediaStream stream)
+        {
+            if (stream.ExtendedVideoType == ExtendedVideoTypes.None) return false;
+
+            var target = data?.format?.filename;
+            if (string.IsNullOrWhiteSpace(target)) return false;
+
+            return HasVividByFrameProbe(target, probe.index ?? 0);
+        }
+
+        /// <summary>
+        /// 读首帧的 side_data 判断是否 CUVA。带超时与按目标缓存：
+        /// 单次约 1.6 秒（与原有探测同量级），每个条目在进程生命周期内只探一次。
+        /// </summary>
+        private static bool HasVividByFrameProbe(string target, int streamIndex)
+        {
+            var key = target + "|" + streamIndex;
+            if (FrameProbeCache.TryGetValue(key, out var cached)) return cached;
+
+            var found = false;
+
+            try
+            {
+                var probePath = ResolveProbePath();
+                if (string.IsNullOrEmpty(probePath) || !File.Exists(probePath))
+                {
+                    Plugin.Instance.Logger.Debug("HdrVividTagging - ffprobe not found, frame probe skipped");
+                    FrameProbeCache[key] = false;
+                    return false;
+                }
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = probePath,
+                    Arguments =
+                        $"-v error -print_format json -show_frames -read_intervals \"%+#1\" -select_streams v:{streamIndex} \"{target}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null) return false;
+
+                var stdout = process.StandardOutput.ReadToEndAsync();
+                var stderr = process.StandardError.ReadToEndAsync();   // 必须排空，否则可能写满管道阻塞
+
+                if (!process.WaitForExit(FrameProbeTimeoutMs))
+                {
+                    try { process.Kill(true); } catch { /* ignored */ }
+                    Plugin.Instance.Logger.Debug($"HdrVividTagging - frame probe timed out: {target}");
+                    return false;
+                }
+
+                _ = stderr.Result;
+                found = OutputMentionsCuva(stdout.Result);
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Debug("HdrVividTagging frame probe failed: " + e.Message);
+            }
+
+            FrameProbeCache[key] = found;
+            return found;
+        }
+
+        /// <summary>
+        /// ffprobe 输出里是否出现 CUVA 标记。抽成纯函数便于单测。
+        /// </summary>
+        internal static bool OutputMentionsCuva(string probeOutput) =>
+            !string.IsNullOrEmpty(probeOutput) &&
+            probeOutput.IndexOf(CuvaMarker, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        /// <summary>优先用用户自定义 ffprobe（可能带新特性），否则用 Emby 当前的。</summary>
+        private static string ResolveProbePath()
+        {
+            try
+            {
+                var custom = Plugin.Instance.MediaInfoExtractStore.GetOptions().IsoTool.CustomProbePath;
+                if (!string.IsNullOrWhiteSpace(custom) && File.Exists(custom)) return custom;
+            }
+            catch
+            {
+                // 选项尚未就绪时忽略
+            }
+
+            return FfmpegPathOverride.CurrentProbePath;
         }
 
         /// <summary>

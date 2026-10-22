@@ -33,6 +33,25 @@ namespace StrmAssistant.Common
         /// <summary>自定义 ffmpeg 是否具备 bluray 输入协议能力（预留，用于截图/章节图路径）。</summary>
         public static bool? EncoderSupportsBluray { get; private set; }
 
+        /// <summary>
+        /// 当前生效的 ffprobe 路径（含用户自定义覆盖）。未初始化或配置为空时返回 null。
+        /// 供需要自己发起一次探测的功能（如 HDR Vivid 首帧补探）使用。
+        /// </summary>
+        public static string CurrentProbePath
+        {
+            get
+            {
+                try
+                {
+                    return _ffmpegManager?.FfmpegConfiguration?.ProbePath;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
         public static void Initialize(IFfmpegManager ffmpegManager, ILogger logger)
         {
             _ffmpegManager = ffmpegManager;

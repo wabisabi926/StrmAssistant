@@ -69,6 +69,21 @@ namespace StrmAssistant.Tests
         }
 
         /// <summary>
+        /// 首帧补探的输出解析：CUVA 只出现在**帧级** side_data（stream 级为空），
+        /// 所以补探结果用字符串匹配判断，抽成纯函数以便固定。
+        /// </summary>
+        [Theory]
+        [InlineData("{\"side_data_list\":[{\"side_data_type\":\"HDR Dynamic Metadata CUVA 005.1 2021 (Vivid)\"}]}", true)]
+        [InlineData("{\"side_data_type\": \"HDR Dynamic Metadata SMPTE2094-40 (HDR10+)\"}", false)]
+        [InlineData("{\"side_data_type\": \"Mastering display metadata\"}", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void OutputMentionsCuva_DetectsOnlyCuva(string output, bool expected)
+        {
+            Assert.Equal(expected, HdrVividTagging.OutputMentionsCuva(output));
+        }
+
+        /// <summary>
         /// 回归锁：Emby 的 VideoRange 传的是 isForDisplay=false。
         /// 若哪天 Emby 改成 true，这个用例会失败，提示可以简化实现。
         /// </summary>

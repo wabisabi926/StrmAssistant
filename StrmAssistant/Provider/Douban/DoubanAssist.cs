@@ -368,13 +368,16 @@ namespace StrmAssistant.Provider.Douban
 
                         if (_ratings.TryGetValue(subjectId, out var snapshot))
                         {
-                            // Applied 以「快照标记 + 当前 CommunityRating 实测」双重确认：
-                            // 条目被 TMDB 等重新刮削后 CommunityRating 可能已不是豆瓣分，
-                            // 此时快照里的标记会失真，实测比对可以把它纠正回来。
-                            // 旧快照没有该字段（null）：退回实测推断，保证升级后图标不集体回退。
+                            // Applied 以「当前 CommunityRating 实测」为准：
+                            // 条目被 TMDB 等重新刮削后 CommunityRating 可能已不是豆瓣分，实测比对能把它纠正回来。
+                            //
+                            // ⚠️ 不能再与快照标记做 &&：那只能把「假 true」纠正为 false，无法把「假 false」
+                            // 纠正为 true —— 快照一旦写坏（如 2026-10-17 那批 Applied=false），徽章就永久不显示。
+                            // 实测相等已是最强证据：条目上展示的数字确实等于豆瓣分。
+                            // 快照里的 Applied 仍写回，保留为诊断信息（下次排查能看到当时是否由我们写入）。
                             var ratingMatches = item.CommunityRating.HasValue &&
                                                 Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
-                            var applied = ratingMatches && (snapshot.Applied ?? true);
+                            var applied = ratingMatches;
 
                             result.Add(new DoubanRatingInfo
                             {

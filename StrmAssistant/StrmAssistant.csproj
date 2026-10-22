@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
-    <!-- 版本号与 Releases 仓库的 tag 体系保持一致（v3.0.0.x），显示为 3.0.0.60 -->
-    <AssemblyVersion>3.0.0.60</AssemblyVersion>
-    <FileVersion>3.0.0.60</FileVersion>
-    <Version>3.0.0.60</Version>
-    <InformationalVersion>3.0.0.60</InformationalVersion>
+    <!-- 版本号与 Releases 仓库的 tag 体系保持一致（v3.0.0.x），显示为 3.0.0.61 -->
+    <AssemblyVersion>3.0.0.61</AssemblyVersion>
+    <FileVersion>3.0.0.61</FileVersion>
+    <Version>3.0.0.61</Version>
+    <InformationalVersion>3.0.0.61</InformationalVersion>
     <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <LangVersion>latest</LangVersion>

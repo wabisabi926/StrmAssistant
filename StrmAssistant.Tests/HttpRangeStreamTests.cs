@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -142,6 +143,62 @@ namespace StrmAssistant.Tests
         }
 
         /// <summary>
+        /// 回归（F2）：服务器回了 206 响应头后**不发送正文**时，块读取必须在预算内中止。
+        ///
+        /// 修复前 <c>source.Read</c> 是同步、无取消令牌的，且 <c>_deadline</c> 只在重试循环头检查，
+        /// 一旦服务器停传就会永久阻塞（预算形同虚设），进而长期占用提取队列的并发名额。
+        /// 修复后用 CancellationTokenSource 把超时覆盖到响应体读取上。
+        /// </summary>
+        [Fact]
+        public void BodyStall_IsAbortedWithinBudget()
+        {
+            var content = BuildContent(2 * 1024 * 1024);
+            using var server = new RangeHttpServer(content, stallBodyMs: 5000);
+
+            Assert.True(HttpRangeStream.TryOpen(server.Url, out var stream, out var error,
+                TimeSpan.FromMilliseconds(400)), error);
+
+            using (stream)
+            {
+                var sw = Stopwatch.StartNew();
+                var n = stream.Read(new byte[4096], 0, 4096);
+                sw.Stop();
+
+                Assert.Equal(0, n);   // 拿不到数据 → 上层静默回退
+                Assert.True(sw.ElapsedMilliseconds < 2000,
+                    $"应在预算内中止，实际耗时 {sw.ElapsedMilliseconds}ms（修复前会等到服务器发数据，约 5000ms）");
+            }
+        }
+
+        /// <summary>
+        /// 回归（F2）：正文正常时必须照旧读满，确认超时改造没有把正常路径改坏。
+        /// </summary>
+        [Fact]
+        public void NormalBody_StillReadsFully_AfterTimeoutChange()
+        {
+            var content = BuildContent(1024 * 1024 + 321);
+            using var server = new RangeHttpServer(content);
+
+            Assert.True(HttpRangeStream.TryOpen(server.Url, out var stream, out var error), error);
+
+            using (stream)
+            {
+                var buffer = new byte[content.Length];
+                var offset = 0;
+
+                while (offset < buffer.Length)
+                {
+                    var n = stream.Read(buffer, offset, buffer.Length - offset);
+                    if (n <= 0) break;
+                    offset += n;
+                }
+
+                Assert.Equal(content.Length, offset);
+                Assert.Equal(content, buffer);
+            }
+        }
+
+        /// <summary>
         /// 端到端：真实 ISO 通过 HTTP Range 提供，走 HttpRangeStream → UdfTitleResolver 解析章节。
         /// 这正是远程 ISO（strm → http）的完整链路，只是把远端换成本地回环。
         /// </summary>
@@ -208,16 +265,18 @@ namespace StrmAssistant.Tests
             private readonly string _filePath;
             private readonly long _length;
             private readonly bool _supportsRange;
+            private readonly int _stallBodyMs;
             private readonly Thread _acceptThread;
             private volatile bool _disposed;
 
             public string Url { get; }
 
-            public RangeHttpServer(byte[] content, bool supportsRange = true)
+            public RangeHttpServer(byte[] content, bool supportsRange = true, int stallBodyMs = 0)
             {
                 _content = content;
                 _length = content.Length;
                 _supportsRange = supportsRange;
+                _stallBodyMs = stallBodyMs;
 
                 _listener = new TcpListener(IPAddress.Loopback, 0);
                 _listener.Start();
@@ -235,6 +294,7 @@ namespace StrmAssistant.Tests
                 _filePath = filePath;
                 _length = new FileInfo(filePath).Length;
                 _supportsRange = true;
+                _stallBodyMs = 0;
 
                 _listener = new TcpListener(IPAddress.Loopback, 0);
                 _listener.Start();
@@ -322,8 +382,17 @@ namespace StrmAssistant.Tests
 
                     var headerBytes = Encoding.ASCII.GetBytes(header.ToString());
                     stream.Write(headerBytes, 0, headerBytes.Length);
+                    stream.Flush();
 
                     if (isHead || length <= 0) return;
+
+                    // 模拟「回了 206 响应头但不发送正文」的云盘/代理。
+                    // 只对真正的块请求生效（0-0 探针的 length 为 1），否则 TryOpen 也会被卡住。
+                    if (_stallBodyMs > 0 && length > 1)
+                    {
+                        Thread.Sleep(_stallBodyMs);
+                        return;
+                    }
 
                     if (_filePath == null)
                     {

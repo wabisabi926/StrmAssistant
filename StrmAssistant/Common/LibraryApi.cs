@@ -1371,6 +1371,35 @@ namespace StrmAssistant.Common
             }
         }
 
+        /// <summary>
+        /// 判断某个（已去掉扩展名的）文件名是否属于 <paramref name="basename"/> 的附属文件。
+        ///
+        /// ⚠️ 必须校验名称边界：直接 StartsWith 会让 Movie 吃掉 Movie2 的 nfo / 字幕 / 图片 /
+        /// 以及本插件自己生成的 *-mediainfo.json，进而在「删除版本」时误删其他影片的附属文件。
+        /// 边界采用**分隔符白名单**（正向定义）：漏判的后果是少删一个附属文件，
+        /// 而反向（只排除数字）会漏掉 MovieA / MovieII / 中文续集名等情形。
+        /// </summary>
+        internal static bool IsSidecarOf(string fileNameWithoutExtension, string basename)
+        {
+            if (string.IsNullOrEmpty(fileNameWithoutExtension) || string.IsNullOrEmpty(basename))
+                return false;
+
+            // 1) 完全同名：Movie.mkv ↔ Movie.nfo
+            if (fileNameWithoutExtension.Equals(basename, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // 2) 必须以基名开头，且长于基名
+            if (fileNameWithoutExtension.Length <= basename.Length)
+                return false;
+
+            if (!fileNameWithoutExtension.StartsWith(basename, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // 3) 基名之后的第一个字符必须是分隔符，否则视为另一部影片
+            var boundary = fileNameWithoutExtension[basename.Length];
+            return boundary is ' ' or '.' or '-' or '_' or '[' or '(' or '+';
+        }
+
         private FileSystemMetadata[] GetRelatedPaths(string basename, string folder)
         {
             var extensions = new List<string>
@@ -1392,8 +1421,8 @@ namespace StrmAssistant.Common
 
             extensions.AddRange(BaseItem.SupportedImageExtensions);
             return _fileSystem.GetFiles(folder, extensions.ToArray(), false, false)
-                .Where(i => !string.IsNullOrEmpty(i.FullName) && Path.GetFileNameWithoutExtension(i.FullName)
-                    .StartsWith(basename, StringComparison.OrdinalIgnoreCase))
+                .Where(i => !string.IsNullOrEmpty(i.FullName) &&
+                            IsSidecarOf(Path.GetFileNameWithoutExtension(i.FullName), basename))
                 .ToArray();
         }
 

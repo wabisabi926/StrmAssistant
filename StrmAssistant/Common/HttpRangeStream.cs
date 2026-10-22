@@ -33,11 +33,17 @@ namespace StrmAssistant.Common
         /// <summary>整个流的解析预算：超过后块读取直接返回 null（UDF 解析随之失败，静默回退）。</summary>
         private static readonly TimeSpan DefaultBudget = TimeSpan.FromSeconds(90);
 
+        /// <summary>单次读取允许的最长空闲：连续这么久没有新字节就放弃本次尝试。</summary>
+        private static readonly TimeSpan ReadIdleTimeout = TimeSpan.FromSeconds(20);
+
         private readonly HttpClient _client;
         private readonly string _url;
         private readonly long _length;
         private readonly DateTime _deadline;
         private readonly object _sync = new object();
+
+        /// <summary>外部中止（Dispose）时打断在途读取，避免留下阻塞线程。</summary>
+        private readonly CancellationTokenSource _abort = new CancellationTokenSource();
 
         private readonly Dictionary<long, LinkedListNode<BlockEntry>> _blocks =
             new Dictionary<long, LinkedListNode<BlockEntry>>();
@@ -275,12 +281,25 @@ namespace StrmAssistant.Common
                 // 总预算耗尽：不再重试，让上层静默回退（避免把探测线程拖死）
                 if (DateTime.UtcNow > _deadline) return null;
 
+                // 关键：超时令牌必须覆盖「响应头 + 响应体」全过程。
+                // ResponseHeadersRead 下 HttpClient.Timeout 只管到读完响应头，正文读取需要自带令牌，
+                // 否则服务器回了 206 头后停传会让 source.Read 永久阻塞，_deadline 再无机会被检查。
                 try
                 {
+                    if (_abort.IsCancellationRequested) return null;
+
+                    var remaining = _deadline - DateTime.UtcNow;
+                    if (remaining <= TimeSpan.Zero) return null;
+
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(_abort.Token);
+                    cts.CancelAfter(remaining < ReadIdleTimeout ? remaining : ReadIdleTimeout);
+
                     using var request = new HttpRequestMessage(HttpMethod.Get, _url);
                     request.Headers.Range = new RangeHeaderValue(start, end);
 
-                    using var response = _client.Send(request, HttpCompletionOption.ResponseHeadersRead);
+                    using var response = _client
+                        .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token)
+                        .GetAwaiter().GetResult();
 
                     if (response.StatusCode != HttpStatusCode.PartialContent)
                     {
@@ -296,9 +315,14 @@ namespace StrmAssistant.Common
 
                     while (read < expected)
                     {
-                        var n = source.Read(buffer, read, expected - read);
+                        var n = source.ReadAsync(buffer, read, expected - read, cts.Token)
+                                        .GetAwaiter().GetResult();
                         if (n <= 0) break;
                         read += n;
+
+                        // 有进展就重置空闲计时；总预算仍在每次循环里守
+                        if (DateTime.UtcNow > _deadline) return null;
+                        cts.CancelAfter(ReadIdleTimeout);
                     }
 
                     if (read == 0) return null;
@@ -308,6 +332,18 @@ namespace StrmAssistant.Common
                     var trimmed = new byte[read];
                     Buffer.BlockCopy(buffer, 0, trimmed, 0, read);
                     return trimmed;
+                }
+                catch (OperationCanceledException)
+                {
+                    // 空闲超时 / 预算耗尽 / 外部中止：重试只会重复同样的等待，直接放弃
+                    Plugin.Instance?.Logger?.Debug(
+                        $"HttpRangeStream - block {index} aborted by timeout/cancel (attempt {attempt})");
+                    return null;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Dispose 与在途读取竞争：静默放弃
+                    return null;
                 }
                 catch (Exception e)
                 {
@@ -330,7 +366,10 @@ namespace StrmAssistant.Common
         {
             if (disposing)
             {
+                // 先中止在途读取，再释放客户端，避免留下阻塞在 socket 读上的线程
+                try { _abort.Cancel(); } catch { /* ignored */ }
                 _client.Dispose();
+                _abort.Dispose();
 
                 lock (_sync)
                 {

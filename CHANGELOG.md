@@ -10,12 +10,14 @@
 - **豆瓣评分端点要求登录并按条目可见性过滤**：`/Douban/Ratings` 此前 `[Unauthenticated]` 且不校验用户可见性，匿名请求可枚举「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系，泄露私有媒体库片单。
 - **本地 TMDB 缓存键按完整资源路径隔离**：此前正则未锚定结尾，`/3/movie/123` 与 `/3/movie/123/credits` 共用 `all.json`；`append_to_response` / `language` 也不参与键，同一文件会承载多种 JSON 结构。
 - **Linux 打包补回 DiscUtils 依赖**：`build-local.sh` 的 ILRepack 清单补齐 `DiscUtils.Core/Streams/Udf/Iso9660`，与 csproj 的 `PostBuildMerge` 一致。
+- **HDR Vivid 标签不显示**：Emby 4.10 的 `MediaStream.VideoRange` getter 调用 `GenerateVideoRange(false)`（IL 为 `ldarg.0; ldc.i4.0; call`），而原实现只在 `isForDisplay == true` 时覆写，导致标签永远打不出来。改为挂 `get_VideoRange` 的 Postfix。探测与落库本就正常，参考实现同样踩了这个坑。
 
 ### 🧪 测试
 - 新增附属文件边界匹配用例（24 项）、响应体停传中止与正常读取回归用例。
 - 新增 MPLS/STN 端到端样本用例（合成 MPLS：视频 + AC3 英语 5.1 + PGS 中文字幕，含非零 UO mask、多角度、多 PlayItem、Text 字幕）。
 - 新增缓存键用例（子资源拒绝、append_to_response / language 隔离、参数顺序稳定）。
-- 129 项全绿。
+- 新增 HDR Vivid 用例（真实 Harmony 补丁验证显示覆写生效，并锁死「VideoRange 传 false」这一事实）。
+- 131 项全绿。
 
 ## [3.0.0.60] - 2026-10-22
 

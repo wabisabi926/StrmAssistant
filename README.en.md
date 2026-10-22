@@ -106,6 +106,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - **ISO direct read**: custom ffprobe reads UDF images directly on Linux/Docker, with MPLS playlist language and chapter parsing
 - **Media info persistence**: writes `*-mediainfo.json` with backup / restore / clear-then-re-extract support
 - **Image capture**: video screenshots, preview thumbnails, backdrop generation (with multi-select post-processing)
+- **HDR tagging**: detects CUVA dynamic metadata and shows the range label as `HDR Vivid`; dual-layer Dolby Vision is tagged Profile 7 on the enhancement layer
 - **Concurrency & timeout control**: 1–20 concurrent tasks, configurable timeouts and screenshot timeout multiplier
 
 ### Intro & Credits

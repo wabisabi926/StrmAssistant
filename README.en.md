@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.62** |
+| Plugin Version | **3.0.0.63** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.1.0+ |
 | Tested On | 4.10.1.0 |

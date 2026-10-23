@@ -1380,19 +1380,19 @@
     <value>啟用 HDR 標註</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
-    <value>為 CUVA（HDR Vivid）與雙層杜比視界的增強層打畫質標籤。修改後需重新啟動伺服器，預設關閉。</value>
+    <value>為 HDR Vivid（CUVA）和雙層杜比視界片源打畫質標籤。關閉後兩項都不生效。修改後需重新啟動伺服器，預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
     <value>標註雙層杜比視界為 Profile 7</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
-    <value>把 1080p 增強層標註為杜比視界 Profile 7.6。除非播放器異常，建議保持開啟。</value>
+    <value>辨識雙層杜比視界（BL + 1080p 增強層），Emby 會顯示為 Profile 7.6 (Bluray) —— Emby 只有這一個 Profile 7 標籤，不區分 FEL / MEL。若某些播放器因此無法播放或黑屏，可關閉此項。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>顯示 HDR Vivid 標籤</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
-    <value>辨識 CUVA 動態中繼資料，把畫質標籤顯示為 HDR Vivid。</value>
+    <value>片源含 CUVA 動態中繼資料時，畫質標籤顯示為「HDR Vivid」。CUVA 只寫在視訊幀裡、探測結果拿不到，因此會對 HDR 片源額外讀一幀確認（每條目只做一次）。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>資訊持久化</value>
@@ -1455,6 +1455,6 @@
     <value>多版本</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoStoragePerformance" xml:space="preserve">
-    <value>媒體訊息持久化</value>
+    <value>持久化與效能</value>
   </data>
 </root>

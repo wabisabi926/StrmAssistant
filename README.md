@@ -16,7 +16,7 @@
 
 | 项目 | 说明 |
 |---|---|
-| 插件版本 | **3.0.0.60** |
+| 插件版本 | **3.0.0.62** |
 | 最低 Emby 版本 | 4.9.1.0 |
 | 适配展示版本 | 4.10.1.0+ |
 | 实测版本 | 4.10.1.0 |
@@ -25,7 +25,19 @@
 
 > 各版本详细变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 最新优化 (v3.0.0.58 ~ v3.0.0.60)
+## 最新优化 (v3.0.0.58 ~ v3.0.0.62)
+
+✅ **HDR 标注独立 + Vivid 识别（3.0.0.62）**
+- 设置页「媒体信息」新增「HDR 标注」分组，双层杜比视界 Profile 7 与 HDR Vivid 的标签开关从「ISO 提取」独立出来
+- HDR Vivid 改为补读一帧确认 CUVA 动态元数据（探测结果里没有），标签真正生效
+- 升级后自动沿用原 ISO 提取的开关状态，标签不会消失
+
+✅ **安全与数据完整性（3.0.0.61）**
+- 删除某个版本时不再连带删掉同目录另一部影片的海报、字幕和 NFO
+- 网盘卡住不回数据时，提取任务按超时放弃，不再长期占用队列
+- 豆瓣评分接口改为需要登录；本地元数据缓存不再把影片详情与演职员混成同一份文件
+- 原盘的音轨 / 字幕语言与声道数补全真正生效（STN 解析已按 libbluray 重写）
+- Linux 自建包补齐 DiscUtils 组件，ISO 功能不再因缺件报错
 
 ✅ **远程 ISO 提取重做（3.0.0.60）**
 - 改为按 UDF/ISO9660 目录定位并采样正片，不再把 ISO 文件头当影音数据交给 ffprobe
@@ -201,7 +213,7 @@
 
 CI 为**手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行。
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.60`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistant.dll` 覆盖到 `config/plugins/StrmAssistant.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.62`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistant.dll` 覆盖到 `config/plugins/StrmAssistant.dll` 后重启 Emby。
 
 ### 方式二：本地构建
 

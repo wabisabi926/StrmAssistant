@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.60** |
+| Plugin Version | **3.0.0.62** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.1.0+ |
 | Tested On | 4.10.1.0 |
@@ -25,7 +25,19 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.58 ~ v3.0.0.60)
+## Latest Optimizations (v3.0.0.58 ~ v3.0.0.62)
+
+✅ **HDR tagging decoupled + Vivid detection (3.0.0.62)**
+- New "HDR tagging" group under Media Info; Dolby Vision Profile 7 and HDR Vivid toggles are now independent of ISO extraction
+- HDR Vivid now probes one frame for CUVA metadata (absent from Emby's probe result), so the tag actually appears
+- Existing ISO toggle state carries over on upgrade
+
+✅ **Safety & data integrity (3.0.0.61)**
+- Deleting one version no longer removes another movie's poster, subtitles or NFO in the same folder
+- Extraction tasks abort on timeout instead of occupying the queue when cloud storage stalls
+- Douban ratings endpoint now requires login; local metadata cache no longer mixes details with credits
+- Audio / subtitle language and channel backfill for disc images actually works (STN parsing rewritten against libbluray)
+- Linux builds include the missing DiscUtils assemblies
 
 ✅ **Remote ISO extraction reworked (3.0.0.60)**
 - Locate and sample the main feature via UDF/ISO9660 directory entries instead of feeding the ISO header to ffprobe
@@ -201,7 +213,7 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 CI is **manually triggered**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`.
 
-When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.60`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistant.dll`, overwrite `config/plugins/StrmAssistant.dll`, then restart Emby.
+When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.62`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistant.dll`, overwrite `config/plugins/StrmAssistant.dll`, then restart Emby.
 
 ### Method 2: Local build
 

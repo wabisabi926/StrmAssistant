@@ -451,6 +451,21 @@ namespace StrmAssistant.Mod
         public static bool PatchUnpatch(PatchTracker tracker, bool apply, MethodBase targetMethod, string prefix = null,
             string postfix = null, string transpiler = null, string finalizer = null, bool suppress = false)
         {
+            var ok = PatchUnpatchCore(tracker, apply, targetMethod, prefix, postfix, transpiler, finalizer, suppress);
+
+            // 把失败记进 tracker：PatchBase.Patch() 之后无条件标 Applied，
+            // 只有这里留痕，运行时状态页和启动日志才能反映「补丁其实没打上」。
+            if (!ok && apply)
+            {
+                tracker.AddError($"{targetMethod?.Name ?? "(null)"} 补丁未应用");
+            }
+
+            return ok;
+        }
+
+        private static bool PatchUnpatchCore(PatchTracker tracker, bool apply, MethodBase targetMethod, string prefix = null,
+            string postfix = null, string transpiler = null, string finalizer = null, bool suppress = false)
+        {
             if (tracker.FallbackPatchApproach != PatchApproach.Harmony) return false;
 
             if (targetMethod is null)

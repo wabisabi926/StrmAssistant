@@ -75,8 +75,18 @@ namespace StrmAssistant.Mod
                 Plugin.Instance.Logger.Debug($"[{PatchTracker.PatchType.Name}] ▶ Patch() applying (Fallback={PatchTracker.FallbackPatchApproach})");
             }
 
+            var hadErrors = PatchTracker.HasErrors;
+
             Prepare(true);
             PatchTracker.Status = PatchStatus.Applied;
+
+            // Prepare 是 void，模块无法回报「某条补丁其实没打上」；PatchUnpatch 失败会记进
+            // PatchTracker.AddError，这里据此补一条告警，避免状态页显示 Applied 而功能实际缺失。
+            if (!hadErrors && PatchTracker.HasErrors)
+            {
+                Plugin.Instance.Logger.Warn(
+                    $"[{PatchTracker.PatchType.Name}] 部分补丁未能应用，功能可能不完整（详见运行时状态页）");
+            }
 
             // ★ 统一 debug 日志：模块 Patch 应用后
             if (Plugin.Instance.DebugMode)

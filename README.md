@@ -27,13 +27,23 @@
 
 ## 最新优化 (v3.0.0.58 ~ v3.0.0.65)
 
-✅ **稳定性与安全修复（3.0.0.65）**
+✅ **删除预览 + 后台任务可观测（3.0.0.65）**
+- 新增「删除版本预览」：删除整季某版本前，先看到会删掉哪些文件、哪些因版本身份不明被跳过
+- 后台任务统一出口，异常会被记录，不再出现「功能没生效但日志干净」
+- 版本身份判定、直链地址脱敏、外部命令参数抽成可独立测试的纯逻辑
+
+✅ **稳定性与安全修复（3.0.0.64）**
 - 删除整季某版本时不再误删其他版本：改为按目录、分辨率、编码综合判断版本身份，判不明则跳过
 - 图片裁剪恢复：修复临时文件扩展名导致 ffmpeg 无法识别输出格式的问题
 - 部分片源的 HDR Vivid 识别不到：补探改为按流序号精确定位
 - 关闭追更不再可能永久占用一个并发名额
 - 直链日志不再记录完整地址，只保留协议、主机与路径，避免访问签名外泄
 - 构建流程加入自动化测试，测试不通过不会发布
+
+✅ **媒体信息页重新分组（3.0.0.63）**
+- 分组顺序调整为 提取范围 → ISO 与外部工具 → 图像捕获 → HDR 标注 → 独占与性能 → 结果与持久化
+- 不再在运行时合并分组，分组与设置项一一对应，更好找
+- HDR 相关选项的说明文案补全，明确各项的作用与代价
 
 ✅ **HDR 标注独立 + Vivid 识别（3.0.0.62）**
 - 设置页「媒体信息」新增「HDR 标注」分组，双层杜比视界 Profile 7 与 HDR Vivid 的标签开关从「ISO 提取」独立出来
@@ -222,7 +232,9 @@
 
 CI 为**手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行。
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.62`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistant.dll` 覆盖到 `config/plugins/StrmAssistant.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.65`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+
+> 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 
 ### 方式二：本地构建
 
@@ -233,7 +245,7 @@ CI 为**手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin
 bash build-local.sh
 ```
 
-构建产物：`StrmAssistant/bin/Release/StrmAssistant.merged.dll`
+构建产物：`StrmAssistant/bin/Release/StrmAssistant.merged.dll`，复制到插件目录时命名为 `StrmAssistantPlus.dll`。
 
 ### 编译 libsimple.so（中文/拼音分词器）
 

@@ -34,6 +34,8 @@ dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj -c Release
 - 某个版本**已打过 tag 就不能复用**：后续改动另起新版本号，避免标签内容与实际产物不一致。
 - 打标签后**核对它指向的提交**（`git show <tag> --no-patch --format="%h %s"`）。
   本仓历史上出现过两个标签指向同一个旧提交的情况，只看「标签存在」会误判。
+- 推送 `v*` 标签会**自动触发** CI 构建并发布 Release；CI 会校验「标签名 == `v` + 工程版本号」，
+  不一致直接失败。也可在 Actions 页面手动 `Run workflow`。
 - `CHANGELOG.md` 的版本段要与代码版本同步；README 的「插件版本」表格同理。
 
 ## 提交前自查

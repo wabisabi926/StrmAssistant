@@ -230,7 +230,10 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 ### Method 1: GitHub Actions (recommended)
 
-CI is **manually triggered**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`.
+CI can be triggered two ways:
+
+- **Automatic on tag push**: `git push origin v3.0.0.65` builds and publishes that version (the tag name is validated against the project version)
+- **Manually**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`
 
 When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.65`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
 

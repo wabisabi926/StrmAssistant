@@ -1,7 +1,10 @@
 name: Build Plugin
 
 on:
-  workflow_dispatch:  # 仅手动触发
+  workflow_dispatch:  # 手动触发（可重复构建任意提交）
+  push:
+    tags:
+      - 'v*'  # 推送版本标签（如 v3.0.0.65）时自动打包并发布
 
 permissions:
   contents: write
@@ -63,6 +66,18 @@ jobs:
           if (-not $version) { throw "Version not found in csproj" }
           "value=$version" >> $env:GITHUB_OUTPUT
 
+      # 标签触发时校验「标签名 == v + csproj 版本」，避免打错标签后发出内容不符的包
+      - name: Verify tag matches csproj version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $expected = "v${{ steps.version.outputs.value }}"
+          if ($tag -ne $expected) {
+            throw "Tag '$tag' does not match csproj version '$expected'. Bump the version or re-tag."
+          }
+          Write-Host "Tag '$tag' matches csproj version."
+
       # 收集编译产物（ILRepack 打包后的版本化 DLL）
       - name: Collect artifact
         shell: pwsh
@@ -92,5 +107,8 @@ jobs:
             Auto-build from commit ${{ github.sha }}
             Version: ${{ steps.version.outputs.value }}
             Emby 4.9 / 4.10 compatible
+
+            安装：下载下方 DLL，重命名为 `StrmAssistantPlus.dll`，覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+            详细变更见仓库 [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/myp015/CHANGELOG.md)。
           files: artifact/*.dll
           fail_on_unmatched_files: true

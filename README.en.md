@@ -141,6 +141,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - **Automatic merging**: merges same-title videos in a folder or across libraries without strict naming rules
 - **Display enhancement**: labels show resolution tier, codec, bitrate and size (e.g. `4K HEVC 46.1Mbps 168.4MB`)
 - **Sorting**: by quality, size, or path; customizable display format
+- **Delete preview**: before deleting a whole-season version, see which files would be removed and which candidates are skipped as ambiguous
 
 ### Metadata Enhancement
 

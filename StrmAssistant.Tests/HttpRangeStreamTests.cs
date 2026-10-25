@@ -202,10 +202,10 @@ namespace StrmAssistant.Tests
         /// 端到端：真实 ISO 通过 HTTP Range 提供，走 HttpRangeStream → UdfTitleResolver 解析章节。
         /// 这正是远程 ISO（strm → http）的完整链路，只是把远端换成本地回环。
         /// </summary>
-        [Fact]
+        [IsoSampleFact]
         public void RemoteIso_ResolvesPlaylistChapters_OverRangeStream()
         {
-            if (!TryGetReadableIso(out var isoPath)) return;   // 样本缺失/不可读：跳过
+            var isoPath = IsoSample.ResolvedPath;
 
             using var server = new RangeHttpServer(isoPath);
 
@@ -222,39 +222,6 @@ namespace StrmAssistant.Tests
                 Assert.Contains("STREAM", title.RelativePath, StringComparison.OrdinalIgnoreCase);
                 Assert.NotEmpty(title.Chapters);
             }
-        }
-
-        /// <summary>
-        /// 找一个**真的能读**的 ISO 样本。
-        /// 注意：某些目录（如媒体库的"最近接收"）可能被 ACL/安全策略拒绝读取，
-        /// 这种情况下跳过而不是让用例失败 —— 环境问题不该算作代码回归。
-        /// </summary>
-        private static bool TryGetReadableIso(out string isoPath)
-        {
-            var candidates = new[]
-            {
-                @"D:\视频\小号\杜比视界测试：双层 FEL2.iso",
-                @"D:\视频\小号\最近接收\杜比视界测试：双层 FEL2.iso"
-            };
-
-            foreach (var candidate in candidates)
-            {
-                try
-                {
-                    if (!File.Exists(candidate)) continue;
-
-                    using var probe = File.OpenRead(candidate);   // 真正读一次，确认权限
-                    isoPath = candidate;
-                    return true;
-                }
-                catch (Exception)
-                {
-                    // 不可读 → 试下一个
-                }
-            }
-
-            isoPath = null;
-            return false;
         }
 
         /// <summary>极简 HTTP 服务器：支持 HEAD / Range（可关闭），足以覆盖被测行为。</summary>

@@ -182,12 +182,10 @@ namespace StrmAssistant.Tests
         /// （实测 BDMV\PLAYLIST 下 "*" → 0 个、"*.*" → 1 个）。
         /// 曾经这里用 "*"，导致进程内 UDF 解析永远返回 null（挂载路径掩盖了该缺陷）。
         /// </summary>
-        [Fact]
+        [IsoSampleFact]
         public void Resolve_RealIso_ReturnsTitleWithDurationAndChapters()
         {
-            const string isoPath = @"D:\视频\小号\杜比视界测试：双层 FEL2.iso";
-
-            if (!File.Exists(isoPath)) return;   // 样本缺失：跳过（不计失败）
+            var isoPath = IsoSample.ResolvedPath;
 
             var title = UdfTitleResolver.Resolve(isoPath);
 

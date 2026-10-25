@@ -36,6 +36,24 @@ jobs:
       - name: Build the project
         run: dotnet build StrmAssistant/StrmAssistant.csproj --no-restore --configuration Release -p:UseSharedCompilation=false -p:StrmAssistantPluginOutputDir=
 
+      # 测试工程是 net8.0，且直接引用上面构建出的插件 DLL（无 ProjectReference），
+      # 所以顺序必须是「先构建插件 → 再装 .NET 8 → 跑测试」，否则测的是旧产物。
+      - name: Setup .NET 8 for tests
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Run unit tests
+        run: dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/*.trx
+          retention-days: 7
+
       - name: Read version
         id: version
         shell: pwsh

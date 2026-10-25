@@ -25,7 +25,15 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.58 ~ v3.0.0.62)
+## Latest Optimizations (v3.0.0.58 ~ v3.0.0.64)
+
+✅ **Stability & security fixes (3.0.0.64)**
+- Deleting a whole-season version no longer wipes other versions: version identity is now checked by folder, resolution and codec, and ambiguous candidates are skipped
+- Image cropping works again: the temp file kept an extension ffmpeg could not map to an output format
+- Some HDR Vivid sources were not detected: the extra probe now selects the stream by absolute index
+- Turning Catchup off can no longer permanently consume a concurrency slot
+- Direct-link logging no longer records the full URL (signatures and tokens are stripped)
+- CI now runs the unit tests; a failing test blocks the release
 
 ✅ **HDR tagging decoupled + Vivid detection (3.0.0.62)**
 - New "HDR tagging" group under Media Info; Dolby Vision Profile 7 and HDR Vivid toggles are now independent of ISO extraction

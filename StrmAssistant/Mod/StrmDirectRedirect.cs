@@ -218,7 +218,7 @@ namespace StrmAssistant.Mod
                 __result = Task.FromResult(resultFactory.GetRedirectResult(finalUrl));
 
                 Plugin.Instance.Logger.Info(
-                    $"StrmDirectRedirect: itemId={itemId}, type={(isVideo ? (isLiveTv ? "LIVE" : "VIDEO") : "AUDIO")}, finalUrl={SafeUnescape(finalUrl)}");
+                    $"StrmDirectRedirect: itemId={itemId}, type={(isVideo ? (isLiveTv ? "LIVE" : "VIDEO") : "AUDIO")}, target={BuildLogSafeUrl(finalUrl)}");
 
                 DisposeState(state);
                 return false;
@@ -513,6 +513,25 @@ namespace StrmAssistant.Mod
                 .Where(item => !string.IsNullOrWhiteSpace(item))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
+        }
+
+        /// <summary>
+        /// 日志用的地址脱敏：只保留 <c>scheme://host:port/path</c>，去掉 userinfo、query 与 fragment。
+        ///
+        /// 网盘的访问签名、pickcode、临时凭据几乎都在 query 里；写进 Info 日志后，
+        /// 一旦日志被上传做诊断或转给别人，等同于把可用链接一起交出去。
+        /// 降低日志级别不能替代脱敏，所以这里直接不记。
+        /// </summary>
+        internal static string BuildLogSafeUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return "(empty)";
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return "(unparsable)";
+
+            var port = uri.IsDefaultPort ? string.Empty : ":" + uri.Port.ToString();
+
+            // 不用 UriBuilder：它会把 userinfo 一并带回来
+            return $"{uri.Scheme}://{uri.Host}{port}{uri.AbsolutePath}";
         }
 
         private static string SafeUnescape(string url)

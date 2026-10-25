@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static StrmAssistant.Common.CommonUtility;
 using static StrmAssistant.Common.LanguageUtility;
@@ -173,13 +174,164 @@ namespace StrmAssistant.Web.Service
                 var cleanedName = CleanEpisodeName(ep.FileNameWithoutExtension);
                 var similarity = LevenshteinDistance(targetCleaned, cleanedName);
 
-                if (similarity > 0.92)
+                if (similarity <= 0.92) continue;
+
+                // 名称相似度不足以证明版本身份：1080p 与 2160p 在长文件名里的相似度可达 0.94+，
+                // 仅凭相似度会把两个版本判成同一版，进而删掉另一版本的真实文件。
+                // 删除不可逆，判不明一律排除（宁可少删）。
+                if (!IsSameVersion(episode, ep, out var reason))
                 {
-                    similarEpisodes.Add(ep);
+                    _logger.Info(
+                        $"DeleteVersion - Skip candidate (version identity not confirmed: {reason}): {ep.Name} - {ep.Path}");
+                    continue;
                 }
+
+                similarEpisodes.Add(ep);
             }
 
             return similarEpisodes;
+        }
+
+        /// <summary>
+        /// 判断候选条目与目标条目是否为「同一版本」：同目录 + 分辨率一致 + 编码/片源（若有）一致。
+        /// 分辨率标记缺失时直接判为不同版本——这类文件无法可靠区分，不应进入批量删除集合。
+        /// </summary>
+        internal static bool IsSameVersion(Episode target, BaseItem candidate, out string reason) =>
+            IsSameVersion(target.Path, target.FileNameWithoutExtension,
+                candidate.Path, candidate.FileNameWithoutExtension, out reason);
+
+        /// <summary>
+        /// 纯字符串版本：便于单测（Emby 实体的 <c>FileNameWithoutExtension</c> 依赖内部状态，无法直接构造）。
+        /// </summary>
+        internal static bool IsSameVersion(string targetPath, string targetName,
+            string candidatePath, string candidateName, out string reason)
+        {
+            reason = null;
+
+            var targetDir = Path.GetDirectoryName(targetPath);
+            var candidateDir = Path.GetDirectoryName(candidatePath);
+
+            if (!string.Equals(targetDir, candidateDir, StringComparison.OrdinalIgnoreCase))
+            {
+                reason = "different folder";
+                return false;
+            }
+
+            targetName = targetName ?? string.Empty;
+            candidateName = candidateName ?? string.Empty;
+
+            var targetResolution = ParseResolutionToken(targetName);
+            var candidateResolution = ParseResolutionToken(candidateName);
+
+            if (targetResolution == null || candidateResolution == null)
+            {
+                reason = "resolution token missing";
+                return false;
+            }
+
+            if (!string.Equals(targetResolution, candidateResolution, StringComparison.Ordinal))
+            {
+                reason = $"resolution {targetResolution} vs {candidateResolution}";
+                return false;
+            }
+
+            var targetCodec = ParseCodecToken(targetName);
+            var candidateCodec = ParseCodecToken(candidateName);
+
+            if (targetCodec != null && candidateCodec != null &&
+                !string.Equals(targetCodec, candidateCodec, StringComparison.Ordinal))
+            {
+                reason = $"codec {targetCodec} vs {candidateCodec}";
+                return false;
+            }
+
+            var targetSource = ParseSourceToken(targetName);
+            var candidateSource = ParseSourceToken(candidateName);
+
+            if (targetSource != null && candidateSource != null &&
+                !string.Equals(targetSource, candidateSource, StringComparison.Ordinal))
+            {
+                reason = $"source {targetSource} vs {candidateSource}";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static readonly Regex ResolutionTokenRegex = new Regex(
+            @"(?<![0-9])(2160p|1080p|720p|576p|480p|4k|uhd)(?![0-9])",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static readonly Regex CodecTokenRegex = new Regex(
+            @"(?<![a-z0-9])(h\.?264|x264|avc|h\.?265|x265|hevc|av1|vp9)(?![a-z0-9])",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static readonly Regex SourceTokenRegex = new Regex(
+            @"(?<![a-z0-9])(web-?dl|webrip|blu-?ray|bdrip|remux|hdtv|dvdrip)(?![a-z0-9])",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        internal static string ParseResolutionToken(string fileName)
+        {
+            var match = ResolutionTokenRegex.Match(fileName ?? string.Empty);
+            if (!match.Success) return null;
+
+            var token = match.Value.ToLowerInvariant();
+
+            switch (token)
+            {
+                case "2160p":
+                case "4k":
+                case "uhd":
+                    return "2160";
+                case "1080p":
+                    return "1080";
+                case "720p":
+                    return "720";
+                case "576p":
+                    return "576";
+                default:
+                    return "480";
+            }
+        }
+
+        internal static string ParseCodecToken(string fileName)
+        {
+            var match = CodecTokenRegex.Match(fileName ?? string.Empty);
+            if (!match.Success) return null;
+
+            var token = match.Value.ToLowerInvariant().Replace(".", string.Empty);
+
+            switch (token)
+            {
+                case "h264":
+                case "x264":
+                case "avc":
+                    return "h264";
+                case "h265":
+                case "x265":
+                case "hevc":
+                    return "h265";
+                default:
+                    return token; // av1 / vp9
+            }
+        }
+
+        internal static string ParseSourceToken(string fileName)
+        {
+            var match = SourceTokenRegex.Match(fileName ?? string.Empty);
+            if (!match.Success) return null;
+
+            var token = match.Value.ToLowerInvariant().Replace("-", string.Empty);
+
+            switch (token)
+            {
+                case "webdl":
+                    return "webdl";
+                case "bluray":
+                    return "bluray";
+                default:
+                    return token; // webrip / bdrip / remux / hdtv / dvdrip
+            }
         }
     }
 }

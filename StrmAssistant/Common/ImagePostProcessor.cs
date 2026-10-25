@@ -238,12 +238,15 @@ namespace StrmAssistant.Common
                 var encoderPath = _ffmpegManager.FfmpegConfiguration?.EncoderPath;
                 if (string.IsNullOrEmpty(encoderPath) || !File.Exists(encoderPath)) return (null, null);
 
-                var tempPath = imagePath + ".crop.tmp";
+                // 必须保留原扩展名：ffmpeg 靠扩展名推断输出格式，".tmp" 会直接报
+                // "Unable to choose an output format"（实测 Emby 自带 ffmpeg 5.1 必现），
+                // 裁剪因此长期静默失败、只留一条 Warn。
+                var tempPath = imagePath + ".crop" + Path.GetExtension(imagePath);
 
                 var exitCode = RunProcess(encoderPath,
                     $"-y -i \"{imagePath}\" -vf crop={targetW}:{targetH}:{x}:{y} -q:v 2 \"{tempPath}\"");
 
-                if (exitCode == 0 && File.Exists(tempPath))
+                if (exitCode == 0 && File.Exists(tempPath) && new FileInfo(tempPath).Length > 0)
                 {
                     File.Delete(imagePath);
                     File.Move(tempPath, imagePath);

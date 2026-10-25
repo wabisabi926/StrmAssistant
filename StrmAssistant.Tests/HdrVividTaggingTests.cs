@@ -69,6 +69,28 @@ namespace StrmAssistant.Tests
         }
 
         /// <summary>
+        /// 回归 SA-03：补探必须用**绝对流索引**。
+        /// <c>probe.index</c> 是容器内的绝对索引，而 <c>v:N</c> 表示第 N 条视频流；
+        /// MKV 里音轨排在视频前时视频索引 ≥1，写成 <c>v:1</c> 会匹配不到任何流 → 静默漏标。
+        /// </summary>
+        [Fact]
+        public void FrameProbe_UsesAbsoluteStreamIndex()
+        {
+            var args = HdrVividTagging.BuildFrameProbeArgs("http://host/a.mkv", 1);
+
+            Assert.Contains("-select_streams 1 ", args);
+            Assert.DoesNotContain("v:1", args);
+        }
+
+        [Fact]
+        public void FrameProbe_FallsBackToFirstVideo_WhenIndexMissing()
+        {
+            var args = HdrVividTagging.BuildFrameProbeArgs("http://host/a.mkv", null);
+
+            Assert.Contains("-select_streams v:0", args);
+        }
+
+        /// <summary>
         /// 首帧补探的输出解析：CUVA 只出现在**帧级** side_data（stream 级为空），
         /// 所以补探结果用字符串匹配判断，抽成纯函数以便固定。
         /// </summary>

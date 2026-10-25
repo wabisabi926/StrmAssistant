@@ -298,6 +298,10 @@ namespace StrmAssistant.Common
 
                                 try
                                 {
+                                    // 取消判断必须放在 delegate 内部：
+                                    // Task.Run 若带一个已取消的令牌，delegate 可能完全不执行，
+                                    // 其 finally 随之消失 → 许可永久丢失（容量为 1 时后续任务全部卡住）。
+                                    if (cancellationToken.IsCancellationRequested) return;
                                     if (cancellationToken.IsCancellationRequested)
                                     {
                                         Logger.Info("MediaInfoExtract - Item cancelled: " + taskItem.Name + " - " +
@@ -354,7 +358,7 @@ namespace StrmAssistant.Common
 
                                     MasterSemaphore.Release();
                                 }
-                            }, cancellationToken);
+                            }, CancellationToken.None);   // 不用取消令牌调度：delegate 必须执行才能释放许可
                             tasks.Add(task);
 
                             // 周期性剔除已完成的 task，释放闭包捕获的 BaseItem 引用，

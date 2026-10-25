@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.64** |
+| Plugin Version | **3.0.0.65** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.1.0+ |
 | Tested On | 4.10.1.0 |
@@ -25,9 +25,9 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.58 ~ v3.0.0.64)
+## Latest Optimizations (v3.0.0.58 ~ v3.0.0.65)
 
-✅ **Stability & security fixes (3.0.0.64)**
+✅ **Stability & security fixes (3.0.0.65)**
 - Deleting a whole-season version no longer wipes other versions: version identity is now checked by folder, resolution and codec, and ambiguous candidates are skipped
 - Image cropping works again: the temp file kept an extension ffmpeg could not map to an output format
 - Some HDR Vivid sources were not detected: the extra probe now selects the stream by absolute index

@@ -473,11 +473,11 @@ namespace StrmAssistant
             {
                 if (e.Argument.Item is Series refreshedSeries)
                 {
-                    _ = Task.Run(() => IntroDbApi.ScrapeSeriesAsync(refreshedSeries, CancellationToken.None));
+                    _ = BackgroundTaskRunner.Run("IntroDb.ScrapeSeries", () => IntroDbApi.ScrapeSeriesAsync(refreshedSeries, CancellationToken.None));
                 }
                 else if (e.Argument.Item is Movie refreshedMovie)
                 {
-                    _ = Task.Run(() => IntroDbApi.ScrapeMovieAsync(refreshedMovie, CancellationToken.None));
+                    _ = BackgroundTaskRunner.Run("IntroDb.ScrapeMovie", () => IntroDbApi.ScrapeMovieAsync(refreshedMovie, CancellationToken.None));
                 }
             }
 
@@ -489,22 +489,22 @@ namespace StrmAssistant
             {
                 var refreshedItem = e.Argument.Item;
 
-                _ = Task.Run(() => ImagePostProcessor.ProcessItem(refreshedItem, postProcessMode));
+                _ = BackgroundTaskRunner.Run("ImagePostProcess.ProcessItem", () => ImagePostProcessor.ProcessItem(refreshedItem, postProcessMode));
             }
 
             if (MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
             {
                 if (e.Argument.Item is Movie doubanMovie)
                 {
-                    _ = Task.Run(() => DoubanAssist.ApplyAsync(doubanMovie, CancellationToken.None));
+                    _ = BackgroundTaskRunner.Run("Douban.Apply.Movie", () => DoubanAssist.ApplyAsync(doubanMovie, CancellationToken.None));
                 }
                 else if (e.Argument.Item is Series doubanSeries)
                 {
-                    _ = Task.Run(() => DoubanAssist.ApplyAsync(doubanSeries, CancellationToken.None));
+                    _ = BackgroundTaskRunner.Run("Douban.Apply.Series", () => DoubanAssist.ApplyAsync(doubanSeries, CancellationToken.None));
                 }
                 else if (e.Argument.Item is Season doubanSeason)
                 {
-                    _ = Task.Run(() => DoubanAssist.ApplyAsync(doubanSeason, CancellationToken.None));
+                    _ = BackgroundTaskRunner.Run("Douban.Apply.Season", () => DoubanAssist.ApplyAsync(doubanSeason, CancellationToken.None));
                 }
             }
 

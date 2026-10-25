@@ -1,4 +1,4 @@
-using StrmAssistant.Web.Service;
+using StrmAssistant.Common;
 using Xunit;
 
 namespace StrmAssistant.Tests
@@ -14,7 +14,7 @@ namespace StrmAssistant.Tests
     {
         private static bool Same(string targetPath, string targetName, string candidatePath, string candidateName,
             out string reason) =>
-            LibraryService.IsSameVersion(targetPath, targetName, candidatePath, candidateName, out reason);
+            VersionIdentity.IsSameVersion(targetPath, targetName, candidatePath, candidateName, out reason);
 
         [Theory]
         [InlineData("A.Show.S01E01.1080p.WEB-DL.H.264-GRP", "1080")]
@@ -24,7 +24,7 @@ namespace StrmAssistant.Tests
         [InlineData("A.Show.S01E01", null)]
         public void ParsesResolution(string name, string expected)
         {
-            Assert.Equal(expected, LibraryService.ParseResolutionToken(name));
+            Assert.Equal(expected, VersionIdentity.ParseResolutionToken(name));
         }
 
         [Theory]
@@ -36,7 +36,7 @@ namespace StrmAssistant.Tests
         [InlineData("Show.1080p-GRP", null)]
         public void ParsesCodec(string name, string expected)
         {
-            Assert.Equal(expected, LibraryService.ParseCodecToken(name));
+            Assert.Equal(expected, VersionIdentity.ParseCodecToken(name));
         }
 
         [Theory]
@@ -48,7 +48,7 @@ namespace StrmAssistant.Tests
         [InlineData("Show.1080p", null)]
         public void ParsesSource(string name, string expected)
         {
-            Assert.Equal(expected, LibraryService.ParseSourceToken(name));
+            Assert.Equal(expected, VersionIdentity.ParseSourceToken(name));
         }
 
         [Fact]

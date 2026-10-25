@@ -1,4 +1,4 @@
-using StrmAssistant.Mod;
+using StrmAssistant.Common;
 using Xunit;
 
 namespace StrmAssistant.Tests
@@ -17,7 +17,7 @@ namespace StrmAssistant.Tests
             const string url =
                 "http://user:pass@192.168.50.250:12333/115/url/video.mp4?pickcode=abc123&userid=341871580#frag";
 
-            var safe = StrmDirectRedirect.BuildLogSafeUrl(url);
+            var safe = UrlSanitizer.ToLogSafe(url);
 
             Assert.Equal("http://192.168.50.250:12333/115/url/video.mp4", safe);
             Assert.DoesNotContain("pickcode", safe);
@@ -30,15 +30,15 @@ namespace StrmAssistant.Tests
         public void Keeps_DefaultPort_Out_Of_Result()
         {
             Assert.Equal("https://example.com/video.mp4",
-                StrmDirectRedirect.BuildLogSafeUrl("https://example.com/video.mp4?sig=xyz"));
+                UrlSanitizer.ToLogSafe("https://example.com/video.mp4?sig=xyz"));
         }
 
         [Fact]
         public void Handles_Empty_And_Unparsable()
         {
-            Assert.Equal("(empty)", StrmDirectRedirect.BuildLogSafeUrl(null));
-            Assert.Equal("(empty)", StrmDirectRedirect.BuildLogSafeUrl("  "));
-            Assert.Equal("(unparsable)", StrmDirectRedirect.BuildLogSafeUrl("not a url"));
+            Assert.Equal("(empty)", UrlSanitizer.ToLogSafe(null));
+            Assert.Equal("(empty)", UrlSanitizer.ToLogSafe("  "));
+            Assert.Equal("(unparsable)", UrlSanitizer.ToLogSafe("not a url"));
         }
     }
 }

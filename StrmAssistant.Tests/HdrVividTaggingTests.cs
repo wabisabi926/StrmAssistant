@@ -1,6 +1,7 @@
 using System.Reflection;
 using HarmonyLib;
 using MediaBrowser.Model.Entities;
+using StrmAssistant.Common;
 using StrmAssistant.Mod;
 using Xunit;
 
@@ -76,7 +77,7 @@ namespace StrmAssistant.Tests
         [Fact]
         public void FrameProbe_UsesAbsoluteStreamIndex()
         {
-            var args = HdrVividTagging.BuildFrameProbeArgs("http://host/a.mkv", 1);
+            var args = ProbeCommand.BuildFrameProbeArgs("http://host/a.mkv", 1);
 
             Assert.Contains("-select_streams 1 ", args);
             Assert.DoesNotContain("v:1", args);
@@ -85,7 +86,7 @@ namespace StrmAssistant.Tests
         [Fact]
         public void FrameProbe_FallsBackToFirstVideo_WhenIndexMissing()
         {
-            var args = HdrVividTagging.BuildFrameProbeArgs("http://host/a.mkv", null);
+            var args = ProbeCommand.BuildFrameProbeArgs("http://host/a.mkv", null);
 
             Assert.Contains("-select_streams v:0", args);
         }

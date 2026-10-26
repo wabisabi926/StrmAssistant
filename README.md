@@ -16,7 +16,7 @@
 
 | 项目 | 说明 |
 |---|---|
-| 插件版本 | **3.0.0.65** |
+| 插件版本 | **3.0.0.66** |
 | 最低 Emby 版本 | 4.9.1.0 |
 | 适配展示版本 | 4.10.1.0+ |
 | 实测版本 | 4.10.1.0 |
@@ -25,7 +25,14 @@
 
 > 各版本详细变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 最新优化 (v3.0.0.58 ~ v3.0.0.65)
+## 最新优化 (v3.0.0.58 ~ v3.0.0.66)
+
+✅ **中文搜索与 ISO 挂载的可靠性（3.0.0.66）**
+- 中文搜索不再因纯文案升级被自动关闭：改为按「索引方案号」判断，只有分词器/索引结构真变了才关闭并重建
+- 分词器扩展不可用时启动兜底：直接关闭中文搜索并还原索引，不再让元数据写入整体回滚
+- ISO 挂载能力误判不再锁死整个进程：失败结果只缓存 5 分钟，并记录判定原因与耗时
+- ISO 提取的两条兜底路径补日志，明确「本轮不注入章节」，不再静默
+- 内置 ISO 测试样本，两条长期跳过的用例真正跑起来；测试 176 → **190，0 跳过**
 
 ✅ **删除预览 + 后台任务可观测（3.0.0.65）**
 - 新增「删除版本预览」：删除整季某版本前，先看到会删掉哪些文件、哪些因版本身份不明被跳过
@@ -232,10 +239,10 @@
 
 CI 支持两种触发方式：
 
-- **推送标签自动构建**：`git push origin v3.0.0.65` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
+- **推送标签自动构建**：`git push origin v3.0.0.66` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
 - **手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.65`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.66`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
 
 > 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 

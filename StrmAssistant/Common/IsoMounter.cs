@@ -98,25 +98,77 @@ namespace StrmAssistant.Common
 
         private static Timer _sweeper;
         private static bool? _supported;
+        private static DateTime _supportedProbedUtc = DateTime.MinValue;
+
+        /// <summary>
+        /// 「不支持挂载」结果的缓存时长。
+        /// <para>
+        /// <b>为什么 false 不能永久缓存</b>：首次探测要起一个 <c>powershell.exe</c> 子进程（上限 30s）。
+        /// 冷启动 / 杀软扫描 / 机器繁忙时可能超时，此时会误判成「不支持」。旧实现把结果缓存在
+        /// <c>_supported</c> 里永不重算、且不打任何日志 —— 判错一次，整个进程生命周期都不挂载，
+        /// 表现为「章节静默丢失」而日志毫无线索。改为 false 只缓存 5 分钟，到点重试。
+        /// </para>
+        /// <para>true 结果仍然永久缓存（探测成功没有理由再变）。</para>
+        /// </summary>
+        private static readonly TimeSpan NegativeSupportCacheDuration = TimeSpan.FromMinutes(5);
 
         /// <summary>当前平台是否支持「OS 原生挂载」（Windows + 存在 Mount-DiskImage）。</summary>
         public static bool IsSupported
         {
             get
             {
-                if (_supported.HasValue) return _supported.Value;
+                // 成功结果永久有效
+                if (_supported == true) return true;
+
+                // 失败结果只在冷却期内有效，到点重新探测（避免一次超时误判锁死整个进程）
+                if (_supported == false &&
+                    DateTime.UtcNow - _supportedProbedUtc < NegativeSupportCacheDuration)
+                {
+                    return false;
+                }
+
+                var stopwatch = Stopwatch.StartNew();
+                string reason;
 
                 try
                 {
-                    _supported = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                                 (RunPowerShell(
-                                     $"if (Get-Command {MountCmdlet} -ErrorAction SilentlyContinue) {{ 'yes' }}")
-                                     ?.StdOut?.Trim() == "yes");
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        _supported = false;
+                        reason = "not running on Windows";
+                    }
+                    else
+                    {
+                        var probe = RunPowerShell(
+                            $"if (Get-Command {MountCmdlet} -ErrorAction SilentlyContinue) {{ 'yes' }}");
+                        var output = probe?.StdOut?.Trim();
+
+                        _supported = output == "yes";
+
+                        reason = probe == null
+                            ? "powershell process could not be started"
+                            : probe.TimedOut
+                                ? "powershell probe timed out (30s limit)"
+                                : probe.ExitCode != 0
+                                    ? $"powershell exit={probe.ExitCode}, err='{probe.StdErr?.Trim()}'"
+                                    : $"Get-Command {MountCmdlet} -> '{output}'";
+                    }
                 }
-                catch
+                catch (Exception e)
                 {
                     _supported = false;
+                    reason = "probe threw: " + e.Message;
                 }
+
+                stopwatch.Stop();
+                _supportedProbedUtc = DateTime.UtcNow;
+
+                Plugin.Instance?.Logger?.Info(
+                    $"IsoMounter - native mount support = {_supported.Value} ({reason}), " +
+                    $"probe took {stopwatch.ElapsedMilliseconds} ms" +
+                    (_supported.Value
+                        ? string.Empty
+                        : $"; will re-probe in {NegativeSupportCacheDuration.TotalMinutes:F0} min"));
 
                 return _supported.Value;
             }
@@ -469,11 +521,28 @@ namespace StrmAssistant.Common
                         Plugin.Instance?.Logger?.Info(
                             $"IsoExtraction - no main title found under {entry.DriveRoot} for {isoPath}");
                     }
+                    else
+                    {
+                        // 挂载没成功（Failed 或拿不到盘符）：下面会退回进程内 UDF，
+                        // 但**不会**把章节注入探测结果。必须明说，否则表现为「章节静默丢失」。
+                        Plugin.Instance?.Logger?.Info(
+                            $"IsoExtraction - mount unavailable for {isoPath} " +
+                            $"(failed={entry.Failed}, drive='{entry.DriveRoot}'); " +
+                            "falling back to in-process UDF, playlist chapters will NOT be injected this round");
+                    }
                 }
                 catch (Exception e)
                 {
                     Plugin.Instance?.Logger?.Warn("IsoExtraction - mount failed: " + e.Message);
                 }
+            }
+            else
+            {
+                // IsSupported 为 false（非 Windows，或 PowerShell 探测失败/超时）。
+                // 明确记录：否则用户只看到「没有章节」而日志毫无线索。
+                Plugin.Instance?.Logger?.Info(
+                    "IsoExtraction - native mount not supported on this host; " +
+                    $"falling back to in-process UDF for {isoPath} (playlist chapters will NOT be injected)");
             }
 
             ResolveInProcessTitle(isoPath);

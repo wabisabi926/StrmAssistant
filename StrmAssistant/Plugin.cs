@@ -180,6 +180,7 @@ namespace StrmAssistant
 
             MigrateLegacyOptionGroups();
             MigrateChineseSearchOptions();
+            EnsureChineseSearchUsable();
             InitializeOptionCache();
 
             // 方案 4A：对账并释放上一次进程遗留的 ISO 孤儿挂载（跨 Emby 重启泄漏的兜底）
@@ -833,8 +834,46 @@ namespace StrmAssistant
         /// （按 <see cref="Version"/> 语义 <c>3.0.0.55 &lt; 3.0.55</c>，会得出「降级」的假结论），
         /// 因此只重置基线，既不判升级也不判降级。
         /// </para>
+        /// <para>
+        /// 3：<c>格式号|索引方案号|版本号</c>（如 <c>3|2|3.0.0.65</c>）。
+        /// 只有**索引方案号**（<see cref="EnhanceChineseSearch.IndexSchemeVersion"/>）变化时
+        /// 才自动关闭功能；同一方案内的版本升级保持原状 —— 纯 UI / 文案升级不该把功能关掉。
+        /// 读到格式 2 及更早的标记（没有方案号）时只重置基线，不执行自动关闭。
+        /// </para>
         /// </summary>
-        private const int VersionMarkerFormat = 2;
+        private const int VersionMarkerFormat = 3;
+
+        /// <summary>
+        /// 启动兜底：分词器扩展不可用时关掉中文搜索。
+        /// <para>
+        /// 索引一旦建立在插件自带分词器上，扩展加载不上就会让**每次元数据写入整体回滚**。
+        /// 这种情况与版本号无关（换架构、插件目录不完整、Emby 内部变化都会触发），
+        /// 所以单独校验一次：宁可关掉功能，也不能带着坏索引继续跑。
+        /// </para>
+        /// </summary>
+        private void EnsureChineseSearchUsable()
+        {
+            try
+            {
+                var options = MainOptionsStore.GetOptions();
+                if (!options.ChineseSearch.EnhanceChineseSearch) return;
+
+                if (EnhanceChineseSearch.IsTokenizerAvailable()) return;
+
+                options.ChineseSearch.EnhanceChineseSearch = false;
+                options.ChineseSearch.EnhanceChineseSearchRestore = true;
+                MainOptionsStore.SavePluginOptionsSuppress();
+
+                Logger.Error(
+                    "EnhanceChineseSearch has been disabled: tokenizer extension is not available " +
+                    "(missing file, unrecognized SHA-1, or unsupported architecture). " +
+                    "Index restore to default tokenizer queued. Fix the tokenizer, then re-enable.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"EnsureChineseSearchUsable failed: {ex.Message}");
+            }
+        }
 
         private void MigrateChineseSearchOptions()
         {
@@ -855,40 +894,70 @@ namespace StrmAssistant
                 var hasLegacyMarker = File.Exists(legacyMarkerPath);
                 var hasVersionMarker = File.Exists(versionMarkerPath);
 
-                // 标记文件格式：<格式号>|<版本号>。旧文件没有分隔符，视为格式 1。
-                var markerText = hasVersionMarker ? File.ReadAllText(versionMarkerPath).Trim() : string.Empty;
-                var markerFormat = 1;
-                var previousVersionText = markerText;
-                var separatorIndex = markerText.IndexOf('|');
-                if (separatorIndex >= 0)
-                {
-                    if (int.TryParse(markerText.Substring(0, separatorIndex), out var parsedFormat))
-                    {
-                        markerFormat = parsedFormat;
-                    }
+                // 标记文件格式见 ChineseSearchMarker：1（隐式版本号）/ 2（格式|版本）/ 3（格式|方案|版本）。
+                var marker = Common.ChineseSearchMarker.Parse(
+                    hasVersionMarker ? File.ReadAllText(versionMarkerPath) : null);
+                var markerFormat = marker.Format;
+                var previousVersion = marker.Version;
+                var previousIndexScheme = marker.IndexScheme;
 
-                    previousVersionText = markerText.Substring(separatorIndex + 1).Trim();
-                }
+                // 标记格式变更 → 版本号不可比，只重置基线（既不判升级也不判降级，也不告警）。
+                var formatChanged = hasVersionMarker && markerFormat != VersionMarkerFormat;
 
-                Version previousVersion = null;
-                if (!string.IsNullOrWhiteSpace(previousVersionText) && Version.TryParse(previousVersionText, out var parsedPrevious))
-                {
-                    previousVersion = parsedPrevious;
-                }
-
-                // 编号方案变更 → 两数不可比，只重置基线（既不判升级也不判降级，也不告警）。
-                var schemeChanged = hasVersionMarker && markerFormat != VersionMarkerFormat;
+                // 只有索引方案号真的变了才需要关功能。格式 2 及更早的标记没有方案号，
+                // 视为未知 → 不关（避免老用户升级时功能被莫名关掉）。
+                var indexSchemeChanged = marker.HasIndexScheme &&
+                                         previousIndexScheme != EnhanceChineseSearch.IndexSchemeVersion;
 
                 void WriteVersionMarker()
                 {
-                    File.WriteAllText(versionMarkerPath, $"{VersionMarkerFormat}|{currentVersion}");
+                    File.WriteAllText(versionMarkerPath,
+                        Common.ChineseSearchMarker.Format(EnhanceChineseSearch.IndexSchemeVersion, currentVersion));
+                }
+
+                void DisableForIndexRestore(string reason)
+                {
+                    var options = MainOptionsStore.GetOptions();
+                    var changed = false;
+
+                    if (options.ChineseSearch.EnhanceChineseSearch)
+                    {
+                        options.ChineseSearch.EnhanceChineseSearch = false;
+
+                        // 关闭时**排程还原**：把 fts_search9 重建回 Emby 默认分词器（unicode61）。
+                        // 否则会留下「索引用 simple + 选项已关闭」的半吊状态：索引永久依赖插件自带的
+                        // libsimple 扩展，一旦扩展加载不上（插件目录不完整 / 架构不符 / Emby 内部变化），
+                        // 每次元数据写入都会整体回滚。还原后索引不再依赖扩展，关闭就是真的关闭。
+                        options.ChineseSearch.EnhanceChineseSearchRestore = true;
+                        changed = true;
+                    }
+                    else if (options.ChineseSearch.EnhanceChineseSearchRestore)
+                    {
+                        options.ChineseSearch.EnhanceChineseSearchRestore = false;
+                        changed = true;
+                    }
+
+                    if (!changed)
+                    {
+                        Logger.Info($"EnhanceChineseSearch: {reason}, but the option is already off; nothing to do.");
+                        return;
+                    }
+
+                    MainOptionsStore.SavePluginOptionsSuppress();
+                    Logger.Info(
+                        $"EnhanceChineseSearch has been disabled ({reason}). " +
+                        "Index restore to default tokenizer queued (runs shortly after startup). " +
+                        "User must re-enable it manually to trigger rebuild.");
                 }
 
                 Logger.Info(
-                    $"EnhanceChineseSearch upgrade-check: current={currentVersion}, previous={(previousVersion?.ToString() ?? "<none>")}, markerFormat={markerFormat}, schemeChanged={schemeChanged}, legacyMarker={hasLegacyMarker}, versionMarker={hasVersionMarker}");
+                    $"EnhanceChineseSearch upgrade-check: current={currentVersion}, previous={(previousVersion?.ToString() ?? "<none>")}, " +
+                    $"markerFormat={markerFormat}, previousIndexScheme={previousIndexScheme}, " +
+                    $"indexScheme={EnhanceChineseSearch.IndexSchemeVersion}, indexSchemeChanged={indexSchemeChanged}, " +
+                    $"formatChanged={formatChanged}, legacyMarker={hasLegacyMarker}, versionMarker={hasVersionMarker}");
 
-                // 首次安装 / 编号方案变更：仅记录版本，不执行自动禁用。
-                if (previousVersion is null || schemeChanged)
+                // 首次安装 / 标记格式变更 / 旧格式（没有方案号）：只写基线，不执行自动禁用。
+                if (previousVersion is null || formatChanged)
                 {
                     WriteVersionMarker();
 
@@ -897,56 +966,36 @@ namespace StrmAssistant
                         File.WriteAllText(legacyMarkerPath, DateTime.UtcNow.ToString("O"));
                     }
 
-                    Logger.Info(schemeChanged
-                        ? $"EnhanceChineseSearch upgrade-check: version numbering scheme changed (marker format {markerFormat} -> {VersionMarkerFormat}, previous={previousVersion}); baseline reset, no upgrade/downgrade decision."
+                    Logger.Info(formatChanged
+                        ? $"EnhanceChineseSearch upgrade-check: marker format changed ({markerFormat} -> {VersionMarkerFormat}, previous={previousVersion}); baseline reset, no auto-disable."
                         : "EnhanceChineseSearch upgrade-check: baseline initialized, no auto-disable on first run.");
                     return;
                 }
 
-                var isUpgrade = currentVersion > previousVersion;
-                if (!isUpgrade)
+                // 索引方案变了：旧索引与新代码不匹配，必须关掉并重建。
+                if (indexSchemeChanged)
                 {
-                    if (currentVersion < previousVersion)
-                    {
-                        Logger.Warn($"EnhanceChineseSearch upgrade-check: detected downgrade {previousVersion} -> {currentVersion}; keep current option state.");
-                    }
-
+                    DisableForIndexRestore(
+                        $"index scheme changed {previousIndexScheme} -> {EnhanceChineseSearch.IndexSchemeVersion} " +
+                        $"({previousVersion} -> {currentVersion})");
                     WriteVersionMarker();
                     return;
                 }
 
-                var options = MainOptionsStore.GetOptions();
-                var changed = false;
-
-                if (options.ChineseSearch.EnhanceChineseSearch)
+                if (currentVersion < previousVersion)
                 {
-                    options.ChineseSearch.EnhanceChineseSearch = false;
-
-                    // 升级关闭时**排程还原**：把 fts_search9 重建回 Emby 默认分词器（unicode61）。
-                    // 否则会留下「索引用 simple + 选项已关闭」的半吊状态：索引永久依赖插件自带的
-                    // libsimple 扩展，一旦扩展加载不上（插件目录不完整 / 架构不符 / Emby 内部变化），
-                    // 每次元数据写入都会整体回滚。还原后索引不再依赖扩展，关闭就是真的关闭。
-                    options.ChineseSearch.EnhanceChineseSearchRestore = true;
-                    changed = true;
+                    Logger.Warn(
+                        $"EnhanceChineseSearch upgrade-check: detected downgrade {previousVersion} -> {currentVersion} " +
+                        "within the same index scheme; keep current option state.");
                 }
-                else if (options.ChineseSearch.EnhanceChineseSearchRestore)
+                else if (currentVersion > previousVersion)
                 {
-                    options.ChineseSearch.EnhanceChineseSearchRestore = false;
-                    changed = true;
-                }
-
-                if (changed)
-                {
-                    MainOptionsStore.SavePluginOptionsSuppress();
                     Logger.Info(
-                        $"EnhanceChineseSearch has been disabled after upgrade ({previousVersion} -> {currentVersion}), " +
-                        "index restore to default tokenizer queued (runs shortly after startup). " +
-                        "User must re-enable it manually to trigger rebuild.");
+                        $"EnhanceChineseSearch upgrade-check: upgraded {previousVersion} -> {currentVersion} " +
+                        "with the same index scheme; option state kept, no rebuild needed.");
                 }
-                else
-                {
-                    Logger.Info($"EnhanceChineseSearch upgrade-check: no disable needed for upgrade {previousVersion} -> {currentVersion}.");
-                }
+
+                WriteVersionMarker();
 
                 WriteVersionMarker();
 

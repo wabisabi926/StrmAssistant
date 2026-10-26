@@ -90,6 +90,9 @@ Task.WhenAll 返回，大批量刮削期间 RSS 持续上涨。
 - **不要裸写 `_ = Task.Run(...)`**，用 `BackgroundTaskRunner.Run(name, body)`：异常会被记录、运行数量可查。
 - **补丁状态不代表功能可用**。`PatchBase` 的 `Applied` 只说明调用了 `Prepare`；底层补丁是否真的打上，
   看 `PatchTracker` 的错误列表与启动日志里的「部分补丁未能应用」告警。
+- **改了中文搜索的分词器 / 归一化规则 / FTS 表结构，必须把 `EnhanceChineseSearch.IndexSchemeVersion` +1**。
+  启动时只在方案号变化时才关闭功能并重建索引；漏了这个号，旧索引会与新代码不匹配，
+  而搜索只会静默出错（不抛异常）。同一方案内的版本升级不会动用户的功能开关。
 
 ## 破坏性操作
 

@@ -48,6 +48,47 @@ namespace StrmAssistant.Mod
 
         public static string CurrentTokenizerName { get; private set; } = "unknown";
 
+        /// <summary>
+        /// 搜索索引方案号。
+        /// <para>
+        /// **改了分词器、归一化规则或 FTS 表结构就必须 +1** —— 旧索引与新代码不匹配时，
+        /// 搜索只会静默出错（不抛异常），靠日志也看不出来。
+        /// </para>
+        /// <para>
+        /// 启动时的自动关闭只看这个号，不看插件版本号：纯 UI / 文案的小版本升级
+        /// 不该把功能关掉。当前值 2 对应 <c>strmassistant_chinese_search_norm2.done</c>。
+        /// </para>
+        /// </summary>
+        public const int IndexSchemeVersion = 2;
+
+        /// <summary>
+        /// 分词器扩展是否可用（文件存在且能识别 / 导出当前架构的版本）。
+        /// <para>
+        /// 启动时用它兜底：索引依赖插件自带的 libsimple，扩展加载不上时
+        /// **每次元数据写入都会整体回滚**，所以宁可关掉功能，也不能带着坏索引继续跑。
+        /// </para>
+        /// </summary>
+        public static bool IsTokenizerAvailable()
+        {
+            try
+            {
+                // 启动兜底可能早于补丁实例构造，这里补一次路径初始化。
+                if (string.IsNullOrEmpty(_tokenizerPath))
+                {
+                    _tokenizerPath = Path.Combine(Plugin.Instance.ApplicationPaths.PluginsPath, "libsimple.so");
+                }
+
+                return EnsureTokenizerExists();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Instance.Logger.Warn(
+                    $"EnhanceChineseSearch: tokenizer availability check failed: {ex.Message}");
+                return false;
+            }
+        }
+
+
         private static string _tokenizerPath;
         private static readonly object _lock = new object();
         private static volatile bool _patchPhase2Initialized;

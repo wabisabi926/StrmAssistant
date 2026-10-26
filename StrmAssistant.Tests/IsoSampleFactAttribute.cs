@@ -24,21 +24,23 @@ namespace StrmAssistant.Tests
 
     internal static class IsoSample
     {
-        private static readonly string[] LegacyCandidates =
-        {
-            @"D:\视频\小号\杜比视界测试：双层 FEL2.iso",
-            @"D:\视频\小号\最近接收\杜比视界测试：双层 FEL2.iso"
-        };
+        /// <summary>
+        /// 内置最小 BD 结构镜像（约 566KB）：真实测试盘的 <c>MPLS</c> / <c>CLPI</c> / <c>index.bdmv</c>
+        /// 加一个占位 <c>m2ts</c>（解析器只要求文件存在，不读内容）。
+        /// 有了它，依赖 ISO 的用例在任意机器（含 CI）都能跑，而不是永远 Skip。
+        /// </summary>
+        private const string FixtureRelativePath = "fixtures/bd-minimal.iso";
 
         static IsoSample()
         {
             var candidates = new List<string>();
 
-            // 优先用环境变量，便于 CI 或其它机器挂载样本
+            // 环境变量优先：本地挂真实盘或 CI 提供真盘时，用它覆盖 fixture 做真盘验证
             var fromEnv = Environment.GetEnvironmentVariable("STRM_ISO_SAMPLE");
             if (!string.IsNullOrWhiteSpace(fromEnv)) candidates.Add(fromEnv);
 
-            candidates.AddRange(LegacyCandidates);
+            // 内置 fixture：随测试输出复制，正常情况一定存在
+            candidates.Add(Path.Combine(AppContext.BaseDirectory, FixtureRelativePath));
 
             foreach (var candidate in candidates)
             {
@@ -58,7 +60,7 @@ namespace StrmAssistant.Tests
             }
 
             UnavailableReason =
-                "未找到可读的 ISO 样本：请设置环境变量 STRM_ISO_SAMPLE 指向一个 ISO 文件";
+                "未找到可读的 ISO 样本：内置 fixture 缺失，且 STRM_ISO_SAMPLE 未指向有效文件";
         }
 
         public static bool IsAvailable { get; }

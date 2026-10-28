@@ -254,14 +254,22 @@ Output: `StrmAssistant/bin/Release/StrmAssistant.merged.dll` — copy it into th
 
 Source and one-click script live in `StrmAssistant/Tokenizer/libsimple-src/` (see its README).
 
+## License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**. See [LICENSE](LICENSE) for the full text.
+
+This project is based on the community edition of [OneManJS/StrmAssistant](https://github.com/OneManJS/StrmAssistant) and its community forks. Modifications are also released under GPL-3.0. Copyright in upstream code belongs to the original authors and community contributors; retain the copyright notices and license text when using, modifying, or redistributing this project.
+
+> GPL-3.0 permits commercial use. If you redistribute this project or a derivative work, you must continue to provide the source under GPL-3.0 and retain the copyright and disclaimer notices.
+
 ## Disclaimer
 
-This is an open-source project not affiliated with, authorized, or endorsed by Emby LLC. It is intended to provide extra enhancements and convenience for users who have legally purchased and installed Emby.
+This is a GPL-3.0 open-source project not affiliated with, authorized, or endorsed by Emby LLC. It is intended to provide extra enhancements and convenience for users who have legally purchased and installed Emby.
 
 ### Terms of Use
 
 1. **Legal use**: This project applies only to users with a legally installed and licensed Emby. Users must comply with Emby's terms of service and license agreement.
-2. **Non-commercial**: This project is free and for personal study, research and non-commercial use only. Commercial use of this project or its derivatives is strictly prohibited.
+2. **Free and licensed**: This project is free of charge and has no paid edition. Use, modification and redistribution are governed by [GPL-3.0](LICENSE); derivative works must also be released under GPL-3.0 with copyright notices retained. The authors do not provide paid commercial support.
 3. **No proprietary Emby components**: This project contains no proprietary Emby components (DLLs, code, icons or other copyrighted assets).
 4. **Feature limits**: This project does not bypass Emby's licensing, DRM, or unlock any paid features.
 5. **User responsibility**: Users are responsible for complying with applicable laws and regulations.

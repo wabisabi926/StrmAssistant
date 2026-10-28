@@ -20,8 +20,8 @@ namespace StrmAssistant.Options
                 },
                 new GenericListItem
                 {
-                    PrimaryText = "非商业用途",
-                    SecondaryText = "本项目完全免费，仅限个人学习、研究和非商业用途。\n严禁将本项目或其衍生版本用于任何商业用途。",
+                    PrimaryText = "开源协议",
+                    SecondaryText = "本项目免费提供，无付费版本，按 GPL-3.0 发布。\n使用、修改和分发请遵循 GPL-3.0；衍生作品须同样以 GPL-3.0 发布并保留版权声明。",
                     Icon = IconNames.label_important,
                     IconMode = ItemListIconMode.SmallRegular,
                     Status = ItemStatus.Succeeded
@@ -75,7 +75,7 @@ namespace StrmAssistant.Options
         public override string EditorTitle => "声明";
 
         public LabelItem Statement { get; set; } = new LabelItem(
-            "本项目为开源项目，与 Emby LLC 没有任何关联，也未获得 Emby LLC 的授权或认可。本项目的目的是为合法购买并安装了 Emby 软件的用户提供额外的功能增强和使用便利。");
+            "本项目为 GPL-3.0 开源项目，与 Emby LLC 没有任何关联，也未获得 Emby LLC 的授权或认可。本项目的目的是为合法购买并安装了 Emby 软件的用户提供额外的功能增强和使用便利。");
 
         public CaptionItem UsageNoticeCaption { get; set; } = new CaptionItem("使用须知");
 

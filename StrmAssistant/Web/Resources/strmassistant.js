@@ -818,35 +818,63 @@ define([
                 }
             }
 
+            // Emby 4.10.2 的 ItemsView 模块 id 是 ListPage（./list/list.js）；
+            // 旧版本使用 components/items/itemsview。按候选顺序探测，避免单一路径 404。
+            const ITEMSVIEW_MODULE_IDS = ['ListPage', 'components/items/itemsview', '../../list/list.js'];
+
+            function resolveItemsViewModule(module) {
+                const candidate = module && (module.default || module);
+                return candidate && candidate.prototype ? candidate : null;
+            }
+
+            function loadItemsView(onLoaded) {
+                let index = 0;
+
+                function attempt() {
+                    if (index >= ITEMSVIEW_MODULE_IDS.length) return;
+
+                    const id = ITEMSVIEW_MODULE_IDS[index++];
+
+                    try {
+                        require([id], function (module) {
+                            const ItemsView = resolveItemsViewModule(module);
+                            if (ItemsView) onLoaded(ItemsView);
+                            else attempt();
+                        }, function () {
+                            attempt();
+                        });
+                    } catch (e) {
+                        attempt();
+                    }
+                }
+
+                attempt();
+            }
+
             function patchSearchMediaInfo() {
                 if (mediaInfoPatched || !cfg().showMediaInfo) return;
 
-                try {
-                    require(['components/items/itemsview'], function (responses) {
-                        const ItemsView = responses && responses[0];
-                        const proto = ItemsView && ItemsView.prototype;
-                        if (!proto || typeof proto.getViewSettings !== 'function' ||
-                            proto.__saSearchMediaPatched) return;
+                loadItemsView(function (ItemsView) {
+                    const proto = ItemsView.prototype;
+                    if (!proto || typeof proto.getViewSettings !== 'function' ||
+                        proto.__saSearchMediaPatched) return;
 
-                        const original = proto.getViewSettings;
-                        proto.getViewSettings = function () {
-                            const settings = original.apply(this, arguments);
-                            try {
-                                const params = this.params;
-                                if (params && params.type === 'search') {
-                                    appendSearchMediaFields(settings, activeSearchTab(this.view));
-                                }
-                            } catch (e) {
-                                // 字段补充失败时保持 Emby 原始设置
+                    const original = proto.getViewSettings;
+                    proto.getViewSettings = function () {
+                        const settings = original.apply(this, arguments);
+                        try {
+                            const params = this.params;
+                            if (params && params.type === 'search') {
+                                appendSearchMediaFields(settings, activeSearchTab(this.view));
                             }
-                            return settings;
-                        };
-                        proto.__saSearchMediaPatched = true;
-                        mediaInfoPatched = true;
-                    });
-                } catch (e) {
-                    // ignore
-                }
+                        } catch (e) {
+                            // 字段补充失败时保持 Emby 原始设置
+                        }
+                        return settings;
+                    };
+                    proto.__saSearchMediaPatched = true;
+                    mediaInfoPatched = true;
+                });
             }
 
             function scanTotalEpisodes() {

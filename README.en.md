@@ -29,8 +29,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 ✅ **Search media info & compatibility (3.0.0.67)**
 - Ratings and container info are back on search results in Emby 4.10.2 (updated frontend module path)
-- Dual-layer Dolby Vision P7 detection now pairs the HDR10 base layer with a half-size enhancement layer, avoiding mismatches when extra video tracks exist
-- HDR Vivid tagging rewritten: stream-level CUVA first, first-frame probe as fallback
+- Dual-layer Dolby Vision P7 detection now pairs the HDR10 base layer with a half-width/half-height enhancement layer, so extra video tracks no longer cause a miss or mismatch
 - Disclaimer is now available in English, Simplified Chinese and Traditional Chinese; licensing aligned with GPL-3.0
 - Brand line now shows Support Emby Server_v4.10.2.0 +
 

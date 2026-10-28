@@ -4464,5 +4464,149 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_Contact_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_Contact_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_DisclaimerCaption_LimitationOfLiability {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_DisclaimerCaption_LimitationOfLiability", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_EditorTitle_Disclaimer {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_EditorTitle_Disclaimer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_FeatureLimits_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_FeatureLimits_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_FeatureLimits_Title {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_FeatureLimits_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_LegalUse_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_LegalUse_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_LegalUse_Title {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_LegalUse_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_Liability_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_Liability_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_License_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_License_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_License_Title {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_License_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_NoProprietaryComponents_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_NoProprietaryComponents_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_NoProprietaryComponents_Title {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_NoProprietaryComponents_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_Statement_Disclaimer {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_Statement_Disclaimer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_UsageNoticeCaption_TermsOfUse {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_UsageNoticeCaption_TermsOfUse", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_UserResponsibility_Description {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_UserResponsibility_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DisclaimerDialog_UserResponsibility_Title {
+            get {
+                return ResourceManager.GetString("DisclaimerDialog_UserResponsibility_Title", resourceCulture);
+            }
+        }
+
     }
 }

@@ -1457,4 +1457,52 @@
   <data name="MediaInfoExtractOptions_Group_MediaInfoStoragePerformance" xml:space="preserve">
     <value>持久化與效能</value>
   </data>
+  <data name="DisclaimerDialog_EditorTitle_Disclaimer" xml:space="preserve">
+    <value>聲明</value>
+  </data>
+  <data name="DisclaimerDialog_Statement_Disclaimer" xml:space="preserve">
+    <value>本專案為 GPL-3.0 開源專案，與 Emby LLC 沒有任何關聯，也未獲得 Emby LLC 的授權或認可。本專案的目的為合法購買並安裝了 Emby 軟體的使用者提供額外的功能增強與使用便利。</value>
+  </data>
+  <data name="DisclaimerDialog_UsageNoticeCaption_TermsOfUse" xml:space="preserve">
+    <value>使用須知</value>
+  </data>
+  <data name="DisclaimerDialog_LegalUse_Title" xml:space="preserve">
+    <value>合法使用</value>
+  </data>
+  <data name="DisclaimerDialog_LegalUse_Description" xml:space="preserve">
+    <value>本專案僅適用於合法安裝和使用 Emby 軟體的使用者。&#10;使用本專案時，使用者需自行確保遵守 Emby 軟體的服務條款和使用授權協議。</value>
+  </data>
+  <data name="DisclaimerDialog_License_Title" xml:space="preserve">
+    <value>開源協議</value>
+  </data>
+  <data name="DisclaimerDialog_License_Description" xml:space="preserve">
+    <value>本專案免費提供，無付費版本，依 GPL-3.0 發布。&#10;使用、修改和分發請遵循 GPL-3.0；衍生作品須同樣以 GPL-3.0 發布並保留版權聲明。</value>
+  </data>
+  <data name="DisclaimerDialog_NoProprietaryComponents_Title" xml:space="preserve">
+    <value>不包含 Emby 專有元件</value>
+  </data>
+  <data name="DisclaimerDialog_NoProprietaryComponents_Description" xml:space="preserve">
+    <value>本專案未包含 Emby 軟體的任何專有元件（例如：DLL 檔案、程式碼、圖示或其他版權資源）。&#10;使用本專案不會直接修改或分發 Emby 軟體本身。</value>
+  </data>
+  <data name="DisclaimerDialog_FeatureLimits_Title" xml:space="preserve">
+    <value>功能限制</value>
+  </data>
+  <data name="DisclaimerDialog_FeatureLimits_Description" xml:space="preserve">
+    <value>本專案不會繞過 Emby 的授權機制、數位版權保護 (DRM)，或以任何方式解鎖其付費功能。&#10;本專案僅在執行時動態注入程式碼，且不會竄改 Emby 軟體的核心功能。</value>
+  </data>
+  <data name="DisclaimerDialog_UserResponsibility_Title" xml:space="preserve">
+    <value>使用者責任</value>
+  </data>
+  <data name="DisclaimerDialog_UserResponsibility_Description" xml:space="preserve">
+    <value>使用者在使用本專案時，需自行承擔遵守相關法律法規的責任。&#10;如果使用者使用本專案違反了 Emby 的服務條款或相關法律法規，本專案開發者概不負責。</value>
+  </data>
+  <data name="DisclaimerDialog_DisclaimerCaption_LimitationOfLiability" xml:space="preserve">
+    <value>免責聲明</value>
+  </data>
+  <data name="DisclaimerDialog_Liability_Description" xml:space="preserve">
+    <value>本專案開發者不對因使用本專案而可能導致的任何直接或間接後果，&#10;包括但不限於資料遺失、軟體故障或法律糾紛負責。</value>
+  </data>
+  <data name="DisclaimerDialog_Contact_Description" xml:space="preserve">
+    <value>如果認為本專案可能侵犯相關方的合法權益，請與開發者取得聯絡。</value>
+  </data>
 </root>

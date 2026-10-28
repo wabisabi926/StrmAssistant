@@ -1544,4 +1544,52 @@
   <data name="MediaInfoExtractOptions_Group_MediaInfoStoragePerformance" xml:space="preserve">
     <value>Persistence &amp; Performance</value>
   </data>
+  <data name="DisclaimerDialog_EditorTitle_Disclaimer" xml:space="preserve">
+    <value>Disclaimer</value>
+  </data>
+  <data name="DisclaimerDialog_Statement_Disclaimer" xml:space="preserve">
+    <value>This project is a GPL-3.0 open-source project not affiliated with, authorized, or endorsed by Emby LLC. It is intended to provide extra enhancements and convenience for users who have legally purchased and installed Emby.</value>
+  </data>
+  <data name="DisclaimerDialog_UsageNoticeCaption_TermsOfUse" xml:space="preserve">
+    <value>Terms of Use</value>
+  </data>
+  <data name="DisclaimerDialog_LegalUse_Title" xml:space="preserve">
+    <value>Legal use</value>
+  </data>
+  <data name="DisclaimerDialog_LegalUse_Description" xml:space="preserve">
+    <value>This project applies only to users with a legally installed and licensed Emby.&#10;Users must ensure they comply with Emby's terms of service and license agreement.</value>
+  </data>
+  <data name="DisclaimerDialog_License_Title" xml:space="preserve">
+    <value>License</value>
+  </data>
+  <data name="DisclaimerDialog_License_Description" xml:space="preserve">
+    <value>This project is free of charge and has no paid edition; it is released under GPL-3.0.&#10;Use, modification and redistribution must follow GPL-3.0; derivative works must also be released under GPL-3.0 with copyright notices retained.</value>
+  </data>
+  <data name="DisclaimerDialog_NoProprietaryComponents_Title" xml:space="preserve">
+    <value>No proprietary Emby components</value>
+  </data>
+  <data name="DisclaimerDialog_NoProprietaryComponents_Description" xml:space="preserve">
+    <value>This project contains no proprietary Emby components (DLLs, code, icons or other copyrighted assets).&#10;Using this project does not directly modify or redistribute Emby itself.</value>
+  </data>
+  <data name="DisclaimerDialog_FeatureLimits_Title" xml:space="preserve">
+    <value>Feature limits</value>
+  </data>
+  <data name="DisclaimerDialog_FeatureLimits_Description" xml:space="preserve">
+    <value>This project does not bypass Emby's licensing, DRM, or unlock any paid features.&#10;It injects code only at runtime and does not alter Emby's core functionality.</value>
+  </data>
+  <data name="DisclaimerDialog_UserResponsibility_Title" xml:space="preserve">
+    <value>User responsibility</value>
+  </data>
+  <data name="DisclaimerDialog_UserResponsibility_Description" xml:space="preserve">
+    <value>Users are responsible for complying with applicable laws and regulations.&#10;The developers are not responsible if use of this project violates Emby's terms of service or applicable laws.</value>
+  </data>
+  <data name="DisclaimerDialog_DisclaimerCaption_LimitationOfLiability" xml:space="preserve">
+    <value>Limitation of Liability</value>
+  </data>
+  <data name="DisclaimerDialog_Liability_Description" xml:space="preserve">
+    <value>The developers are not liable for any direct or indirect consequences arising from the use of this project,&#10;including but not limited to data loss, software failure, or legal disputes.</value>
+  </data>
+  <data name="DisclaimerDialog_Contact_Description" xml:space="preserve">
+    <value>If you believe this project may infringe any rights, please contact the developer.</value>
+  </data>
 </root>

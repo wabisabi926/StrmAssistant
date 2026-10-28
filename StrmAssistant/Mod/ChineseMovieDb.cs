@@ -87,7 +87,7 @@ namespace StrmAssistant.Mod
             var getEpInfo = movieDbProviderBase?.GetMethod("GetEpisodeInfo", BindingFlags.NonPublic | BindingFlags.Instance);
             if (getEpInfo != null) _getEpisodeInfoAsync = AccessTools.AsyncMoveNext(getEpInfo);
 
-            // 版本适配诊断：MovieDb 内部 API 随版本变动（参考实现已适配至 1.9.9.0）。
+            // 版本适配诊断：MovieDb 内部 API 随版本变动（当前适配至 1.9.9.0）。
             // 不做门禁，但必须把“方法缺失”暴露出来，避免补丁静默失效。
             var enhanceOptions = Plugin.Instance.MetadataEnhanceStore.GetOptions();
             var versionTier = enhanceOptions.MovieDbVersionTier;

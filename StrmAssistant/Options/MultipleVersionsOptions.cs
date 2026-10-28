@@ -4,7 +4,7 @@ using StrmAssistant.Properties;
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 多版本美化相关枚举（与 参考实现的 <c>MultipleVersionsOptions</c> 对齐）。
+    /// 多版本美化相关枚举。
     /// 用枚举而非字符串，Emby 的 GenericEdit 才会渲染成下拉框，并通过
     /// <see cref="DescriptionLAttribute"/> 显示本地化标签。
     /// 枚举成员名与旧版本的字符串取值完全一致，因此历史 JSON 配置可原样反序列化。

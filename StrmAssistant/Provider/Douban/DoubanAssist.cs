@@ -133,7 +133,7 @@ namespace StrmAssistant.Provider.Douban
         private const string SparqlUrl = "https://query.wikidata.org/sparql";
         private const string DoubanProviderId = "Douban";
 
-        // 豆瓣开放平台 V2 API（参考实现同构）：配置 DoubanAccessToken 后优先走官方接口，
+        // 豆瓣开放平台 V2 API：配置 DoubanAccessToken 后优先走官方接口，
         // 可绕过网页端风控，且返回结构化 JSON。未配置 Token 时回退到 movie.douban.com 网页刮削。
         private const string DoubanV2BaseUrl = "https://api.douban.com/v2";
         private const string DoubanV2MoviePath = "/movie/{0}";
@@ -274,8 +274,8 @@ namespace StrmAssistant.Provider.Douban
         ///
         /// 豆瓣把每个季拆成独立 subject（如「庆余年 第二季」），剧集条目本身只有一个 ID，
         /// 季条目必须另行解析。若每个季都靠标题搜索，既慢又易错配（不同剧同名季）。
-        /// 这里按剧集缓存映射：同一剧集的季条目直接查表，未命中才搜索并回填。
-        /// 等价 参考实现的 UpdateSeasonMap 思路（按剧集聚合季号集合后批量建立）。
+        /// 这里按剧集缓存映射：同一剧集的季条目直接查表，未命中才搜索并回填；
+        /// 批量建立时按剧集聚合季号集合，减少重复查询。
         /// </summary>
         private Dictionary<string, Dictionary<string, SeasonMapEntry>> _seasons;
 
@@ -713,7 +713,7 @@ namespace StrmAssistant.Provider.Douban
         /// 季刷新完成后调用：按「剧名 第N季」匹配豆瓣季条目（阿拉伯/中文数字各试一次）。
         /// </summary>
         /// <summary>
-        /// 「豆瓣辅助生效范围」= 允许豆瓣改写的字段（与 参考实现的 DoubanAssistScrapeOption 一致）。
+        /// 「豆瓣辅助生效范围」= 允许豆瓣改写的字段。
         /// 空值或旧版库 ID 值（不含任何已知字段名）一律视为「全部」。
         /// </summary>
         private static bool IsScrapeFieldEnabled(StrmAssistant.Options.MetadataEnhanceOptions options,
@@ -742,7 +742,7 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 扫库后补全豆瓣 ID：只处理**缺失 ID** 的条目（等价 参考实现的 TriggerPopulateDoubanIdTask）。
+        /// 扫库后补全豆瓣 ID：只处理**缺失 ID** 的条目。
         /// 已有 ID 的条目跳过——它们的评分刷新由条目事件与 BuildDoubanCacheTask 负责，
         /// 否则每次扫库都要把整库重跑一遍。上次失败的条目会被优先重试。
         /// </summary>

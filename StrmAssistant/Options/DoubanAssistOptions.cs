@@ -12,7 +12,7 @@ using System.ComponentModel;
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 豆瓣辅助可改写的字段（与 参考实现的 DoubanAssistScrapeOption 一致）。
+    /// 豆瓣辅助可改写的字段。
     /// </summary>
     public enum DoubanAssistScrapeOption
     {
@@ -101,7 +101,7 @@ namespace StrmAssistant.Options
 
         public void Initialize()
         {
-            // 豆瓣辅助生效范围 = 字段多选（与 参考实现的 DoubanAssistScrapeOption 一致）
+            // 豆瓣辅助生效范围 = 字段多选
             DoubanAssistScrapeOptionList.Clear();
 
             foreach (Enum item in Enum.GetValues(typeof(DoubanAssistScrapeOption)))

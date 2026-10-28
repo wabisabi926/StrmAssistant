@@ -9,8 +9,8 @@ namespace StrmAssistant.Options
 {
     /// <summary>
     /// 片头片尾探测设置根节点。
-    /// 设置项按功能拆到 3 个分组类：检测与指纹 / 在线刮削 / 播放与跳过
-    /// （与 参考实现的拆分方式一致）。本类只负责声明分组与委派 <c>Initialize()</c>。
+    /// 设置项按功能拆到 3 个分组类：检测与指纹 / 在线刮削 / 播放与跳过。
+    /// 本类只负责声明分组与委派 <c>Initialize()</c>。
     /// 注意：分组的属性名与分组类名不同（避免实例成员遮蔽类型名导致初始化表达式无法解析）。
     /// </summary>
     public class IntroSkipOptions : EditableOptionsBase

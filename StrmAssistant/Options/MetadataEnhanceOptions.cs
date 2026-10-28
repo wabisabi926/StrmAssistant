@@ -86,7 +86,7 @@ namespace StrmAssistant.Options
             Version.TryParse(MovieDbPluginVersion, out var parsed) ? parsed : null;
 
         /// <summary>
-        /// MovieDb 已知适配区间下限（参考实现曾分别适配 1.8.6/.7/.8、1.9.1.0、1.9.2.0、1.9.9.0）。
+        /// MovieDb 已知适配区间下限（已适配 1.8.6/.7/.8、1.9.1.0、1.9.2.0、1.9.9.0）。
         /// 低于该下限时，中文刮削/图像参数补丁可能因内部 API 变动而失效。
         /// </summary>
         [Browsable(false)]

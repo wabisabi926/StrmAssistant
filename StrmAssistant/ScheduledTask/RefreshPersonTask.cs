@@ -135,9 +135,9 @@ namespace StrmAssistant.ScheduledTask
             NoAdult = refreshPersonOptions.Contains(RefreshPersonOption.NoAdult);
             var excludeIfChinese = refreshPersonOptions.Contains(RefreshPersonOption.ExcludeIfChinese);
             var downloadImagesInAdvance = refreshPersonOptions.Contains(RefreshPersonOption.DownloadImagesInAdvance);
-            // 图像刷新精细控制（参考实现同构，二者互斥、优先级 Full > Default > 历史行为）：
+            // 图像刷新精细控制（二者互斥、优先级 Full > Default > 历史行为）：
             // - FullImageRefresh：强制全量刷新人物图像（imageRefreshSkip 恒为 false）
-            // - DefaultImageRefresh：参考实现默认语义——仅在"已有主图且非强制下载/非本地图"时跳过
+            // - DefaultImageRefresh：仅在"已有主图且非强制下载/非本地图"时跳过
             // 二者都未勾选时沿用历史行为（由 FullRefresh/DownloadImagesInAdvance/30 天组合决定）。
             var fullImageRefresh = refreshPersonOptions.Contains(RefreshPersonOption.FullImageRefresh);
             var defaultImageRefresh = refreshPersonOptions.Contains(RefreshPersonOption.DefaultImageRefresh);
@@ -166,7 +166,7 @@ namespace StrmAssistant.ScheduledTask
                         (excludeIfChinese && IsChinese(taskItem.Name) && IsChinese(taskItem.Overview)) ||
                         (!refreshPersonOptions.Contains(RefreshPersonOption.FullRefresh) && IsChinese(taskItem.Name) &&
                          IsChinese(taskItem.Overview) && taskItem.DateLastSaved >= DateTimeOffset.UtcNow.AddDays(-30));
-                    // 图像刷新跳过判定（参考实现同构）：
+                    // 图像刷新跳过判定：
                     // - FullImageRefresh：永不跳过（强制全量刷新图像）
                     // - DefaultImageRefresh：有主图即跳过（除非强制下载且该图为远程图）
                     // - 均未勾选：沿用社区历史行为（有主图即跳过；或 30 天内刷新过且未 FullRefresh/

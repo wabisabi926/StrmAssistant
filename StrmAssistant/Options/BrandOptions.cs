@@ -7,8 +7,8 @@ using System.ComponentModel;
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 品牌信息：组头显示插件名；版本行用 LabelItem（参考实现同款），
-    /// 渲染为区块内全宽文本，不套列表项，因而没有左侧缩进。
+    /// 品牌信息：组头显示插件名；版本行用 LabelItem 渲染为区块内全宽文本，
+    /// 不套列表项，因而没有左侧缩进。
     /// </summary>
     public class BrandOptions : EditableOptionsBase
     {

@@ -10,11 +10,11 @@ using static StrmAssistant.Mod.PatchManager;
 namespace StrmAssistant.Mod
 {
     /// <summary>
-    /// 强制用户显示偏好（参考实现的 <c>EnforceUserPreferences</c> 的 <c>SeriesDisplay</c> 分支）：
+    /// 强制用户显示偏好（<c>SeriesDisplay</c> 分支）：
     /// 把「首位管理员」的季集显示样式（Emby DisplayPreferences 自定义项 <c>seriesDisplay</c>）
     /// 强制应用到其他用户。
     ///
-    /// 与参考实现同源的两个挂钩点（均在 <c>Emby.Server.Implementations.Library.UserManager</c>）：
+    /// 两个挂钩点（均在 <c>Emby.Server.Implementations.Library.UserManager</c>）：
     ///   1. <c>UpdatePartialUserSettings(long userId, Dictionary&lt;string,string&gt; values)</c> 前缀：
     ///      当首位管理员保存偏好时，捕获其 <c>seriesDisplay</c> 值。
     ///   2. <c>GetUserSettings(long userId, CancellationToken)</c> 后缀：

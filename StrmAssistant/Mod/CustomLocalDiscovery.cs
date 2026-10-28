@@ -8,7 +8,7 @@ using static StrmAssistant.Mod.PatchManager;
 namespace StrmAssistant.Mod
 {
     /// <summary>
-    /// 自定义本地发现地址（参考实现的 <c>NetworkOptions.LocalDiscoveryUrl</c>）。
+    /// 自定义本地发现地址（<c>NetworkOptions.LocalDiscoveryUrl</c>）。
     ///
     /// 局域网客户端通过 Emby 的 UDP 发现协议（「who is EmbyServer?」）获取服务器地址；
     /// 当部署在反向代理之后时，希望发现响应返回代理地址而不是内网直连地址。

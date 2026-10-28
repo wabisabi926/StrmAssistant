@@ -53,7 +53,7 @@ namespace StrmAssistant.Options
         [Browsable(false)]
         public string ImageCaptureExcludeMediaContainers { get; set; } = string.Empty;
 
-        /// <summary>截图后处理模式（对齐 参考实现的 ImageCapturePostProcess）。</summary>
+        /// <summary>截图后处理模式。</summary>
         public enum ImageCapturePostProcess
         {
             [DescriptionL("ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9", typeof(Resources))]

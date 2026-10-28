@@ -63,7 +63,7 @@ namespace StrmAssistant.Common
 
         /// <summary>
         /// 判断是否为默认季名（未刮削出真实季名）：如 "Season 1" / "第 1 季" / "シーズン1"。
-        /// 对应参考实现 <c>MetadataRefreshRule.DefaultSeasonName</c> 的判定。
+        /// 三种语言的任一正则命中即视为默认季名。
         /// </summary>
         public static bool IsDefaultSeasonName(string input) =>
             IsDefaultEnglishSeasonName(input) || IsDefaultChineseSeasonName(input) || IsDefaultJapaneseSeasonName(input);
@@ -74,7 +74,7 @@ namespace StrmAssistant.Common
         }
 
         /// <summary>
-        /// 中文搜索变体归一化（参考实现 <c>MixedChineseVariants</c> 的社区等价实现）：
+        /// 中文搜索变体归一化：
         /// 在全角/半角、繁简之外，额外处理常见空格与标点变体，使搜索词的字符变体互通。
         /// 纯字符级归一化，无外部词表依赖。
         /// </summary>

@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 人物刷新方式（可多选）。与 参考实现的 <c>RefreshPersonOption</c> 对应。
+    /// 人物刷新方式（可多选）。
     /// </summary>
     public enum RefreshPersonOption
     {

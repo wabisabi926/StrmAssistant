@@ -1709,7 +1709,7 @@ namespace StrmAssistant.Mod
                     }
                 }
 
-                // DigitsAsTmdbId（参考实现同构）：纯数字搜索词直接当作 TMDB ID 精确匹配。
+                // DigitsAsTmdbId：纯数字搜索词直接当作 TMDB ID 精确匹配。
                 // 仅当已开启该开关、且前面的 provider 前缀匹配未命中时生效；匹配后不再走分词查询。
                 if (!string.IsNullOrEmpty(query.SearchTerm) &&
                     Plugin.Instance.MainOptionsStore.GetOptions().ChineseSearch.DigitsAsTmdbId)

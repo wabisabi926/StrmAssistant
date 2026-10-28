@@ -152,7 +152,7 @@ namespace StrmAssistant.Mod
                     var bytes = LocalMetadataCache.ReadAll(response.Content);
                     if (bytes is { Length: > 0 })
                     {
-                        // 先打补丁，再把最终结果存入被动缓存（与参考实现语义一致）
+                        // 先应用合并补丁，再把最终结果存入被动缓存
                         bytes = LocalMetadataCache.ApplyPatches(entry, bytes);
                         LocalMetadataCache.WritePassive(entry, bytes);
                         // 原流已被读空，返回一个新的可读流供调用方反序列化

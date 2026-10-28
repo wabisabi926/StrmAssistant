@@ -786,9 +786,37 @@ define([
                     c.reverseLogLines || c.blockSearchRecommend || c.showMediaInfo;
             }
 
-            // ShowMediaInfo：在搜索结果页，按当前搜索 tab 类型为结果项追加显示字段
-            // （评分 / 容器格式等），使搜索结果直接呈现媒体信息。包裹 ItemsView.getViewSettingDefaults。
+            // ShowMediaInfo：搜索结果按当前 tab 追加媒体字段。
+            //
+            // 独立实现：在 ListController.getViewSettings() 出口统一补字段。
+            // Emby 的 getBaseQuery() 与卡片渲染都会读这个结果，因此请求的 Fields
+            // 和最终展示保持一致；不修改 ItemsView.getViewSettingDefaults()。
+            //
+            // tab -> 追加字段：评分类用于影视/季，容器格式用于可出现单集/视频的 tab。
+            const SEARCH_MEDIA_FIELDS = {
+                Movie: ['Container', 'CommunityRating', 'CriticRating'],
+                Series: ['CommunityRating', 'CriticRating'],
+                Season: ['CommunityRating', 'CriticRating'],
+                Episode: ['Container'],
+                Video: ['Container']
+            };
+
             let mediaInfoPatched = false;
+
+            function activeSearchTab(view) {
+                const tab = view && view.querySelector('.emby-searchable-tab-button.emby-tab-button-active');
+                return tab ? tab.getAttribute('data-searchtype') : null;
+            }
+
+            function appendSearchMediaFields(settings, tab) {
+                const extra = SEARCH_MEDIA_FIELDS[tab];
+                if (!extra || !settings) return;
+
+                const fields = Array.isArray(settings.fields) ? settings.fields : (settings.fields = []);
+                for (let i = 0; i < extra.length; i++) {
+                    if (fields.indexOf(extra[i]) < 0) fields.push(extra[i]);
+                }
+            }
 
             function patchSearchMediaInfo() {
                 if (mediaInfoPatched || !cfg().showMediaInfo) return;
@@ -797,39 +825,23 @@ define([
                     require(['components/items/itemsview'], function (responses) {
                         const ItemsView = responses && responses[0];
                         const proto = ItemsView && ItemsView.prototype;
-                        if (!proto || !proto.getViewSettingDefaults || proto.__saMediaInfoPatched) return;
+                        if (!proto || typeof proto.getViewSettings !== 'function' ||
+                            proto.__saSearchMediaPatched) return;
 
-                        const original = proto.getViewSettingDefaults;
-                        proto.getViewSettingDefaults = function () {
-                            let result;
+                        const original = proto.getViewSettings;
+                        proto.getViewSettings = function () {
+                            const settings = original.apply(this, arguments);
                             try {
-                                result = original.apply(this, arguments);
                                 const params = this.params;
-                                if (!params || params.type !== 'search') return result;
-
-                                const view = this.view;
-                                const tabEl = view && view.querySelector(
-                                    '.emby-searchable-tab-button.emby-tab-button-active');
-                                const tab = tabEl ? tabEl.getAttribute('data-searchtype') : null;
-                                if (!tab) return result;
-
-                                if (!Array.isArray(result.fields)) result.fields = [];
-                                const fields = result.fields;
-
-                                if (tab === 'Movie' || tab === 'Series' || tab === 'Season') {
-                                    if (fields.indexOf('CommunityRating') < 0) {
-                                        fields.push('CommunityRating', 'CriticRating');
-                                    }
+                                if (params && params.type === 'search') {
+                                    appendSearchMediaFields(settings, activeSearchTab(this.view));
                                 }
-                                if (tab === 'Movie' || tab === 'Episode' || tab === 'Video') {
-                                    if (fields.indexOf('Container') < 0) fields.push('Container');
-                                }
-                                return result;
                             } catch (e) {
-                                return result;
+                                // 字段补充失败时保持 Emby 原始设置
                             }
+                            return settings;
                         };
-                        proto.__saMediaInfoPatched = true;
+                        proto.__saSearchMediaPatched = true;
                         mediaInfoPatched = true;
                     });
                 } catch (e) {

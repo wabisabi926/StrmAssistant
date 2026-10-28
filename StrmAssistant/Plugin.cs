@@ -1026,9 +1026,9 @@ namespace StrmAssistant
         public const string MinRequiredEmbyVersion = "4.9.1.0";
 
         /// <summary>
-        /// 品牌区「Support x.x.x.x +」对外展示的基准版本（与准入检查解耦）。
+        /// 品牌区「Emby Server_vx.x.x.x +」对外展示的基准版本（与准入检查解耦）。
         /// </summary>
-        public const string AdvertisedEmbyVersion = "4.10.1.0";
+        public const string AdvertisedEmbyVersion = "4.10.2.0";
 
         public sealed override string Name => "StrmAssistantPlus";
 

@@ -2,10 +2,10 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <!-- 版本号与 Releases 仓库的 tag 体系保持一致（v3.0.0.x），显示为 3.0.0.65 -->
-    <AssemblyVersion>3.0.0.66</AssemblyVersion>
-    <FileVersion>3.0.0.66</FileVersion>
-    <Version>3.0.0.66</Version>
-    <InformationalVersion>3.0.0.66</InformationalVersion>
+    <AssemblyVersion>3.0.0.67</AssemblyVersion>
+    <FileVersion>3.0.0.67</FileVersion>
+    <Version>3.0.0.67</Version>
+    <InformationalVersion>3.0.0.67</InformationalVersion>
     <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <LangVersion>latest</LangVersion>

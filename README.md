@@ -16,16 +16,23 @@
 
 | 项目 | 说明 |
 |---|---|
-| 插件版本 | **3.0.0.66** |
+| 插件版本 | **3.0.0.67** |
 | 最低 Emby 版本 | 4.9.1.0 |
-| 适配展示版本 | 4.10.1.0+ |
-| 实测版本 | 4.10.1.0 |
+| 适配展示版本 | 4.10.2.0+ |
+| 实测版本 | 4.10.2.0 |
 | 目标框架 | .NET 6.0 |
 | 架构 | x64 / ARM64（全部功能） |
 
 > 各版本详细变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 最新优化 (v3.0.0.58 ~ v3.0.0.66)
+## 最新优化 (v3.0.0.58 ~ v3.0.0.67)
+
+✅ **搜索结果媒体信息与兼容性（3.0.0.67）**
+- 搜索结果页的评分/容器信息在 Emby 4.10.2 上恢复显示：适配新版前端模块路径
+- 双层杜比 Vision P7 识别改为「HDR10 基础层 + 半尺寸增强层」配对，有画中画/花絮轨时不再配错
+- HDR Vivid 标注重写：优先读流级 CUVA，流级没有时补探首帧
+- 免责声明支持中英繁三语；授权协议统一为 GPL-3.0
+- 品牌行改为显示 Emby Server_v4.10.2.0 +
 
 ✅ **中文搜索与 ISO 挂载的可靠性（3.0.0.66）**
 - 中文搜索不再因纯文案升级被自动关闭：改为按「索引方案号」判断，只有分词器/索引结构真变了才关闭并重建
@@ -222,7 +229,8 @@
 
 | Emby 版本 | 兼容状态 | 备注 |
 |---|---|---|
-| 4.10.1.x | ✅ 完全支持 | 当前适配与实测版本 |
+| 4.10.2.x | ✅ 完全支持 | 当前适配与实测版本 |
+| 4.10.1.x | ✅ 完全支持 | 已实测（旧基线） |
 | 4.10.0.x | ✅ 完全支持 | 已在 x64 实测（全部模块 Harmony + 中文搜索增强） |
 | 4.9.1.90+ | ✅ 完全支持 | 推荐版本，性能最优 |
 | 4.9.1.0–89 | ✅ 支持 | 部分功能可能降级 |
@@ -239,10 +247,10 @@
 
 CI 支持两种触发方式：
 
-- **推送标签自动构建**：`git push origin v3.0.0.66` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
+- **推送标签自动构建**：`git push origin v3.0.0.67` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
 - **手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.66`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.67`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
 
 > 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 

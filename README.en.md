@@ -16,16 +16,23 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.65** |
+| Plugin Version | **3.0.0.67** |
 | Minimum Emby Version | 4.9.1.0 |
-| Advertised Version | 4.10.1.0+ |
-| Tested On | 4.10.1.0 |
+| Advertised Version | 4.10.2.0+ |
+| Tested On | 4.10.2.0 |
 | Target Framework | .NET 6.0 |
 | Architecture | x64 / ARM64 (all features) |
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.58 ~ v3.0.0.65)
+## Latest Optimizations (v3.0.0.58 ~ v3.0.0.67)
+
+✅ **Search media info & compatibility (3.0.0.67)**
+- Ratings and container info are back on search results in Emby 4.10.2 (updated frontend module path)
+- Dual-layer Dolby Vision P7 detection now pairs the HDR10 base layer with a half-size enhancement layer, avoiding mismatches when extra video tracks exist
+- HDR Vivid tagging rewritten: stream-level CUVA first, first-frame probe as fallback
+- Disclaimer is now available in English, Simplified Chinese and Traditional Chinese; licensing aligned with GPL-3.0
+- Brand line now shows Emby Server_v4.10.2.0 +
 
 ✅ **Delete preview + observable background work (3.0.0.65)**
 - New delete preview: before deleting a whole-season version, see exactly which files would go and which candidates are skipped as ambiguous
@@ -215,7 +222,8 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 | Emby Version | Status | Notes |
 |---|---|---|
-| 4.10.1.x | ✅ Full | Current target and tested version |
+| 4.10.2.x | ✅ Full | Current target and tested version |
+| 4.10.1.x | ✅ Full | Tested (previous baseline) |
 | 4.10.0.x | ✅ Full | Tested on x64 (all modules Harmony + Chinese search) |
 | 4.9.1.90+ | ✅ Full | Recommended, best performance |
 | 4.9.1.0–89 | ✅ Supported | Some features may degrade |
@@ -232,10 +240,10 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 CI can be triggered two ways:
 
-- **Automatic on tag push**: `git push origin v3.0.0.65` builds and publishes that version (the tag name is validated against the project version)
+- **Automatic on tag push**: `git push origin v3.0.0.67` builds and publishes that version (the tag name is validated against the project version)
 - **Manually**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`
 
-When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.65`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
+When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.67`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
 
 > Always use the filename `StrmAssistantPlus.dll`. If an older copy such as `StrmAssistant.dll` is still in the plugins folder, delete it — Emby loads both and you end up with a duplicate plugin.
 

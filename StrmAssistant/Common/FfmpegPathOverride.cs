@@ -12,7 +12,7 @@ namespace StrmAssistant.Common
     /// 自定义 ffmpeg/ffprobe 路径覆盖：把 Emby 全局 FfmpegConfiguration 的
     /// ProbePath / EncoderPath 底层字段替换为用户指定二进制（静态编译版、
     /// rffmpeg 包装器等），用于解决 DV P5 截图发绿、ISO/bluray 协议支持等问题。
-    /// 参考自检日志范式：运行 -version 并输出关键能力行。
+    /// 自检日志：运行 -version 并输出关键能力行。
     /// </summary>
     public static class FfmpegPathOverride
     {
@@ -141,6 +141,27 @@ namespace StrmAssistant.Common
         }
 
         /// <summary>
+        /// 从 <c>ffprobe -version</c> / <c>ffmpeg -version</c> 的输出判断是否编译了 bluray 输入协议。
+        /// ffmpeg 的 configuration 行会包含 <c>--enable-libbluray</c>；只认带 <c>--enable</c> 的行，
+        /// 避免把运行日志里偶然出现的库名当成能力声明。
+        /// </summary>
+        internal static bool VersionOutputIndicatesBlurayInput(string output)
+        {
+            if (string.IsNullOrEmpty(output)) return false;
+
+            foreach (var line in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (line.IndexOf("--enable", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    line.IndexOf("libbluray", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// 自检：执行 -version 并把协议/能力相关输出写入日志，便于诊断 bluray/smb/chromaprint 支持。
         /// 同时把 bluray 能力缓存到 <see cref="ProbeSupportsBluray"/> / <see cref="EncoderSupportsBluray"/>。
         /// </summary>
@@ -175,7 +196,7 @@ namespace StrmAssistant.Common
                         .ToList();
 
                     // 关键：探测 bluray 输入协议能力（--enable-libbluray）并缓存
-                    var supportsBluray = features.Any(l => l.IndexOf("libbluray", StringComparison.OrdinalIgnoreCase) >= 0);
+                    var supportsBluray = VersionOutputIndicatesBlurayInput(output);
                     if (isProbe) ProbeSupportsBluray = supportsBluray;
                     else EncoderSupportsBluray = supportsBluray;
 

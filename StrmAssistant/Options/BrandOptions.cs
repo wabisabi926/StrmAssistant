@@ -18,6 +18,6 @@ namespace StrmAssistant.Options
         [DisplayName("")]
         public LabelItem PluginVersion => new LabelItem(
             "版本：v" + AboutOptions.GetVersion() +
-            " 💎 Emby Server_v" + Plugin.AdvertisedEmbyVersion + " +");
+            " 💎 Support Emby Server_v" + Plugin.AdvertisedEmbyVersion + " +");
     }
 }

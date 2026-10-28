@@ -32,7 +32,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - Dual-layer Dolby Vision P7 detection now pairs the HDR10 base layer with a half-size enhancement layer, avoiding mismatches when extra video tracks exist
 - HDR Vivid tagging rewritten: stream-level CUVA first, first-frame probe as fallback
 - Disclaimer is now available in English, Simplified Chinese and Traditional Chinese; licensing aligned with GPL-3.0
-- Brand line now shows Emby Server_v4.10.2.0 +
+- Brand line now shows Support Emby Server_v4.10.2.0 +
 
 ✅ **Delete preview + observable background work (3.0.0.65)**
 - New delete preview: before deleting a whole-season version, see exactly which files would go and which candidates are skipped as ambiguous

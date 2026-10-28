@@ -42,7 +42,7 @@ dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj -c Release
 
 - [ ] `dotnet build` **0 警告 0 错误**
 - [ ] 构建输出 `[OK] resx keys consistent`
-- [ ] `dotnet test` 全绿（当前基线：234 通过 / 0 跳过）
+- [ ] `dotnet test` 全绿（当前基线：235 通过 / 0 跳过）
 - [ ] 涉及 Emby 内部行为的改动，在真机上验证过，并把日志原文贴进提交信息
 - [ ] 新增选项同步了三语 resx（Designer 会自动补）
 

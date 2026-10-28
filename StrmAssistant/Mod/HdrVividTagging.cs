@@ -1,4 +1,4 @@
-﻿using Emby.Media.Model.ProbeModel;
+using Emby.Media.Model.ProbeModel;
 using HarmonyLib;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.MediaInfo;
@@ -8,28 +8,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using static StrmAssistant.Mod.PatchManager;
 
 namespace StrmAssistant.Mod
 {
     /// <summary>
-    /// HDR Vivid 标注 —— 对齐 参考实现的「探测 CUVA side_data → 落库 Comment → 覆写显示」三段链路。
+    /// HDR Vivid 标注。
     ///
-    /// ① 探测：挂 <c>ProbeResultNormalizer.GetMediaInfo</c> 的 Postfix，读取 ffprobe 原始
-    ///    <c>ProbeResult.streams</c> 中视频流的 <c>side_data_list</c>；命中 CUVA HDR Vivid 动态元数据
-    ///    （side_data_type 含 "CUVA"）即把对应 <see cref="MediaStream.Comment"/> 写为 "HDR Vivid"。
-    ///    ffprobe 5.1 打出的完整标签是 "HDR Dynamic Metadata CUVA 005.1 2021 (Vivid)"。
-    /// ② 覆写显示：<b>必须挂 <see cref="MediaStream.VideoRange"/> 的 getter</b>。
-    ///    Emby 4.10 的 getter IL 是 <c>ldarg.0; ldc.i4.0; call GenerateVideoRange</c> —— 传的是
-    ///    <c>isForDisplay=false</c>，所以只挂 <c>GenerateVideoRange</c> 且判断 isForDisplay 的写法
-    ///    永远不会生效（参考实现也是这么写的，同样打不中）。这里改为直接覆写属性返回值。
-    ///
-    /// 为什么必须自建探测：Emby 的 <c>VideoRange</c> 是计算属性，只依据 <c>ExtendedVideoType</c>
-    /// （仅有 None/Hdr10/Hdr10Plus/HyperLogGamma/DolbyVision），不含 Vivid；CUVA side_data 属未知类型，
-    /// Emby 不会写进任何可读字段。实测 library.db 的 MediaStreams2 表存在 Comment 列、且不存在
-    /// VideoRange 列（VideoRange 不落库、每次读时重算），因此 <c>Comment</c> 是本仓唯一可持久化的落库载体。
+    /// Emby 的 <see cref="MediaStream.ExtendedVideoType"/> 没有 Vivid 取值，ffprobe 也会把
+    /// CUVA 动态元数据归为未知 side_data，所以插件需要自己完成三件事：
+    /// 1. 探测：读取 ffprobe 的 side_data 判断是否含 CUVA；流级没有时再补探首帧。
+    /// 2. 落库：把命中的视频流 <see cref="MediaStream.Comment"/> 写为 "HDR Vivid"，
+    ///    这是 MediaStreams2 表里可持久化、且不会被 Emby 重算覆盖的载体。
+    /// 3. 显示：Emby 的 <see cref="MediaStream.VideoRange"/> 是计算属性，
+    ///    只依据 ExtendedVideoType，不会返回 Vivid；因此在 getter 上覆写返回值。
     ///
     /// 安全性：
     /// - 只在命中 CUVA 时改写 <c>MediaStream.Comment</c>（Emby 定义为可写），未命中一律不动。
@@ -58,6 +51,13 @@ namespace StrmAssistant.Mod
         private static MethodInfo _generateVideoRange;
         private static MethodInfo _videoRangeGetter;
 
+        private enum CuvaEvidence
+        {
+            None,
+            StreamSideData,
+            FrameProbe
+        }
+
         public HdrVividTagging()
         {
             Initialize();
@@ -84,8 +84,6 @@ namespace StrmAssistant.Mod
                 _generateVideoRange = typeof(MediaStream).GetMethod("GenerateVideoRange",
                     BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(bool) }, null);
 
-                // 真正的显示出口：Emby 的 VideoRange 是纯计算属性（无 setter、不落库），
-                // 且内部调用 GenerateVideoRange(false)，只能直接覆写 getter 的返回值。
                 _videoRangeGetter = typeof(MediaStream)
                     .GetProperty("VideoRange", BindingFlags.Instance | BindingFlags.Public)?.GetGetMethod();
 
@@ -134,25 +132,17 @@ namespace StrmAssistant.Mod
 
                 foreach (var probe in data.streams)
                 {
-                    if (!string.Equals(probe?.codec_type, VideoCodecType, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!IsVideoProbe(probe)) continue;
 
                     var stream = FindVideoStream(__result.MediaStreams, probe.index);
-                    if (stream == null) continue;
+                    if (stream == null || IsAlreadyTagged(stream)) continue;
 
-                    // ① 快路径：Emby 的 stream 级 side_data（部分封装/ffprobe 会带）
-                    var vivid = HasVividSideData(probe.side_data_list);
-
-                    // ② 补探：CUVA 属动态元数据，ffprobe 只在**帧级** side_data 里输出
-                    //    （实测 ffprobe 5.1 与 9.0.2 的 -show_streams 均为 0 条），
-                    //    所以 HDR 片源要再读一帧确认。结果按目标缓存，每条目只探一次。
-                    if (!vivid) vivid = TryFrameProbe(data, probe, stream);
-
-                    if (!vivid) continue;
-                    if (string.Equals(stream.Comment, VividLabel, StringComparison.Ordinal)) continue;
+                    var evidence = FindCuvaEvidence(data, probe, stream);
+                    if (evidence == CuvaEvidence.None) continue;
 
                     stream.Comment = VividLabel;
                     Plugin.Instance.Logger.Info(
-                        $"HdrVividTagging - HDR Vivid tagged (probe index={probe.index}, stream-level={HasVividSideData(probe.side_data_list)})");
+                        $"HdrVividTagging - HDR Vivid tagged (probe index={probe.index}, evidence={evidence})");
                 }
             }
             catch (Exception ex)
@@ -162,22 +152,26 @@ namespace StrmAssistant.Mod
         }
 
         /// <summary>
-        /// 只在 HDR 片源上补探，避免给 SDR 条目平白多跑一次 ffprobe。
-        /// 目标取 ffprobe 实际读的地址（<c>ProbeResult.format.filename</c>），strm 已由 Emby 解析过。
+        /// 判定 CUVA 证据：优先读流级 side_data；流级为空时，仅对 Emby 已识别为 HDR 的流
+        /// 补探首帧，避免给 SDR 条目平白多跑一次 ffprobe。
         /// </summary>
-        private static bool TryFrameProbe(ProbeResult data, ProbeStream probe, MediaStream stream)
+        private static CuvaEvidence FindCuvaEvidence(ProbeResult data, ProbeStream probe, MediaStream stream)
         {
-            if (stream.ExtendedVideoType == ExtendedVideoTypes.None) return false;
+            if (ContainsCuvaSideData(probe.side_data_list)) return CuvaEvidence.StreamSideData;
+
+            if (stream.ExtendedVideoType == ExtendedVideoTypes.None) return CuvaEvidence.None;
 
             var target = data?.format?.filename;
-            if (string.IsNullOrWhiteSpace(target)) return false;
+            if (string.IsNullOrWhiteSpace(target)) return CuvaEvidence.None;
 
-            return HasVividByFrameProbe(target, probe.index);
+            return HasVividByFrameProbe(target, probe.index)
+                ? CuvaEvidence.FrameProbe
+                : CuvaEvidence.None;
         }
 
         /// <summary>
         /// 读首帧的 side_data 判断是否 CUVA。带超时与按目标缓存：
-        /// 单次约 1.6 秒（与原有探测同量级），每个条目在进程生命周期内只探一次。
+        /// 单次约 1.6 秒，每个条目在进程生命周期内只探一次。
         /// </summary>
         private static bool HasVividByFrameProbe(string target, int? probeIndex)
         {
@@ -234,9 +228,32 @@ namespace StrmAssistant.Mod
         /// <summary>
         /// ffprobe 输出里是否出现 CUVA 标记。抽成纯函数便于单测。
         /// </summary>
-        internal static bool OutputMentionsCuva(string probeOutput) =>
-            !string.IsNullOrEmpty(probeOutput) &&
-            probeOutput.IndexOf(CuvaMarker, StringComparison.OrdinalIgnoreCase) >= 0;
+        internal static bool OutputMentionsCuva(string probeOutput)
+        {
+            return !string.IsNullOrEmpty(probeOutput) &&
+                   probeOutput.IndexOf(CuvaMarker, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// CUVA 005.1 即 HDR Vivid 的动态元数据；ffprobe 将其归为未知 side_data，
+        /// side_data_type 形如 "HDR Dynamic Metadata CUVA 005.1 2021 (Vivid)"。
+        /// 用 "CUVA" 子串匹配以兼容不同 ffprobe 版本的后缀差异。
+        /// </summary>
+        internal static bool ContainsCuvaSideData(IEnumerable<ProbeSideData> sideData)
+        {
+            if (sideData == null) return false;
+
+            foreach (var item in sideData)
+            {
+                var type = item?.side_data_type;
+                if (type != null && type.IndexOf(CuvaMarker, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>优先用用户自定义 ffprobe（可能带新特性），否则用 Emby 当前的。</summary>
         private static string ResolveProbePath()
@@ -264,7 +281,7 @@ namespace StrmAssistant.Mod
             try
             {
                 if (__instance?.Type != MediaStreamType.Video) return;
-                if (!string.Equals(__instance.Comment, VividLabel, StringComparison.Ordinal)) return;
+                if (!IsAlreadyTagged(__instance)) return;
 
                 __result = VividLabel;
             }
@@ -275,9 +292,9 @@ namespace StrmAssistant.Mod
         }
 
         /// <summary>
-        /// 兼容入口：某些调用方直接调 <c>GenerateVideoRange(isForDisplay:true)</c>（不经过 VideoRange 属性）。
-        /// 注意 Emby 的 <c>VideoRange</c> getter 传的是 <b>false</b>，所以这条补丁打不中属性路径，
-        /// 真正生效的是 <see cref="VideoRangePostfix"/>。
+        /// 兼容直接调用 <c>GenerateVideoRange(isForDisplay:true)</c> 的路径。
+        /// 注意 Emby 的 <c>VideoRange</c> getter 传的是 <b>false</b>，所以属性路径由
+        /// <see cref="VideoRangePostfix"/> 负责；这里只覆盖显式要求显示值的调用方。
         /// </summary>
         [HarmonyPostfix]
         private static void GenerateVideoRangePostfix(MediaStream __instance, bool isForDisplay, ref string __result)
@@ -285,11 +302,9 @@ namespace StrmAssistant.Mod
             try
             {
                 if (!isForDisplay || __instance?.Type != MediaStreamType.Video) return;
+                if (!IsAlreadyTagged(__instance)) return;
 
-                if (string.Equals(__instance.Comment, VividLabel, StringComparison.Ordinal))
-                {
-                    __result = VividLabel;
-                }
+                __result = VividLabel;
             }
             catch (Exception ex)
             {
@@ -297,33 +312,34 @@ namespace StrmAssistant.Mod
             }
         }
 
-        /// <summary>
-        /// CUVA 005.1 即 HDR Vivid 的动态元数据；ffprobe 将其归为未知 side_data，
-        /// side_data_type 形如 "HDR Dynamic Metadata CUVA 005.1 2021 (Vivid)"。
-        /// 用 "CUVA" 子串匹配以兼容不同 ffprobe 版本的后缀差异。
-        /// </summary>
-        private static bool HasVividSideData(ProbeSideDataList sideData)
+        private static bool IsVideoProbe(ProbeStream probe)
         {
-            return sideData != null &&
-                   sideData.Any(sd => sd?.side_data_type != null &&
-                                      sd.side_data_type.IndexOf(CuvaMarker, StringComparison.OrdinalIgnoreCase) >= 0);
+            return string.Equals(probe?.codec_type, VideoCodecType, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsAlreadyTagged(MediaStream stream)
+        {
+            return string.Equals(stream?.Comment, VividLabel, StringComparison.Ordinal);
         }
 
         /// <summary>
         /// 按 ffprobe 流序号定位对应的视频 <see cref="MediaStream"/>；序号缺失时回退为首路视频流。
         /// </summary>
-        private static MediaStream FindVideoStream(IEnumerable<MediaStream> streams, int? probeIndex)
+        internal static MediaStream FindVideoStream(IEnumerable<MediaStream> streams, int? probeIndex)
         {
-            var videos = streams.Where(s => s != null && s.Type == MediaStreamType.Video).ToList();
-            if (videos.Count == 0) return null;
+            if (streams == null) return null;
 
-            if (probeIndex.HasValue)
+            MediaStream firstVideo = null;
+
+            foreach (var stream in streams)
             {
-                var match = videos.FirstOrDefault(v => v.Index == probeIndex.Value);
-                if (match != null) return match;
+                if (stream == null || stream.Type != MediaStreamType.Video) continue;
+
+                if (probeIndex.HasValue && stream.Index == probeIndex.Value) return stream;
+                if (firstVideo == null) firstVideo = stream;
             }
 
-            return videos[0];
+            return firstVideo;
         }
     }
 }

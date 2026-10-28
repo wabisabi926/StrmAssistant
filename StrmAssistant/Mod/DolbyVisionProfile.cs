@@ -11,19 +11,19 @@ namespace StrmAssistant.Mod
     /// <summary>
     /// 双层杜比 Vision Profile 7 标注（Wiki「提取 ISO 媒体信息」第 3 条）。
     ///
-    /// 挂点与 参考实现的 MonoMod 补丁同源：<c>ProbeResultNormalizer.GetMediaInfo</c> 是 Emby 把
-    /// ffprobe 原始输出归一化为 <see cref="MediaInfo"/>（继承 <c>MediaSourceInfo</c>）的位置，
-    /// 此处对该结果做 Postfix，写回媒体流标注。
+    /// 为什么挂 <c>ProbeResultNormalizer.GetMediaInfo</c>：这是 Emby 把 ffprobe 原始输出
+    /// 归一化为 <see cref="MediaInfo"/>（继承 <c>MediaSourceInfo</c>）的出口，此时
+    /// <c>MediaStreams</c> 已就绪，适合做一次只读的几何判定。
     ///
-    /// 命中条件见 <see cref="DvProfileDetector"/>（面积前二 + 均 hevc + BL 为 Hdr10 + 宽高各 2 倍）。
-    /// 命中后把**增强层（面积较小者）**写为 Dolby Vision Profile 7 —— 与 参考实现的写入目标流一致，
-    /// 也与 Wiki「显示增强层」的表述一致。
+    /// 命中条件见 <see cref="DvProfileDetector"/>：HDR10 HEVC 基础层 + 半宽半高的 HEVC 增强层。
+    /// 命中后把**增强层**写为 Dolby Vision Profile 7 —— 与 Emby 对双层 DV 的展示语义一致：
+    /// 基础层保持 HDR10，增强层承载 DV 标记。
     ///
     /// 安全性：
     /// - 只写 <c>MediaStream.ExtendedVideoType / ExtendedVideoSubType</c>（Emby 定义为可写）；
     ///   <c>VideoRange</c>、<c>ExtendedVideoSubTypeDescription</c> 只读，不动。
     /// - **不改** <c>MediaSourceInfo.Path</c>，播放路径与条目身份不受影响。
-    /// - 未命中（单层 / 非 hevc / 非 HDR10 基础层 / 非 2 倍几何）一律不改，行为与原来完全一致。
+    /// - 未命中（单层 / 非 hevc / 非 HDR10 基础层 / 无半尺寸增强层）一律不改。
     /// - 开关见 <see cref="Options.HdrTaggingOptions"/>（3.0.0.62 起与 ISO 提取解耦，默认 OFF）。
     /// </summary>
     public class DolbyVisionProfile : PatchBase<DolbyVisionProfile>

@@ -1,4 +1,5 @@
 using System.Reflection;
+using Emby.Media.Model.ProbeModel;
 using HarmonyLib;
 using MediaBrowser.Model.Entities;
 using StrmAssistant.Common;
@@ -8,12 +9,12 @@ using Xunit;
 namespace StrmAssistant.Tests
 {
     /// <summary>
-    /// HDR Vivid 显示覆写（回归）。
+    /// HDR Vivid 检测与显示覆写（回归）。
     ///
     /// 关键事实：Emby 4.10 的 <c>MediaStream.VideoRange</c> getter IL 是
     /// <c>ldarg.0; ldc.i4.0; call GenerateVideoRange</c> —— 传的是 <b>isForDisplay = false</b>。
-    /// 所以「只挂 GenerateVideoRange 且判断 isForDisplay」的写法永远不会生效（参考实现也是这么写的）。
-    /// 本用例用真实 Harmony 补丁验证：改挂 <c>get_VideoRange</c> 之后，Comment 命中即可覆写返回值。
+    /// 因此只在 GenerateVideoRange 里判断 isForDisplay 不会影响属性路径，
+    /// 本实现改挂 <c>get_VideoRange</c>；本用例用真实 Harmony 补丁验证。
     /// </summary>
     public class HdrVividTaggingTests
     {
@@ -104,6 +105,42 @@ namespace StrmAssistant.Tests
         public void OutputMentionsCuva_DetectsOnlyCuva(string output, bool expected)
         {
             Assert.Equal(expected, HdrVividTagging.OutputMentionsCuva(output));
+        }
+
+        /// <summary>
+        /// 流级 side_data 的识别：只有 CUVA 命中，其他 HDR 静态元数据不算。
+        /// </summary>
+        [Fact]
+        public void ContainsCuvaSideData_DetectsOnlyCuva()
+        {
+            var cuva = new ProbeSideDataList
+            {
+                new ProbeSideData { side_data_type = "HDR Dynamic Metadata CUVA 005.1 2021 (Vivid)" }
+            };
+            var hdr10Plus = new ProbeSideDataList
+            {
+                new ProbeSideData { side_data_type = "HDR Dynamic Metadata SMPTE2094-40 (HDR10+)" }
+            };
+
+            Assert.True(HdrVividTagging.ContainsCuvaSideData(cuva));
+            Assert.False(HdrVividTagging.ContainsCuvaSideData(hdr10Plus));
+            Assert.False(HdrVividTagging.ContainsCuvaSideData(new ProbeSideDataList()));
+            Assert.False(HdrVividTagging.ContainsCuvaSideData(null));
+        }
+
+        [Fact]
+        public void FindVideoStream_UsesAbsoluteIndex_AndFallsBackToFirstVideo()
+        {
+            var audio = new MediaStream { Type = MediaStreamType.Audio, Index = 0 };
+            var video1 = new MediaStream { Type = MediaStreamType.Video, Index = 1 };
+            var video2 = new MediaStream { Type = MediaStreamType.Video, Index = 2 };
+            var streams = new[] { audio, video1, video2 };
+
+            Assert.Same(video1, HdrVividTagging.FindVideoStream(streams, 1));
+            Assert.Same(video2, HdrVividTagging.FindVideoStream(streams, 2));
+            Assert.Same(video1, HdrVividTagging.FindVideoStream(streams, null));
+            Assert.Same(video1, HdrVividTagging.FindVideoStream(streams, 9));
+            Assert.Null(HdrVividTagging.FindVideoStream(null, 1));
         }
 
         /// <summary>

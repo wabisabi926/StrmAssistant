@@ -1181,6 +1181,18 @@
   <data name="MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_" xml:space="preserve">
     <value>Overwrite the community rating (CommunityRating) with the Douban rating, so the rating shown in Emby becomes the Douban score. Default is OFF.</value>
   </data>
+  <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
+    <value>Sync Douban Rating to Kodi</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_" xml:space="preserve">
+    <value>Write the Douban rating into ProviderIds for Kodi skins as a third rating; the main and critic ratings stay untouched. Default is OFF.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
+    <value>On-Demand Refresh Interval (Days)</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_" xml:space="preserve">
+    <value>Refresh the Douban rating when an item is viewed or played and the last check is older than this many days; 0 disables automatic refresh. Default is 7 days.</value>
+  </data>
   <data name="MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_Assist_Scope" xml:space="preserve">
     <value>Douban Assist Scope</value>
   </data>

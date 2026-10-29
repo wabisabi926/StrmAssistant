@@ -1094,6 +1094,18 @@
   <data name="MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_" xml:space="preserve">
     <value>以豆瓣評分覆寫 Emby 的社群評分（CommunityRating）：開啟後 Emby 顯示的評分即為豆瓣分。預設為關閉。</value>
   </data>
+  <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
+    <value>同步豆瓣評分到 Kodi</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_" xml:space="preserve">
+    <value>把豆瓣評分寫入 ProviderIds，供 Kodi 面板作為第三種評分讀取；Emby 主評分與影評人評分不受影響。預設為關閉。</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
+    <value>按需重新整理間隔（天）</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_" xml:space="preserve">
+    <value>條目被檢視或播放時，距上次檢查超過該天數才更新豆瓣評分；0 表示關閉自動更新。預設為 7 天。</value>
+  </data>
   <data name="MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_Assist_Scope" xml:space="preserve">
     <value>豆瓣輔助生效範圍</value>
   </data>

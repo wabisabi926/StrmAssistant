@@ -19,7 +19,6 @@ namespace StrmAssistant.Web.Service
         public object Get(GetDoubanRatings request)
         {
             if (!Plugin.IsPluginEnabled) return null;
-
             var response = new DoubanRatingsResponse();
 
             // 必须登录：该端点会暴露「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系，
@@ -50,6 +49,30 @@ namespace StrmAssistant.Web.Service
 
             // 逐条按当前用户可见性过滤，与 MultiVersionService 保持一致
             response.Ratings = Plugin.DoubanAssist.GetRatings(itemIds, user);
+
+            return response;
+        }
+
+        public class RefreshDoubanRatingResponse
+        {
+            /// <summary>是否已排入后台刷新（冷却未到、缺豆瓣 ID、熔断中等情况返回 false）。</summary>
+            public bool Scheduled { get; set; }
+        }
+
+        public object Post(RefreshDoubanRating request)
+        {
+            var response = new RefreshDoubanRatingResponse();
+
+            if (!Plugin.IsPluginEnabled) return response;
+
+            var user = GetUserForRequest(null, true);
+
+            var item = Plugin.LibraryManager.GetItemById(request.Id);
+
+            if (item == null) return response;
+            if (user != null && !item.IsVisible(user)) return response;
+
+            response.Scheduled = Plugin.DoubanAssist.TryScheduleRatingRefresh(item, "DetailPage");
 
             return response;
         }

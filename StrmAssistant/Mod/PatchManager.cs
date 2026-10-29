@@ -54,6 +54,7 @@ namespace StrmAssistant.Mod
         public static IsoExtraction IsoExtraction;
         public static DolbyVisionProfile DolbyVisionProfile;
         public static HdrVividTagging HdrVividTagging;
+        public static DoubanRatingRefresh DoubanRatingRefresh;
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod> HarmonyMethodCache 
             = new ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod>();
@@ -123,6 +124,7 @@ namespace StrmAssistant.Mod
             IsoExtraction = new IsoExtraction();
             DolbyVisionProfile = new DolbyVisionProfile();
             HdrVividTagging = new HdrVividTagging();
+            DoubanRatingRefresh = new DoubanRatingRefresh();
 
             // ★ 总览日志：遍历所有 PatchTracker，打印每个模块的最终状态（Info 级别，无需开启 DebugMode）
             try

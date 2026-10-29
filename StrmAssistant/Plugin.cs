@@ -384,6 +384,7 @@ namespace StrmAssistant
             _libraryManager.ItemUpdated += OnItemUpdated;
             _libraryManager.ItemRemoved += OnItemRemoved;
             _providerManager.RefreshCompleted += OnRefreshCompleted;
+            _sessionManager.PlaybackStart += OnPlaybackStart;
             _sessionManager.PlaybackStopped += OnPlaybackStopped;
             _userManager.UserCreated += OnUserCreated;
             _userManager.UserDeleted += OnUserDeleted;
@@ -648,6 +649,21 @@ namespace StrmAssistant
             {
                 Logger.Debug(ex.Message);
                 Logger.Debug(ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// 播放开始时按需刷新豆瓣评分：覆盖只使用 Kodi/App、从不打开网页详情页的用户。
+        /// 冷却与限流都在 <see cref="DoubanAssist.TryScheduleRatingRefresh"/> 内判定，不阻塞播放。
+        /// </summary>
+        private void OnPlaybackStart(object sender, PlaybackProgressEventArgs e)
+        {
+            if (!MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist) return;
+
+            // Episode 会在 TryScheduleRatingRefresh 内归一到所属剧集
+            if (e.Item is Movie || e.Item is Episode || e.Item is Series || e.Item is Season)
+            {
+                DoubanAssist.TryScheduleRatingRefresh(e.Item, "PlaybackStart");
             }
         }
 

@@ -8,9 +8,11 @@ using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
+using StrmAssistant.Common;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -133,6 +135,12 @@ namespace StrmAssistant.Provider.Douban
         private const string SparqlUrl = "https://query.wikidata.org/sparql";
         private const string DoubanProviderId = "Douban";
 
+        /// <summary>
+        /// 豆瓣评分的第三形态载体：写入 <c>ProviderIds</c>，Emby UI 不展示，
+        /// 由 E4K 读取后落成 Kodi 的 <c>rating_type="douban"</c>。值域 0–10，保留一位小数。
+        /// </summary>
+        private const string DoubanRatingProviderId = "DoubanRating";
+
         // 豆瓣开放平台 V2 API：配置 DoubanAccessToken 后优先走官方接口，
         // 可绕过网页端风控，且返回结构化 JSON。未配置 Token 时回退到 movie.douban.com 网页刮削。
         private const string DoubanV2BaseUrl = "https://api.douban.com/v2";
@@ -168,6 +176,12 @@ namespace StrmAssistant.Provider.Douban
             /// 可空：null 表示旧版快照（无此字段），此时按实测推断，避免升级瞬间全部图标回退。
             /// </summary>
             public bool? Applied { get; set; }
+
+            /// <summary>
+            /// 最近一次成功检查豆瓣条目的时间（与评分是否变化无关），用于「按需刷新」冷却判定。
+            /// 可空：旧版快照无此字段，回退用 <see cref="Updated"/>。
+            /// </summary>
+            public DateTime? Checked { get; set; }
         }
 
         public class DoubanRatingInfo
@@ -264,6 +278,7 @@ namespace StrmAssistant.Provider.Douban
         private readonly object _seasonsLock = new object();
         private readonly object _requestLock = new object();
         private readonly ConcurrentDictionary<long, byte> _inFlight = new ConcurrentDictionary<long, byte>();
+        private readonly ConcurrentDictionary<long, byte> _refreshScheduled = new ConcurrentDictionary<long, byte>();
 
         private Dictionary<string, CacheEntry> _cache;
         private Dictionary<string, DoubanRatingSnapshot> _ratings;
@@ -415,10 +430,34 @@ namespace StrmAssistant.Provider.Douban
             {
                 if (_ratings == null) LoadRatings();
 
-                if (_ratings.TryGetValue(subjectId, out var existing) &&
-                    Math.Abs(existing.Rating - rating) < 0.001 &&
-                    existing.Votes == votes)
+                var now = DateTime.UtcNow;
+
+                if (_ratings.TryGetValue(subjectId, out var existing))
                 {
+                    var ratingChanged = Math.Abs(existing.Rating - rating) >= 0.001 || existing.Votes != votes;
+
+                    existing.Checked = now;
+
+                    if (!ratingChanged)
+                    {
+                        // 评分未变也要落盘「检查时间」，否则按需刷新的冷却永远不推进；按节流窗口写盘。
+                        if (now - _lastRatingsSave >= RatingsSaveThrottle)
+                        {
+                            _lastRatingsSave = now;
+                            SaveRatings();
+                        }
+
+                        return;
+                    }
+
+                    existing.Rating = rating;
+                    existing.Votes = votes;
+                    existing.Updated = now;
+                    // 豆瓣分变了，CommunityRating 还停在旧分，两者已不同源：
+                    // 先置 false，等 ApplyAsync 真正写入后再由 MarkRatingApplied 置 true。
+                    existing.Applied = false;
+
+                    SaveRatings();
                     return;
                 }
 
@@ -426,13 +465,177 @@ namespace StrmAssistant.Provider.Douban
                 {
                     Rating = rating,
                     Votes = votes,
-                    Updated = DateTime.UtcNow,
-                    // 豆瓣分变了，CommunityRating 还停在旧分，两者已不同源：
-                    // 先置 false，等 ApplyAsync 真正写入后再由 MarkRatingApplied 置 true。
+                    Updated = now,
+                    Checked = now,
                     Applied = false
                 };
 
                 SaveRatings();
+            }
+        }
+
+        /// <summary>
+        /// 距上次成功检查是否已超过按需刷新间隔。无快照（含首次）视为到期。
+        /// </summary>
+        private bool IsRatingCheckDue(string subjectId, int refreshDays)
+        {
+            if (refreshDays <= 0) return false;
+
+            lock (_ratingsLock)
+            {
+                if (_ratings == null) LoadRatings();
+
+                if (!_ratings.TryGetValue(subjectId, out var snapshot)) return true;
+
+                var last = snapshot.Checked ?? (snapshot.Updated == default ? (DateTime?)null : snapshot.Updated);
+                if (!last.HasValue) return true;
+
+                return DateTime.UtcNow - last.Value >= TimeSpan.FromDays(refreshDays);
+            }
+        }
+
+        private bool TryGetSnapshotRating(string subjectId, out double rating)
+        {
+            rating = 0;
+
+            lock (_ratingsLock)
+            {
+                if (_ratings == null) LoadRatings();
+
+                if (!_ratings.TryGetValue(subjectId, out var snapshot)) return false;
+
+                rating = snapshot.Rating;
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 按豆瓣分数同步 <c>ProviderIds["DoubanRating"]</c>，返回是否修改了条目。
+        /// 开关关闭时顺手移除遗留 key。
+        /// </summary>
+        private static bool SyncRatingProviderId(BaseItem item, DoubanSubject subject, bool enabled, bool allowRating)
+        {
+            if (enabled && allowRating && subject?.Rating.HasValue == true)
+            {
+                var value = subject.Rating.Value.ToString("0.#", CultureInfo.InvariantCulture);
+
+                if (!string.Equals(item.GetProviderId(DoubanRatingProviderId), value, StringComparison.Ordinal))
+                {
+                    item.ProviderIds[DoubanRatingProviderId] = value;
+                    return true;
+                }
+
+                return false;
+            }
+
+            if (!enabled && item.ProviderIds.ContainsKey(DoubanRatingProviderId))
+            {
+                item.ProviderIds.Remove(DoubanRatingProviderId);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 按需刷新入口（详情页 / 开始播放）：冷却到期才抓豆瓣，异步执行，不阻塞调用方。
+        /// 只处理已有豆瓣 ID 的条目——缺 ID 的由扫库补全任务负责。
+        /// </summary>
+        public bool TryScheduleRatingRefresh(BaseItem item, string origin)
+        {
+            if (item == null) return false;
+
+            // 剧集播放/详情页拿到的是 Episode，豆瓣评分挂在剧集上，向上归一到 Series。
+            if (item is Episode episode && episode.Series != null) item = episode.Series;
+
+            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
+
+            if (!options.DoubanAssist.EnableDoubanAssist) return false;
+            if (options.DoubanAssist.DoubanRefreshIntervalDays <= 0) return false;
+            if (item.IsLocked) return false;
+
+            var subjectId = item.GetProviderId(DoubanProviderId);
+            if (string.IsNullOrEmpty(subjectId)) return false;
+
+            if (!IsRatingCheckDue(subjectId, options.DoubanAssist.DoubanRefreshIntervalDays)) return false;
+            if (IsBreakerEngaged()) return false;
+            if (!_refreshScheduled.TryAdd(item.InternalId, 0)) return false;
+
+            var suggestType = item is Movie ? "movie" : "tv";
+            var seasonNumber = (item as Season)?.IndexNumber;
+
+            _ = BackgroundTaskRunner.Run("Douban.Refresh", async () =>
+            {
+                try
+                {
+                    // 0–2 秒抖动，叠加请求频控，避免短时间内集中打豆瓣
+                    await Task.Delay(Random.Shared.Next(0, 2000)).ConfigureAwait(false);
+                    await ApplyAsync(item, suggestType, seasonNumber, CancellationToken.None).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    _logger.Debug("DoubanAssist - On-demand refresh failed ({0}): {1}", origin, e.Message);
+                }
+                finally
+                {
+                    _refreshScheduled.TryRemove(item.InternalId, out _);
+                }
+            });
+
+            _logger.Info("DoubanAssist - On-demand refresh scheduled ({0}): {1}", origin, item.Name);
+            return true;
+        }
+
+        /// <summary>
+        /// 本地修复 <c>ProviderIds["DoubanRating"]</c>：只读评分快照，不发任何豆瓣请求。
+        /// 覆盖两种场景：①「替换全部元数据」把 ProviderIds 重建后按快照补回；②关闭开关后清理遗留 key。
+        /// </summary>
+        public void RepairRatingProviderIds(IEnumerable<BaseItem> items)
+        {
+            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
+
+            if (!options.DoubanAssist.EnableDoubanAssist || items == null) return;
+
+            var writeKey = options.DoubanAssist.DoubanRatingToKodi;
+            var repaired = 0;
+            var cleared = 0;
+
+            foreach (var item in items)
+            {
+                try
+                {
+                    var current = item.GetProviderId(DoubanRatingProviderId);
+
+                    if (!writeKey)
+                    {
+                        if (string.IsNullOrEmpty(current)) continue;
+
+                        item.ProviderIds.Remove(DoubanRatingProviderId);
+                        item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                        cleared++;
+                        continue;
+                    }
+
+                    var subjectId = item.GetProviderId(DoubanProviderId);
+                    if (string.IsNullOrEmpty(subjectId)) continue;
+                    if (!TryGetSnapshotRating(subjectId, out var rating)) continue;
+
+                    var desired = rating.ToString("0.#", CultureInfo.InvariantCulture);
+                    if (string.Equals(current, desired, StringComparison.Ordinal)) continue;
+
+                    item.ProviderIds[DoubanRatingProviderId] = desired;
+                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                    repaired++;
+                }
+                catch (Exception e)
+                {
+                    _logger.Debug("DoubanAssist - Rating ProviderId repair failed for {0}: {1}", item.Name, e.Message);
+                }
+            }
+
+            if (repaired > 0 || cleared > 0)
+            {
+                _logger.Info("DoubanAssist - Rating ProviderId repaired: {0}, cleared: {1}", repaired, cleared);
             }
         }
 
@@ -748,11 +951,17 @@ namespace StrmAssistant.Provider.Douban
         /// </summary>
         public async Task PopulateDoubanIdsAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
-            var missing = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
+            var scanItems = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
             {
                 // Season 必须包含：豆瓣把季拆成独立 subject，季条目需要单独匹配（季级映射表的数据来源）。
                 IncludeItemTypes = new[] { nameof(Movie), nameof(Series), nameof(Season) }
-            }).Where(i => string.IsNullOrEmpty(i.GetProviderId(DoubanProviderId))).ToList();
+            }).ToList();
+
+            // 本地自愈：按评分快照补齐（全量替换元数据后）或清理（关闭开关后）DoubanRating，不发豆瓣请求。
+            RepairRatingProviderIds(scanItems);
+
+            var missing = scanItems
+                .Where(i => string.IsNullOrEmpty(i.GetProviderId(DoubanProviderId))).ToList();
 
             // 上次失败的条目优先重试；顺带清理已从库中消失或已补上 ID 的记录
             List<BaseItem> retryItems;
@@ -894,7 +1103,16 @@ namespace StrmAssistant.Provider.Douban
 
                 var subject = await FindSubjectAsync(item, suggestType, seasonNumber, cancellationToken)
                     .ConfigureAwait(false);
-                return subject != null;
+
+                if (subject == null) return false;
+
+                // 手动回填（构建缓存任务）时顺手补齐第三评分载体，避免「缓存有了、Kodi 侧却没有分」。
+                var ratingChanged = SyncRatingProviderId(item, subject,
+                    options.DoubanAssist.DoubanRatingToKodi, IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating));
+
+                if (ratingChanged) item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+
+                return true;
             }
             catch (OperationCanceledException)
             {
@@ -976,6 +1194,13 @@ namespace StrmAssistant.Provider.Douban
                 if (!string.Equals(item.GetProviderId(DoubanProviderId), subject.SubjectId, StringComparison.Ordinal))
                 {
                     item.ProviderIds[DoubanProviderId] = subject.SubjectId;
+                    changed = true;
+                }
+
+                // 第三形态：豆瓣分写入 ProviderIds，供 Kodi 皮肤独立读取；
+                // 与主评分（CommunityRating）/ 次评分（CriticRating）互不影响。
+                if (SyncRatingProviderId(item, subject, options.DoubanAssist.DoubanRatingToKodi, allowRating))
+                {
                     changed = true;
                 }
 

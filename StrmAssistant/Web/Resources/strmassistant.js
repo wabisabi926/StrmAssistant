@@ -530,11 +530,39 @@ define([
             }
 
             let detailCheckedId = null;
+            let detailRefreshId = null;
+
+            // 详情页打开时申请一次「按需刷新」：冷却未到 / 缺豆瓣 ID 时后端直接返回 false，不产生豆瓣请求。
+            // 无论是否排入刷新，约 4 秒后重扫一次——未排入时只是一次本地快照重读，代价可忽略。
+            function requestRefresh(id) {
+                if (!id || detailRefreshId === id) return;
+                detailRefreshId = id;
+
+                try {
+                    const client = apiClient();
+                    client.ajax({
+                        type: 'POST',
+                        url: client.getUrl('Douban/RefreshRating', { Id: id }),
+                        data: {},
+                        contentType: 'application/json'
+                    }).catch(function () {});
+                } catch (e) {
+                    // ignore
+                }
+
+                setTimeout(function () {
+                    if (hashId() !== id) return;
+                    detailCheckedId = null;
+                    scan();
+                }, 4000);
+            }
 
             function decorateDetail() {
                 const id = hashId();
                 if (!id || detailCheckedId === id) return;
                 detailCheckedId = id;
+
+                requestRefresh(id);
 
                 fetchRatings([id]).then(function (list) {
                     if (hashId() !== id) return;

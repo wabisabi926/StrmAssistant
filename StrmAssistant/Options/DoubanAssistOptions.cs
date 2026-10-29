@@ -55,6 +55,18 @@ namespace StrmAssistant.Options
         [Required]
         public bool DoubanRatingOverride { get; set; } = false;
 
+        [DisplayNameL("MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi", typeof(Resources))]
+        [DescriptionL("MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_", typeof(Resources))]
+        [VisibleCondition(nameof(EnableDoubanAssist), SimpleCondition.IsTrue)]
+        [Required]
+        public bool DoubanRatingToKodi { get; set; } = false;
+
+        [DisplayNameL("MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days", typeof(Resources))]
+        [DescriptionL("MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_", typeof(Resources))]
+        [VisibleCondition(nameof(EnableDoubanAssist), SimpleCondition.IsTrue)]
+        [Required, MinValue(0)]
+        public int DoubanRefreshIntervalDays { get; set; } = 7;
+
         [Browsable(false)]
         public List<EditorSelectOption> DoubanAssistScrapeOptionList { get; set; } = new List<EditorSelectOption>();
 

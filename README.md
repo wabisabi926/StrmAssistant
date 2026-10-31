@@ -16,7 +16,7 @@
 
 | 项目 | 说明 |
 |---|---|
-| 插件版本 | **3.0.0.68** |
+| 插件版本 | **3.0.0.69** |
 | 最低 Emby 版本 | 4.9.1.0 |
 | 适配展示版本 | 4.10.2.0+ |
 | 实测版本 | 4.10.2.0 |
@@ -25,7 +25,11 @@
 
 > 各版本详细变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 最新优化 (v3.0.0.58 ~ v3.0.0.68)
+## 最新优化 (v3.0.0.58 ~ v3.0.0.69)
+
+✅ **Kodi 助手取分接口（3.0.0.69）**
+- 新增 `/Douban/RatingsByImdb` 隐藏接口，Kodi 助手可按 IMDb 批量查询豆瓣评分
+- 同一 IMDb 有多条副本时优先返回带豆瓣数据的条目
 
 ✅ **豆瓣第三评分与按需刷新（3.0.0.68）**
 - 豆瓣评分可独立写入 `ProviderIds`，Kodi 皮肤用 `ListItem.Rating(douban)` 读取，不覆盖 Emby 主评分与影评人评分
@@ -251,10 +255,10 @@
 
 CI 支持两种触发方式：
 
-- **推送标签自动构建**：`git push origin v3.0.0.68` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
+- **推送标签自动构建**：`git push origin v3.0.0.69` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
 - **手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.68`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.69`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
 
 > 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 

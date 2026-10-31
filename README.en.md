@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.68** |
+| Plugin Version | **3.0.0.69** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -25,7 +25,11 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.58 ~ v3.0.0.68)
+## Latest Optimizations (v3.0.0.58 ~ v3.0.0.69)
+
+✅ **Douban lookup for the Kodi helper (3.0.0.69)**
+- New hidden endpoint `/Douban/RatingsByImdb` lets the Kodi helper batch-query Douban ratings by IMDb id
+- When an IMDb id maps to several items, the one carrying Douban data is preferred
 
 ✅ **Douban third rating & on-demand refresh (3.0.0.68)**
 - The Douban score is written to ProviderIds as its own rating, readable by Kodi skins via ListItem.Rating(douban), without touching Emby's main or critic rating
@@ -244,10 +248,10 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 CI can be triggered two ways:
 
-- **Automatic on tag push**: `git push origin v3.0.0.68` builds and publishes that version (the tag name is validated against the project version)
+- **Automatic on tag push**: `git push origin v3.0.0.69` builds and publishes that version (the tag name is validated against the project version)
 - **Manually**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`
 
-When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.68`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
+When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.69`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
 
 > Always use the filename `StrmAssistantPlus.dll`. If an older copy such as `StrmAssistant.dll` is still in the plugins folder, delete it — Emby loads both and you end up with a duplicate plugin.
 

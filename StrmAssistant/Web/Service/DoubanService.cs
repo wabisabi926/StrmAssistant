@@ -16,6 +16,14 @@ namespace StrmAssistant.Web.Service
             public List<DoubanAssist.DoubanRatingInfo> Ratings { get; set; } = new List<DoubanAssist.DoubanRatingInfo>();
         }
 
+        public class DoubanImdbRatingsResponse
+        {
+            public bool Enabled { get; set; }
+
+            public List<DoubanAssist.DoubanImdbRatingInfo> Ratings { get; set; } =
+                new List<DoubanAssist.DoubanImdbRatingInfo>();
+        }
+
         public object Get(GetDoubanRatings request)
         {
             if (!Plugin.IsPluginEnabled) return null;
@@ -49,6 +57,42 @@ namespace StrmAssistant.Web.Service
 
             // 逐条按当前用户可见性过滤，与 MultiVersionService 保持一致
             response.Ratings = Plugin.DoubanAssist.GetRatings(itemIds, user);
+
+            return response;
+        }
+
+        /// <summary>
+        /// 按 IMDb ID 批量查豆瓣分：供 Kodi 侧助手/皮肤用外部 ID 定位条目，无需读取 E4K 映射库。
+        /// </summary>
+        public object Get(GetDoubanRatingsByImdb request)
+        {
+            if (!Plugin.IsPluginEnabled) return null;
+
+            var response = new DoubanImdbRatingsResponse();
+
+            var user = GetUserForRequest(null, true);
+
+            if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
+            {
+                return response;
+            }
+
+            response.Enabled = true;
+
+            if (string.IsNullOrWhiteSpace(request?.Ids))
+            {
+                return response;
+            }
+
+            var imdbIds = request.Ids
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(i => i.Trim())
+                .Where(i => i.StartsWith("tt", StringComparison.OrdinalIgnoreCase) && i.Length > 2)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(80)
+                .ToList();
+
+            response.Ratings = Plugin.DoubanAssist.GetRatingsByImdb(imdbIds, user);
 
             return response;
         }

@@ -25,76 +25,23 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.58 ~ v3.0.0.70)
+## Latest Optimizations (v3.0.0.66 ~ v3.0.0.70)
 
-✅ **Douban rating on the Emby web UI (3.0.0.70)**
-- The detail-page rating row now appends a Douban entry (official logo + score) after the user and critic ratings, shown whenever a Douban score exists, no override switch required
-- Skipped when the override already replaced the star icon; falls back to the start of the info row when both native ratings are missing
+✅ **Douban rating across web and Kodi (3.0.0.68 ~ 3.0.0.70)**
+- Web: the detail-page rating row shows the Douban score (logo + value) after the user and critic ratings, no override needed
+- Kodi: the Douban score is written to `ProviderIds` and read via `ListItem.Rating(douban)` without touching native ratings; an IMDb-based lookup endpoint is also available
+- Refresh is on demand: only when a detail page is opened or playback starts, and the last check is older than the configured interval
 
-✅ **Douban lookup for the Kodi helper (3.0.0.69)**
-- New hidden endpoint `/Douban/RatingsByImdb` lets the Kodi helper batch-query Douban ratings by IMDb id
-- When an IMDb id maps to several items, the one carrying Douban data is preferred
+✅ **Automatic media-info catch-up (3.0.0.70)**
+- Missing items are extracted automatically after each scan, and failed ones are retried (3 attempts by default); manual tasks and the context menu are unchanged
 
-✅ **Douban third rating & on-demand refresh (3.0.0.68)**
-- The Douban score is written to ProviderIds as its own rating, readable by Kodi skins via ListItem.Rating(douban), without touching Emby's main or critic rating
-- Douban refresh is on demand: only when an item's detail page is opened or playback starts, and the last check is older than the configured interval (7 days by default)
-- Library scans backfill the third rating from local snapshots without requesting Douban
+✅ **Search and compatibility (3.0.0.66 ~ 3.0.0.67)**
+- Ratings and container info are back on search results in Emby 4.10.2
+- Chinese search no longer disables itself on version upgrades (index-scheme based); a startup fallback restores the index when the tokenizer is unavailable
+- ISO mount misdetection is cached for 5 minutes with the reason logged, no longer blocking the process
+- Dolby Vision P7 detection now pairs the HDR10 base layer with the half-resolution enhancement layer
 
-✅ **Search media info & compatibility (3.0.0.67)**
-- Ratings and container info are back on search results in Emby 4.10.2 (updated frontend module path)
-- Dual-layer Dolby Vision P7 detection now pairs the HDR10 base layer with a half-width/half-height enhancement layer, so extra video tracks no longer cause a miss or mismatch
-- Disclaimer is now available in English, Simplified Chinese and Traditional Chinese; licensing aligned with GPL-3.0
-- Brand line now shows Support Emby Server_v4.10.2.0 +
-
-✅ **Delete preview + observable background work (3.0.0.65)**
-- New delete preview: before deleting a whole-season version, see exactly which files would go and which candidates are skipped as ambiguous
-- Background tasks now run through a single entry point, so failures are logged instead of silently swallowed
-- Version identity, URL redaction and external-command arguments extracted into independently testable pure logic
-
-✅ **Stability & security fixes (3.0.0.64)**
-- Deleting a whole-season version no longer wipes other versions: version identity is now checked by folder, resolution and codec, and ambiguous candidates are skipped
-- Image cropping works again: the temp file kept an extension ffmpeg could not map to an output format
-- Some HDR Vivid sources were not detected: the extra probe now selects the stream by absolute index
-- Turning Catchup off can no longer permanently consume a concurrency slot
-- Direct-link logging no longer records the full URL (signatures and tokens are stripped)
-- CI now runs the unit tests; a failing test blocks the release
-
-✅ **Media Info page regrouped (3.0.0.63)**
-- Group order is now scope → ISO & external tools → image capture → HDR tagging → exclusivity & performance → persistence
-- Groups are no longer merged at runtime, so every group maps to one set of settings
-- HDR option descriptions completed with what each toggle does and what it costs
-
-✅ **HDR tagging decoupled + Vivid detection (3.0.0.62)**
-- New "HDR tagging" group under Media Info; Dolby Vision Profile 7 and HDR Vivid toggles are now independent of ISO extraction
-- HDR Vivid now probes one frame for CUVA metadata (absent from Emby's probe result), so the tag actually appears
-- Existing ISO toggle state carries over on upgrade
-
-✅ **Safety & data integrity (3.0.0.61)**
-- Deleting one version no longer removes another movie's poster, subtitles or NFO in the same folder
-- Extraction tasks abort on timeout instead of occupying the queue when cloud storage stalls
-- Douban ratings endpoint now requires login; local metadata cache no longer mixes details with credits
-- Audio / subtitle language and channel backfill for disc images actually works (STN parsing rewritten against libbluray)
-- Linux builds include the missing DiscUtils assemblies
-
-✅ **Remote ISO extraction reworked (3.0.0.60)**
-- Locate and sample the main feature via UDF/ISO9660 directory entries instead of feeding the ISO header to ffprobe
-- Filter looping/duplicate clips, invalid durations and missing streams before selection; dedupe samples by stream file (256 files / 64 MiB budget)
-- Support 115 pickcode-only redirect links while preserving the original signature and HTTP source protocol
-- Fail explicitly when no candidate is valid, instead of passing an arbitrary largest stream off as the title
-
-✅ **ISO audio/subtitle backfill (3.0.0.59)**
-- Fill language, channel count and sample rate from the MPLS STN_table, only for missing fields
-- Backfill total duration for remote ISO; write chapters after duration is resolved
-
-✅ **Context menu & settings (3.0.0.58)**
-- New "Extract Media Info" / "Delete Media Info" context menu entries for movies/episodes/seasons/series
-- Settings groups unified: media info persistence merged, multi-version merged, "Behavior Probe" renamed "Behavior Marking"
-- Layout-only changes, no config migration
-
-✅ **Performance & stability (3.0.0.58 ~ 59)**
-- Queue batch memory reclamation, fewer DB round-trips, cached container/extension exclusion parsing
-- Intro/outro dedupe keyed by `InternalId`; Chinese index rebuild uses `BEGIN IMMEDIATE`
-- Multi-version info API now enforces authentication and user library permissions
+> Earlier versions (v3.0.0.58 ~ v3.0.0.65) are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Latest Optimizations (v3.0.0.57)
 

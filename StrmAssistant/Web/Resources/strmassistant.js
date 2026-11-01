@@ -529,6 +529,72 @@ define([
                 if (cardId) doubanIds[cardId] = info;
             }
 
+            // 详情页追加「豆瓣」评分项：只要条目有豆瓣分就展示，不依赖「豆瓣评分覆盖」开关。
+            // 与 applyStars 互斥：Applied=true 时红五星已被换成豆瓣 logo（数字即豆瓣分），
+            // 此时移除追加项，避免同一行出现两个豆瓣分。
+            // 位置：评分行同一行右侧；两个原生评分都缺失时补位到信息区。
+            const DOUBAN_BADGE_CLASS = 'douban-rating-badge';
+
+            function removeDoubanBadge() {
+                const stale = document.querySelectorAll('.' + DOUBAN_BADGE_CLASS);
+                for (const el of stale) el.remove();
+            }
+
+            function applyDoubanBadge() {
+                const detailId = hashId();
+                if (!detailId) return;
+
+                const info = doubanIds[detailId];
+                const douban = info ? Number(ratingOf(info)) : NaN;
+
+                // 无豆瓣分，或覆盖已生效（星星即豆瓣）时，不追加
+                if (!info || isNaN(douban) || douban <= 0 || ratingApplied(info)) {
+                    removeDoubanBadge();
+                    return;
+                }
+
+                const page = document.querySelector('.itemView');
+                if (!page) return;
+
+                // Emby 渲染顺序：星星（.starRatingContainer）在前、番茄（.mediaInfoCriticRating）在后，
+                // 二者都是 .mediaInfoItem。豆瓣徽章要紧跟「两个评分」之后，而不是插到信息行末尾。
+                const star = page.querySelector('.starRatingContainer');
+                const critic = page.querySelector('.mediaInfoCriticRating');
+                const anchor = critic || star;
+                // 补位锚点：两个原生评分都缺失时，插到详情页信息区开头
+                const fallback = page.querySelector('.itemMiscInfo-primary') ||
+                    page.querySelector('.itemMiscInfo') ||
+                    page.querySelector('.infoWrapper');
+
+                let badge = page.querySelector('.' + DOUBAN_BADGE_CLASS);
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = DOUBAN_BADGE_CLASS + ' mediaInfoItem';
+                    badge.appendChild(makeDoubanMark('1em', '-0.1em'));
+                    const value = document.createElement('span');
+                    value.className = 'douban-rating-value';
+                    badge.appendChild(value);
+                    // 与 .mediaInfoCriticRating 一致：inline-flex + 垂直居中
+                    badge.setAttribute('style', 'display:inline-flex;align-items:center;white-space:nowrap;');
+                }
+
+                const valueEl = badge.querySelector('.douban-rating-value');
+                const text = douban.toFixed(1);
+                if (valueEl && valueEl.textContent !== text) valueEl.textContent = text;
+
+                if (anchor && anchor.parentNode) {
+                    // 紧跟两个评分之后（幂等：已在正确位置则不动）
+                    if (badge.previousElementSibling !== anchor) {
+                        anchor.insertAdjacentElement('afterend', badge);
+                    }
+                } else if (fallback) {
+                    // 两个原生评分都缺失：补位到信息区开头（评分通常排在最前）
+                    if (badge.parentNode !== fallback || fallback.firstElementChild !== badge) {
+                        fallback.insertBefore(badge, fallback.firstElementChild);
+                    }
+                }
+            }
+
             let detailCheckedId = null;
             let detailRefreshId = null;
 
@@ -571,6 +637,7 @@ define([
                     doubanIds[String(idOf(info))] = info;
                     // 详情页评分行换豆瓣 logo；不再额外追加 pill，避免与评分行重复。
                     applyStars();
+                    applyDoubanBadge();
                 }).catch(function () {});
             }
 
@@ -578,6 +645,7 @@ define([
                 try {
                     decorateDetail();
                     applyStars();
+                    applyDoubanBadge();
 
                     const cards = Array.prototype.slice.call(
                         document.querySelectorAll('.card[data-id]:not([data-douban-badge])'));

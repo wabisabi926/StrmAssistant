@@ -317,6 +317,7 @@ namespace StrmAssistant.Common
                                     {
                                         Logger.Info("MediaInfoExtract - Item skipped or non-existent: " + taskItem.Name + " - " +
                                                     taskItem.Path);
+                                        MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, "skipped or non-existent");
                                         return;
                                     }
 
@@ -328,6 +329,7 @@ namespace StrmAssistant.Common
 
                                     Logger.Info("MediaInfoExtract - Item processed: " + taskItem.Name + " - " +
                                                 taskItem.Path);
+                                    MediaInfoRetryQueue.RecordSuccess(taskItem.InternalId);
                                 }
                                 catch (OperationCanceledException)
                                 {
@@ -340,6 +342,7 @@ namespace StrmAssistant.Common
                                                  taskItem.Path);
                                     Logger.Error(e.Message);
                                     Logger.Debug(e.StackTrace);
+                                    MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, e.Message);
                                 }
                                 finally
                                 {

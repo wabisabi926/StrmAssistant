@@ -3023,6 +3023,69 @@ namespace StrmAssistant.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Result and Persistence.
         /// </summary>
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Catch-up.
+        /// </summary>
+        public static string MediaInfoExtractOptions_Group_AutoCatchup {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_Group_AutoCatchup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto extract after library scan.
+        /// </summary>
+        public static string MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After each library scan, automatically extract items that still lack media info. Default is ON..
+        /// </summary>
+        public static string MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_ {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto retry failed items.
+        /// </summary>
+        public static string MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Items that failed or were temporarily unreachable are recorded and retried on the next scan. Default is ON..
+        /// </summary>
+        public static string MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_ {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max retry attempts.
+        /// </summary>
+        public static string MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum retry attempts per item; items exceeding this limit are removed from the queue. Default is 3..
+        /// </summary>
+        public static string MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_ {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_", resourceCulture);
+            }
+        }
+        
         public static string MediaInfoExtractOptions_Group_MediaInfoPersist {
             get {
                 return ResourceManager.GetString("MediaInfoExtractOptions_Group_MediaInfoPersist", resourceCulture);

@@ -411,6 +411,168 @@ namespace StrmAssistant.Common
             return librariesWithImageCapture;
         }
 
+        /// <summary>
+        /// 扫库后自动补提取：先处理失败重试队列，再对增量缺失项做一次提取。
+        /// 只处理 <see cref="IsExtractNeeded"/> 为 true 的条目，不会重复探测已有媒体信息。
+        /// 由 <c>AutoExtractMediaInfoTask</c>（ILibraryPostScanTask）触发。
+        /// </summary>
+        public async Task AutoCatchupMediaInfoAsync(IProgress<double> progress, CancellationToken cancellationToken)
+        {
+            var options = Plugin.Instance.MediaInfoExtractStore.GetOptions();
+            var auto = options.AutoCatchup;
+
+            if (!auto.AutoExtractOnScan) return;
+
+            if (StrmAssistant.ScheduledTask.ExtractMediaInfoTask.IsRunning)
+            {
+                _logger.Info("MediaInfoExtract - Auto catch-up skipped: the scheduled task is running");
+                return;
+            }
+
+            var timeoutMs = options.ExtractionPerformance.MediaInfoExtractionTimeoutMs;
+            var imageMultiplier = options.ExtractionPerformance.ImageExtractionTimeoutMultiplier;
+            var enableImageCapture = options.ImageCapture.EnableImageCapture;
+
+            var items = new List<BaseItem>();
+            var seen = new HashSet<long>();
+
+            // 1) 失败重试队列优先
+            if (auto.AutoRetryFailed)
+            {
+                var retryIds = MediaInfoRetryQueue.GetPendingItemIds(auto.MaxRetryAttempts);
+
+                if (retryIds.Count > 0)
+                {
+                    var retryItems = _libraryManager.GetItemList(new InternalItemsQuery
+                    {
+                        ItemIds = retryIds.ToArray()
+                    }).ToList();
+
+                    foreach (var item in FetchExtractQueueItems(retryItems))
+                    {
+                        if (seen.Add(item.InternalId)) items.Add(item);
+                    }
+
+                    _logger.Info("MediaInfoExtract - Auto catch-up retry candidates: " + items.Count);
+                }
+            }
+
+            // 2) 增量缺失项
+            foreach (var item in FetchPreExtractTaskItems())
+            {
+                if (seen.Add(item.InternalId)) items.Add(item);
+            }
+
+            if (items.Count == 0)
+            {
+                MediaInfoRetryQueue.Save(true);
+                _logger.Info("MediaInfoExtract - Auto catch-up: nothing to extract");
+                return;
+            }
+
+            _logger.Info("MediaInfoExtract - Auto catch-up started, items: " + items.Count);
+
+            var total = items.Count;
+            var completed = 0;
+            var tasks = new List<Task>();
+
+            foreach (var item in items)
+            {
+                if (cancellationToken.IsCancellationRequested) break;
+
+                try
+                {
+                    await QueueManager.MasterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch
+                {
+                    break;
+                }
+
+                var taskItem = item;
+
+                var task = Task.Run(async () =>
+                {
+                    CancellationTokenSource timeoutCts = null;
+
+                    try
+                    {
+                        if (cancellationToken.IsCancellationRequested) return;
+
+                        var itemToken = cancellationToken;
+
+                        if (timeoutMs > 0)
+                        {
+                            var effectiveTimeout = timeoutMs;
+
+                            if (enableImageCapture && !taskItem.HasImage(ImageType.Primary, 0))
+                            {
+                                effectiveTimeout = timeoutMs * Math.Max(1, imageMultiplier);
+                            }
+
+                            timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            timeoutCts.CancelAfter(effectiveTimeout);
+                            itemToken = timeoutCts.Token;
+                        }
+
+                        var result = await OrchestrateMediaInfoProcessAsync(taskItem,
+                            "MediaInfoExtract AutoCatchup", itemToken).ConfigureAwait(false);
+
+                        if (result is true)
+                        {
+                            MediaInfoRetryQueue.RecordSuccess(taskItem.InternalId);
+                            _logger.Info("MediaInfoExtract - Auto catch-up item processed: " + taskItem.Name + " - " +
+                                         taskItem.Path);
+                        }
+                        else if (result is null)
+                        {
+                            MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, "skipped or non-existent");
+                            _logger.Info("MediaInfoExtract - Auto catch-up item skipped: " + taskItem.Name + " - " +
+                                         taskItem.Path);
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // 超时/取消：留在重试队列，下次扫库再试
+                        MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, "timeout or cancelled");
+                    }
+                    catch (Exception e)
+                    {
+                        MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, e.Message);
+                        _logger.Error("MediaInfoExtract - Auto catch-up item failed: " + taskItem.Name);
+                        _logger.Error(e.Message);
+                    }
+                    finally
+                    {
+                        timeoutCts?.Dispose();
+                        QueueManager.MasterSemaphore.Release();
+
+                        var done = Interlocked.Increment(ref completed);
+
+                        try
+                        {
+                            progress?.Report(done * 100.0 / total);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                    }
+                }, CancellationToken.None);
+
+                tasks.Add(task);
+
+                if (tasks.Count >= 50) tasks.RemoveAll(t => t.IsCompleted);
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            MediaInfoRetryQueue.Save(true);
+
+            _logger.Info("MediaInfoExtract - Auto catch-up completed, pending retry: " +
+                         MediaInfoRetryQueue.Count);
+        }
+
         public List<BaseItem> FetchExtractQueueItems(List<BaseItem> items)
         {
             var libraryIds = Plugin.Instance.MediaInfoExtractStore.GetOptions().ExtractionScope.LibraryScope

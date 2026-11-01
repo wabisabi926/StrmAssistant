@@ -1409,6 +1409,27 @@
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>信息持久化</value>
   </data>
+  <data name="MediaInfoExtractOptions_Group_AutoCatchup" xml:space="preserve">
+    <value>自动补漏</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan" xml:space="preserve">
+    <value>扫库后自动补提取</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_" xml:space="preserve">
+    <value>每次媒体库扫描结束后，自动提取仍缺少媒体信息的条目。默认开启。</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items" xml:space="preserve">
+    <value>自动重试失败的提取</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_" xml:space="preserve">
+    <value>提取失败或文件暂时不可达的条目会记录下来，在下次扫库时重试。默认开启。</value>
+  </data>
+  <data name="MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts" xml:space="preserve">
+    <value>重试次数上限</value>
+  </data>
+  <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
+    <value>单条目的最大重试次数，超过后移出重试队列。默认 3。</value>
+  </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>独占与性能</value>
   </data>

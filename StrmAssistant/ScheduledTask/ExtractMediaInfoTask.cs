@@ -112,10 +112,16 @@ namespace StrmAssistant.ScheduledTask
                             {
                                 _logger.Info(
                                     $"MediaInfoExtract - Item skipped or non-existent: {taskItem.Name} - {taskItem.Path}");
+                                MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, "skipped or non-existent");
                             }
 
                             Interlocked.Increment(ref skip);
                             return;
+                        }
+
+                        if (result is true)
+                        {
+                            MediaInfoRetryQueue.RecordSuccess(taskItem.InternalId);
                         }
 
                         if (enableIntroSkip && taskItem is Episode episode &&
@@ -141,6 +147,7 @@ namespace StrmAssistant.ScheduledTask
                         _logger.Error($"MediaInfoExtract - Item failed: {taskItem.Name} - {taskItem.Path}");
                         _logger.Error(e.Message);
                         _logger.Debug(e.StackTrace);
+                        MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, e.Message);
                     }
                     finally
                     {
@@ -185,6 +192,7 @@ namespace StrmAssistant.ScheduledTask
 
             progress.Report(100.0);
             _logger.Info($"MediaInfoExtract - Number of items skipped: {skip}");
+            MediaInfoRetryQueue.Save(true);
             _logger.Info("MediaInfoExtract - Scheduled Task Complete");
         }
 

@@ -50,6 +50,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("MediaInfoExtractOptions_Group_MediaInfoPersist", typeof(Resources))]
         public MediaInfoPersistOptions MediaInfoPersist { get; set; } = new MediaInfoPersistOptions();
 
+        /// <summary>自动补漏：扫库后自动补提取缺失项、失败条目有限次重试。</summary>
+        [DisplayNameL("MediaInfoExtractOptions_Group_AutoCatchup", typeof(Resources))]
+        public AutoCatchupOptions AutoCatchup { get; set; } = new AutoCatchupOptions();
+
         public enum ExclusiveControl
         {
             [DescriptionL("ExclusiveControl_IgnoreFileChange_IgnoreFileChange", typeof(Resources))]

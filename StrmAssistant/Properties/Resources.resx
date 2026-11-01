@@ -1496,6 +1496,27 @@
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>Persistence</value>
   </data>
+  <data name="MediaInfoExtractOptions_Group_AutoCatchup" xml:space="preserve">
+    <value>Auto Catch-up</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan" xml:space="preserve">
+    <value>Auto extract after library scan</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_" xml:space="preserve">
+    <value>After each library scan, automatically extract items that still lack media info. Default is ON.</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items" xml:space="preserve">
+    <value>Auto retry failed items</value>
+  </data>
+  <data name="MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_" xml:space="preserve">
+    <value>Items that failed or were temporarily unreachable are recorded and retried on the next scan. Default is ON.</value>
+  </data>
+  <data name="MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts" xml:space="preserve">
+    <value>Max retry attempts</value>
+  </data>
+  <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
+    <value>Maximum retry attempts per item; items exceeding this limit are removed from the queue. Default is 3.</value>
+  </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>Exclusive &amp; Performance</value>
   </data>

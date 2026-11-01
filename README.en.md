@@ -27,21 +27,16 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 ## Latest Optimizations (v3.0.0.66 ~ v3.0.0.70)
 
-✅ **Douban rating across web and Kodi (3.0.0.68 ~ 3.0.0.70)**
-- Web: the detail-page rating row shows the Douban score (logo + value) after the user and critic ratings, no override needed
-- Kodi: the Douban score is written to `ProviderIds` and read via `ListItem.Rating(douban)` without touching native ratings; an IMDb-based lookup endpoint is also available
-- Refresh is on demand: only when a detail page is opened or playback starts, and the last check is older than the configured interval
+✅ **Douban rating (3.0.0.68 ~ 3.0.0.70)**
+- Shown on the web detail page; readable by Kodi via `ProviderIds`; refresh on demand instead of full-library polling
 
 ✅ **Automatic media-info catch-up (3.0.0.70)**
-- Missing items are extracted automatically after each scan, and failed ones are retried (3 attempts by default); manual tasks and the context menu are unchanged
+- Missing items extracted after each scan; failed items retried (3 attempts max)
 
 ✅ **Search and compatibility (3.0.0.66 ~ 3.0.0.67)**
-- Ratings and container info are back on search results in Emby 4.10.2
-- Chinese search no longer disables itself on version upgrades (index-scheme based); a startup fallback restores the index when the tokenizer is unavailable
-- ISO mount misdetection is cached for 5 minutes with the reason logged, no longer blocking the process
-- Dolby Vision P7 detection now pairs the HDR10 base layer with the half-resolution enhancement layer
+- Search ratings fixed for Emby 4.10.2; Chinese search no longer self-disables on upgrade; ISO mount misdetection cached for 5 minutes; Dolby Vision P7 detection corrected
 
-> Earlier versions (v3.0.0.58 ~ v3.0.0.65) are listed in [CHANGELOG.md](CHANGELOG.md).
+> Earlier versions: see [CHANGELOG.md](CHANGELOG.md).
 
 ## Latest Optimizations (v3.0.0.57)
 

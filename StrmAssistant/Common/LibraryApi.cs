@@ -411,12 +411,35 @@ namespace StrmAssistant.Common
             return librariesWithImageCapture;
         }
 
+        /// <summary>自动补提取的防重入标记：多个库并行扫描会各自触发一次 post-scan 任务。</summary>
+        private static int _autoCatchupRunning;
+
         /// <summary>
         /// 扫库后自动补提取：先处理失败重试队列，再对增量缺失项做一次提取。
         /// 只处理 <see cref="IsExtractNeeded"/> 为 true 的条目，不会重复探测已有媒体信息。
         /// 由 <c>AutoExtractMediaInfoTask</c>（ILibraryPostScanTask）触发。
         /// </summary>
         public async Task AutoCatchupMediaInfoAsync(IProgress<double> progress, CancellationToken cancellationToken)
+        {
+            // 多个库并行扫描时 post-scan 任务会被多次调用，用标记保证同一时刻只跑一份
+            if (Interlocked.CompareExchange(ref _autoCatchupRunning, 1, 0) != 0)
+            {
+                _logger.Info("MediaInfoExtract - Auto catch-up skipped: another instance is already running");
+                return;
+            }
+
+            try
+            {
+                await AutoCatchupMediaInfoCoreAsync(progress, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _autoCatchupRunning, 0);
+            }
+        }
+
+        private async Task AutoCatchupMediaInfoCoreAsync(IProgress<double> progress,
+            CancellationToken cancellationToken)
         {
             var options = Plugin.Instance.MediaInfoExtractStore.GetOptions();
             var auto = options.AutoCatchup;

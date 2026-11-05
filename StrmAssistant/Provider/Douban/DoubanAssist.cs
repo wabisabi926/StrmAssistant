@@ -1217,8 +1217,9 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 构建缓存：仅预取豆瓣数据落盘（subject + 评分快照），不写回条目。
-        /// 已有豆瓣 ID 且缓存未过期的条目直接跳过，不产生网络请求。
+        /// 构建缓存：预取豆瓣数据落盘（subject + 评分快照），并回填条目
+        /// <c>ProviderIds["DoubanRating"]</c>。
+        /// 已有豆瓣 ID 且缓存未过期的条目不再请求网络，但仍从缓存回填评分 ProviderId。
         /// </summary>
         public async Task<bool> BuildCacheAsync(BaseItem item, CancellationToken cancellationToken)
         {
@@ -1231,20 +1232,33 @@ namespace StrmAssistant.Provider.Douban
 
             var suggestType = item is Movie ? "movie" : "tv";
             var cachedId = item.GetProviderId(DoubanProviderId);
+            var allowRating = IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating);
+            var cacheValid = false;
 
             lock (_cacheLock)
             {
                 if (_cache == null) LoadCache();
-                if (!string.IsNullOrEmpty(cachedId) &&
-                    _cache.TryGetValue("subject:" + cachedId, out var entry) &&
-                    entry.Expiry > DateTime.UtcNow)
-                {
-                    return false;
-                }
+                cacheValid = !string.IsNullOrEmpty(cachedId) &&
+                             _cache.TryGetValue("subject:" + cachedId, out var entry) &&
+                             entry.Expiry > DateTime.UtcNow;
             }
 
             try
             {
+                if (cacheValid)
+                {
+                    // 缓存命中：FetchSubjectAsync 只读缓存并补记评分快照，不产生网络请求。
+                    var cachedSubject = await FetchSubjectAsync(cachedId, cancellationToken).ConfigureAwait(false);
+
+                    if (SyncRatingProviderId(item, cachedSubject, options.DoubanAssist.DoubanRatingToKodi, allowRating))
+                    {
+                        item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                        _logger.Debug("DoubanCacheBuild - Rating provider updated for {0}", item.Name);
+                    }
+
+                    return false;
+                }
+
                 // 季条目必须带季号，否则会按剧集主条目解析（豆瓣季是独立 subject）。
                 var seasonNumber = (item as Season)?.IndexNumber;
 
@@ -1254,10 +1268,11 @@ namespace StrmAssistant.Provider.Douban
                 if (subject == null) return false;
 
                 // 手动回填（构建缓存任务）时顺手补齐第三评分载体，避免「缓存有了、Kodi 侧却没有分」。
-                var ratingChanged = SyncRatingProviderId(item, subject,
-                    options.DoubanAssist.DoubanRatingToKodi, IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating));
-
-                if (ratingChanged) item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                if (SyncRatingProviderId(item, subject, options.DoubanAssist.DoubanRatingToKodi, allowRating))
+                {
+                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                    _logger.Debug("DoubanCacheBuild - Rating provider updated for {0}", item.Name);
+                }
 
                 return true;
             }

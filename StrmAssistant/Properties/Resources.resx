@@ -1700,4 +1700,46 @@
   <data name="ScheduledTasks_List_Task_List_Description" xml:space="preserve">
     <value>Clicking Run starts the task immediately and may discard unsaved setting changes. Save first if you need to keep them.</value>
   </data>
+  <data name="Sessions_EditorTitle_Active_Sessions" xml:space="preserve">
+    <value>Active Sessions</value>
+  </data>
+  <data name="Sessions_List_Session_List" xml:space="preserve">
+    <value>Session List</value>
+  </data>
+  <data name="Sessions_List_Session_List_Description" xml:space="preserve">
+    <value>Sessions that are playing have a Stop button; stopping interrupts playback immediately on the client.</value>
+  </data>
+  <data name="Sessions_Playing" xml:space="preserve">
+    <value>Now playing: {0}</value>
+  </data>
+  <data name="Sessions_Paused" xml:space="preserve">
+    <value>Paused: {0}</value>
+  </data>
+  <data name="Sessions_Idle" xml:space="preserve">
+    <value>Idle · last active {0}</value>
+  </data>
+  <data name="Sessions_Stop_Stop_Playback" xml:space="preserve">
+    <value>Stop Playback</value>
+  </data>
+  <data name="Sessions_NotPlaying" xml:space="preserve">
+    <value>This session is not playing anything</value>
+  </data>
+  <data name="Sessions_NotFound" xml:space="preserve">
+    <value>Session not found</value>
+  </data>
+  <data name="Sessions_Stopped" xml:space="preserve">
+    <value>Playback stopped: {0}</value>
+  </data>
+  <data name="Sessions_None" xml:space="preserve">
+    <value>No active sessions</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache" xml:space="preserve">
+    <value>Clear Metadata Cache</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCacheResult_Cleared" xml:space="preserve">
+    <value>Passive metadata cache cleared ({0} file(s)).</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
+    <value>Metadata cache root is not initialized; nothing was cleared.</value>
+  </data>
 </root>

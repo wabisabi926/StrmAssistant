@@ -1,4 +1,4 @@
-using Emby.Media.Common.Extensions;
+﻿using Emby.Media.Common.Extensions;
 using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Elements;
 using Emby.Web.GenericEdit.Elements.List;
@@ -30,6 +30,13 @@ namespace StrmAssistant.Options
             new ButtonItem(Resources.GeneralOptions_ScheduleIndexRebuild_Schedule_Search_Index_Rebuild)
             {
                 Icon = IconNames.build, Data1 = "ScheduleIndexRebuild",
+                ConfirmationPrompt = Resources.AreYouSureToContinue
+            };
+
+        public ButtonItem ClearMetadataCacheButton =>
+            new ButtonItem(Resources.GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache)
+            {
+                Icon = IconNames.delete_sweep, Data1 = "ClearMetadataCache",
                 ConfirmationPrompt = Resources.AreYouSureToContinue
             };
 

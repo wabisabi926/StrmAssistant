@@ -1613,4 +1613,46 @@
   <data name="ScheduledTasks_List_Task_List_Description" xml:space="preserve">
     <value>点「执行」会立即开始任务，页面上未保存的改动可能丢失；需要保留时请先保存。</value>
   </data>
+  <data name="Sessions_EditorTitle_Active_Sessions" xml:space="preserve">
+    <value>活动会话</value>
+  </data>
+  <data name="Sessions_List_Session_List" xml:space="preserve">
+    <value>会话列表</value>
+  </data>
+  <data name="Sessions_List_Session_List_Description" xml:space="preserve">
+    <value>播放中的会话带「停止播放」按钮；停止后客户端会立即中断当前播放。</value>
+  </data>
+  <data name="Sessions_Playing" xml:space="preserve">
+    <value>正在播放：{0}</value>
+  </data>
+  <data name="Sessions_Paused" xml:space="preserve">
+    <value>已暂停：{0}</value>
+  </data>
+  <data name="Sessions_Idle" xml:space="preserve">
+    <value>空闲 · 最后活动 {0}</value>
+  </data>
+  <data name="Sessions_Stop_Stop_Playback" xml:space="preserve">
+    <value>停止播放</value>
+  </data>
+  <data name="Sessions_NotPlaying" xml:space="preserve">
+    <value>该会话当前未在播放</value>
+  </data>
+  <data name="Sessions_NotFound" xml:space="preserve">
+    <value>会话不存在或已结束</value>
+  </data>
+  <data name="Sessions_Stopped" xml:space="preserve">
+    <value>已停止播放：{0}</value>
+  </data>
+  <data name="Sessions_None" xml:space="preserve">
+    <value>当前没有连接的会话</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache" xml:space="preserve">
+    <value>清理元数据缓存</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCacheResult_Cleared" xml:space="preserve">
+    <value>已清理被动元数据缓存（{0} 个文件）。</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
+    <value>元数据缓存目录未初始化，未执行清理。</value>
+  </data>
 </root>

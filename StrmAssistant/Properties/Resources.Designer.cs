@@ -4932,5 +4932,131 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_EditorTitle_Active_Sessions {
+            get {
+                return ResourceManager.GetString("Sessions_EditorTitle_Active_Sessions", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_Idle {
+            get {
+                return ResourceManager.GetString("Sessions_Idle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_List_Session_List {
+            get {
+                return ResourceManager.GetString("Sessions_List_Session_List", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_List_Session_List_Description {
+            get {
+                return ResourceManager.GetString("Sessions_List_Session_List_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_None {
+            get {
+                return ResourceManager.GetString("Sessions_None", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_NotFound {
+            get {
+                return ResourceManager.GetString("Sessions_NotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_NotPlaying {
+            get {
+                return ResourceManager.GetString("Sessions_NotPlaying", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_Paused {
+            get {
+                return ResourceManager.GetString("Sessions_Paused", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_Playing {
+            get {
+                return ResourceManager.GetString("Sessions_Playing", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_Stop_Stop_Playback {
+            get {
+                return ResourceManager.GetString("Sessions_Stop_Stop_Playback", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Sessions_Stopped {
+            get {
+                return ResourceManager.GetString("Sessions_Stopped", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ClearMetadataCacheResult_Cleared {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ClearMetadataCacheResult_Cleared", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ClearMetadataCacheResult_NotInitialized {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ClearMetadataCacheResult_NotInitialized", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache", resourceCulture);
+            }
+        }
+
     }
 }

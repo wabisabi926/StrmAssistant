@@ -5,6 +5,7 @@ using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.Tasks;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Plugins.UI.Views;
+using MediaBrowser.Model.Session;
 using MediaBrowser.Model.Tasks;
 using StrmAssistant.Common;
 using StrmAssistant.Core;
@@ -16,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StrmAssistant.Options.View
@@ -23,6 +25,7 @@ namespace StrmAssistant.Options.View
     internal class HomePageView : PluginPageView
     {
         private const string RunScheduledTaskCommand = "RunScheduledTask";
+        private const string StopSessionCommand = "StopSession";
 
         private readonly PluginInfo _pluginInfo;
         private readonly PluginOptionsStore _store;
@@ -44,8 +47,10 @@ namespace StrmAssistant.Options.View
             PluginOptions.ChineseSearch.Initialize();
             PluginOptions.AboutOptions.Initialize();
             PluginOptions.ScheduledTasks.Initialize();
+            PluginOptions.Sessions.Initialize();
 
             PopulateScheduledTasks();
+            PopulateSessions();
             PopulateRuntimeStatus(PluginOptions);
         }
 
@@ -239,6 +244,124 @@ namespace StrmAssistant.Options.View
             Plugin.NotificationApi?.SendMessageToAdmins(
                 $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {message}", 8000);
 
+        /// <summary>
+        /// 生成「活动会话」列表：谁在播什么，播放中的行带「停止播放」按钮。
+        /// </summary>
+        private void PopulateSessions()
+        {
+            var list = PluginOptions.Sessions.SessionList;
+            list.Clear();
+
+            try
+            {
+                var sessions = _sessionManager.Sessions?
+                    .Where(s => s != null && !string.IsNullOrEmpty(s.Id))
+                    .OrderByDescending(s => s.NowPlayingItem != null)
+                    .ThenBy(s => s.UserName, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (sessions == null || sessions.Count == 0)
+                {
+                    list.Add(new GenericListItem
+                    {
+                        PrimaryText = Resources.Sessions_None,
+                        Icon = IconNames.devices
+                    });
+                    return;
+                }
+
+                foreach (var session in sessions)
+                {
+                    list.Add(BuildSessionItem(session));
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Warn($"HomePage - 生成会话列表失败: {e.Message}");
+            }
+        }
+
+        private static GenericListItem BuildSessionItem(SessionInfo session)
+        {
+            var playing = session.NowPlayingItem;
+            var who = string.IsNullOrEmpty(session.UserName) ? session.DeviceName : session.UserName;
+            var client = string.IsNullOrEmpty(session.Client) ? session.DeviceName : session.Client;
+
+            var item = new GenericListItem
+            {
+                PrimaryText = string.Join(" \u00b7 ",
+                    new[] { who, client }.Where(x => !string.IsNullOrEmpty(x)).Distinct()),
+                Icon = IconNames.devices,
+                Status = playing != null ? ItemStatus.InProgress : ItemStatus.None
+            };
+
+            if (playing == null)
+            {
+                item.SecondaryText = string.Format(Resources.Sessions_Idle,
+                    session.LastActivityDate.ToLocalTime().ToString("MM-dd HH:mm"));
+                return item;
+            }
+
+            var title = playing.SeriesName != null &&
+                        playing.ParentIndexNumber.HasValue && playing.IndexNumber.HasValue
+                ? $"{playing.SeriesName} S{playing.ParentIndexNumber:00}E{playing.IndexNumber:00}"
+                : playing.Name;
+
+            item.SecondaryText = string.Format(
+                session.PlayState != null && session.PlayState.IsPaused
+                    ? Resources.Sessions_Paused
+                    : Resources.Sessions_Playing,
+                title);
+
+            item.Button1 = new ButtonItem(Resources.Sessions_Stop_Stop_Playback)
+            {
+                Icon = IconNames.stop,
+                Data1 = StopSessionCommand,
+                Data2 = session.Id
+            };
+
+            return item;
+        }
+
+        private void StopSession(string sessionId)
+        {
+            try
+            {
+                var session = _sessionManager.Sessions?
+                    .FirstOrDefault(s => string.Equals(s?.Id, sessionId, StringComparison.OrdinalIgnoreCase));
+
+                if (session == null)
+                {
+                    Notify(Resources.Sessions_NotFound);
+                    return;
+                }
+
+                if (session.NowPlayingItem == null)
+                {
+                    Notify(Resources.Sessions_NotPlaying);
+                    return;
+                }
+
+                var request = new PlaystateRequest
+                {
+                    Command = PlaystateCommand.Stop,
+                    ControllingUserId = session.UserId
+                };
+
+                _sessionManager.SendPlaystateCommand(null, session.Id, request, CancellationToken.None)
+                    .FireAndForget(Plugin.Instance.Logger);
+
+                Notify(string.Format(Resources.Sessions_Stopped, session.NowPlayingItem.Name));
+                Plugin.Instance.Logger.Info(
+                    $"HomePage - 停止播放: {session.UserName}/{session.Client} ({session.NowPlayingItem.Name})");
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Warn($"HomePage - 停止播放失败: {e.Message}");
+                Notify(e.Message);
+            }
+        }
+
         private void PopulateRuntimeStatus(PluginOptions pluginOptions)
         {
             var statusOptions = pluginOptions.RuntimeStatus;
@@ -369,6 +492,13 @@ namespace StrmAssistant.Options.View
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 
+                case StopSessionCommand:
+                    StopSession(itemId);
+                    PopulateSessions();
+                    PopulateRuntimeStatus(PluginOptions);
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
+
                 case "CleanMemoryNow":
                     MemoryCleaner.RequestCleanup("手动清理（选项页）");
                     PopulateRuntimeStatus(PluginOptions);
@@ -379,6 +509,23 @@ namespace StrmAssistant.Options.View
                     PopulateRuntimeStatus(PluginOptions);
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
+
+                case "ClearMetadataCache":
+                {
+                    var removed = LocalMetadataCache.ClearPassiveCache();
+
+                    Plugin.Instance.Logger.Info($"HomePage - 手动清理元数据被动缓存: {removed} 个文件");
+
+                    Plugin.NotificationApi?.SendMessageToAdmins(
+                        removed >= 0
+                            ? string.Format(Resources.GeneralOptions_ClearMetadataCacheResult_Cleared, removed)
+                            : Resources.GeneralOptions_ClearMetadataCacheResult_NotInitialized,
+                        8000);
+
+                    PopulateRuntimeStatus(PluginOptions);
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
+                }
 
                 case "ScheduleIndexRebuild":
                     EnhanceChineseSearch.ScheduleIndexRebuild();

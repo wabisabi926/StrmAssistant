@@ -79,6 +79,13 @@ namespace StrmAssistant.Options
         public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
 
         /// <summary>
+        /// 活动会话：谁在播什么，可一键停止播放。
+        /// 放在计划任务之后、运行状态之前——「现在谁在用」比「服务器怎么样」更常被点开。
+        /// </summary>
+        [DisplayNameL("Sessions_EditorTitle_Active_Sessions", typeof(Resources))]
+        public SessionsOptions Sessions { get; set; } = new SessionsOptions();
+
+        /// <summary>
         /// 运行状态与维护（只读状态 + 清内存/重建索引/优化索引/重启）。
         /// 挂在页面末尾：按「危险操作居末」的约定，重启服务器这类按钮不应夹在配置项中间。
         /// 该组没有用户配置（列表是运行时生成的），所以搬家不需要配置迁移。

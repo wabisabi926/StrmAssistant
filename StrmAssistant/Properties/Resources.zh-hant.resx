@@ -1613,4 +1613,46 @@
   <data name="ScheduledTasks_List_Task_List_Description" xml:space="preserve">
     <value>點「執行」會立即開始任務，頁面上未儲存的變更可能遺失；需要保留時請先儲存。</value>
   </data>
+  <data name="Sessions_EditorTitle_Active_Sessions" xml:space="preserve">
+    <value>活動工作階段</value>
+  </data>
+  <data name="Sessions_List_Session_List" xml:space="preserve">
+    <value>工作階段列表</value>
+  </data>
+  <data name="Sessions_List_Session_List_Description" xml:space="preserve">
+    <value>播放中的工作階段帶「停止播放」按鈕；停止後用戶端會立即中斷目前播放。</value>
+  </data>
+  <data name="Sessions_Playing" xml:space="preserve">
+    <value>正在播放：{0}</value>
+  </data>
+  <data name="Sessions_Paused" xml:space="preserve">
+    <value>已暫停：{0}</value>
+  </data>
+  <data name="Sessions_Idle" xml:space="preserve">
+    <value>閒置 · 最後活動 {0}</value>
+  </data>
+  <data name="Sessions_Stop_Stop_Playback" xml:space="preserve">
+    <value>停止播放</value>
+  </data>
+  <data name="Sessions_NotPlaying" xml:space="preserve">
+    <value>該工作階段目前未在播放</value>
+  </data>
+  <data name="Sessions_NotFound" xml:space="preserve">
+    <value>工作階段不存在或已結束</value>
+  </data>
+  <data name="Sessions_Stopped" xml:space="preserve">
+    <value>已停止播放：{0}</value>
+  </data>
+  <data name="Sessions_None" xml:space="preserve">
+    <value>目前沒有連線的工作階段</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache" xml:space="preserve">
+    <value>清理元資料快取</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCacheResult_Cleared" xml:space="preserve">
+    <value>已清理被動元資料快取（{0} 個檔案）。</value>
+  </data>
+  <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
+    <value>元資料快取目錄未初始化，未執行清理。</value>
+  </data>
 </root>

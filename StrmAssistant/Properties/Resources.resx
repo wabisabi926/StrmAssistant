@@ -225,7 +225,7 @@
     <value>❤️Favorites</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Exclusive_Extract" xml:space="preserve">
-    <value>Exclusive MediaInfo Extract</value>
+    <value>Exclusive Extract</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Only_allow_this_plugin_to_extract_media_info__ffprobe__and_capture_image__ffmpeg___Default_is_OFF_" xml:space="preserve">
     <value>Let this plugin handle ffprobe/ffmpeg for all libraries. Default is OFF.</value>
@@ -462,7 +462,7 @@
     <value>Alternative MovieDb Api Key is invalid</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_MediaInfo" xml:space="preserve">
-    <value>MediaInfo Persist (Default)</value>
+    <value>Persist (Default)</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_media_info_in_JSON_file__Default_is_OFF_" xml:space="preserve">
     <value>Restore from JSON first; probe and write when missing.</value>
@@ -867,19 +867,19 @@
     <value>Position as a percentage of runtime; range 10–90, default 10.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Media_Info_Exclude_Keywords" xml:space="preserve">
-    <value>Media Info Exclude Keywords</value>
+    <value>Extract Exclude Keywords</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Comma_separated_keywords_matched_against_the_file_path_to_skip_media_info_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>Comma-separated keywords matched against the file path to skip media info extraction. Default is EMPTY.</value>
+    <value>Matched against the file path; matching items skip extraction. Default is blank.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeMediaContainers_Media_Info_Exclude_Media_Containers" xml:space="preserve">
-    <value>Media Info Exclude Media Containers</value>
+    <value>Extract Exclude Containers</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeMediaContainers_Comma_separated_container_names_or_extensions_to_skip_media_info_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>Comma-separated container names or extensions to skip media info extraction. Default is EMPTY.</value>
+    <value>Matched against container name or extension; matching items skip extraction. Default is blank.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Enable_ISO_Extraction" xml:space="preserve">
-    <value>Enable ISO Extraction</value>
+    <value>ISO Extraction</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
     <value>Include local/remote ISOs. Windows uses OS mount; Linux/Docker requires a custom ffprobe. Remote ISO capture is unsupported. Default is OFF.</value>
@@ -891,25 +891,25 @@
     <value>Remove embedded container metadata to avoid polluting item metadata. Default is ON.</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Video_Thumbnail_Exclude_Keywords" xml:space="preserve">
-    <value>Video Thumbnail Exclude Keywords</value>
+    <value>Thumbnail Exclude Keywords</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Comma_separated_keywords_matched_against_the_file_path_to_skip_video_thumbnail_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>Comma-separated keywords matched against the file path to skip video thumbnail extraction. Default is EMPTY.</value>
+    <value>Matched against the file path; matching items skip thumbnail extraction. Default is blank.</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeMediaContainers_Video_Thumbnail_Exclude_Media_Containers" xml:space="preserve">
-    <value>Video Thumbnail Exclude Media Containers</value>
+    <value>Thumbnail Exclude Containers</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeMediaContainers_Comma_separated_container_names_or_extensions_to_skip_video_thumbnail_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>Comma-separated container names or extensions to skip video thumbnail extraction. Default is EMPTY.</value>
+    <value>Matched against container name or extension; matching items skip thumbnail extraction. Default is blank.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Media_Info_Extraction_Timeout" xml:space="preserve">
-    <value>Media Info Extraction Timeout</value>
+    <value>Extraction Timeout</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Per_item_extraction_timeout_in_milliseconds__0_disables_the_timeout__Default_is_0_" xml:space="preserve">
     <value>Per-item timeout in ms; 0 means unlimited. Default is 0.</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Image_Extraction_Timeout_Multiplier" xml:space="preserve">
-    <value>Image Extraction Timeout Multiplier</value>
+    <value>Image Timeout Multiplier</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Multiplier_applied_to_the_extraction_timeout_when_image_capture_runs_for_the_item__Default_is_1_" xml:space="preserve">
     <value>Multiplier applied to the timeout during image capture. Default is 1.</value>
@@ -1146,13 +1146,13 @@
     <value>Crop episode stills to 16:9 when the source ratio differs. Server-generated images only. Default is OFF.</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
-    <value>Ensure 16:9</value>
+    <value>Crop to 16:9</value>
   </data>
   <data name="ImageCapturePostProcess_GenerateBackdrop_Generate_Backdrop" xml:space="preserve">
     <value>Generate Backdrop</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect2By3_Ensure_Aspect_2x3" xml:space="preserve">
-    <value>Ensure 2:3</value>
+    <value>Crop to 2:3</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Image_Capture_Post_Processing" xml:space="preserve">
     <value>Image Capture Post Processing</value>
@@ -1290,7 +1290,7 @@
     <value>Restore only from JSON/BIF; no probing.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_MediaInfo_Restore_Mode" xml:space="preserve">
-    <value>Restore Only (Skip Probing)</value>
+    <value>Restore Only</value>
   </data>
   <data name="DisclaimerButtonText" xml:space="preserve">
     <value>Click to view the disclaimer. Do not send logs to the official team before uninstalling the plugin. Please remember this!</value>
@@ -1485,7 +1485,7 @@
     <value>HDR Tagging</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Enable_HDR_tagging" xml:space="preserve">
-    <value>Enable HDR tagging</value>
+    <value>HDR Tagging</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
     <value>Tag HDR Vivid and dual-layer Dolby Vision; restart required. Default is OFF.</value>

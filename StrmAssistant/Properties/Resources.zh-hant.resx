@@ -138,7 +138,7 @@
     <value>❤️最愛</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Exclusive_Extract" xml:space="preserve">
-    <value>獨佔媒體訊息擷取</value>
+    <value>獨佔提取</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Only_allow_this_plugin_to_extract_media_info__ffprobe__and_capture_image__ffmpeg___Default_is_OFF_" xml:space="preserve">
     <value>由外掛接管 ffprobe/ffmpeg，全媒體庫生效。預設關閉。</value>
@@ -375,7 +375,7 @@
     <value>替代 TMDB API 金鑰無效</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_MediaInfo" xml:space="preserve">
-    <value>媒體訊息持久化（預設）</value>
+    <value>持久化（預設）</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_media_info_in_JSON_file__Default_is_OFF_" xml:space="preserve">
     <value>優先從 JSON 恢復；缺少時探測並寫入。</value>
@@ -780,19 +780,19 @@
     <value>依片長百分比截取，範圍 10–90，預設 10。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Media_Info_Exclude_Keywords" xml:space="preserve">
-    <value>媒體資訊排除關鍵字</value>
+    <value>提取排除關鍵字</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Comma_separated_keywords_matched_against_the_file_path_to_skip_media_info_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>逗號分隔的關鍵字，符合檔案路徑則跳過媒體資訊提取。預設為空。</value>
+    <value>依檔案路徑匹配，命中則跳過提取。預設留空。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeMediaContainers_Media_Info_Exclude_Media_Containers" xml:space="preserve">
-    <value>媒體資訊排除媒體容器</value>
+    <value>提取排除容器</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeMediaContainers_Comma_separated_container_names_or_extensions_to_skip_media_info_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>逗號分隔的容器名稱或副檔名，命中則跳過媒體資訊提取。預設為空。</value>
+    <value>依容器名稱或副檔名匹配，命中則跳過提取。預設留空。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Enable_ISO_Extraction" xml:space="preserve">
-    <value>啟用 ISO 擷取</value>
+    <value>ISO 擷取</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
     <value>本機/遠端 ISO 納入擷取；Windows 自動掛載，Linux/Docker 需自訂 ffprobe。遠端 ISO 不支援截圖。預設關閉。</value>
@@ -804,25 +804,25 @@
     <value>移除容器內嵌中繼資料，避免污染項目資訊。預設開啟。</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Video_Thumbnail_Exclude_Keywords" xml:space="preserve">
-    <value>影片縮圖排除關鍵字</value>
+    <value>縮圖排除關鍵字</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Comma_separated_keywords_matched_against_the_file_path_to_skip_video_thumbnail_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>逗號分隔的關鍵字，符合檔案路徑則跳過影片縮圖提取。預設為空。</value>
+    <value>依檔案路徑匹配，命中則跳過縮圖提取。預設留空。</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeMediaContainers_Video_Thumbnail_Exclude_Media_Containers" xml:space="preserve">
-    <value>影片縮圖排除媒體容器</value>
+    <value>縮圖排除容器</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeMediaContainers_Comma_separated_container_names_or_extensions_to_skip_video_thumbnail_extraction__Default_is_EMPTY_" xml:space="preserve">
-    <value>逗號分隔的容器名稱或副檔名，命中則跳過影片縮圖提取。預設為空。</value>
+    <value>依容器名稱或副檔名匹配，命中則跳過縮圖提取。預設留空。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Media_Info_Extraction_Timeout" xml:space="preserve">
-    <value>媒體資訊提取逾時</value>
+    <value>提取逾時</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Per_item_extraction_timeout_in_milliseconds__0_disables_the_timeout__Default_is_0_" xml:space="preserve">
     <value>單一條目逾時（毫秒）；0 不限制。預設 0。</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Image_Extraction_Timeout_Multiplier" xml:space="preserve">
-    <value>截圖提取逾時倍數</value>
+    <value>截圖逾時倍數</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Multiplier_applied_to_the_extraction_timeout_when_image_capture_runs_for_the_item__Default_is_1_" xml:space="preserve">
     <value>截圖時依此倍數放大逾時。預設 1。</value>
@@ -1059,13 +1059,13 @@
     <value>來源比例不符時將劇集截圖裁剪為 16:9。僅處理伺服器生成的圖片。預設為關閉。</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
-    <value>確保集圖 16:9</value>
+    <value>裁剪為 16:9</value>
   </data>
   <data name="ImageCapturePostProcess_GenerateBackdrop_Generate_Backdrop" xml:space="preserve">
     <value>生成背景圖</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect2By3_Ensure_Aspect_2x3" xml:space="preserve">
-    <value>確保海報 2:3</value>
+    <value>裁剪為 2:3</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Image_Capture_Post_Processing" xml:space="preserve">
     <value>截圖後處理</value>
@@ -1203,7 +1203,7 @@
     <value>僅從 JSON/BIF 恢復，不探測。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_MediaInfo_Restore_Mode" xml:space="preserve">
-    <value>僅恢復（跳過擷取）</value>
+    <value>僅恢復</value>
   </data>
   <data name="DisclaimerButtonText" xml:space="preserve">
     <value>點擊查看免責聲明。未刪除插件前，請勿發送日誌至官方​​。請務必牢記！</value>
@@ -1398,7 +1398,7 @@
     <value>HDR 標註</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Enable_HDR_tagging" xml:space="preserve">
-    <value>啟用 HDR 標註</value>
+    <value>HDR 標註</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
     <value>為 HDR Vivid 與雙層杜比視界標註畫質；修改後需重啟。預設關閉。</value>

@@ -355,6 +355,8 @@ namespace StrmAssistant.Common
 
         public void RemoveSeasonIntroCreditsMarkers(Episode item, SessionInfo session)
         {
+            if (DryRunMode.Skip($"clear season intro/credits markers: {item.Name}", _logger)) return;
+
             var episodesInSeason = GetEpisodesInSeason(item.Season, item.IndexNumber);
 
             foreach (var episode in episodesInSeason)
@@ -368,6 +370,8 @@ namespace StrmAssistant.Common
 
         public void RemoveIntroCreditsMarkers(BaseItem item)
         {
+            if (DryRunMode.Skip($"clear intro/credits markers: {item.Name}", _logger)) return;
+
             var chapters = _itemRepository.GetChapters(item);
             chapters.RemoveAll(c =>
                 c.MarkerType == MarkerType.IntroStart || c.MarkerType == MarkerType.IntroEnd ||
@@ -377,6 +381,8 @@ namespace StrmAssistant.Common
 
         public void ClearChapterImages(BaseItem item)
         {
+            if (DryRunMode.Skip($"clear chapter images: {item.Name}", _logger)) return;
+
             var chapters = _itemRepository.GetChapters(item);
             var changed = false;
 

@@ -1559,6 +1559,15 @@
   <data name="ExperienceEnhanceOptions_Group_Playback" xml:space="preserve">
     <value>Playback &amp; Cleanup</value>
   </data>
+  <data name="ExperienceEnhanceOptions_Group_Safety" xml:space="preserve">
+    <value>Safety</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_DryRun_Dry_Run" xml:space="preserve">
+    <value>Dry Run</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_DryRun_Description" xml:space="preserve">
+    <value>Clearing intro markers, media info, deleting versions, deep delete, merging/splitting, deleting persons and clearing caches are logged only; nothing is written or deleted. Default is OFF.</value>
+  </data>
   <data name="ExperienceEnhanceOptions_Group_Notification" xml:space="preserve">
     <value>Notification</value>
   </data>

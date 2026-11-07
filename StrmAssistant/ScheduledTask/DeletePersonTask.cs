@@ -2,6 +2,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Tasks;
+using StrmAssistant.Common;
 using StrmAssistant.Properties;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,12 @@ namespace StrmAssistant.ScheduledTask
             });
 
             _logger.Info("DeletePerson - Number of Persons: " + personItems.Length);
+
+            if (DryRunMode.Skip($"delete {personItems.Length} person item(s)", _logger))
+            {
+                progress.Report(100);
+                return Task.CompletedTask;
+            }
 
             _libraryManager.DeleteItems(personItems.Select(i => i.InternalId).ToArray());
 

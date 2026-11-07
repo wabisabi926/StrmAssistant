@@ -5274,5 +5274,32 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_DryRun_Description {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_DryRun_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_DryRun_Dry_Run {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_DryRun_Dry_Run", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_Group_Safety {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_Group_Safety", resourceCulture);
+            }
+        }
+
     }
 }

@@ -172,6 +172,13 @@ namespace StrmAssistant.Options.View
 
                 case "ClearMetadataCache":
                 {
+                    if (DryRunMode.Skip("clear passive metadata cache", Plugin.Instance.Logger))
+                    {
+                        PopulateOverview();
+                        RaiseUIViewInfoChanged();
+                        return Task.FromResult<IPluginUIView>(this);
+                    }
+
                     var removed = LocalMetadataCache.ClearPassiveCache();
 
                     Plugin.Instance.Logger.Info($"HomePage - 手动清理元数据被动缓存: {removed} 个文件");

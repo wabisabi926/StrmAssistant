@@ -186,6 +186,8 @@ namespace StrmAssistant.Common
         /// </summary>
         public static int ClearPassiveCache()
         {
+            if (DryRunMode.Skip("clear passive metadata cache", Plugin.Instance?.Logger)) return 0;
+
             var root = _root;
             if (string.IsNullOrEmpty(root)) return -1;
 
@@ -222,6 +224,7 @@ namespace StrmAssistant.Common
         public static int ClearExpiredPassive(int ttlDays, CancellationToken cancellationToken)
         {
             if (ttlDays <= 0) return 0;
+            if (DryRunMode.Skip($"clear {ttlDays}-day expired passive cache", Plugin.Instance?.Logger)) return 0;
 
             var root = _root;
             if (string.IsNullOrEmpty(root)) return -1;

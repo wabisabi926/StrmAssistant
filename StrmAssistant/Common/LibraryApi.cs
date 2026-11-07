@@ -1711,6 +1711,8 @@ namespace StrmAssistant.Common
 
         public void ExecuteDeepDelete(HashSet<string> mountPaths)
         {
+            if (DryRunMode.Skip($"deep delete {mountPaths?.Count ?? 0} path(s)", _logger)) return;
+
             var deletePaths = new HashSet<FileSystemMetadata>(new FileSystemMetadataComparer());
 
             foreach (var mountPath in mountPaths)

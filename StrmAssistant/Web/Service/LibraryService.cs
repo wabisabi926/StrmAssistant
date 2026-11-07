@@ -68,6 +68,8 @@ namespace StrmAssistant.Web.Service
                 ? GetSeasonEpisodesSameVersion(episode)
                 : new List<BaseItem> { item };
 
+            if (DryRunMode.Skip($"delete {deleteItems.Count} version item(s)", _logger)) return;
+
             var allMountPaths = new Dictionary<string, bool?>();
 
             foreach (var deleteItem in deleteItems)

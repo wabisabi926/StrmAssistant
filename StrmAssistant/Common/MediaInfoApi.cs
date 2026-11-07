@@ -622,6 +622,8 @@ namespace StrmAssistant.Common
 
         public void ClearMediaInfoJson(BaseItem item, string source)
         {
+            if (DryRunMode.Skip($"clear media info json ({source}): {item.Name}", _logger)) return;
+
             DeleteMediaInfoJson(item, new DirectoryService(_logger, _fileSystem), source);
 
             // 标记为「需重新提取」：清 json 不会清 Emby DB 的 MediaSources，
@@ -632,6 +634,8 @@ namespace StrmAssistant.Common
 
         public void DeleteMediaInfoJson(BaseItem item, IDirectoryService directoryService, string source)
         {
+            if (DryRunMode.Skip($"delete media info json ({source}): {item.Name}", _logger)) return;
+
             var mediaInfoJsonPath = GetMediaInfoJsonPath(item);
 
             var file = directoryService.GetFile(mediaInfoJsonPath);

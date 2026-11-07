@@ -3,6 +3,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Logging;
+using StrmAssistant.Common;
 using StrmAssistant.Web.Api;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace StrmAssistant.Web.Service
 
             var episodes = Plugin.ChapterApi.FetchClearTaskItems(new List<BaseItem> { itemById });
 
+            if (DryRunMode.Skip($"clear intro/credits markers for {episodes.Count} episode(s)", _logger))
+                return;
+
             foreach (var item in episodes)
             {
                 Plugin.ChapterApi.RemoveIntroCreditsMarkers(item);
@@ -48,6 +52,9 @@ namespace StrmAssistant.Web.Service
             var targets = itemById is Series || itemById is Season
                 ? Plugin.ChapterApi.FetchClearTaskItems(new List<BaseItem> { itemById })
                 : new List<BaseItem> { itemById };
+
+            if (DryRunMode.Skip($"clear chapter images for {targets.Count} item(s)", _logger))
+                return;
 
             foreach (var item in targets.OfType<Video>())
             {

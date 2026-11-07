@@ -34,6 +34,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("ExperienceEnhanceOptions_Group_Playback", typeof(Resources))]
         public ExperiencePlaybackOptions Playback { get; set; } = new ExperiencePlaybackOptions();
 
+        /// <summary>安全：演练模式，破坏性操作只记录不执行。</summary>
+        [DisplayNameL("ExperienceEnhanceOptions_Group_Safety", typeof(Resources))]
+        public SafetyOptions Safety { get; set; } = new SafetyOptions();
+
         /// <summary>通知：剧集通知显示集详情与触发字段。</summary>
         [DisplayNameL("ExperienceEnhanceOptions_Group_Notification", typeof(Resources))]
         public ExperienceNotificationOptions Notification { get; set; } = new ExperienceNotificationOptions();

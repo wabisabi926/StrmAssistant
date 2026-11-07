@@ -70,6 +70,8 @@ namespace StrmAssistant.Web.Service
 
             if (itemById is null) return;
 
+            if (DryRunMode.Skip($"clear media info for {itemById.Name}", Plugin.Instance.Logger)) return;
+
             Plugin.MediaInfoApi.ClearMediaInfoJson(itemById, "Clear Media Info Menu");
         }
 
@@ -145,6 +147,14 @@ namespace StrmAssistant.Web.Service
             if (items.Count == 0)
             {
                 response.Message = "no supported items";
+                return response;
+            }
+
+            if (DryRunMode.Skip($"delete media info for {items.Count} item(s)", Plugin.Instance.Logger))
+            {
+                response.Message = "dry run";
+                response.Processed = items.Count;
+                response.Skipped = items.Count;
                 return response;
             }
 

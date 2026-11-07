@@ -5,6 +5,7 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Tasks;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Plugins.UI.Views;
+using StrmAssistant.Common;
 using StrmAssistant.Options.Store;
 using StrmAssistant.Options.UIBaseClasses.Views;
 using StrmAssistant.Properties;
@@ -68,23 +69,28 @@ namespace StrmAssistant.Options.View
             await Task.Delay(10.ms());
 
             var total = movies.Count;
+            var dryRun = DryRunMode.Skip("split multi-version movies", Plugin.Instance.Logger);
             var current = 0;
 
             foreach (var item in movies)
             {
-                _libraryManager.SplitItems(item);
+                if (!dryRun) _libraryManager.SplitItems(item);
                 current++;
                 var percentDone = current * 100 / total;
                 var adjustedProgress = 20 + percentDone * 80 / 100;
                 progressItem.PercentComplete = adjustedProgress;
-                Plugin.Instance.Logger.Info("MergeMovie - Split group " + current + "/" + total + " - " + item.Path);
+                Plugin.Instance.Logger.Info(
+                    $"MergeMovie - Split group{(dryRun ? " (dry run)" : string.Empty)} " +
+                    $"{current}/{total} - {item.Path}");
                 RaiseUIViewInfoChanged();
                 await Task.Delay(10.ms());
             }
 
             ExperienceEnhanceOptions.Merge.SplitMoviesButton.IsEnabled = true;
             progressItem.HasPercentage = false;
-            progressItem.SecondaryText = Resources.Operation_Success;
+            progressItem.SecondaryText = dryRun
+                ? $"演练：将拆分 {total} 组"
+                : Resources.Operation_Success;
             progressItem.Icon = IconNames.info;
             progressItem.Status = ItemStatus.Succeeded;
             RaiseUIViewInfoChanged();

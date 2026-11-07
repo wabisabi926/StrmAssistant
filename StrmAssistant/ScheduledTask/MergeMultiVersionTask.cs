@@ -7,6 +7,7 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Tasks;
+using StrmAssistant.Common;
 using StrmAssistant.Properties;
 using System;
 using System.Collections.Generic;
@@ -55,6 +56,12 @@ namespace StrmAssistant.ScheduledTask
             if (!Plugin.IsPluginEnabled) return;
 
             _logger.Info("MergeMultiVersion - Scheduled Task Execute");
+
+            if (DryRunMode.Skip("merge multi-version", _logger))
+            {
+                progress.Report(100);
+                return;
+            }
 
             // 库选项可能在上次运行后被改动（界面切换/自动分组被改写），先清缓存
             Mod.MergeMultiVersion.ClearSeriesGroupingCache();

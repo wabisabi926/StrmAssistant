@@ -4,6 +4,7 @@ using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Tasks;
+using StrmAssistant.Common;
 using StrmAssistant.Properties;
 using System;
 using System.Collections.Generic;
@@ -45,6 +46,12 @@ namespace StrmAssistant.ScheduledTask
             var failed = 0;
 
             _logger.Info($"RebuildUserDataKeys - {total} item(s) to process");
+
+            if (DryRunMode.Skip($"rebuild user data keys for {total} item(s)", _logger))
+            {
+                progress.Report(100);
+                return;
+            }
 
             foreach (var item in items)
             {

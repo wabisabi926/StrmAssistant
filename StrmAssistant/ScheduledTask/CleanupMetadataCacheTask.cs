@@ -32,6 +32,12 @@ namespace StrmAssistant.ScheduledTask
         {
             if (!Plugin.IsPluginEnabled) return;
 
+            if (DryRunMode.Skip("cleanup expired metadata cache", Plugin.Instance.Logger))
+            {
+                progress.Report(100);
+                return;
+            }
+
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions().MetadataCache;
             if (!options.IsMetadataCacheEnabled || options.MetadataCacheTtlDays <= 0)
             {

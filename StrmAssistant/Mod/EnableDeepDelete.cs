@@ -1,6 +1,7 @@
 using HarmonyLib;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
+using StrmAssistant.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,10 +42,13 @@ namespace StrmAssistant.Mod
         }
 
         [HarmonyPrefix]
-        private static void DeleteItemPrefix(ILibraryManager __instance, BaseItem item, DeleteOptions options,
+        private static bool DeleteItemPrefix(ILibraryManager __instance, BaseItem item, DeleteOptions options,
             BaseItem parent, bool notifyParentItem, out Dictionary<string, bool?> __state)
         {
             __state = null;
+
+            if (DryRunMode.Skip($"delete item (deep delete): {item?.Name}", Plugin.Instance.Logger))
+                return false;
 
             if (options.DeleteFileLocation)
             {
@@ -53,6 +57,8 @@ namespace StrmAssistant.Mod
 
                 __state = Plugin.LibraryApi.PrepareDeepDelete(item, scope);
             }
+
+            return true;
         }
 
         [HarmonyFinalizer]

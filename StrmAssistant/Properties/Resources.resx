@@ -1577,6 +1577,9 @@
   <data name="GeneralOptions_Group_Memory" xml:space="preserve">
     <value>Memory</value>
   </data>
+  <data name="GeneralOptions_Group_ConfigTransfer" xml:space="preserve">
+    <value>Config Transfer</value>
+  </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
     <value>Maintenance</value>
   </data>
@@ -1852,6 +1855,9 @@
   </data>
   <data name="Overview_Status_Text" xml:space="preserve">
     <value>Memory {0}/{1} MB ({2}%) · tasks {3} · queue {4} · index {5}</value>
+  </data>
+  <data name="Overview_Status_DryRun" xml:space="preserve">
+    <value> · dry run</value>
   </data>
   <data name="Overview_Status_Conflict" xml:space="preserve">
     <value>  · conflicting plugins: {0}</value>

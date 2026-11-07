@@ -28,11 +28,26 @@ namespace StrmAssistant.Tests
             Assert.True(enableIndex >= 0);
             Assert.True(NameOrId(items[enableIndex + 1], "CatchupMode"));
 
+            var chineseIndex = items.FindIndex(i => NameOrId(i, "ChineseSearch"));
+            var tasksIndex = items.FindIndex(i => NameOrId(i, "ScheduledTasks"));
+            var concurrencyIndex = items.FindIndex(i => NameOrId(i, "TaskConcurrency"));
+            Assert.True(chineseIndex > enableIndex);
+            Assert.True(tasksIndex > chineseIndex);
+            Assert.True(concurrencyIndex > tasksIndex);
+
             var concurrency = items.OfType<EditorGroup>()
                 .FirstOrDefault(g => NameOrId(g, "TaskConcurrency"));
             Assert.NotNull(concurrency);
             Assert.Contains(concurrency.EditorItems, i => NameOrId(i, "MaxConcurrentCount"));
             Assert.DoesNotContain(concurrency.EditorItems, i => NameOrId(i, "CatchupMode"));
+
+            var configTransfer = items.OfType<EditorGroup>()
+                .FirstOrDefault(g => NameOrId(g, "ConfigTransfer"));
+            Assert.NotNull(configTransfer);
+            Assert.Contains(configTransfer.EditorItems, i => NameOrId(i, "ConfigTransferFolder"));
+            var configButtons = configTransfer.EditorItems.OfType<EditorButtonGroup>().FirstOrDefault();
+            Assert.NotNull(configButtons);
+            Assert.Equal(2, configButtons.EditorItems.Count());
         }
 
         [Fact]

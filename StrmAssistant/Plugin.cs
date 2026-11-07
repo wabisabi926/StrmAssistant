@@ -440,6 +440,18 @@ namespace StrmAssistant
                     $"TaskConcurrency - migrated CatchupMinWaitMinutes to CatchupMinWaitSeconds ({taskConcurrency.CatchupMinWaitSeconds} s)");
             }
 
+            // 配置迁移目录从 RuntimeStatus 拆到独立分组：旧配置里存在的值搬到新位置。
+            var configTransfer = MainOptionsStore.GetOptions().ConfigTransfer;
+            var legacyConfigTransferFolder = MainOptionsStore.GetOptions().RuntimeStatus?.ConfigTransferFolder;
+            if (configTransfer != null &&
+                string.IsNullOrWhiteSpace(configTransfer.ConfigTransferFolder) &&
+                !string.IsNullOrWhiteSpace(legacyConfigTransferFolder))
+            {
+                configTransfer.ConfigTransferFolder = legacyConfigTransferFolder;
+                MainOptionsStore.GetOptions().RuntimeStatus.ConfigTransferFolder = string.Empty;
+                MainOptionsStore.SavePluginOptionsSuppress();
+                Logger.Info("PluginOptions - migrated ConfigTransferFolder to ConfigTransfer group");
+            }
         }
 
         private void MigrateImageCaptureExcludeContainers()

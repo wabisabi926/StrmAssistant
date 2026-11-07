@@ -125,6 +125,11 @@ namespace StrmAssistant.Options.View
                     text += string.Format(Resources.Overview_Status_Conflict, string.Join(", ", conflicts));
                 }
 
+                if (DryRunMode.Enabled)
+                {
+                    text += Resources.Overview_Status_DryRun;
+                }
+
                 if (MemoryGuard.IsRestartPending && MemoryGuard.RestartAtUtc.HasValue)
                 {
                     var seconds = Math.Max(0,
@@ -135,7 +140,7 @@ namespace StrmAssistant.Options.View
 
                 var status = MemoryGuard.IsRestartPending || conflicts.Length > 0 || percent >= 90
                     ? ItemStatus.Failed
-                    : percent >= 75 || runningTasks > 0 || pendingQueue > 0
+                    : percent >= 75 || runningTasks > 0 || pendingQueue > 0 || DryRunMode.Enabled
                         ? ItemStatus.Warning
                         : ItemStatus.Succeeded;
 
@@ -253,7 +258,7 @@ namespace StrmAssistant.Options.View
 
         private string ResolveConfigFolder()
         {
-            var folder = Plugin.Instance.MainOptionsStore.GetOptions().RuntimeStatus.ConfigTransferFolder;
+            var folder = Plugin.Instance.MainOptionsStore.GetOptions().ConfigTransfer.ConfigTransferFolder;
             return string.IsNullOrWhiteSpace(folder)
                 ? Plugin.Instance.ApplicationPaths.PluginConfigurationsPath
                 : folder;

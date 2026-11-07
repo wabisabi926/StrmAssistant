@@ -4,6 +4,7 @@ using Emby.Web.GenericEdit.Elements;
 using MediaBrowser.Model.Attributes;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
+using System.ComponentModel;
 
 namespace StrmAssistant.Options
 {
@@ -17,23 +18,9 @@ namespace StrmAssistant.Options
         [DisplayNameL("GeneralOptions_Group_RuntimeStatus", typeof(Resources))]
         public override string EditorTitle => Resources.GeneralOptions_Group_RuntimeStatus;
 
-        [DisplayNameL("GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder", typeof(Resources))]
-        [DescriptionL("GeneralOptions_ConfigTransferFolder_Description", typeof(Resources))]
-        [EditFolderPicker]
+        /// <summary>旧版配置迁移用；新位置见 <see cref="ConfigTransferOptions"/>。</summary>
+        [Browsable(false)]
         public string ConfigTransferFolder { get; set; } = string.Empty;
-
-        public ButtonItem ExportConfigButton =>
-            new ButtonItem(Resources.GeneralOptions_ExportConfig_Export_Config)
-            {
-                Icon = IconNames.code, Data1 = "ExportConfig"
-            };
-
-        public ButtonItem ImportConfigButton =>
-            new ButtonItem(Resources.GeneralOptions_ImportConfig_Import_Config)
-            {
-                Icon = IconNames.build, Data1 = "ImportConfig",
-                ConfirmationPrompt = Resources.GeneralOptions_ImportConfig_Confirm
-            };
 
         public ButtonItem VerifyMetadataCacheButton =>
             new ButtonItem(Resources.GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache)

@@ -5409,5 +5409,23 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_Group_ConfigTransfer {
+            get {
+                return ResourceManager.GetString("GeneralOptions_Group_ConfigTransfer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_DryRun {
+            get {
+                return ResourceManager.GetString("Overview_Status_DryRun", resourceCulture);
+            }
+        }
+
     }
 }

@@ -57,9 +57,13 @@ namespace StrmAssistant.Options
         public StatusItem ModStatus { get; set; } = new StatusItem();
 
 
+        /// <summary>中文搜索：功能设置，放在并发/性能参数之前。</summary>
+        [DisplayNameL("ModOptions_Group_ChineseSearch", typeof(Resources))]
+        public ChineseSearchOptions ChineseSearch { get; set; } = new ChineseSearchOptions();
+
         /// <summary>
         /// 计划任务：插件自己的任务清单，每行可直接执行（含上次耗时/状态）。
-        /// 放在运行状态之前——「能做什么」比「现在怎么样」更常被查看。
+        /// 放在日常设置之后、性能参数之前。
         /// </summary>
         [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
         public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
@@ -75,8 +79,9 @@ namespace StrmAssistant.Options
         [DisplayNameL("GeneralOptions_Group_Memory", typeof(Resources))]
         public MemoryOptions Memory { get; set; } = new MemoryOptions();
 
-        [DisplayNameL("ModOptions_Group_ChineseSearch", typeof(Resources))]
-        public ChineseSearchOptions ChineseSearch { get; set; } = new ChineseSearchOptions();
+        /// <summary>配置迁移：导出/导入与维护操作分离。</summary>
+        [DisplayNameL("GeneralOptions_Group_ConfigTransfer", typeof(Resources))]
+        public ConfigTransferOptions ConfigTransfer { get; set; } = new ConfigTransferOptions();
 
         /// <summary>
         /// 旧版容器，仅用于把已存在的配置读进来后拍平（见 <c>Plugin.Initialize</c> 的 FlattenOptions）。

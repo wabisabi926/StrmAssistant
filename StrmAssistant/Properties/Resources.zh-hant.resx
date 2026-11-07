@@ -1490,6 +1490,9 @@
   <data name="GeneralOptions_Group_Memory" xml:space="preserve">
     <value>記憶體管理</value>
   </data>
+  <data name="GeneralOptions_Group_ConfigTransfer" xml:space="preserve">
+    <value>設定遷移</value>
+  </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
     <value>維護工具</value>
   </data>
@@ -1765,6 +1768,9 @@
   </data>
   <data name="Overview_Status_Text" xml:space="preserve">
     <value>記憶體 {0}/{1} MB（{2}%）· 任務 {3} · 佇列 {4} · 索引 {5}</value>
+  </data>
+  <data name="Overview_Status_DryRun" xml:space="preserve">
+    <value>　· 演練模式</value>
   </data>
   <data name="Overview_Status_Conflict" xml:space="preserve">
     <value>　· 衝突外掛：{0}</value>

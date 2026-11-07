@@ -105,10 +105,10 @@
     <value>Extract media info for newly added items and intro marker detection or sync in near real-time. Default is OFF.</value>
   </data>
   <data name="PluginOptions_IncludeExtra_Include_Extra" xml:space="preserve">
-    <value>Include Additional Part and Extra</value>
+    <value>Include Parts &amp; Extras</value>
   </data>
   <data name="PluginOptions_IncludeExtra_Include_media_extras_to_extract__Default_is_False_" xml:space="preserve">
-    <value>Include additional parts and extras to extract. Default is OFF.</value>
+    <value>Include parts and extras. Default is OFF.</value>
   </data>
   <data name="PluginOptions_StrmOnly_Strm_Only" xml:space="preserve">
     <value>Strm Only</value>
@@ -129,25 +129,25 @@
     <value>Library Scope</value>
   </data>
   <data name="PluginOptions_LibraryScope_Library_scope_to_extract__Blank_includes_all_" xml:space="preserve">
-    <value>Library scope; blank includes all. Note: to extract video preview thumbnails, first set "Generate video preview thumbnails" to a scheduled task in the Emby library settings.</value>
+    <value>Leave blank to include all libraries. Enable scheduled thumbnail generation in the Emby library settings.</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_Probe_Path" xml:space="preserve">
-    <value>Custom Probe Path</value>
+    <value>Custom ffprobe</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_ffprobe_binary_used_for_media_info_extraction__leave_empty_to_use_the_Emby_builtin__supports_rffmpeg_wrapper_for_distributed_extraction_" xml:space="preserve">
-    <value>Custom ffprobe binary used for media info extraction (leave empty to use the Emby builtin). Supports rffmpeg wrapper for distributed extraction.</value>
+    <value>Blank uses Emby built-in; supports rffmpeg.</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomEncoderPath_Custom_Encoder_Path" xml:space="preserve">
-    <value>Custom Encoder Path</value>
+    <value>Custom ffmpeg</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomEncoderPath_Custom_ffmpeg_binary_used_for_image_capture_and_thumbnails__leave_empty_to_use_the_Emby_builtin__a_build_with_libplacebo_fixes_DV_P5_green_tint_" xml:space="preserve">
-    <value>Custom ffmpeg binary used for image capture and thumbnails (leave empty to use the Emby builtin). A build with libplacebo fixes DV P5 green tint.</value>
+    <value>Used for image capture and thumbnails; blank uses the built-in.</value>
   </data>
   <data name="PluginOptions_EnableImageCapture_Enable_Image_Capture" xml:space="preserve">
-    <value>Image Capture and Thumbnail Preview Enhanced</value>
+    <value>Video Capture</value>
   </data>
   <data name="PluginOptions_EnableImageCapture_Perform_image_capture_for_videos_without_primary_image__Default_is_False_" xml:space="preserve">
-    <value>Unlock image capture, video thumbnail BIF for Strm. Skip embedded image. Default is OFF.</value>
+    <value>Capture images for videos without a primary image; supports STRM and BIF previews. Default is OFF.</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
     <value>Playback Detection</value>
@@ -228,7 +228,7 @@
     <value>Exclusive MediaInfo Extract</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Only_allow_this_plugin_to_extract_media_info__ffprobe__and_capture_image__ffmpeg___Default_is_OFF_" xml:space="preserve">
-    <value>Take over media info extract (ffprobe) and image capture (ffmpeg) for all libraries. Default is OFF.</value>
+    <value>Let this plugin handle ffprobe/ffmpeg for all libraries. Default is OFF.</value>
   </data>
   <data name="Repo_Link" xml:space="preserve">
     <value>Repo Link</value>
@@ -465,7 +465,7 @@
     <value>MediaInfo Persist (Default)</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_media_info_in_JSON_file__Default_is_OFF_" xml:space="preserve">
-    <value>Restore from JSON first during extraction/import; probe and write JSON when missing; also write when media info already exists on import.</value>
+    <value>Restore from JSON first; probe and write when missing.</value>
   </data>
   <data name="UIFunctionOptions_EnhanceMissingEpisodes_Missing_Episodes_Enhanced" xml:space="preserve">
     <value>View Missing Episodes Enhanced</value>
@@ -474,10 +474,10 @@
     <value>Add MovieDb support for the view missing episodes function, support Episode Group. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_MediaInfo_Json_Root_Folder" xml:space="preserve">
-    <value>Optional MediaInfo JSON Root Folder</value>
+    <value>MediaInfo JSON Folder</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
-    <value>Shared by extraction, backup and restore tasks; leave empty to store beside the media file. On Windows, drive/UNC subfolders are created automatically.</value>
+    <value>Shared by extraction, backup and restore; blank uses the media folder.</value>
   </data>
   <data name="ClearChapterMarkersTask_Name_Clear_Episode_Intros" xml:space="preserve">
     <value>Clear Episode Intros</value>
@@ -861,10 +861,10 @@
     <value>No Intro Marker Protect</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_Capture_Offset" xml:space="preserve">
-    <value>Customize Image Capture Position</value>
+    <value>Capture Position (%)</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_capture_position_as_a_percentage_of_runtime__Default_is_10_" xml:space="preserve">
-    <value>Image capture offset as a percentage of runtime. It must be between 10 and 90. Default is 10.</value>
+    <value>Position as a percentage of runtime; range 10–90, default 10.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Media_Info_Exclude_Keywords" xml:space="preserve">
     <value>Media Info Exclude Keywords</value>
@@ -882,13 +882,13 @@
     <value>Enable ISO Extraction</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>Include local .iso files and strm/http remote ISO streams in media info extraction. On Windows the main title is resolved via OS mount; on Linux/Docker the plugin parses it with the built-in UDF reader (a custom ffprobe is required). Chapters are read from the MPLS playlist for both local and remote ISOs (remote reads on demand over HTTP Range). Remote ISO image capture is not supported. Default is OFF.</value>
+    <value>Include local/remote ISOs. Windows uses OS mount; Linux/Docker requires a custom ffprobe. Remote ISO capture is unsupported. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>Clear Embedded Metadata</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Strip_embedded_metadata_from_movie_and_episode_probe_results__Default_is_ON_" xml:space="preserve">
-    <value>Remove metadata embedded in the media container (name, overview, premiere date, production year, studios, tags, artists, genres) from movie and episode probe results, so it does not leak into item metadata. Default is ON.</value>
+    <value>Remove embedded container metadata to avoid polluting item metadata. Default is ON.</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Video_Thumbnail_Exclude_Keywords" xml:space="preserve">
     <value>Video Thumbnail Exclude Keywords</value>
@@ -906,13 +906,13 @@
     <value>Media Info Extraction Timeout</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Per_item_extraction_timeout_in_milliseconds__0_disables_the_timeout__Default_is_0_" xml:space="preserve">
-    <value>Per-item extraction timeout in milliseconds. 0 disables the timeout. Default is 0.</value>
+    <value>Per-item timeout in ms; 0 means unlimited. Default is 0.</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Image_Extraction_Timeout_Multiplier" xml:space="preserve">
     <value>Image Extraction Timeout Multiplier</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Multiplier_applied_to_the_extraction_timeout_when_image_capture_runs_for_the_item__Default_is_1_" xml:space="preserve">
-    <value>Multiplier applied to the extraction timeout when image capture runs for the item. Default is 1.</value>
+    <value>Multiplier applied to the timeout during image capture. Default is 1.</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnhanceNotification_Enhance_Notification" xml:space="preserve">
     <value>Notification Enhanced</value>
@@ -1158,7 +1158,7 @@
     <value>Image Capture Post Processing</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_" xml:space="preserve">
-    <value>Post-process images captured for videos: crop episode stills to 16:9, crop posters to 2:3, or additionally generate a backdrop from the captured frame. Server-generated images only. Default is OFF.</value>
+    <value>Crop to 16:9 or 2:3, or generate a backdrop; leave blank for none.</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping" xml:space="preserve">
     <value>Douban Assist Scraping</value>
@@ -1287,7 +1287,7 @@
     <value>Update failed. Check error details in admin dashboard.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_Only_restore_media_info__chapters__and_video_thumbnails_from_JSON_or_BIF__skipping_extraction__Default_is_OFF_" xml:space="preserve">
-    <value>Only restore media info, chapters and thumbnails from JSON/BIF during extraction; no probing.</value>
+    <value>Restore only from JSON/BIF; no probing.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_MediaInfo_Restore_Mode" xml:space="preserve">
     <value>Restore Only (Skip Probing)</value>
@@ -1488,19 +1488,19 @@
     <value>Enable HDR tagging</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
-    <value>Tags HDR Vivid (CUVA) and dual-layer Dolby Vision titles. Both toggles below stop working when this is off. Requires a server restart. Default is OFF.</value>
+    <value>Tag HDR Vivid and dual-layer Dolby Vision; restart required. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
     <value>Tag dual-layer Dolby Vision as Profile 7</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
-    <value>Detects dual-layer Dolby Vision (BL + 1080p enhancement layer); Emby then shows Profile 7.6 (Bluray). That is the only Profile 7 label Emby has, and it does not distinguish FEL from MEL. Turn this off if some players fail to play or show a black screen.</value>
+    <value>Mark the 1080p enhancement layer as Profile 7.6; Emby does not distinguish FEL/MEL. Disable if playback fails.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>Show HDR Vivid label</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
-    <value>When the source carries CUVA dynamic metadata, the video range label shows as HDR Vivid. CUVA is only present in video frames, not in Emby's probe result, so one extra frame is read for HDR sources (once per item).</value>
+    <value>Detect CUVA metadata; HDR sources read one extra frame. Default is ON.</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>Persistence</value>
@@ -1509,22 +1509,22 @@
     <value>Auto Catch-up</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan" xml:space="preserve">
-    <value>Auto extract after library scan</value>
+    <value>Fill After Scan</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_" xml:space="preserve">
-    <value>After each library scan, automatically extract items that still lack media info. Default is ON.</value>
+    <value>Extract missing media info after scanning. Default is ON.</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items" xml:space="preserve">
-    <value>Auto retry failed items</value>
+    <value>Retry Failures</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_" xml:space="preserve">
-    <value>Items that failed or were temporarily unreachable are recorded and retried on the next scan. Default is ON.</value>
+    <value>Retry failed items on the next scan. Default is ON.</value>
   </data>
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts" xml:space="preserve">
     <value>Max retry attempts</value>
   </data>
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
-    <value>Maximum retry attempts per item; items exceeding this limit are removed from the queue. Default is 3.</value>
+    <value>Items exceeding this limit leave the retry queue. Default is 3.</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_OnDemand" xml:space="preserve">
     <value>On-Demand Extraction</value>
@@ -1533,13 +1533,13 @@
     <value>Extract When Opening Details</value>
   </data>
   <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_" xml:space="preserve">
-    <value>Extract media info in the background when opening a detail page for an item that has none. Default is OFF.</value>
+    <value>Extract in the background when a detail page finds missing media info. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback" xml:space="preserve">
     <value>Preload Next Episode During Playback</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_" xml:space="preserve">
-    <value>Extract media info for the next episode in the background while playing. Default is OFF.</value>
+    <value>Extract the next episode's media info in the background during playback. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>Extraction Performance</value>

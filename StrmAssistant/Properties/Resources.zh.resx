@@ -18,10 +18,10 @@
     <value>电影洗版或剧集有更新后实时提取媒体信息以及片头片尾标记探测或同步，默认关闭。</value>
   </data>
   <data name="PluginOptions_IncludeExtra_Include_Extra" xml:space="preserve">
-    <value>包含分集和附加内容</value>
+    <value>包含分集与附加内容</value>
   </data>
   <data name="PluginOptions_IncludeExtra_Include_media_extras_to_extract__Default_is_False_" xml:space="preserve">
-    <value>提取电影或剧集的分集和附加内容的媒体信息，默认关闭。</value>
+    <value>同时提取分集与附加内容。默认关闭。</value>
   </data>
   <data name="PluginOptions_StrmOnly_Strm_Only" xml:space="preserve">
     <value>仅支持 STRM</value>
@@ -42,25 +42,25 @@
     <value>媒体库范围</value>
   </data>
   <data name="PluginOptions_LibraryScope_Library_scope_to_extract__Blank_includes_all_" xml:space="preserve">
-    <value>媒体库范围，留空包含所有。注意：提取视频预览缩略图前，需先在 Emby 媒体库设置中把「生成视频预览缩略图」设为计划任务。</value>
+    <value>留空包含全部媒体库；视频缩略图需在 Emby 媒体库设置中启用计划任务。</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_Probe_Path" xml:space="preserve">
-    <value>自定义 Probe 路径</value>
+    <value>自定义 ffprobe</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_ffprobe_binary_used_for_media_info_extraction__leave_empty_to_use_the_Emby_builtin__supports_rffmpeg_wrapper_for_distributed_extraction_" xml:space="preserve">
-    <value>用于媒体信息提取的自定义 ffprobe 二进制（留空使用 Emby 内置）。支持 rffmpeg 包装器实现分布式提取。</value>
+    <value>留空使用 Emby 内置；支持 rffmpeg。</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomEncoderPath_Custom_Encoder_Path" xml:space="preserve">
-    <value>自定义 Encoder 路径</value>
+    <value>自定义 ffmpeg</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomEncoderPath_Custom_ffmpeg_binary_used_for_image_capture_and_thumbnails__leave_empty_to_use_the_Emby_builtin__a_build_with_libplacebo_fixes_DV_P5_green_tint_" xml:space="preserve">
-    <value>用于截图和视频缩略图的自定义 ffmpeg 二进制（留空使用 Emby 内置）。带 libplacebo 的构建可修复 DV P5 截图发绿。</value>
+    <value>截图与缩略图使用；留空使用内置。</value>
   </data>
   <data name="PluginOptions_EnableImageCapture_Enable_Image_Capture" xml:space="preserve">
-    <value>视频截图预览缩略图增强</value>
+    <value>视频截图</value>
   </data>
   <data name="PluginOptions_EnableImageCapture_Perform_image_capture_for_videos_without_primary_image__Default_is_False_" xml:space="preserve">
-    <value>解锁 STRM 视频截图，预览缩略图 BIF，跳过内嵌封面，默认关闭。</value>
+    <value>为无主图视频截图，支持 STRM 与 BIF 预览。默认关闭。</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
     <value>播放行为探测</value>
@@ -141,7 +141,7 @@
     <value>独占媒体信息提取</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Only_allow_this_plugin_to_extract_media_info__ffprobe__and_capture_image__ffmpeg___Default_is_OFF_" xml:space="preserve">
-    <value>接管媒体信息提取 (ffprobe) 以及视频截图 (ffmpeg)，全媒体库生效，默认关闭。</value>
+    <value>由插件接管 ffprobe/ffmpeg，全库生效。默认关闭。</value>
   </data>
   <data name="Repo_Link" xml:space="preserve">
     <value>项目链接</value>
@@ -378,7 +378,7 @@
     <value>媒体信息持久化（默认）</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_media_info_in_JSON_file__Default_is_OFF_" xml:space="preserve">
-    <value>提取/入库时优先从 JSON 恢复；缺 JSON 时探测并写入；入库时已有媒体信息也会写入备份。</value>
+    <value>优先从 JSON 恢复；缺失时探测并写入。</value>
   </data>
   <data name="UIFunctionOptions_EnhanceMissingEpisodes_Missing_Episodes_Enhanced" xml:space="preserve">
     <value>查看缺少的集增强</value>
@@ -387,10 +387,10 @@
     <value>查看缺少的集支持 TMDB 以及剧集组，默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_MediaInfo_Json_Root_Folder" xml:space="preserve">
-    <value>可选媒体信息 JSON 根目录</value>
+    <value>媒体信息 JSON 目录</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
-    <value>提取、备份任务、恢复任务共用此根目录；留空则与媒体文件同目录。Windows 下会自动按盘符/UNC 建立子目录。</value>
+    <value>提取、备份、恢复共用；留空与媒体文件同目录。</value>
   </data>
   <data name="ClearChapterMarkersTask_Name_Clear_Episode_Intros" xml:space="preserve">
     <value>清除片头片尾标记</value>
@@ -774,10 +774,10 @@
     <value>无片头标记保护</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_Capture_Offset" xml:space="preserve">
-    <value>自定义视频截图位置</value>
+    <value>截图位置（%）</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_capture_position_as_a_percentage_of_runtime__Default_is_10_" xml:space="preserve">
-    <value>视频截图的偏移位置，基于时长的百分比，必须在 10 至 90 之间，默认为 10。</value>
+    <value>按片长百分比截取，范围 10–90，默认 10。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Media_Info_Exclude_Keywords" xml:space="preserve">
     <value>媒体信息排除关键字</value>
@@ -795,13 +795,13 @@
     <value>启用 ISO 提取</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>把本地 .iso 文件与 strm/http 远程 ISO 流纳入媒体信息提取。Windows 由系统挂载定位正片；Linux/Docker 由插件内置 UDF 解析（需配合自定义 ffprobe）。本地与远程 ISO 都会从 MPLS 播放列表补写章节（远程按需 HTTP Range 读取）；远程 ISO 不支持截图。默认关闭。</value>
+    <value>本地/远程 ISO 纳入提取；Windows 自动挂载，Linux/Docker 需自定义 ffprobe。远程 ISO 不支持截图。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>清除内嵌元数据</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Strip_embedded_metadata_from_movie_and_episode_probe_results__Default_is_ON_" xml:space="preserve">
-    <value>在影片与剧集的探测结果中移除媒体容器内嵌的元数据（名称、简介、首映日期、制作年份、制片公司、标签、艺人、类型），避免其污染条目元数据。默认开启。</value>
+    <value>移除容器内嵌元数据，避免污染条目信息。默认开启。</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Video_Thumbnail_Exclude_Keywords" xml:space="preserve">
     <value>视频缩略图排除关键字</value>
@@ -819,13 +819,13 @@
     <value>媒体信息提取超时</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Per_item_extraction_timeout_in_milliseconds__0_disables_the_timeout__Default_is_0_" xml:space="preserve">
-    <value>单条目提取超时（毫秒）。0 表示不启用超时。默认为 0。</value>
+    <value>单条目超时（毫秒）；0 不限制。默认 0。</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Image_Extraction_Timeout_Multiplier" xml:space="preserve">
     <value>截图提取超时倍数</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Multiplier_applied_to_the_extraction_timeout_when_image_capture_runs_for_the_item__Default_is_1_" xml:space="preserve">
-    <value>条目需要截图时，提取超时按此倍数放大。默认为 1。</value>
+    <value>截图时按此倍数放大超时。默认 1。</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnhanceNotification_Enhance_Notification" xml:space="preserve">
     <value>通知系统增强</value>
@@ -1071,7 +1071,7 @@
     <value>截图后处理</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_" xml:space="preserve">
-    <value>对无主图视频截帧生成的图片做后处理：可将剧集图裁剪为 16:9、海报裁剪为 2:3，或额外从截帧生成背景图。仅处理服务器生成的图片。默认关闭。</value>
+    <value>裁剪为 16:9 或 2:3，或生成背景图；留空不处理。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping" xml:space="preserve">
     <value>豆瓣辅助刮削</value>
@@ -1200,7 +1200,7 @@
     <value>更新失败，请至控制台查看详细错误信息。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_Only_restore_media_info__chapters__and_video_thumbnails_from_JSON_or_BIF__skipping_extraction__Default_is_OFF_" xml:space="preserve">
-    <value>提取时只从 JSON/BIF 恢复媒体信息、章节和缩略图，不探测。</value>
+    <value>只从 JSON/BIF 恢复，不探测。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_MediaInfo_Restore_Mode" xml:space="preserve">
     <value>仅恢复（跳过提取）</value>
@@ -1401,19 +1401,19 @@
     <value>启用 HDR 标注</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
-    <value>为 HDR Vivid（CUVA）和双层杜比视界片源打画质标签。关闭后两项都不生效。修改后需重启服务器，默认关闭。</value>
+    <value>为 HDR Vivid 与双层杜比视界打画质标签；修改后需重启。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
     <value>标注双层杜比视界为 Profile 7</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
-    <value>识别双层杜比视界（BL + 1080p 增强层），Emby 会显示为 Profile 7.6 (Bluray) —— Emby 只有这一个 Profile 7 标签，不区分 FEL / MEL。若某些播放器因此无法播放或黑屏，可关闭此项。</value>
+    <value>将 1080p 增强层标为 Profile 7.6；Emby 不区分 FEL/MEL。播放异常时关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>显示 HDR Vivid 标签</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
-    <value>片源含 CUVA 动态元数据时，画质标签显示为「HDR Vivid」。CUVA 只写在视频帧里、探测结果拿不到，因此会对 HDR 片源额外读一帧确认（每条目只做一次）。</value>
+    <value>检测 CUVA 元数据；HDR 片源会额外读一帧。默认开启。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>信息持久化</value>
@@ -1422,22 +1422,22 @@
     <value>自动补漏</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan" xml:space="preserve">
-    <value>扫库后自动补提取</value>
+    <value>扫库后补全</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_" xml:space="preserve">
-    <value>每次媒体库扫描结束后，自动提取仍缺少媒体信息的条目。默认开启。</value>
+    <value>扫描后提取缺失媒体信息。默认开启。</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items" xml:space="preserve">
-    <value>自动重试失败的提取</value>
+    <value>失败重试</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_" xml:space="preserve">
-    <value>提取失败或文件暂时不可达的条目会记录下来，在下次扫库时重试。默认开启。</value>
+    <value>失败条目在下次扫库时重试。默认开启。</value>
   </data>
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts" xml:space="preserve">
     <value>重试次数上限</value>
   </data>
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
-    <value>单条目的最大重试次数，超过后移出重试队列。默认 3。</value>
+    <value>超过后移出重试队列。默认 3 次。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_OnDemand" xml:space="preserve">
     <value>按需提取</value>
@@ -1446,13 +1446,13 @@
     <value>打开详情页时提取</value>
   </data>
   <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_" xml:space="preserve">
-    <value>条目缺少媒体信息时，打开详情页后在后台提取。默认关闭。</value>
+    <value>详情页发现缺少媒体信息时后台提取。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback" xml:space="preserve">
     <value>播放时预加载下一集</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_" xml:space="preserve">
-    <value>播放剧集时，在后台为下一集提取媒体信息。默认关闭。</value>
+    <value>播放时后台提取下一集媒体信息。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>提取性能</value>

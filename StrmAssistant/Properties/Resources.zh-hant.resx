@@ -21,28 +21,28 @@
     <value>電影洗版或劇集有更新後即時擷取媒體資訊以及片頭片尾標記探測或同步，預設為關閉。</value>
   </data>
   <data name="PluginOptions_IncludeExtra_Include_Extra" xml:space="preserve">
-    <value>包含分集和附加內容</value>
+    <value>包含分集與附加內容</value>
   </data>
   <data name="PluginOptions_IncludeExtra_Include_media_extras_to_extract__Default_is_False_" xml:space="preserve">
-    <value>提取電影或劇集的分集和附加內容的媒體訊息，預設為關閉。</value>
+    <value>同時擷取分集與附加內容。預設關閉。</value>
   </data>
   <data name="PluginOptions_LibraryScope_Library_Scope" xml:space="preserve">
     <value>媒體庫範圍</value>
   </data>
   <data name="PluginOptions_LibraryScope_Library_scope_to_extract__Blank_includes_all_" xml:space="preserve">
-    <value>媒體庫範圍，留空包含所有。注意：擷取影片預覽縮圖前，需先在 Emby 媒體庫設定中把「產生影片預覽縮圖」設為計畫任務。</value>
+    <value>留空包含全部媒體庫；影片縮圖需在 Emby 媒體庫設定中啟用計畫任務。</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_Probe_Path" xml:space="preserve">
-    <value>自訂 Probe 路徑</value>
+    <value>自訂 ffprobe</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_ffprobe_binary_used_for_media_info_extraction__leave_empty_to_use_the_Emby_builtin__supports_rffmpeg_wrapper_for_distributed_extraction_" xml:space="preserve">
-    <value>用於媒體資訊提取的自訂 ffprobe 二進位（留空使用 Emby 內建）。支援 rffmpeg 包裝器實現分散式提取。</value>
+    <value>留空使用 Emby 內建；支援 rffmpeg。</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomEncoderPath_Custom_Encoder_Path" xml:space="preserve">
-    <value>自訂 Encoder 路徑</value>
+    <value>自訂 ffmpeg</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomEncoderPath_Custom_ffmpeg_binary_used_for_image_capture_and_thumbnails__leave_empty_to_use_the_Emby_builtin__a_build_with_libplacebo_fixes_DV_P5_green_tint_" xml:space="preserve">
-    <value>用於截圖和影片縮圖的自訂 ffmpeg 二進位（留空使用 Emby 內建）。帶 libplacebo 的建置可修復 DV P5 截圖發綠。</value>
+    <value>供截圖與縮圖使用；留空使用內建。</value>
   </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count" xml:space="preserve">
     <value>主最大並發線程數</value>
@@ -57,10 +57,10 @@
     <value>僅處理 STRM</value>
   </data>
   <data name="PluginOptions_EnableImageCapture_Enable_Image_Capture" xml:space="preserve">
-    <value>影片截圖預覽縮圖增強</value>
+    <value>影片截圖</value>
   </data>
   <data name="PluginOptions_EnableImageCapture_Perform_image_capture_for_videos_without_primary_image__Default_is_False_" xml:space="preserve">
-    <value>解鎖 STRM 影片截圖，預覽縮圖 BIF，跳過內嵌封面，預設為關閉。</value>
+    <value>為無主圖影片截圖，支援 STRM 與 BIF 預覽。預設關閉。</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
     <value>播放行為偵測</value>
@@ -141,7 +141,7 @@
     <value>獨佔媒體訊息擷取</value>
   </data>
   <data name="ModOptions_ExclusiveExtract_Only_allow_this_plugin_to_extract_media_info__ffprobe__and_capture_image__ffmpeg___Default_is_OFF_" xml:space="preserve">
-    <value>接管媒體資訊提取 (ffprobe) 以及視訊截圖 (ffmpeg)，全媒體庫生效，預設為關閉。</value>
+    <value>由外掛接管 ffprobe/ffmpeg，全媒體庫生效。預設關閉。</value>
   </data>
   <data name="Repo_Link" xml:space="preserve">
     <value>項目連結</value>
@@ -378,7 +378,7 @@
     <value>媒體訊息持久化（預設）</value>
   </data>
   <data name="MediaInfoExtractOptions_PersistMediaInfo_Persist_media_info_in_JSON_file__Default_is_OFF_" xml:space="preserve">
-    <value>擷取/入庫時優先從 JSON 恢復；缺 JSON 時探測並寫入；入庫時已有媒體訊息也會寫入備份。</value>
+    <value>優先從 JSON 恢復；缺少時探測並寫入。</value>
   </data>
   <data name="UIFunctionOptions_EnhanceMissingEpisodes_Missing_Episodes_Enhanced" xml:space="preserve">
     <value>查看缺少的集增強</value>
@@ -387,10 +387,10 @@
     <value>查看缺少的集支援 TMDB 以及劇集組，預設為關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_MediaInfo_Json_Root_Folder" xml:space="preserve">
-    <value>可選媒體資訊 JSON 根目錄</value>
+    <value>媒體資訊 JSON 目錄</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
-    <value>擷取、備份任務、恢復任務共用此根目錄；留空則與媒體檔案同目錄。Windows 下會自動按磁碟機/UNC 建立子目錄。</value>
+    <value>擷取、備份、恢復共用；留空與媒體檔案同目錄。</value>
   </data>
   <data name="ClearChapterMarkersTask_Name_Clear_Episode_Intros" xml:space="preserve">
     <value>清除片頭片尾標記</value>
@@ -774,10 +774,10 @@
     <value>無片頭標記保護</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_Capture_Offset" xml:space="preserve">
-    <value>自訂影片截圖位置</value>
+    <value>截圖位置（%）</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_capture_position_as_a_percentage_of_runtime__Default_is_10_" xml:space="preserve">
-    <value>視訊截圖的偏移位置，基於時長的百分比，必須在 10 至 90 之間，預設為 10。</value>
+    <value>依片長百分比截取，範圍 10–90，預設 10。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExcludeKeywords_Media_Info_Exclude_Keywords" xml:space="preserve">
     <value>媒體資訊排除關鍵字</value>
@@ -795,13 +795,13 @@
     <value>啟用 ISO 擷取</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>將本機 .iso 檔案與 strm/http 遠端 ISO 串流納入媒體資訊擷取。Windows 由系統掛載定位正片；Linux/Docker 由外掛內建 UDF 解析（需配合自訂 ffprobe）。本機與遠端 ISO 都會從 MPLS 播放清單補寫章節（遠端按需 HTTP Range 讀取）；遠端 ISO 不支援截圖。預設關閉。</value>
+    <value>本機/遠端 ISO 納入擷取；Windows 自動掛載，Linux/Docker 需自訂 ffprobe。遠端 ISO 不支援截圖。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>清除內嵌中繼資料</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Strip_embedded_metadata_from_movie_and_episode_probe_results__Default_is_ON_" xml:space="preserve">
-    <value>在影片與劇集的探測結果中移除媒體容器內嵌的中繼資料（名稱、簡介、首映日期、製作年份、製作公司、標籤、藝人、類型），避免其污染項目中繼資料。預設為開啟。</value>
+    <value>移除容器內嵌中繼資料，避免污染項目資訊。預設開啟。</value>
   </data>
   <data name="MediaInfoExtractOptions_VideoThumbnailExcludeKeywords_Video_Thumbnail_Exclude_Keywords" xml:space="preserve">
     <value>影片縮圖排除關鍵字</value>
@@ -819,13 +819,13 @@
     <value>媒體資訊提取逾時</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoExtractionTimeoutMs_Per_item_extraction_timeout_in_milliseconds__0_disables_the_timeout__Default_is_0_" xml:space="preserve">
-    <value>單一條目提取逾時（毫秒）。0 表示不啟用逾時。預設為 0。</value>
+    <value>單一條目逾時（毫秒）；0 不限制。預設 0。</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Image_Extraction_Timeout_Multiplier" xml:space="preserve">
     <value>截圖提取逾時倍數</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageExtractionTimeoutMultiplier_Multiplier_applied_to_the_extraction_timeout_when_image_capture_runs_for_the_item__Default_is_1_" xml:space="preserve">
-    <value>條目需要截圖時，提取逾時按此倍數放大。預設為 1。</value>
+    <value>截圖時依此倍數放大逾時。預設 1。</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnhanceNotification_Enhance_Notification" xml:space="preserve">
     <value>通知系統增強</value>
@@ -1071,7 +1071,7 @@
     <value>截圖後處理</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_" xml:space="preserve">
-    <value>對無主圖影片截幀生成的圖片做後處理：可將劇集圖裁剪為 16:9、海報裁剪為 2:3，或額外從截幀生成背景圖。僅處理伺服器生成的圖片。預設為關閉。</value>
+    <value>裁剪為 16:9 或 2:3，或產生背景圖；留空不處理。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping" xml:space="preserve">
     <value>豆瓣輔助刮削</value>
@@ -1200,7 +1200,7 @@
     <value>更新失敗，請至控制台查看詳細錯誤訊息。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_Only_restore_media_info__chapters__and_video_thumbnails_from_JSON_or_BIF__skipping_extraction__Default_is_OFF_" xml:space="preserve">
-    <value>擷取時僅從 JSON/BIF 恢復媒體訊息、章節和縮圖，不探測。</value>
+    <value>僅從 JSON/BIF 恢復，不探測。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_MediaInfo_Restore_Mode" xml:space="preserve">
     <value>僅恢復（跳過擷取）</value>
@@ -1401,19 +1401,19 @@
     <value>啟用 HDR 標註</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
-    <value>為 HDR Vivid（CUVA）和雙層杜比視界片源打畫質標籤。關閉後兩項都不生效。修改後需重新啟動伺服器，預設關閉。</value>
+    <value>為 HDR Vivid 與雙層杜比視界標註畫質；修改後需重啟。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
     <value>標註雙層杜比視界為 Profile 7</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
-    <value>辨識雙層杜比視界（BL + 1080p 增強層），Emby 會顯示為 Profile 7.6 (Bluray) —— Emby 只有這一個 Profile 7 標籤，不區分 FEL / MEL。若某些播放器因此無法播放或黑屏，可關閉此項。</value>
+    <value>將 1080p 增強層標為 Profile 7.6；Emby 不區分 FEL/MEL。播放異常時關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>顯示 HDR Vivid 標籤</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
-    <value>片源含 CUVA 動態中繼資料時，畫質標籤顯示為「HDR Vivid」。CUVA 只寫在視訊幀裡、探測結果拿不到，因此會對 HDR 片源額外讀一幀確認（每條目只做一次）。</value>
+    <value>偵測 CUVA 中繼資料；HDR 片源會額外讀取一幀。預設開啟。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_MediaInfoPersist" xml:space="preserve">
     <value>資訊持久化</value>
@@ -1422,22 +1422,22 @@
     <value>自動補漏</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoExtractOnScan_Auto_Extract_After_Library_Scan" xml:space="preserve">
-    <value>掃庫後自動補提取</value>
+    <value>掃庫後補全</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoExtractOnScan_When_enabled__items_missing_media_info_are_extracted_automatically_after_each_library_scan__Default_is_ON_" xml:space="preserve">
-    <value>每次媒體庫掃描結束後，自動提取仍缺少媒體資訊的條目。預設開啟。</value>
+    <value>掃描後擷取缺少的媒體資訊。預設開啟。</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoRetryFailed_Auto_Retry_Failed_Items" xml:space="preserve">
-    <value>自動重試失敗的提取</value>
+    <value>失敗重試</value>
   </data>
   <data name="MediaInfoExtractOptions_AutoRetryFailed_Failed_or_unreachable_items_are_recorded_and_retried_on_the_next_scan__Default_is_ON_" xml:space="preserve">
-    <value>提取失敗或檔案暫時無法存取的條目會記錄下來，於下次掃庫時重試。預設開啟。</value>
+    <value>失敗條目於下次掃庫時重試。預設開啟。</value>
   </data>
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Max_Retry_Attempts" xml:space="preserve">
     <value>重試次數上限</value>
   </data>
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
-    <value>單一條目的最大重試次數，超過後移出重試佇列。預設 3。</value>
+    <value>超過後移出重試佇列。預設 3 次。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_OnDemand" xml:space="preserve">
     <value>按需擷取</value>
@@ -1446,13 +1446,13 @@
     <value>開啟詳情頁時擷取</value>
   </data>
   <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_" xml:space="preserve">
-    <value>條目缺少媒體資訊時，開啟詳情頁後在背景擷取。預設關閉。</value>
+    <value>詳情頁發現缺少媒體資訊時背景擷取。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback" xml:space="preserve">
     <value>播放時預載下一集</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_" xml:space="preserve">
-    <value>播放劇集時，在背景為下一集擷取媒體資訊。預設關閉。</value>
+    <value>播放時背景擷取下一集媒體資訊。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>提取效能</value>

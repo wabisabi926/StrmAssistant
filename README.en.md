@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.71** |
+| Plugin Version | **3.0.0.72** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -25,7 +25,21 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.66 ~ v3.0.0.71)
+## Latest Optimizations (v3.0.0.66 ~ v3.0.0.72)
+
+✅ **Home and settings redesign (3.0.0.72)**
+- Home is now a dashboard: a one-line runtime overview for memory, tasks, queue and index; one-click common tasks; separate Config Transfer and Maintenance groups
+- Settings groups follow workflows; copy is now short titles plus one-line descriptions, with storage paths unchanged
+
+✅ **Per-library play progress (3.0.0.72)**
+- Track progress and favorites separately when a title exists in multiple libraries; restart and run 'Rebuild Per-Library Progress Index' after toggling
+
+✅ **Server-side version label (3.0.0.72)**
+- Version labels are written into `MediaSourceInfo.Name`, visible in Kodi, Apple TV and mobile apps; audio badges support Atmos / DTS:X
+
+✅ **Config, cache and safety (3.0.0.72)**
+- Config export/import with secrets omitted, metadata cache TTL and read-only verification, dry-run for destructive tasks
+- On-demand media info extraction and next-episode prefetch; new 'Clean Expired Metadata Cache' task
 
 ✅ **Douban rating backfill (3.0.0.71)**
 - Cache hits now also write the Douban rating, so Kodi no longer misses it when the cached score exists
@@ -197,10 +211,10 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 CI can be triggered two ways:
 
-- **Automatic on tag push**: `git push origin v3.0.0.71` builds and publishes that version (the tag name is validated against the project version)
+- **Automatic on tag push**: `git push origin v3.0.0.72` builds and publishes that version (the tag name is validated against the project version)
 - **Manually**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`
 
-When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.71`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
+When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.72`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
 
 > Always use the filename `StrmAssistantPlus.dll`. If an older copy such as `StrmAssistant.dll` is still in the plugins folder, delete it — Emby loads both and you end up with a duplicate plugin.
 

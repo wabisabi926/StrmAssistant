@@ -16,7 +16,7 @@
 
 | 项目 | 说明 |
 |---|---|
-| 插件版本 | **3.0.0.71** |
+| 插件版本 | **3.0.0.72** |
 | 最低 Emby 版本 | 4.9.1.0 |
 | 适配展示版本 | 4.10.2.0+ |
 | 实测版本 | 4.10.2.0 |
@@ -25,7 +25,21 @@
 
 > 各版本详细变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 最新优化 (v3.0.0.66 ~ v3.0.0.71)
+## 最新优化 (v3.0.0.66 ~ v3.0.0.72)
+
+✅ **首页与设置页重构（3.0.0.72）**
+- 首页改为仪表盘：运行概览一行显示内存、任务、队列与索引；常用任务一键触发，配置迁移与维护工具独立分组
+- 设置页按任务收敛分组，文案统一为短标题 + 单句说明，字段存储路径不变
+
+✅ **按库播放进度（3.0.0.72）**
+- 同一影片/剧集在不同库各有一份时分别记录进度与收藏；切换后重启并运行「重建按库播放进度索引」
+
+✅ **服务端版本标签（3.0.0.72）**
+- 多版本标签写入 `MediaSourceInfo.Name`，Kodi、Apple TV 与手机 App 均可见；音轨标识支持 Atmos / DTS:X
+
+✅ **配置、缓存与安全（3.0.0.72）**
+- 配置导出/导入（敏感字段默认省略）、元数据缓存 TTL 与只读对账、破坏性任务演练模式
+- 媒体信息支持详情页按需提取与下一集预取，新增计划任务「清理过期元数据缓存」
 
 ✅ **豆瓣评分回填（3.0.0.71）**
 - 豆瓣缓存命中时也补写评分，Kodi 端不再出现“缓存有分、侧栏没分”
@@ -197,10 +211,10 @@
 
 CI 支持两种触发方式：
 
-- **推送标签自动构建**：`git push origin v3.0.0.71` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
+- **推送标签自动构建**：`git push origin v3.0.0.72` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
 - **手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.71`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.72`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
 
 > 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 

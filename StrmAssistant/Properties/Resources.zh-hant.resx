@@ -1682,6 +1682,42 @@
   <data name="Sessions_None" xml:space="preserve">
     <value>目前沒有連線的工作階段</value>
   </data>
+  <data name="GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder" xml:space="preserve">
+    <value>設定匯出/匯入目錄</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransferFolder_Description" xml:space="preserve">
+    <value>留空使用外掛設定目錄。匯出寫入 StrmAssistant-Config.json，匯入讀取同名檔案。</value>
+  </data>
+  <data name="GeneralOptions_ExportConfig_Export_Config" xml:space="preserve">
+    <value>匯出設定</value>
+  </data>
+  <data name="GeneralOptions_ImportConfig_Import_Config" xml:space="preserve">
+    <value>匯入設定</value>
+  </data>
+  <data name="GeneralOptions_ImportConfig_Confirm" xml:space="preserve">
+    <value>將用此檔案覆蓋目前設定，確定繼續？</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache" xml:space="preserve">
+    <value>核對中繼資料快取</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_NotEnabled" xml:space="preserve">
+    <value>中繼資料快取未啟用或目錄不存在。</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_Result" xml:space="preserve">
+    <value>快取 {0} 檔案，過期 {1}；override {2}，patches {3}；孤兒 {4}，缺少快取 {5}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Exported" xml:space="preserve">
+    <value>設定已匯出至：{0}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_FileMissing" xml:space="preserve">
+    <value>找不到設定檔：{0}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Imported" xml:space="preserve">
+    <value>設定匯入：成功 {0} 項，拒絕 {1} 項，失敗 {2} 項，回讀不一致 {3} 項</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Failed" xml:space="preserve">
+    <value>設定操作失敗：{0}</value>
+  </data>
   <data name="GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache" xml:space="preserve">
     <value>清理元資料快取</value>
   </data>

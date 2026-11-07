@@ -1,6 +1,7 @@
 ﻿using Emby.Media.Common.Extensions;
 using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Elements;
+using MediaBrowser.Model.Attributes;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
 
@@ -15,6 +16,30 @@ namespace StrmAssistant.Options
     {
         [DisplayNameL("GeneralOptions_Group_RuntimeStatus", typeof(Resources))]
         public override string EditorTitle => Resources.GeneralOptions_Group_RuntimeStatus;
+
+        [DisplayNameL("GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder", typeof(Resources))]
+        [DescriptionL("GeneralOptions_ConfigTransferFolder_Description", typeof(Resources))]
+        [EditFolderPicker]
+        public string ConfigTransferFolder { get; set; } = string.Empty;
+
+        public ButtonItem ExportConfigButton =>
+            new ButtonItem(Resources.GeneralOptions_ExportConfig_Export_Config)
+            {
+                Icon = IconNames.code, Data1 = "ExportConfig"
+            };
+
+        public ButtonItem ImportConfigButton =>
+            new ButtonItem(Resources.GeneralOptions_ImportConfig_Import_Config)
+            {
+                Icon = IconNames.build, Data1 = "ImportConfig",
+                ConfirmationPrompt = Resources.GeneralOptions_ImportConfig_Confirm
+            };
+
+        public ButtonItem VerifyMetadataCacheButton =>
+            new ButtonItem(Resources.GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache)
+            {
+                Icon = IconNames.queue, Data1 = "VerifyMetadataCache"
+            };
 
         public ButtonItem CleanMemoryNowButton =>
             new ButtonItem(Resources.GeneralOptions_CleanMemoryNow_Clean_Memory_Now)

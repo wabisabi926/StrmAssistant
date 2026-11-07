@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using EmbyJsonSerializerOptions = MediaBrowser.Model.Serialization.JsonSerializerOptions;
 
@@ -93,6 +94,30 @@ namespace StrmAssistant.Web.Service
             public List<string> Rejected { get; set; } = new List<string>();
             public List<string> Failed { get; set; } = new List<string>();
             public List<string> Mismatched { get; set; } = new List<string>();
+        }
+
+        /// <summary>供设置页调用：直接生成与 HTTP 端点一致的导出结果。</summary>
+        public static ConfigExportResponse Export() =>
+            (ConfigExportResponse)new ConfigTransferService().Get(new GetConfigExport());
+
+        /// <summary>供设置页调用：把导出结果序列化成可落盘的 JSON。</summary>
+        public static string ExportJson()
+        {
+            return JsonSerializer.Serialize(Export(), new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+        }
+
+        /// <summary>供设置页调用：导入一段 JSON，行为与 HTTP 端点一致。</summary>
+        public static ConfigImportResponse ImportJson(string json)
+        {
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json ?? string.Empty));
+            return (ConfigImportResponse)new ConfigTransferService().Post(new PostConfigImport
+            {
+                RequestStream = stream
+            });
         }
 
         public object Get(GetConfigExport request)

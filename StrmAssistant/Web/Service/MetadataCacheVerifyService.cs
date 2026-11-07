@@ -3,6 +3,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using StrmAssistant.Common;
+using StrmAssistant.Properties;
 using StrmAssistant.Web.Api;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,25 @@ namespace StrmAssistant.Web.Service
             public List<string> MissingMovieCache { get; set; } = new List<string>();
             public List<string> MissingSeriesCache { get; set; } = new List<string>();
             public string Error { get; set; }
+        }
+
+        /// <summary>供设置页调用：执行与 HTTP 端点相同的只读对账。</summary>
+        public static MetadataCacheVerifyResponse Run() =>
+            (MetadataCacheVerifyResponse)new MetadataCacheVerifyService().Get(new GetMetadataCacheVerify());
+
+        public static string BuildSummary(MetadataCacheVerifyResponse response)
+        {
+            if (response == null) return Resources.GeneralOptions_VerifyMetadataCache_NotEnabled;
+            if (!response.Enabled) return Resources.GeneralOptions_VerifyMetadataCache_NotEnabled;
+            if (!string.IsNullOrEmpty(response.Error)) return response.Error;
+
+            var orphans = response.Cache.Orphans.Count + response.Override.Orphans.Count +
+                          response.Patches.Orphans.Count;
+            var missing = response.MissingMovieCache.Count + response.MissingSeriesCache.Count;
+
+            return string.Format(Resources.GeneralOptions_VerifyMetadataCache_Result,
+                response.Cache.Files, response.Cache.ExpiredFiles, response.Override.Files,
+                response.Patches.Files, orphans, missing);
         }
 
         public object Get(GetMetadataCacheVerify request)

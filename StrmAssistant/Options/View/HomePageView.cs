@@ -13,10 +13,13 @@ using StrmAssistant.Mod;
 using StrmAssistant.Options.Store;
 using StrmAssistant.Options.UIBaseClasses.Views;
 using StrmAssistant.Properties;
+using StrmAssistant.Web.Service;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -194,12 +197,29 @@ namespace StrmAssistant.Options.View
                     return Task.FromResult<IPluginUIView>(this);
                 }
 
+                case "ExportConfig":
+                    HandleExportConfig();
+                    PopulateOverview();
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
+
+                case "ImportConfig":
+                    HandleImportConfig();
+                    PopulateOverview();
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
+
+                case "VerifyMetadataCache":
+                    HandleVerifyMetadataCache();
+                    PopulateOverview();
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
+
                 case "ScheduleIndexRebuild":
                     EnhanceChineseSearch.ScheduleIndexRebuild();
                     PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
-
                 case "OptimizeSearchIndex":
                 {
                     var optimizeResult = EnhanceChineseSearch.OptimizeSearchIndex();
@@ -227,6 +247,87 @@ namespace StrmAssistant.Options.View
             }
 
             return base.RunCommand(itemId, commandId, data);
+        }
+
+        private const string ConfigFileName = "StrmAssistant-Config.json";
+
+        private string ResolveConfigFolder()
+        {
+            var folder = Plugin.Instance.MainOptionsStore.GetOptions().RuntimeStatus.ConfigTransferFolder;
+            return string.IsNullOrWhiteSpace(folder)
+                ? Plugin.Instance.ApplicationPaths.PluginConfigurationsPath
+                : folder;
+        }
+
+        private void HandleExportConfig()
+        {
+            try
+            {
+                var folder = ResolveConfigFolder();
+                Directory.CreateDirectory(folder);
+                var path = Path.Combine(folder, ConfigFileName);
+                File.WriteAllText(path, ConfigTransferService.ExportJson(), new UTF8Encoding(false));
+
+                var message = string.Format(Resources.GeneralOptions_ConfigTransfer_Exported, path);
+                Plugin.Instance.Logger.Info("HomePage - " + message);
+                Plugin.NotificationApi?.SendMessageToAdmins(message, 12000);
+            }
+            catch (Exception e)
+            {
+                HandleConfigTransferError(e);
+            }
+        }
+
+        private void HandleImportConfig()
+        {
+            try
+            {
+                var path = Path.Combine(ResolveConfigFolder(), ConfigFileName);
+                if (!File.Exists(path))
+                {
+                    var missing = string.Format(Resources.GeneralOptions_ConfigTransfer_FileMissing, path);
+                    Plugin.NotificationApi?.SendMessageToAdmins(missing, 12000);
+                    return;
+                }
+
+                var result = ConfigTransferService.ImportJson(File.ReadAllText(path, Encoding.UTF8));
+                if (!string.IsNullOrEmpty(result.Error))
+                {
+                    HandleConfigTransferError(new InvalidOperationException(result.Error));
+                    return;
+                }
+
+                var message = string.Format(Resources.GeneralOptions_ConfigTransfer_Imported,
+                    result.ValuesRestored, result.Rejected.Count, result.Failed.Count, result.Mismatched.Count);
+                Plugin.Instance.Logger.Info("HomePage - " + message);
+                Plugin.NotificationApi?.SendMessageToAdmins(message, 12000);
+            }
+            catch (Exception e)
+            {
+                HandleConfigTransferError(e);
+            }
+        }
+
+        private void HandleVerifyMetadataCache()
+        {
+            try
+            {
+                var result = MetadataCacheVerifyService.Run();
+                var message = MetadataCacheVerifyService.BuildSummary(result);
+                Plugin.Instance.Logger.Info("HomePage - " + message);
+                Plugin.NotificationApi?.SendMessageToAdmins(message, 12000);
+            }
+            catch (Exception e)
+            {
+                HandleConfigTransferError(e);
+            }
+        }
+
+        private void HandleConfigTransferError(Exception exception)
+        {
+            var message = string.Format(Resources.GeneralOptions_ConfigTransfer_Failed, exception.Message);
+            Plugin.Instance.Logger.Error("HomePage - " + message);
+            Plugin.NotificationApi?.SendMessageToAdmins(message, 12000);
         }
 
         public override Task<IPluginUIView> OnSaveCommand(string itemId, string commandId, string data)

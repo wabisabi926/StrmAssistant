@@ -1682,6 +1682,42 @@
   <data name="Sessions_None" xml:space="preserve">
     <value>当前没有连接的会话</value>
   </data>
+  <data name="GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder" xml:space="preserve">
+    <value>配置导出/导入目录</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransferFolder_Description" xml:space="preserve">
+    <value>留空使用插件配置目录。导出写入 StrmAssistant-Config.json，导入读取同名文件。</value>
+  </data>
+  <data name="GeneralOptions_ExportConfig_Export_Config" xml:space="preserve">
+    <value>导出配置</value>
+  </data>
+  <data name="GeneralOptions_ImportConfig_Import_Config" xml:space="preserve">
+    <value>导入配置</value>
+  </data>
+  <data name="GeneralOptions_ImportConfig_Confirm" xml:space="preserve">
+    <value>将用该文件覆盖当前配置，确定继续？</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache" xml:space="preserve">
+    <value>核对元数据缓存</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_NotEnabled" xml:space="preserve">
+    <value>元数据缓存未启用或目录不存在。</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_Result" xml:space="preserve">
+    <value>缓存 {0} 文件，过期 {1}；override {2}，patches {3}；孤儿 {4}，缺缓存 {5}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Exported" xml:space="preserve">
+    <value>已导出配置：{0}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_FileMissing" xml:space="preserve">
+    <value>未找到配置文件：{0}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Imported" xml:space="preserve">
+    <value>配置导入：成功 {0} 项，拒绝 {1} 项，失败 {2} 项，回读不一致 {3} 项</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Failed" xml:space="preserve">
+    <value>配置操作失败：{0}</value>
+  </data>
   <data name="GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache" xml:space="preserve">
     <value>清理元数据缓存</value>
   </data>

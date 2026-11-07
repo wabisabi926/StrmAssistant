@@ -5301,5 +5301,113 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ConfigTransferFolder_Description {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ConfigTransferFolder_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ConfigTransfer_Exported {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ConfigTransfer_Exported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ConfigTransfer_Failed {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ConfigTransfer_Failed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ConfigTransfer_FileMissing {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ConfigTransfer_FileMissing", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ConfigTransfer_Imported {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ConfigTransfer_Imported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ExportConfig_Export_Config {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ExportConfig_Export_Config", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ImportConfig_Confirm {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ImportConfig_Confirm", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_ImportConfig_Import_Config {
+            get {
+                return ResourceManager.GetString("GeneralOptions_ImportConfig_Import_Config", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_VerifyMetadataCache_NotEnabled {
+            get {
+                return ResourceManager.GetString("GeneralOptions_VerifyMetadataCache_NotEnabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_VerifyMetadataCache_Result {
+            get {
+                return ResourceManager.GetString("GeneralOptions_VerifyMetadataCache_Result", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache {
+            get {
+                return ResourceManager.GetString("GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache", resourceCulture);
+            }
+        }
+
     }
 }

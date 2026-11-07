@@ -1769,6 +1769,42 @@
   <data name="Sessions_None" xml:space="preserve">
     <value>No active sessions</value>
   </data>
+  <data name="GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder" xml:space="preserve">
+    <value>Config Transfer Folder</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransferFolder_Description" xml:space="preserve">
+    <value>Leave empty to use the plugin configuration folder. Export writes StrmAssistant-Config.json; import reads the same file.</value>
+  </data>
+  <data name="GeneralOptions_ExportConfig_Export_Config" xml:space="preserve">
+    <value>Export Config</value>
+  </data>
+  <data name="GeneralOptions_ImportConfig_Import_Config" xml:space="preserve">
+    <value>Import Config</value>
+  </data>
+  <data name="GeneralOptions_ImportConfig_Confirm" xml:space="preserve">
+    <value>Overwrite the current settings with this file?</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_Verify_Metadata_Cache" xml:space="preserve">
+    <value>Verify Metadata Cache</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_NotEnabled" xml:space="preserve">
+    <value>Metadata cache is not enabled or the folder is missing.</value>
+  </data>
+  <data name="GeneralOptions_VerifyMetadataCache_Result" xml:space="preserve">
+    <value>Cache: {0} files, {1} expired; override: {2}, patches: {3}; orphans: {4}, missing: {5}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Exported" xml:space="preserve">
+    <value>Config exported to: {0}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_FileMissing" xml:space="preserve">
+    <value>Config file not found: {0}</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Imported" xml:space="preserve">
+    <value>Config imported: {0} restored, {1} rejected, {2} failed, {3} mismatched</value>
+  </data>
+  <data name="GeneralOptions_ConfigTransfer_Failed" xml:space="preserve">
+    <value>Config operation failed: {0}</value>
+  </data>
   <data name="GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache" xml:space="preserve">
     <value>Clear Metadata Cache</value>
   </data>

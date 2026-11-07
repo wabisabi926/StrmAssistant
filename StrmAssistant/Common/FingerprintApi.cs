@@ -383,7 +383,8 @@ namespace StrmAssistant.Common
             }
 
             return FilterBlacklistKeywords(_libraryManager.GetItemList(itemsFingerprintQuery)
-                .Where(i => Plugin.Instance.IsModSupported || !i.IsShortcut).OfType<Episode>().ToList());
+                .Where(i => Plugin.Instance.IsModSupported || !i.IsShortcut).OfType<Episode>()
+                .Where(e => !IsSpecialEpisode(e)).ToList());
         }
 
         public List<Episode> FetchIntroFingerprintTaskItems()
@@ -407,8 +408,17 @@ namespace StrmAssistant.Common
             }
 
             return FilterBlacklistKeywords(_libraryManager.GetItemList(itemsFingerprintQuery)
-                .Where(i => Plugin.Instance.IsModSupported || !i.IsShortcut).OfType<Episode>().ToList());
+                .Where(i => Plugin.Instance.IsModSupported || !i.IsShortcut).OfType<Episode>()
+                .Where(e => !IsSpecialEpisode(e)).ToList());
         }
+
+        /// <summary>
+        /// 特别篇（Season 0）不参与声纹片头提取：
+        /// 它们没有正片那种稳定的片头，混进指纹库会拉高误检率（PRO 3.0.0.46 同类修复）。
+        /// 仅在 ParentIndexNumber 明确为 0 时判定为特别篇，未知的不动。
+        /// </summary>
+        private static bool IsSpecialEpisode(Episode episode) =>
+            episode.ParentIndexNumber.HasValue && episode.ParentIndexNumber.Value == 0;
 
         public void UpdateLibraryIntroDetectionFingerprintLength(int currentLength)
         {

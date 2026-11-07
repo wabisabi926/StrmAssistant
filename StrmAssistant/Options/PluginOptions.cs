@@ -21,9 +21,11 @@ namespace StrmAssistant.Options
 
         public override string EditorDescription => string.Empty;
 
+        // 注意：这里刻意不设 Icon。标题是一整句话（36 字），带图标时在手机窄屏换行后
+        // 图标会被容器裁掉一半；纯文字按钮会正常换行，桌面端也更清爽。
         public ButtonItem DisclaimerButton { get; set; } = new ButtonItem
         {
-            Icon = IconNames.privacy_tip, Data1 = "DisclaimerDialog"
+            Data1 = "DisclaimerDialog"
         };
 
         /// <summary>品牌信息：插件名组头 + 版本/支持版本行，位于免责声明之下、总开关之上。</summary>
@@ -178,6 +180,10 @@ namespace StrmAssistant.Options
         public void Initialize()
         {
             DisclaimerButton.Caption = Resources.DisclaimerButtonText;
+
+            // 旧配置里存过 Icon（privacy_tip），反序列化会把它带回来，必须在运行期清掉，
+            // 否则手机端窄屏换行后图标仍会被裁切。这里显式置空以兼容老配置文件。
+            DisclaimerButton.Icon = null;
 
             if (ShowConflictPluginLoadedStatus)
             {

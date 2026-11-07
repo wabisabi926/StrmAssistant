@@ -5238,5 +5238,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CleanupMetadataCacheTask_Description_Delete_expired_passive_cache_files__override_and_patches_are_kept {
+            get {
+                return ResourceManager.GetString("CleanupMetadataCacheTask_Description_Delete_expired_passive_cache_files__override_and_patches_are_kept", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache {
+            get {
+                return ResourceManager.GetString("CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_MetadataCacheTtlDays_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_MetadataCacheTtlDays_Description", resourceCulture);
+            }
+        }
+
     }
 }

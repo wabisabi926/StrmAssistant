@@ -1298,6 +1298,12 @@
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Description" xml:space="preserve">
     <value>本地 TMDB 缓存/覆盖目录的根目录，模式非“关闭”时必填。</value>
   </data>
+  <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days" xml:space="preserve">
+    <value>缓存有效期（天）</value>
+  </data>
+  <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Description" xml:space="preserve">
+    <value>被动缓存超过该天数后不再读取；0 表示永不过期。override 与 patches 不受影响。默认 30。</value>
+  </data>
   <data name="MetadataEnhanceOptions_ClearRecentTmdbCacheOnStartup_Clear_TMDB_Cache_On_Startup" xml:space="preserve">
     <value>启动时清空 TMDB 缓存</value>
   </data>
@@ -1564,6 +1570,12 @@
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
     <value>按当前开关重算并落库每个电影、剧集、季与单集的播放进度键。切换「各媒体库内记录播放进度」并重启 Emby 后运行一次；关闭开关后运行可恢复原键。</value>
+  </data>
+  <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
+    <value>清理过期元数据缓存</value>
+  </data>
+  <data name="CleanupMetadataCacheTask_Description_Delete_expired_passive_cache_files__override_and_patches_are_kept" xml:space="preserve">
+    <value>删除超过有效期的被动缓存文件，保留 override 与 patches。缓存有效期设为 0 时不执行。</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label" xml:space="preserve">
     <value>服务端版本标签</value>

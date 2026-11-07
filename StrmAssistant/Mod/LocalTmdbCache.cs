@@ -101,7 +101,8 @@ namespace StrmAssistant.Mod
                 }
 
                 // P2：被动缓存
-                if (LocalMetadataCache.TryReadPassive(entry, out bytes))
+                var ttlDays = Plugin.Instance.MetadataEnhanceStore.GetOptions().MetadataCache.MetadataCacheTtlDays;
+                if (LocalMetadataCache.TryReadPassive(entry, ttlDays, out bytes))
                 {
                     bytes = LocalMetadataCache.ApplyPatches(entry, bytes);
                     __result = Task.FromResult(LocalMetadataCache.BuildResponse(bytes, url));

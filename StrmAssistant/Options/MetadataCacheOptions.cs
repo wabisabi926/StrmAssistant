@@ -49,6 +49,13 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(MetadataCacheMode), ValueCondition.IsNotEqual, MetadataCacheOption.None)]
         public string MetadataCacheRootFolder { get; set; } = string.Empty;
 
+        /// <summary>被动缓存有效期；0 表示永不过期。只影响 cache，不影响 override/patches。</summary>
+        [DisplayNameL("MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days", typeof(Resources))]
+        [DescriptionL("MetadataEnhanceOptions_MetadataCacheTtlDays_Description", typeof(Resources))]
+        [Required, MinValue(0), MaxValue(3650)]
+        [VisibleCondition(nameof(MetadataCacheMode), ValueCondition.IsNotEqual, MetadataCacheOption.None)]
+        public int MetadataCacheTtlDays { get; set; } = 30;
+
         /// <summary>
         /// 启动时清空被动缓存（<c>&lt;root&gt;\cache</c>），保留 override 与 patches。
         /// 场景：TMDB 侧修正了某部片的信息，希望下次刮削立刻拿到新数据，而不是等缓存过期。

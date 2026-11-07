@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace StrmAssistant.Common
 {
@@ -209,21 +210,68 @@ namespace StrmAssistant.Common
                 }
 
                 // 由深到浅删空目录（字符串长度倒序近似层级倒序）
-                foreach (var dir in Directory.EnumerateDirectories(cacheDir, "*", SearchOption.AllDirectories)
-                             .OrderByDescending(d => d.Length))
-                {
-                    try
-                    {
-                        if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
-                    }
-                    catch (Exception)
-                    {
-                        // 忽略
-                    }
-                }
+                DeleteEmptyDirectories(cacheDir);
             }
 
             return removed;
+        }
+
+        /// <summary>
+        /// 删除超过有效期的被动缓存文件；override 与 patches 不动。返回删除数，根未初始化返回 -1。
+        /// </summary>
+        public static int ClearExpiredPassive(int ttlDays, CancellationToken cancellationToken)
+        {
+            if (ttlDays <= 0) return 0;
+
+            var root = _root;
+            if (string.IsNullOrEmpty(root)) return -1;
+
+            var cacheDir = Path.Combine(root, "cache");
+            if (!Directory.Exists(cacheDir)) return 0;
+
+            var now = DateTime.UtcNow;
+            var removed = 0;
+
+            lock (_lock)
+            {
+                foreach (var file in Directory.EnumerateFiles(cacheDir, "*", SearchOption.AllDirectories))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        if (IsExpired(File.GetLastWriteTimeUtc(file), now, ttlDays))
+                        {
+                            File.Delete(file);
+                            removed++;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // 单文件失败不影响整批清理
+                    }
+                }
+
+                DeleteEmptyDirectories(cacheDir);
+            }
+
+            return removed;
+        }
+
+        private static void DeleteEmptyDirectories(string root)
+        {
+            foreach (var dir in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories)
+                         .OrderByDescending(d => d.Length))
+            {
+                try
+                {
+                    if (!Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
+                }
+                catch (Exception)
+                {
+                    // 忽略
+                }
+            }
         }
 
         /// <summary>
@@ -342,7 +390,32 @@ namespace StrmAssistant.Common
             TryRead(GetOverrideFilePath(entry), out bytes);
 
         public static bool TryReadPassive(CacheEntry entry, out byte[] bytes) =>
-            TryRead(GetPassiveFilePath(entry), out bytes);
+            TryReadPassive(entry, 0, out bytes);
+
+        /// <summary>被动缓存读取；超过 <paramref name="ttlDays"/> 天视为未命中，0 表示永不过期。</summary>
+        public static bool TryReadPassive(CacheEntry entry, int ttlDays, out byte[] bytes)
+        {
+            var path = GetPassiveFilePath(entry);
+            if (!TryRead(path, out bytes)) return false;
+
+            try
+            {
+                if (IsExpired(File.GetLastWriteTimeUtc(path), DateTime.UtcNow, ttlDays))
+                {
+                    bytes = null;
+                    return false;
+                }
+            }
+            catch
+            {
+                // 读取时间戳失败时按未过期处理，避免误删可用缓存
+            }
+
+            return true;
+        }
+
+        public static bool IsExpired(DateTime lastWriteUtc, DateTime nowUtc, int ttlDays) =>
+            ttlDays > 0 && lastWriteUtc < nowUtc.AddDays(-ttlDays);
 
         public static void WritePassive(CacheEntry entry, byte[] bytes)
         {

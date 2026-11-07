@@ -1298,6 +1298,12 @@
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Description" xml:space="preserve">
     <value>本機 TMDB 快取/覆蓋目錄的根目錄，模式非「關閉」時必填。</value>
   </data>
+  <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days" xml:space="preserve">
+    <value>快取有效期（天）</value>
+  </data>
+  <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Description" xml:space="preserve">
+    <value>被動快取超過此天數後不再讀取；0 表示永不過期。override 與 patches 不受影響。預設 30。</value>
+  </data>
   <data name="MetadataEnhanceOptions_ClearRecentTmdbCacheOnStartup_Clear_TMDB_Cache_On_Startup" xml:space="preserve">
     <value>啟動時清空 TMDB 快取</value>
   </data>
@@ -1564,6 +1570,12 @@
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
     <value>按目前開關重算並落庫每個電影、劇集、季與單集的播放進度鍵。切換「各媒體庫內記錄播放進度」並重啟 Emby 後執行一次；關閉開關後執行可還原原鍵。</value>
+  </data>
+  <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
+    <value>清理過期中繼資料快取</value>
+  </data>
+  <data name="CleanupMetadataCacheTask_Description_Delete_expired_passive_cache_files__override_and_patches_are_kept" xml:space="preserve">
+    <value>刪除超過有效期的被動快取檔案，保留 override 與 patches。快取有效期設為 0 時不執行。</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label" xml:space="preserve">
     <value>伺服器端版本標籤</value>

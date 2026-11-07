@@ -1385,6 +1385,12 @@
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Description" xml:space="preserve">
     <value>Root folder for the local TMDB cache/override directories. Required when the mode is not OFF.</value>
   </data>
+  <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days" xml:space="preserve">
+    <value>Cache TTL (Days)</value>
+  </data>
+  <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Description" xml:space="preserve">
+    <value>Passive cache entries older than this are ignored; 0 means never expire. Override and patches are unaffected. Default is 30.</value>
+  </data>
   <data name="MetadataEnhanceOptions_ClearRecentTmdbCacheOnStartup_Clear_TMDB_Cache_On_Startup" xml:space="preserve">
     <value>Clear TMDB cache on startup</value>
   </data>
@@ -1651,6 +1657,12 @@
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
     <value>Recompute and persist the per-library user data key for every movie, series, season and episode. Run once after toggling Track Play Progress per Library and restarting Emby; run again with the option off to restore the original keys.</value>
+  </data>
+  <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
+    <value>Clean Up Expired Metadata Cache</value>
+  </data>
+  <data name="CleanupMetadataCacheTask_Description_Delete_expired_passive_cache_files__override_and_patches_are_kept" xml:space="preserve">
+    <value>Delete expired passive cache files; override and patches are kept. Does nothing when Cache TTL is 0.</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label" xml:space="preserve">
     <value>Server-side Version Label</value>

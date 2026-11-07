@@ -47,6 +47,27 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(IsModSuccess), SimpleCondition.IsFalse)]
         public StatusItem ModStatus { get; set; } = new StatusItem();
 
+        /// <summary>
+        /// 运行概览：内存 / 任务 / 会话 / 队列 / 索引的实时状态，放在页面最顶部。
+        /// 打开插件页第一眼应该是「现在怎么样」，而不是一串开关。
+        /// </summary>
+        [DisplayNameL("Overview_EditorTitle_Runtime_Overview", typeof(Resources))]
+        public OverviewOptions Overview { get; set; } = new OverviewOptions();
+
+        /// <summary>
+        /// 计划任务：插件自己的任务清单，每行可直接执行（含上次耗时/状态）。
+        /// 放在运行状态之前——「能做什么」比「现在怎么样」更常被查看。
+        /// </summary>
+        [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
+        public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
+
+        /// <summary>
+        /// 活动会话：谁在播什么，可一键停止播放。
+        /// 放在计划任务之后、运行状态之前——「现在谁在用」比「服务器怎么样」更常被点开。
+        /// </summary>
+        [DisplayNameL("Sessions_EditorTitle_Active_Sessions", typeof(Resources))]
+        public SessionsOptions Sessions { get; set; } = new SessionsOptions();
+
         // ---- 分组直接挂在页面根上（不再套 GeneralOptions / ModOptions 两层容器）----
         // 之前的结构是「任务与内存 → 任务并发 → 6 项」，三层嵌套只为一个标题；
         // 拍平后变成「任务并发 → 6 项」，页面层级从 3 层降到 2 层。
@@ -71,19 +92,7 @@ namespace StrmAssistant.Options
         [Browsable(false)]
         public ModOptions ModOptions { get; set; }
 
-        /// <summary>
-        /// 计划任务：插件自己的任务清单，每行可直接执行（含上次耗时/状态）。
-        /// 放在运行状态之前——「能做什么」比「现在怎么样」更常被查看。
-        /// </summary>
-        [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
-        public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
 
-        /// <summary>
-        /// 活动会话：谁在播什么，可一键停止播放。
-        /// 放在计划任务之后、运行状态之前——「现在谁在用」比「服务器怎么样」更常被点开。
-        /// </summary>
-        [DisplayNameL("Sessions_EditorTitle_Active_Sessions", typeof(Resources))]
-        public SessionsOptions Sessions { get; set; } = new SessionsOptions();
 
         /// <summary>
         /// 运行状态与维护（只读状态 + 清内存/重建索引/优化索引/重启）。

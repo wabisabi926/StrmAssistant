@@ -5058,5 +5058,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_EditorTitle_Runtime_Overview {
+            get {
+                return ResourceManager.GetString("Overview_EditorTitle_Runtime_Overview", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_List_Overview {
+            get {
+                return ResourceManager.GetString("Overview_List_Overview", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Memory_Threshold {
+            get {
+                return ResourceManager.GetString("Overview_Memory_Threshold", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Refresh_Refresh {
+            get {
+                return ResourceManager.GetString("Overview_Refresh_Refresh", resourceCulture);
+            }
+        }
+
     }
 }

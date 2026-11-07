@@ -1,24 +1,20 @@
 ﻿using Emby.Media.Common.Extensions;
 using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Elements;
-using Emby.Web.GenericEdit.Elements.List;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
 
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 通用选项 · 运行状态与维护分组：运行时状态只读列表，以及清理内存 / 重建索引 /
-    /// 优化索引 / 重启服务器等维护操作。
+    /// 首页 · 维护工具分组：清理内存 / 重建索引 / 优化索引 / 清理缓存 / 重启服务器。
+    /// 只读的运行时状态已拆到 <see cref="OverviewOptions"/>（页面顶部）。
     /// 说明：这些项都是「操作类」，按统一排序规范放在设置项之后、危险操作居末。
     /// </summary>
     public class RuntimeStatusOptions : EditableOptionsBase
     {
         [DisplayNameL("GeneralOptions_Group_RuntimeStatus", typeof(Resources))]
         public override string EditorTitle => Resources.GeneralOptions_Group_RuntimeStatus;
-
-        [DisplayNameL("GeneralOptions_RuntimeStatus_Runtime_Status", typeof(Resources))]
-        public GenericItemList RuntimeStatusList { get; set; } = new GenericItemList();
 
         public ButtonItem CleanMemoryNowButton =>
             new ButtonItem(Resources.GeneralOptions_CleanMemoryNow_Clean_Memory_Now)
@@ -52,10 +48,5 @@ namespace StrmAssistant.Options
                 Icon = IconNames.autorenew, Data1 = "RestartServer",
                 ConfirmationPrompt = Resources.AreYouSureToContinue
             };
-
-        public void Initialize()
-        {
-            RuntimeStatusList.Clear();
-        }
     }
 }

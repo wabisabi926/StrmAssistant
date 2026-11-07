@@ -1461,7 +1461,7 @@
     <value>記憶體管理</value>
   </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
-    <value>運行狀態與維護</value>
+    <value>維護工具</value>
   </data>
   <data name="ModOptions_Group_ChineseSearch" xml:space="preserve">
     <value>中文搜尋</value>
@@ -1654,5 +1654,17 @@
   </data>
   <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
     <value>元資料快取目錄未初始化，未執行清理。</value>
+  </data>
+  <data name="Overview_EditorTitle_Runtime_Overview" xml:space="preserve">
+    <value>執行概覽</value>
+  </data>
+  <data name="Overview_List_Overview" xml:space="preserve">
+    <value>即時狀態</value>
+  </data>
+  <data name="Overview_Refresh_Refresh" xml:space="preserve">
+    <value>重新整理</value>
+  </data>
+  <data name="Overview_Memory_Threshold" xml:space="preserve">
+    <value>上限 {0} MB · 已用 {1}%</value>
   </data>
 </root>

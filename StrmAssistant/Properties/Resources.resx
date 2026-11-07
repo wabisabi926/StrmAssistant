@@ -1548,7 +1548,7 @@
     <value>Memory</value>
   </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
-    <value>Status &amp; Maintenance</value>
+    <value>Maintenance</value>
   </data>
   <data name="ModOptions_Group_ChineseSearch" xml:space="preserve">
     <value>Chinese Search</value>
@@ -1741,5 +1741,17 @@
   </data>
   <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
     <value>Metadata cache root is not initialized; nothing was cleared.</value>
+  </data>
+  <data name="Overview_EditorTitle_Runtime_Overview" xml:space="preserve">
+    <value>Runtime Overview</value>
+  </data>
+  <data name="Overview_List_Overview" xml:space="preserve">
+    <value>Live Status</value>
+  </data>
+  <data name="Overview_Refresh_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Overview_Memory_Threshold" xml:space="preserve">
+    <value>Limit {0} MB · {1}% used</value>
   </data>
 </root>

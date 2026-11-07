@@ -51,7 +51,7 @@ namespace StrmAssistant.Options.View
 
             PopulateScheduledTasks();
             PopulateSessions();
-            PopulateRuntimeStatus(PluginOptions);
+            PopulateOverview();
         }
 
         public PluginOptions PluginOptions => ContentData as PluginOptions;
@@ -362,10 +362,13 @@ namespace StrmAssistant.Options.View
             }
         }
 
-        private void PopulateRuntimeStatus(PluginOptions pluginOptions)
+        /// <summary>
+        /// 生成「运行概览」：内存 / 任务 / 会话 / 队列 / 索引的实时状态，位于页面最顶部。
+        /// </summary>
+        private void PopulateOverview()
         {
-            var statusOptions = pluginOptions.RuntimeStatus;
-            statusOptions.RuntimeStatusList.Clear();
+            var list = PluginOptions.Overview.OverviewList;
+            list.Clear();
 
             try
             {
@@ -373,11 +376,30 @@ namespace StrmAssistant.Options.View
                 var workingSetMb = process.WorkingSet64 / 1024 / 1024;
                 var gcHeapMb = GC.GetTotalMemory(false) / 1024 / 1024;
 
-                statusOptions.RuntimeStatusList.Add(new GenericListItem
+                var memoryOptions = _store.GetOptions().Memory;
+                var threshold = memoryOptions.MemoryAutoRestartThresholdMB;
+
+                var memoryItem = new GenericListItem
                 {
                     PrimaryText = string.Format(Resources.RuntimeStatus_Memory, workingSetMb, gcHeapMb),
                     Icon = IconNames.memory
-                });
+                };
+
+                if (memoryOptions.EnableMemoryAutoRestart && threshold > 0)
+                {
+                    var percent = Math.Min(100, (int)(workingSetMb * 100L / threshold));
+                    memoryItem.HasPercentage = true;
+                    memoryItem.PercentComplete = percent;
+                    memoryItem.SecondaryText = string.Format(
+                        Resources.Overview_Memory_Threshold, threshold, percent);
+                    memoryItem.Status = percent >= 90
+                        ? ItemStatus.Failed
+                        : percent >= 75
+                            ? ItemStatus.Warning
+                            : ItemStatus.Succeeded;
+                }
+
+                list.Add(memoryItem);
 
                 // 内存超限倒计时：这是唯一会「自己重启服务器」的状态，必须让用户看见
                 if (MemoryGuard.IsRestartPending && MemoryGuard.RestartAtUtc.HasValue)
@@ -385,7 +407,7 @@ namespace StrmAssistant.Options.View
                     var seconds = Math.Max(0,
                         (int)(MemoryGuard.RestartAtUtc.Value - DateTimeOffset.UtcNow).TotalSeconds);
 
-                    statusOptions.RuntimeStatusList.Add(new GenericListItem
+                    list.Add(new GenericListItem
                     {
                         PrimaryText = string.Format(Resources.RuntimeStatus_RestartCountdown,
                             MemoryGuard.ThresholdMb, seconds),
@@ -399,7 +421,7 @@ namespace StrmAssistant.Options.View
                     .Select(t => t.ScheduledTask.Name)
                     .ToList();
 
-                statusOptions.RuntimeStatusList.Add(new GenericListItem
+                list.Add(new GenericListItem
                 {
                     PrimaryText = string.Format(Resources.RuntimeStatus_RunningTasks,
                         runningTasks.Count, runningTasks.Count > 0 ? string.Join(", ", runningTasks) : "-"),
@@ -411,7 +433,7 @@ namespace StrmAssistant.Options.View
                     .ToList();
                 var playingCount = sessions?.Count(s => s.FullNowPlayingItem != null) ?? 0;
 
-                statusOptions.RuntimeStatusList.Add(new GenericListItem
+                list.Add(new GenericListItem
                 {
                     PrimaryText = string.Format(Resources.RuntimeStatus_Sessions,
                         sessions?.Count ?? 0,
@@ -422,7 +444,7 @@ namespace StrmAssistant.Options.View
                     Icon = IconNames.devices
                 });
 
-                statusOptions.RuntimeStatusList.Add(new GenericListItem
+                list.Add(new GenericListItem
                 {
                     PrimaryText = string.Format(Resources.RuntimeStatus_SearchIndex,
                         EnhanceChineseSearch.GetSearchIndexStatus()),
@@ -440,7 +462,7 @@ namespace StrmAssistant.Options.View
                     processing.Add(Resources.CatchupTask_EpisodeRefresh_EpisodeRefresh);
                 }
 
-                statusOptions.RuntimeStatusList.Add(new GenericListItem
+                list.Add(new GenericListItem
                 {
                     PrimaryText = string.Format(Resources.RuntimeStatus_ProcessingTasks,
                         processing.Count > 0 ? string.Join(", ", processing) : "-"),
@@ -452,7 +474,7 @@ namespace StrmAssistant.Options.View
                 var introQueue = QueueManager.IntroSkipItemQueue.Count;
                 var episodeRefreshQueue = QueueManager.EpisodeRefreshItemQueue.Count;
 
-                statusOptions.RuntimeStatusList.Add(new GenericListItem
+                list.Add(new GenericListItem
                 {
                     PrimaryText = string.Format(Resources.RuntimeStatus_PendingQueue,
                         mediaInfoQueue + fingerprintQueue + introQueue + episodeRefreshQueue,
@@ -463,7 +485,7 @@ namespace StrmAssistant.Options.View
                 var conflicts = ConflictDetector.GetConflictingAssemblies();
                 if (conflicts.Length > 0)
                 {
-                    statusOptions.RuntimeStatusList.Add(new GenericListItem
+                    list.Add(new GenericListItem
                     {
                         PrimaryText = string.Format(Resources.RuntimeStatus_ConflictPlugin,
                             string.Join(", ", conflicts)),
@@ -488,25 +510,27 @@ namespace StrmAssistant.Options.View
                 case RunScheduledTaskCommand:
                     RunScheduledTask(itemId);
                     PopulateScheduledTasks();
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 
                 case StopSessionCommand:
                     StopSession(itemId);
                     PopulateSessions();
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 
                 case "CleanMemoryNow":
                     MemoryCleaner.RequestCleanup("手动清理（选项页）");
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 
                 case "RefreshStatus":
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
+                    PopulateScheduledTasks();
+                    PopulateSessions();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 
@@ -522,21 +546,21 @@ namespace StrmAssistant.Options.View
                             : Resources.GeneralOptions_ClearMetadataCacheResult_NotInitialized,
                         8000);
 
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
                 }
 
                 case "ScheduleIndexRebuild":
                     EnhanceChineseSearch.ScheduleIndexRebuild();
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 
                 case "OptimizeSearchIndex":
                 {
                     var optimizeResult = EnhanceChineseSearch.OptimizeSearchIndex();
-                    PopulateRuntimeStatus(PluginOptions);
+                    PopulateOverview();
                     RaiseUIViewInfoChanged();
                     Plugin.NotificationApi?.SendMessageToAdmins(
                         optimizeResult.HasValue

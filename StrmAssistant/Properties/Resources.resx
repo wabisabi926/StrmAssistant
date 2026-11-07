@@ -1629,19 +1629,19 @@
     <value>Track Play Progress per Library</value>
   </data>
   <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
-    <value>Record play progress and favorites separately for the same title in different libraries. After toggling, restart Emby and run the 'Rebuild Play Progress Keys' task. Existing progress becomes temporarily invisible; disable the switch, restart and run the task again to restore it.</value>
+    <value>Track play progress and favorites separately when the same movie or series exists as a separate item in different libraries. After toggling, restart Emby and run 'Rebuild Play Progress Keys'. Existing progress is not deleted, but is invisible under the new key; turn the option off, restart and run the task again to restore it. Progress made while enabled is likewise invisible after disabling.</value>
   </data>
   <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
     <value>Rebuild Play Progress Keys</value>
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
-    <value>Recompute and persist the per-library play progress key for every movie and episode. Run once after toggling Track Play Progress per Library and restarting Emby.</value>
+    <value>Recompute and persist the per-library user data key for every movie, series, season and episode. Run once after toggling Track Play Progress per Library and restarting Emby; run again with the option off to restore the original keys.</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label" xml:space="preserve">
-    <value>Server-sided Version Label</value>
+    <value>Server-side Version Label</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_" xml:space="preserve">
-    <value>Write the same version label into the server-supplied media source name, so Kodi, Apple TV and mobile apps show quality / HDR / audio tags too. Only applies when a title has multiple versions. Default is OFF.</value>
+    <value>Write a label built from the Version Display Option plus HDR/audio into the server-side version name. Requires Multi-Version Quality Badges; only applies to titles with 2+ versions and is skipped when Version Display Option is System Default. Kodi shows it after a resync. Default is OFF.</value>
   </data>
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
     <value>Scheduled Tasks</value>

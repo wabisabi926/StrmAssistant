@@ -73,10 +73,10 @@ namespace StrmAssistant.Tests
 
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
-            // 顺序：提取范围 → 自动与按需 → 存储与截图 → 提取性能 → ISO 与 HDR
+            // 顺序：提取范围 → 自动与按需 → 存储与截图 → ISO 与 HDR → 提取性能
             Assert.Equal(
                 new[] { "ExtractionScope", "AutoOnDemand", "StorageCapture",
-                        "ExtractionPerformance", "IsoHdr" },
+                        "IsoHdr", "ExtractionPerformance" },
                 groups.Select(g => g.Name).ToArray());
 
             // 不再有运行时合并组
@@ -109,12 +109,12 @@ namespace StrmAssistant.Tests
         }
 
         [Fact]
-        public void Intro_Groups_AreMerged()
+        public void Intro_Groups_AreOrdered()
         {
             var container = (EditObjectContainer)new IntroSkipOptions().CreateEditContainer();
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
-            Assert.Equal(new[] { "PlaybackScrape", "Fingerprint" },
+            Assert.Equal(new[] { "Playback", "Fingerprint", "Scrape" },
                 groups.Select(g => g.Name).ToArray());
         }
 

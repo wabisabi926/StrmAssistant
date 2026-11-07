@@ -104,10 +104,10 @@ namespace StrmAssistant.Options
                         "AutoOnDemand", "AutoCatchup", "OnDemand"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_StorageCapture,
                         "StorageCapture", "MediaInfoPersist", "ImageCapture"),
-                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionPerformance,
-                        "ExtractionPerformance", "ExtractionPerformance"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_IsoHdr,
-                        "IsoHdr", "IsoTool", "HdrTagging"));
+                        "IsoHdr", "IsoTool", "HdrTagging"),
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionPerformance,
+                        "ExtractionPerformance", "ExtractionPerformance"));
             }
 
             return container;

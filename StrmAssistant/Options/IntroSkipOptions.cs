@@ -43,10 +43,12 @@ namespace StrmAssistant.Options
             if (container is EditObjectContainer editContainer)
             {
                 EditorGroupHelper.Rebuild(editContainer,
-                    new EditorGroupSpec(Resources.IntroSkipOptions_Group_PlaybackScrape,
-                        "PlaybackScrape", "Playback", "Scrape"),
+                    new EditorGroupSpec(Resources.IntroSkipOptions_Group_Playback,
+                        "Playback", "Playback"),
                     new EditorGroupSpec(Resources.IntroSkipOptions_Group_Fingerprint,
-                        "Fingerprint", "Fingerprint"));
+                        "Fingerprint", "Fingerprint"),
+                    new EditorGroupSpec(Resources.IntroSkipOptions_Group_Scrape,
+                        "Scrape", "Scrape"));
             }
 
             return container;

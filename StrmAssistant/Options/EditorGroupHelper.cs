@@ -55,6 +55,12 @@ namespace StrmAssistant.Options
                     .SelectMany(group => group.EditorItems ?? Array.Empty<EditorBase>())
                     .ToList();
 
+                // 源组末尾的 SpacerItem 在合并后会变成新组前面的空白，清掉。
+                while (items.Count > 0 && items[items.Count - 1] is EditorSpacerItem)
+                {
+                    items.RemoveAt(items.Count - 1);
+                }
+
                 result.Add(new EditorGroup(spec.Title, items.ToArray(), spec.Name, root.Id, null));
             }
 

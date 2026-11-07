@@ -1554,6 +1554,9 @@ namespace StrmAssistant.Common
                     CollectionFolder.SaveLibraryOptions(itemId, options);
                 }
             }
+
+            // 选项被改写后，合并路径上的库级缓存必须失效
+            Mod.MergeMultiVersion.ClearSeriesGroupingCache();
         }
 
         /// <summary>

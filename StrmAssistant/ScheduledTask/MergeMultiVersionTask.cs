@@ -56,6 +56,9 @@ namespace StrmAssistant.ScheduledTask
 
             _logger.Info("MergeMultiVersion - Scheduled Task Execute");
 
+            // 库选项可能在上次运行后被改动（界面切换/自动分组被改写），先清缓存
+            Mod.MergeMultiVersion.ClearSeriesGroupingCache();
+
             var currentScanLibrary = CurrentScanLibrary.Value;
             CurrentScanLibrary.Value = null;
 

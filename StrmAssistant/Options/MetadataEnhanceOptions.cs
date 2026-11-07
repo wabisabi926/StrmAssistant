@@ -86,8 +86,9 @@ namespace StrmAssistant.Options
             Version.TryParse(MovieDbPluginVersion, out var parsed) ? parsed : null;
 
         /// <summary>
-        /// MovieDb 已知适配区间下限（已适配 1.8.6/.7/.8、1.9.1.0、1.9.2.0、1.9.9.0）。
+        /// MovieDb 已知适配区间下限（已适配 1.8.6/.7/.8、1.9.1.0、1.9.2.0、1.9.9.0、2.0.0.0）。
         /// 低于该下限时，中文刮削/图像参数补丁可能因内部 API 变动而失效。
+        /// 注意：这里只做“低于下限”的告警，高版本是否兼容由 ChineseMovieDb 的缺方法清单判定。
         /// </summary>
         [Browsable(false)]
         public bool IsMovieDbVersionCompatible =>
@@ -103,7 +104,9 @@ namespace StrmAssistant.Options
             {
                 var v = MovieDbVersion;
                 if (v == null) return "Unknown";
-                if (v >= new Version("1.9.9.0")) return "1.9.9.0+";
+                // 2.0.x 单列一档：PRO 3.0.0.57 明确适配到 2.0.1.0，与 1.9.9.0 混在一档会掩盖差异
+                if (v >= new Version("2.0.0.0")) return "2.0.x";
+                if (v >= new Version("1.9.9.0")) return "1.9.9.0";
                 if (v >= new Version("1.9.2.0")) return "1.9.2.0-1.9.8.x";
                 if (v >= new Version("1.9.0.0")) return "1.9.x";
                 if (v >= new Version("1.8.6")) return "1.8.6-1.8.x";

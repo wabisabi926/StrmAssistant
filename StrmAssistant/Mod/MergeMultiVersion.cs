@@ -9,6 +9,7 @@ using MediaBrowser.Model.Services;
 using StrmAssistant.Common;
 using StrmAssistant.Provider;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,15 @@ namespace StrmAssistant.Mod
 {
     public class MergeMultiVersion : PatchBase<MergeMultiVersion>
     {
+        // 库选项按库缓存：合并时可对上万个剧集调用 GetAllCollectionFolders，
+        // 每个都走 GetLibraryOptions(item) 会重复解析库归属并读库配置（PRO 3.0.0.57 也做了同类优化）。
+        // 只缓存“库 → 是否自动分组合并”这一位，条目级缓存会随剧集数量膨胀，收益也远小于此。
+        private static readonly ConcurrentDictionary<long, bool> SeriesGroupingCache =
+            new ConcurrentDictionary<long, bool>();
+
+        /// <summary>库选项变化（开关切换、自动分组被改写）后清空，避免读到旧的布尔值。</summary>
+        internal static void ClearSeriesGroupingCache() => SeriesGroupingCache.Clear();
+
         private static MethodInfo _isEligibleForMultiVersion;
         private static MethodInfo _canRefreshImage;
         private static MethodInfo _addLibrariesToPresentationUniqueKey;
@@ -308,18 +318,27 @@ namespace StrmAssistant.Mod
 
             foreach (var item in allSeries)
             {
-                var options = BaseItem.LibraryManager.GetLibraryOptions(item);
+                var libraries = BaseItem.LibraryManager.GetCollectionFolders(item);
+                if (libraries == null || libraries.Length == 0) continue;
 
-                if (options.EnableAutomaticSeriesGrouping)
+                // 同一部剧可能同时挂在多个库上；取 InternalId 最小者做代表，保证每次判定一致
+                var primary = libraries.OrderBy(l => l.InternalId).First();
+
+                if (!IsSeriesGroupingEnabled(primary)) continue;
+
+                foreach (var library in libraries)
                 {
-                    foreach (var library in BaseItem.LibraryManager.GetCollectionFolders(item))
-                    {
-                        collectionFolders.Add(library);
-                    }
+                    collectionFolders.Add(library);
                 }
             }
 
             return collectionFolders.OrderBy(c => c.InternalId).ToArray();
+        }
+
+        private static bool IsSeriesGroupingEnabled(BaseItem library)
+        {
+            return SeriesGroupingCache.GetOrAdd(library.InternalId, _ =>
+                BaseItem.LibraryManager.GetLibraryOptions(library)?.EnableAutomaticSeriesGrouping ?? false);
         }
 
         [HarmonyPrefix]

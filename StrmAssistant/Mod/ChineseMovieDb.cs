@@ -87,7 +87,7 @@ namespace StrmAssistant.Mod
             var getEpInfo = movieDbProviderBase?.GetMethod("GetEpisodeInfo", BindingFlags.NonPublic | BindingFlags.Instance);
             if (getEpInfo != null) _getEpisodeInfoAsync = AccessTools.AsyncMoveNext(getEpInfo);
 
-            // 版本适配诊断：MovieDb 内部 API 随版本变动（当前适配至 1.9.9.0）。
+            // 版本适配诊断：MovieDb 内部 API 随版本变动（当前适配至 2.0.x，2.0.0.0 实测成员齐全）。
             // 不做门禁，但必须把“方法缺失”暴露出来，避免补丁静默失效。
             var enhanceOptions = Plugin.Instance.MetadataEnhanceStore.GetOptions();
             var versionTier = enhanceOptions.MovieDbVersionTier;
@@ -98,12 +98,22 @@ namespace StrmAssistant.Mod
                     "Chinese metadata patch may misbehave.");
             }
 
+            // 逐个反射目标都要列进来：缺哪个打哪个，避免"某天 MovieDb 改名 → 功能静默失效"。
             var missingMovieDbComponents = new List<string>();
             if (_baseImportData == null) missingMovieDbComponents.Add("MovieDbProviderBase.ImportData(5 params)");
             if (_getMovieDbMetadataLanguages == null) missingMovieDbComponents.Add("MovieDbProviderBase.GetMovieDbMetadataLanguages");
             if (_mapLanguageToProviderLanguage == null) missingMovieDbComponents.Add("MovieDbProviderBase.MapLanguageToProviderLanguage");
             if (_getImageLanguagesParam == null) missingMovieDbComponents.Add("MovieDbProviderBase.GetImageLanguagesParam");
+            if (_cacheTime == null) missingMovieDbComponents.Add("MovieDbProviderBase.CacheTime");
             if (_movieGetMetadata == null) missingMovieDbComponents.Add("MovieDbProvider.GetMetadata");
+            if (_getTitleMovieData == null) missingMovieDbComponents.Add("CompleteMovieData.GetTitle");
+            if (_genericIsCompleteMovie == null) missingMovieDbComponents.Add("GenericMovieDbInfo<Movie>.IsComplete");
+            if (_genericProcessMainInfoMovie == null) missingMovieDbComponents.Add("GenericMovieDbInfo<Movie>.ProcessMainInfo");
+            if (_movieDbSeriesProviderIsComplete == null) missingMovieDbComponents.Add("MovieDbSeriesProvider.IsComplete");
+            if (_getTitleSeriesInfo == null) missingMovieDbComponents.Add("MovieDbSeriesProvider.SeriesRootObject.GetTitle");
+            if (_movieDbSeasonProviderIsComplete == null) missingMovieDbComponents.Add("MovieDbSeasonProvider.IsComplete");
+            if (_movieDbEpisodeProviderIsComplete == null) missingMovieDbComponents.Add("MovieDbEpisodeProvider.IsComplete");
+            if (_getEpisodeInfoAsync == null) missingMovieDbComponents.Add("MovieDbProviderBase.GetEpisodeInfo");
 
             if (missingMovieDbComponents.Count > 0)
             {

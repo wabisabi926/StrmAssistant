@@ -120,9 +120,9 @@ namespace StrmAssistant.Options.Store
                     Plugin.Instance.ApplicationHost.NotifyPendingRestart();
 
                     _logger.Warn(options.Playback.LibraryScopePlayProgress
-                        ? "LibraryScopePlayProgress enabled - restart Emby, then run 'Rebuild Play Progress Keys'. " +
+                        ? "LibraryScopePlayProgress enabled - restart Emby, then run 'Rebuild Per-Library Progress Index'. " +
                           "Existing play progress/favorites will be invisible under the new key until the task runs."
-                        : "LibraryScopePlayProgress disabled - restart Emby, then run 'Rebuild Play Progress Keys' to restore the original keys.");
+                        : "LibraryScopePlayProgress disabled - restart Emby, then run 'Rebuild Per-Library Progress Index' to restore the original keys.");
                 }
 
                 if (changedProperties.Contains(nameof(ExperienceNotificationOptions.EnhanceNotificationSystem)))

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace StrmAssistant.ScheduledTask
 {
     /// <summary>
-    /// 重建播放进度键。
+    /// 重建按库播放进度索引。
     ///
     /// 为什么需要它：Emby 把 UserDataKey 存在 <c>MediaItems.UserDataKeyId</c> 上，
     /// 只在**条目被保存**时（<c>SqliteItemRepository.SaveItemsInTranscation</c>）重算。

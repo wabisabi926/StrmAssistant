@@ -1572,13 +1572,13 @@
     <value>各媒体库内记录播放进度</value>
   </data>
   <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
-    <value>同一部影片/剧集在不同库中各有一份条目时，分别记录播放进度与收藏。切换后需重启 Emby 并运行「重建播放进度键」；原进度不会删除，但在新键下不可见，关闭开关、重启并再运行一次可恢复；开启期间产生的新进度在关闭后同样不可见。</value>
+    <value>同一部影片/剧集在不同库中各有一份条目时，分别记录播放进度与收藏。切换后需重启 Emby 并运行「重建按库播放进度索引」；原进度不会删除，但在新键下不可见，关闭开关、重启并再运行一次可恢复；开启期间产生的新进度在关闭后同样不可见。</value>
   </data>
   <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
-    <value>重建播放进度键</value>
+    <value>重建按库播放进度索引</value>
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
-    <value>按当前开关重算并落库每个电影、剧集、季与单集的播放进度键。切换「各媒体库内记录播放进度」并重启 Emby 后运行一次；关闭开关后运行可恢复原键。</value>
+    <value>按当前开关重算并落库每个电影、剧集、季与单集的按库播放进度索引。切换「各媒体库内记录播放进度」并重启 Emby 后运行一次；关闭开关后运行可恢复原状态。</value>
   </data>
   <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
     <value>清理过期元数据缓存</value>
@@ -1743,7 +1743,7 @@
     <value>常用任务</value>
   </data>
   <data name="ScheduledTasks_Button_Rebuild_Keys" xml:space="preserve">
-    <value>重建播放进度键</value>
+    <value>重建按库播放进度索引</value>
   </data>
   <data name="ScheduledTasks_Button_Extract_MediaInfo" xml:space="preserve">
     <value>提取媒体信息</value>

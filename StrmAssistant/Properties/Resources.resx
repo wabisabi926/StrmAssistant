@@ -1637,4 +1637,10 @@
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
     <value>Recompute and persist the per-library play progress key for every movie and episode. Run once after toggling Track Play Progress per Library and restarting Emby.</value>
   </data>
+  <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label" xml:space="preserve">
+    <value>Server-sided Version Label</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_" xml:space="preserve">
+    <value>Write the same version label into the server-supplied media source name, so Kodi, Apple TV and mobile apps show quality / HDR / audio tags too. Only applies when a title has multiple versions. Default is OFF.</value>
+  </data>
 </root>

@@ -149,6 +149,23 @@ namespace StrmAssistant.Options.Store
                     }
                 }
 
+                if (changedProperties.Contains(nameof(ExperienceEnhanceOptions.Display.EnableServerSideVersionLabel)) ||
+                    changedProperties.Contains(nameof(ExperienceEnhanceOptions.Display.EnableMultiVersionEnhance)))
+                {
+                    // 两者是与关系，任一变化都要重算补丁状态；补丁只改 MediaSourceInfo.Name，可热切换
+                    if (options.Display.EnableMultiVersionEnhance && options.Display.EnableServerSideVersionLabel)
+                    {
+                        PatchManager.ServerSideVersionLabel.Patch();
+                    }
+                    else
+                    {
+                        PatchManager.ServerSideVersionLabel.Unpatch();
+                    }
+
+                    _logger.Info("EnableServerSideVersionLabel is set to {0}",
+                        options.Display.EnableServerSideVersionLabel);
+                }
+
                 if (changedProperties.Contains(nameof(ExperienceEnhanceOptions.ItemDisplay.HidePersonNoImage)))
                 {
                     if (options.ItemDisplay.HidePersonNoImage)

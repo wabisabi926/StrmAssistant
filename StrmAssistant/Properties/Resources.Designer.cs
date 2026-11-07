@@ -4743,5 +4743,23 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_ {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_", resourceCulture);
+            }
+        }
+
     }
 }

@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using StrmAssistant.Core;
 using System;
 using System.Collections.Concurrent;
@@ -56,6 +56,7 @@ namespace StrmAssistant.Mod
         public static HdrVividTagging HdrVividTagging;
         public static DoubanRatingRefresh DoubanRatingRefresh;
         public static LibraryScopePlayProgress LibraryScopePlayProgress;
+        public static ServerSideVersionLabel ServerSideVersionLabel;
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod> HarmonyMethodCache 
             = new ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod>();
@@ -127,6 +128,7 @@ namespace StrmAssistant.Mod
             HdrVividTagging = new HdrVividTagging();
             DoubanRatingRefresh = new DoubanRatingRefresh();
             LibraryScopePlayProgress = new LibraryScopePlayProgress();
+            ServerSideVersionLabel = new ServerSideVersionLabel();
 
             // ★ 总览日志：遍历所有 PatchTracker，打印每个模块的最终状态（Info 级别，无需开启 DebugMode）
             try
@@ -212,7 +214,8 @@ namespace StrmAssistant.Mod
                 typeof(OptimizeMovieDbEpisodeScraping),
                 typeof(StrmDirectRedirect),
                 typeof(LiveTvDirectRedirect),
-                typeof(LibraryScopePlayProgress)
+                typeof(LibraryScopePlayProgress),
+                typeof(ServerSideVersionLabel)
             };
             
             // 核心功能补丁（这些失败会影响整体状态）

@@ -1550,4 +1550,10 @@
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
     <value>按当前开关重算并落库每个电影与剧集的播放进度键。切换「各媒体库内记录播放进度」并重启 Emby 后运行一次；关闭开关后运行可恢复原键。</value>
   </data>
+  <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Server_Side_Version_Label" xml:space="preserve">
+    <value>服务端版本标签</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_" xml:space="preserve">
+    <value>把同一套版本标签写入服务端下发的版本名，让 Kodi、Apple TV、手机 App 的版本下拉也显示画质 / HDR / 音轨。仅在条目有多个版本时生效；默认关闭。</value>
+  </data>
 </root>

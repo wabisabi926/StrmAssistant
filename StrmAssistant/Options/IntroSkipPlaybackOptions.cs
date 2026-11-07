@@ -31,18 +31,21 @@ namespace StrmAssistant.Options
         public bool EnableIntroSkip { get; set; } = false;
 
         [DisplayNameL("IntroSkipOptions_MaxIntroDurationSeconds", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_MaxIntroDurationSeconds_Description", typeof(Resources))]
         [MinValue(10), MaxValue(600)]
         [Required]
         [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
         public int MaxIntroDurationSeconds { get; set; } = 150;
 
         [DisplayNameL("IntroSkipOptions_MaxCreditsDurationSeconds", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_MaxCreditsDurationSeconds_Description", typeof(Resources))]
         [MinValue(10), MaxValue(600)]
         [Required]
         [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
         public int MaxCreditsDurationSeconds { get; set; } = 360;
 
         [DisplayNameL("IntroSkipOptions_MinOpeningPlotDurationSeconds", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_MinOpeningPlotDurationSeconds_Description", typeof(Resources))]
         [MinValue(30), MaxValue(120)]
         [Required]
         [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
@@ -86,6 +89,7 @@ namespace StrmAssistant.Options
         public List<EditorSelectOption> IntroSkipPreferenceList { get; set; } = new List<EditorSelectOption>();
 
         [DisplayNameL("IntroSkipOptions_IntroSkipPreferences_IntroSkip_Preferences", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_IntroSkipPreferences_Description", typeof(Resources))]
         [EditMultilSelect]
         [SelectItemsSource(nameof(IntroSkipPreferenceList))]
         [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]

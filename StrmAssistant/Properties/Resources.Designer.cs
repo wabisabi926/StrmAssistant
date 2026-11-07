@@ -5508,5 +5508,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_MaxCreditsDurationSeconds_Description {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_MaxCreditsDurationSeconds_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_MaxIntroDurationSeconds_Description {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_MaxIntroDurationSeconds_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_MinOpeningPlotDurationSeconds_Description {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_MinOpeningPlotDurationSeconds_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_IntroSkipPreferences_Description {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_IntroSkipPreferences_Description", resourceCulture);
+            }
+        }
+
     }
 }

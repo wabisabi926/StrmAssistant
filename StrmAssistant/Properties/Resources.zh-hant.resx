@@ -63,25 +63,25 @@
     <value>解鎖 STRM 影片截圖，預覽縮圖 BIF，跳過內嵌封面，預設為關閉。</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
-    <value>播放行為片頭探測</value>
+    <value>播放行為偵測</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_intro_skip_and_credits_skip_for_episodes__Default_is_False_" xml:space="preserve">
-    <value>基於播放行為的劇集片頭片尾探測，預設為關閉。</value>
+    <value>依播放行為辨識片頭片尾。預設關閉。</value>
   </data>
   <data name="IntroSkipOptions_MaxCreditsDurationSeconds" xml:space="preserve">
-    <value>最大片尾長度 (秒)，預設為 360</value>
+    <value>最大片尾時長（秒）</value>
   </data>
   <data name="IntroSkipOptions_MaxIntroDurationSeconds" xml:space="preserve">
-    <value>最大片頭長度 (秒)，預設為 150</value>
+    <value>最大片頭時長（秒）</value>
   </data>
   <data name="PluginOptions_IntroSkipOptions_Intro_Credits_Detection" xml:space="preserve">
     <value>片頭片尾</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_Library_Scope" xml:space="preserve">
-    <value>片頭跳過偵測媒體庫範圍</value>
+    <value>偵測媒體庫</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_TV_shows_library_scope_to_detect__Blank_includes_all_" xml:space="preserve">
-    <value>運行時片頭片尾跳過偵測的劇集媒體庫範圍，留空包含所有劇集媒體庫。</value>
+    <value>留空包含全部劇集媒體庫。</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Assistant" xml:space="preserve">
     <value>神醫助手 Plus</value>
@@ -150,10 +150,10 @@
     <value>關於</value>
   </data>
   <data name="IntroSkipOptions_UserScope_User_Scope" xml:space="preserve">
-    <value>允許的用戶</value>
+    <value>允許的使用者</value>
   </data>
   <data name="IntroSkipOptions_UserScope_Users_allowed_to_detect__Blank_includes_all" xml:space="preserve">
-    <value>允許的使用者範圍，留空包含所有使用者。</value>
+    <value>留空包含全部使用者。</value>
   </data>
   <data name="ModOptions_OriginalPoster_Original_Poster" xml:space="preserve">
     <value>原語言海報</value>
@@ -165,10 +165,10 @@
     <value>優先使用原語言海報，支援 TMDB, TVDB, Fanart，預設為關閉。</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Built_in_Intro_Skip_Enhanced" xml:space="preserve">
-    <value>原生片頭探測增強</value>
+    <value>原生片頭偵測</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Unlock_Strm_support_for_built_in_intro_skip_detection" xml:space="preserve">
-    <value>提供自訂選項，解鎖支援 STRM，預設為關閉。</value>
+    <value>啟用原生片頭偵測，支援 STRM。預設關閉。</value>
   </data>
   <data name="ModOptions_EnhanceChineseSearch_Support_Chinese_fuzzy_search_and_Pinyin_search__Default_is_OFF_" xml:space="preserve">
     <value>支援中文模糊搜尋和拼音搜索，預設為關閉。</value>
@@ -327,13 +327,13 @@
     <value>首位管理員的哪些偏好強制作用於所有使用者。預設媒體庫排序。</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_Intro_Detection_Fingerprint_Minutes" xml:space="preserve">
-    <value>片頭聲紋探測時長 (分鐘)</value>
+    <value>聲紋偵測時長（分鐘）</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Library_Scope" xml:space="preserve">
-    <value>聲紋提取媒體庫範圍</value>
+    <value>擷取媒體庫</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Intro_detection_enabled_library_scope__Blank_includes_all_" xml:space="preserve">
-    <value>擷取聲紋的媒體庫範圍，留白包含所有啟用原生片頭探測的媒體庫，最愛只可單選。</value>
+    <value>留空包含全部啟用片頭偵測的媒體庫；最愛僅能單選。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableAltMovieDbUrl" xml:space="preserve">
     <value>使用替代 TMDB 配置</value>
@@ -345,7 +345,7 @@
     <value>規劃任務刷新演員時提取別名，導入季的演職人員，更新節目系列的演職人員為各季合併，預設為關閉。</value>
   </data>
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds" xml:space="preserve">
-    <value>最小開頭劇情時長 (秒)，預設為 60</value>
+    <value>最小正片開場（秒）</value>
   </data>
   <data name="InvalidAltMovieDbApiUrl" xml:space="preserve">
     <value>替代 TMDB API 位址無效</value>
@@ -396,7 +396,7 @@
     <value>清除片頭片尾標記</value>
   </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
-    <value>清除由基於行為片頭片尾探測所產生的標記</value>
+    <value>清除行為標記</value>
   </data>
   <data name="ExtractIntroFingerprintTask_Name_Extract_Intro_Fingerprint" xml:space="preserve">
     <value>擷取片頭聲紋</value>
@@ -594,10 +594,10 @@
     <value>追更任務範圍</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Client_Scope" xml:space="preserve">
-    <value>允許的客戶端</value>
+    <value>允許的用戶端</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Allowed_clients__Default_is_Emby_Infuse_SenPlayer" xml:space="preserve">
-    <value>客戶端名關鍵字以逗號或分號隔開，透過第三方客戶端探測可能不准，預設值為 Emby,Infuse,SenPlayer</value>
+    <value>用戶端名稱關鍵字，逗號分隔；第三方用戶端可能偵測不準。</value>
   </data>
   <data name="GeneralOptions_CooldownSeconds_Cooldown_Time__Seconds___Default_is_0" xml:space="preserve">
     <value>主線程冷卻時間 (秒)</value>
@@ -606,13 +606,13 @@
     <value>電視節目或播出季 ID 無效: {0}</value>
   </data>
   <data name="IntroSkipOptions_BlacklistShows_Optional_Blacklist_Shows" xml:space="preserve">
-    <value>可選黑名單</value>
+    <value>排除劇集/季</value>
   </data>
   <data name="IntroSkipOptions_BlacklistKeywords_Optional_Blacklist_Keywords" xml:space="preserve">
-    <value>可選關鍵字黑名單</value>
+    <value>排除關鍵字</value>
   </data>
   <data name="IntroSkipOptions_BlacklistKeywords_Skip_episodes_whose_name_contains_any_keyword_separated_by_comma_or_semicolon__Default_is_EMPTY" xml:space="preserve">
-    <value>集名或劇名包含關鍵字的集跳過聲紋片頭檢測（如 NCOP、Menu、特典），逗號或分號分隔。預設留空。</value>
+    <value>跳過名稱含關鍵字的劇集（NCOP、Menu、特典）。預設留空。</value>
   </data>
   <data name="GeneralOptions_Tier2MaxConcurrentCount_Tier_2_Max_Concurrent_Count" xml:space="preserve">
     <value>次最大並發線程數</value>
@@ -636,19 +636,19 @@
     <value>單線程模式有效，必須在 0 至 60 之間，預設為 0。</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_It_must_be_between_2_and_20__Default_is_10_" xml:space="preserve">
-    <value>自訂片頭聲紋探測時長，必須在 2 至 20 之間，預設為 10。</value>
+    <value>範圍 2–20，預設 10。</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Per_Library_Fingerprint_Minutes" xml:space="preserve">
-    <value>分庫聲紋探測時長</value>
+    <value>分庫聲紋時長</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Overrides_for_specific_libraries_in_libraryId_minutes_format_separated_by_comma__falls_back_to_the_global_value__Default_is_EMPTY_" xml:space="preserve">
-    <value>按 媒體庫ID:分鐘 格式為指定媒體庫設定聲紋探測時長，逗號分隔，未設定的庫回退全域值。預設為空。</value>
+    <value>格式「媒體庫ID:分鐘」，逗號分隔；未設定時使用全域值。</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Parallel_Marker_Computation" xml:space="preserve">
     <value>並行聲紋計算</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Bypass_the_master_concurrency_limit_for_fingerprint_extraction_and_parallelize_across_all_CPU_cores__Default_is_OFF_" xml:space="preserve">
-    <value>聲紋提取繞過主並行限制，按全部 CPU 核心並行計算。預設為關閉。</value>
+    <value>依 CPU 核心並行擷取聲紋。預設關閉。</value>
   </data>
   <data name="UIFunctionOptions_NoBoxsetsAutoCreation_Prevent_Boxsets_Auto_Creation" xml:space="preserve">
     <value>隱藏合集媒體庫</value>
@@ -705,7 +705,10 @@
     <value>無持久化整合</value>
   </data>
   <data name="IntroSkipOptions_IntroSkipPreferences_IntroSkip_Preferences" xml:space="preserve">
-    <value>可選偏好設定</value>
+    <value>偵測偏好（可選）</value>
+  </data>
+  <data name="IntroSkipOptions_IntroSkipPreferences_Description" xml:space="preserve">
+    <value>留空使用預設行為；可多選。</value>
   </data>
   <data name="InvalidFingerprintCatchup" xml:space="preserve">
     <value>原生片頭探測增強未啟用，設定追更無效</value>
@@ -738,10 +741,10 @@
     <value>在搜索結果項上顯示媒體資訊，預設為關閉。</value>
   </data>
   <data name="IntroSkipPreference_NoDetectionButReset_NoDetectionButReset" xml:space="preserve">
-    <value>無自動偵測僅暫停操作設定片頭片尾標記</value>
+    <value>僅手動暫停設定標記</value>
   </data>
   <data name="IntroSkipControl_ResetAndOverwrite_ResetAndOverwrite" xml:space="preserve">
-    <value>重置操作涵蓋後續各集原生片頭標記</value>
+    <value>重設時覆蓋後續原生標記</value>
   </data>
   <data name="PluginOptions_IsHarmonyModFailed_Harmony_Mod_Failed" xml:space="preserve">
     <value>魔改失敗，請啟用調試模式日誌，重新啟動後查看日誌排查問題。</value>
@@ -1008,34 +1011,34 @@
     <value>收藏的集不會被自動標記為已看。預設為關閉。</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Enable_Automatic_Scraping" xml:space="preserve">
-    <value>啟用自動刮削</value>
+    <value>自動補全</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Scrape_intro_credits_markers_for_new_content__May_slow_down_library_scans__Default_is_OFF_" xml:space="preserve">
-    <value>劇集或電影重新整理完成後自動刮削片頭片尾標記（可能拖慢媒體庫掃描）；關閉後僅由排程工作刮削。預設為關閉。</value>
+    <value>重新整理後自動補全標記；可能拖慢掃庫。預設關閉。</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_IntroDb_Intro_Credits_Scraper" xml:space="preserve">
-    <value>片頭片尾刮削（IntroDb）</value>
+    <value>IntroDb 標記補全</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_Scrape_intro_credits_markers_from_TheIntroDB_when_refreshing_series_or_movies__fill_missing_only__Default_is_OFF_" xml:space="preserve">
-    <value>重新整理劇集或電影時從 TheIntroDB 刮削片頭片尾標記，僅填充缺失的標記。預設為關閉。</value>
+    <value>重新整理時補全缺失的片頭片尾標記。預設關閉。</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Api_Key" xml:space="preserve">
-    <value>API Key（可選）</value>
+    <value>IntroDb API Key</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Optional_TheIntroDB_API_key_sent_via_Bearer_auth_to_raise_the_daily_request_limit__Default_is_empty_" xml:space="preserve">
-    <value>可選的 TheIntroDB API Key，透過 Bearer 認證提高每日請求限額。預設留空。</value>
+    <value>提高每日請求限額。預設留空。</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_TIDB_API_Key" xml:space="preserve">
-    <value>TIDB API 金鑰</value>
+    <value>TIDB API Key</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_API_key_increases_daily_usage_limits__Default_is_empty_" xml:space="preserve">
-    <value>用於提升每日請求限額的 TIDB API 金鑰。預設為空。</value>
+    <value>提高每日請求限額。預設留空。</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Unified_IntroDb_Providers" xml:space="preserve">
-    <value>統一片頭資料源</value>
+    <value>資料源順序</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Tried_in_order_until_one_succeeds__Default_is_IntroDb_Tidb_" xml:space="preserve">
-    <value>按順序嘗試直到成功，可選 IntroDb 或 Tidb，逗號分隔。預設 IntroDb,Tidb。</value>
+    <value>依序嘗試，逗號分隔。預設 IntroDb,Tidb。</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
     <value>從 IntroDb 刮削片頭片尾</value>
@@ -1206,7 +1209,7 @@
     <value>點擊查看免責聲明。未刪除插件前，請勿發送日誌至官方​​。請務必牢記！</value>
   </data>
   <data name="IntroSkipOptions_BlacklistShows_List_of_Series_Id_or_Season_Id_separated_by_comma_or_semicolon__Default_is_EMPTY" xml:space="preserve">
-    <value>電視節目或播出季的 ID 列表，逗號或分號分隔，預設為空。</value>
+    <value>劇集或季 ID，逗號分隔。預設留空。</value>
   </data>
   <data name="Notification_DeepDelete_EventName" xml:space="preserve">
     <value>媒體深度刪除</value>
@@ -1458,7 +1461,7 @@
     <value>聲紋探測</value>
   </data>
   <data name="IntroSkipOptions_Group_Scrape" xml:space="preserve">
-    <value>線上刮削</value>
+    <value>外部片頭庫</value>
   </data>
   <data name="IntroSkipOptions_Group_Playback" xml:space="preserve">
     <value>行為標記</value>
@@ -1804,5 +1807,14 @@
   </data>
   <data name="ExperienceEnhanceOptions_Group_NotificationAndLogs" xml:space="preserve">
     <value>通知與日誌</value>
+  </data>
+  <data name="IntroSkipOptions_MaxIntroDurationSeconds_Description" xml:space="preserve">
+    <value>預設 150 秒；範圍 10–600。</value>
+  </data>
+  <data name="IntroSkipOptions_MaxCreditsDurationSeconds_Description" xml:space="preserve">
+    <value>預設 360 秒；範圍 10–600。</value>
+  </data>
+  <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds_Description" xml:space="preserve">
+    <value>預設 60 秒；範圍 30–120。</value>
   </data>
 </root>

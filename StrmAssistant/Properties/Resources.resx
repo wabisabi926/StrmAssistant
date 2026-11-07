@@ -150,25 +150,25 @@
     <value>Unlock image capture, video thumbnail BIF for Strm. Skip embedded image. Default is OFF.</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
-    <value>Adaptive Intro Skip</value>
+    <value>Playback Detection</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_intro_skip_and_credits_skip_for_episodes__Default_is_False_" xml:space="preserve">
-    <value>Playback behavior-based intro and credits detection for episodes. Default is OFF.</value>
+    <value>Detect intro and credits from playback behavior. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_MaxIntroDurationSeconds" xml:space="preserve">
-    <value>Max Intro Duration (Seconds), Default is 150</value>
+    <value>Max Intro Duration (Seconds)</value>
   </data>
   <data name="IntroSkipOptions_MaxCreditsDurationSeconds" xml:space="preserve">
-    <value>Max Credits Duration (Seconds), Default is 360</value>
+    <value>Max Credits Duration (Seconds)</value>
   </data>
   <data name="PluginOptions_IntroSkipOptions_Intro_Credits_Detection" xml:space="preserve">
     <value>Intro &amp; Credits</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_Library_Scope" xml:space="preserve">
-    <value>Intro Skip Detection Library Scope</value>
+    <value>Detection Libraries</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_TV_shows_library_scope_to_detect__Blank_includes_all_" xml:space="preserve">
-    <value>TV shows library scope for runtime intro/credits skip detection. Blank includes all TV shows libraries.</value>
+    <value>Leave blank to include all TV libraries.</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Assistant" xml:space="preserve">
     <value>StrmAssistant Plus</value>
@@ -243,7 +243,7 @@
     <value>Allowed Users</value>
   </data>
   <data name="IntroSkipOptions_UserScope_Users_allowed_to_detect__Blank_includes_all" xml:space="preserve">
-    <value>Users allowed to detect. Blank includes all users.</value>
+    <value>Leave blank to include all users.</value>
   </data>
   <data name="ModOptions_OriginalPoster_Original_Poster" xml:space="preserve">
     <value>Original Language Poster</value>
@@ -252,10 +252,10 @@
     <value>Prefer original poster based on the original language. Support TMDB, TVDB and FANART. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Built_in_Intro_Skip_Enhanced" xml:space="preserve">
-    <value>Built-in Intro Detection Enhanced</value>
+    <value>Native Intro Detection</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Unlock_Strm_support_for_built_in_intro_skip_detection" xml:space="preserve">
-    <value>Provide customizable options, unlock Strm support. Default is OFF.</value>
+    <value>Enable native intro detection with STRM support. Default is OFF.</value>
   </data>
   <data name="ModOptions_EnhanceChineseSearch_Enhance_Chinese_Search" xml:space="preserve">
     <value>Chinese Search Enhanced</value>
@@ -414,13 +414,13 @@
     <value>Which of the first admin's preferences are enforced for all users. Default is Library order.</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_Intro_Detection_Fingerprint_Minutes" xml:space="preserve">
-    <value>Intro Detection Fingerprint Length (Minute)</value>
+    <value>Fingerprint Duration (Minutes)</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Library_Scope" xml:space="preserve">
-    <value>Fingerprint Extraction Library Scope</value>
+    <value>Extraction Libraries</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Intro_detection_enabled_library_scope__Blank_includes_all_" xml:space="preserve">
-    <value>Library scope to extract fingerprint. Blank includes all libraries with intro detection enabled. Favorites is single selection only</value>
+    <value>Leave blank to include all libraries with intro detection. Favorites supports single selection only.</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableAltMovieDbUrl" xml:space="preserve">
     <value>Use Alternative MovieDb Config</value>
@@ -432,7 +432,7 @@
     <value>Extract also_known_as while running refresh person scheduled task, import season cast, update series cast. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds" xml:space="preserve">
-    <value>Min Opening Plot Duration (Seconds), Default is 60</value>
+    <value>Min Opening Plot (Seconds)</value>
   </data>
   <data name="InvalidAltMovieDbApiUrl" xml:space="preserve">
     <value>Alternative MovieDb Api Url is invalid</value>
@@ -483,7 +483,7 @@
     <value>Clear Episode Intros</value>
   </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
-    <value>Clears behavior-based intro and credits markers</value>
+    <value>Clear behavior markers</value>
   </data>
   <data name="ExtractIntroFingerprintTask_Name_Extract_Intro_Fingerprint" xml:space="preserve">
     <value>Extract Intro Fingerprint</value>
@@ -684,7 +684,7 @@
     <value>Allowed Clients</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Allowed_clients__Default_is_Emby_Infuse_SenPlayer" xml:space="preserve">
-    <value>Client name keywords separated by comma or semicolon. Detection via 3rd-party clients might not work properly. Default is Emby,Infuse,SenPlayer</value>
+    <value>Client name keywords, comma-separated. Third-party clients may not detect reliably.</value>
   </data>
   <data name="GeneralOptions_CooldownSeconds_Cooldown_Time__Seconds___Default_is_0" xml:space="preserve">
     <value>Master Cooldown Duration (Seconds)</value>
@@ -693,13 +693,13 @@
     <value>TV show or season ID is invalid: {0}</value>
   </data>
   <data name="IntroSkipOptions_BlacklistShows_Optional_Blacklist_Shows" xml:space="preserve">
-    <value>Optional Blacklist Shows</value>
+    <value>Exclude Series/Seasons</value>
   </data>
   <data name="IntroSkipOptions_BlacklistKeywords_Optional_Blacklist_Keywords" xml:space="preserve">
-    <value>Optional Blacklist Keywords</value>
+    <value>Exclude Keywords</value>
   </data>
   <data name="IntroSkipOptions_BlacklistKeywords_Skip_episodes_whose_name_contains_any_keyword_separated_by_comma_or_semicolon__Default_is_EMPTY" xml:space="preserve">
-    <value>Skip episodes whose name or series name contains any keyword (e.g. NCOP, Menu), separated by comma or semicolon. Default is EMPTY.</value>
+    <value>Skip episodes whose name contains a keyword (e.g. NCOP, Menu). Default is empty.</value>
   </data>
   <data name="GeneralOptions_Tier2MaxConcurrentCount_Tier_2_Max_Concurrent_Count" xml:space="preserve">
     <value>Tier 2 Max Concurrent Thread Count</value>
@@ -723,19 +723,19 @@
     <value>Applicable to single thread mode. It must be between 0 and 60. Default is 0.</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_It_must_be_between_2_and_20__Default_is_10_" xml:space="preserve">
-    <value>Customize intro detection fingerprint length. It must be between 2 and 20. Default is 10.</value>
+    <value>Range 2–20. Default is 10.</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Per_Library_Fingerprint_Minutes" xml:space="preserve">
-    <value>Per-Library Fingerprint Minutes</value>
+    <value>Per-Library Fingerprint Duration</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Overrides_for_specific_libraries_in_libraryId_minutes_format_separated_by_comma__falls_back_to_the_global_value__Default_is_EMPTY_" xml:space="preserve">
-    <value>Overrides for specific libraries in libraryId:minutes format, separated by comma (falls back to the global value). Default is EMPTY.</value>
+    <value>Format: libraryId:minutes, comma-separated; falls back to the global value.</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Parallel_Marker_Computation" xml:space="preserve">
-    <value>Parallel Marker Computation</value>
+    <value>Parallel Fingerprint Computation</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Bypass_the_master_concurrency_limit_for_fingerprint_extraction_and_parallelize_across_all_CPU_cores__Default_is_OFF_" xml:space="preserve">
-    <value>Bypass the master concurrency limit for fingerprint extraction and parallelize across all CPU cores. Default is OFF.</value>
+    <value>Extract fingerprints in parallel across CPU cores. Default is OFF.</value>
   </data>
   <data name="UIFunctionOptions_NoBoxsetsAutoCreation_Prevent_Boxsets_Auto_Creation" xml:space="preserve">
     <value>Hide Collection Library</value>
@@ -792,10 +792,13 @@
     <value>No Persist Integration</value>
   </data>
   <data name="IntroSkipControl_ResetAndOverwrite_ResetAndOverwrite" xml:space="preserve">
-    <value>Reset operation overwrites intro markers added by built-in intro detection</value>
+    <value>Reset overwrites native markers on later episodes</value>
   </data>
   <data name="IntroSkipOptions_IntroSkipPreferences_IntroSkip_Preferences" xml:space="preserve">
-    <value>Optional Preferences</value>
+    <value>Detection Preferences (Optional)</value>
+  </data>
+  <data name="IntroSkipOptions_IntroSkipPreferences_Description" xml:space="preserve">
+    <value>Leave blank for default behavior; multiple selections allowed.</value>
   </data>
   <data name="InvalidFingerprintCatchup" xml:space="preserve">
     <value>Fingerprint catchup is invalid because built-in intro detection enhanced is not enabled.</value>
@@ -828,7 +831,7 @@
     <value>Show media info on search result items. Default is OFF.</value>
   </data>
   <data name="IntroSkipPreference_NoDetectionButReset_NoDetectionButReset" xml:space="preserve">
-    <value>No detection but pause operation to set intro and/or credits markers</value>
+    <value>Manual pause creates markers; no automatic detection</value>
   </data>
   <data name="PluginOptions_IsHarmonyModFailed_Harmony_Mod_Failed" xml:space="preserve">
     <value>Mod failed. Please check log in debug mode after restart to troubleshoot.</value>
@@ -1095,34 +1098,34 @@
     <value>Favorite episodes will not be automatically marked as watched. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Enable_Automatic_Scraping" xml:space="preserve">
-    <value>Enable Automatic Scraping</value>
+    <value>Automatic Fill</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Scrape_intro_credits_markers_for_new_content__May_slow_down_library_scans__Default_is_OFF_" xml:space="preserve">
-    <value>Scrape intro/credits markers for new content automatically once a series or movie finishes refreshing. When OFF, only the scheduled task scrapes. Default is OFF.</value>
+    <value>Fill markers automatically after refresh; may slow library scans. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_IntroDb_Intro_Credits_Scraper" xml:space="preserve">
-    <value>IntroDb Intro/Credits Scraper</value>
+    <value>IntroDb Marker Fill</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_Scrape_intro_credits_markers_from_TheIntroDB_when_refreshing_series_or_movies__fill_missing_only__Default_is_OFF_" xml:space="preserve">
-    <value>Scrape intro/credits markers from TheIntroDB when refreshing series or movies, fill missing markers only. Default is OFF.</value>
+    <value>Fill missing intro/credits markers on refresh. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Api_Key" xml:space="preserve">
-    <value>API Key (Optional)</value>
+    <value>IntroDb API Key</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Optional_TheIntroDB_API_key_sent_via_Bearer_auth_to_raise_the_daily_request_limit__Default_is_empty_" xml:space="preserve">
-    <value>Optional TheIntroDB API key sent via Bearer auth to raise the daily request limit. Default is empty.</value>
+    <value>Raises the daily request limit. Default is empty.</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_TIDB_API_Key" xml:space="preserve">
     <value>TIDB API Key</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_API_key_increases_daily_usage_limits__Default_is_empty_" xml:space="preserve">
-    <value>API key increases daily usage limits. Default is empty.</value>
+    <value>Raises the daily request limit. Default is empty.</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Unified_IntroDb_Providers" xml:space="preserve">
-    <value>Unified IntroDb Providers</value>
+    <value>Provider Order</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Tried_in_order_until_one_succeeds__Default_is_IntroDb_Tidb_" xml:space="preserve">
-    <value>Tried in order until one succeeds. Default is IntroDb,Tidb.</value>
+    <value>Tried in order, comma-separated. Default is IntroDb,Tidb.</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
     <value>Scrape Intro/Credits from IntroDb</value>
@@ -1293,7 +1296,7 @@
     <value>Click to view the disclaimer. Do not send logs to the official team before uninstalling the plugin. Please remember this!</value>
   </data>
   <data name="IntroSkipOptions_BlacklistShows_List_of_Series_Id_or_Season_Id_separated_by_comma_or_semicolon__Default_is_EMPTY" xml:space="preserve">
-    <value>List of Series Id or Season Id separated by comma or semicolon. Default is EMPTY.</value>
+    <value>Series or season IDs, comma-separated. Default is empty.</value>
   </data>
   <data name="Notification_DeepDelete_EventName" xml:space="preserve">
     <value>Media Deep Delete</value>
@@ -1545,7 +1548,7 @@
     <value>Fingerprint Detection</value>
   </data>
   <data name="IntroSkipOptions_Group_Scrape" xml:space="preserve">
-    <value>Online Scraping</value>
+    <value>External Intro Library</value>
   </data>
   <data name="IntroSkipOptions_Group_Playback" xml:space="preserve">
     <value>Behavior Markers</value>
@@ -1891,5 +1894,14 @@
   </data>
   <data name="ExperienceEnhanceOptions_Group_NotificationAndLogs" xml:space="preserve">
     <value>Notifications &amp; Logs</value>
+  </data>
+  <data name="IntroSkipOptions_MaxIntroDurationSeconds_Description" xml:space="preserve">
+    <value>Default is 150 seconds; range 10–600.</value>
+  </data>
+  <data name="IntroSkipOptions_MaxCreditsDurationSeconds_Description" xml:space="preserve">
+    <value>Default is 360 seconds; range 10–600.</value>
+  </data>
+  <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds_Description" xml:space="preserve">
+    <value>Default is 60 seconds; range 30–120.</value>
   </data>
 </root>

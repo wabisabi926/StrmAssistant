@@ -627,13 +627,13 @@
     <value>Ignore File Change</value>
   </data>
   <data name="ExclusiveControl_CatchAllBlock_CatchAllBlock" xml:space="preserve">
-    <value>Catch All Block</value>
+    <value>Block All Probing</value>
   </data>
   <data name="ExclusiveControl_CatchAllAllow_CatchAllAllow" xml:space="preserve">
-    <value>Catch All Allow</value>
+    <value>Allow All Probing</value>
   </data>
   <data name="MediaInfoExtractOptions_ExclusiveExtractFeatureControl_Exclusive_Extract_Feature_Control" xml:space="preserve">
-    <value>Optional Exclusive Extract Feature Control</value>
+    <value>Exclusive Feature Control</value>
   </data>
   <data name="MetadataEnhanceOptions_LocalEpisodeGroup_Store_or_load_episode_group_info_to_from_JSON_file__Default_is_OFF_" xml:space="preserve">
     <value>Store or load episode group info to/from JSON file. Default is OFF.</value>
@@ -789,7 +789,7 @@
     <value>Ignore External Subtitle Change</value>
   </data>
   <data name="ExclusiveControl_NoPersistIntegration_NoPersistIntegration" xml:space="preserve">
-    <value>No Persist Integration</value>
+    <value>Skip Persistence Integration</value>
   </data>
   <data name="IntroSkipControl_ResetAndOverwrite_ResetAndOverwrite" xml:space="preserve">
     <value>Reset overwrites native markers on later episodes</value>
@@ -804,7 +804,7 @@
     <value>Fingerprint catchup is invalid because built-in intro detection enhanced is not enabled.</value>
   </data>
   <data name="ExclusiveControl_ExtractOnFileChange_ExtractOnFileChange" xml:space="preserve">
-    <value>Auto Extract on File Change</value>
+    <value>Re-extract on File Change</value>
   </data>
   <data name="ModOptions_ExcludeOriginalTitle_Exclude_Original_Title" xml:space="preserve">
     <value>Exclude Original Title</value>
@@ -858,7 +858,7 @@
     <value>Collection ordered by item date created</value>
   </data>
   <data name="ExclusiveControl_NoIntroProtect_NoIntroProtect" xml:space="preserve">
-    <value>No Intro Marker Protect</value>
+    <value>Allow Intro Marker Overwrite</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_Capture_Offset" xml:space="preserve">
     <value>Capture Position (%)</value>
@@ -1260,7 +1260,7 @@
     <value>Are you sure you wish to continue?</value>
   </data>
   <data name="ExclusiveControl_ExtractAlternative_ExtractAlternative" xml:space="preserve">
-    <value>Extract Alternative Versions on Playback Stop</value>
+    <value>Extract Alternate Versions on Refresh</value>
   </data>
   <data name="ExperienceEnhanceOptions_MergeMoviePreferences_Movie_Merge_Preference" xml:space="preserve">
     <value>Movie Merge Preference</value>
@@ -1452,7 +1452,7 @@
     <value>Folder Scope</value>
   </data>
   <data name="ExclusiveControl_NoNfoSaverOptimization_No_Nfo_Saver_Optimization" xml:space="preserve">
-    <value>No NFO Saver Optimization</value>
+    <value>Disable NFO Saver Optimization</value>
   </data>
   <data name="DeletePersonTask_Name_Delete_Persons" xml:space="preserve">
     <value>Delete Persons</value>

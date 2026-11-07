@@ -540,13 +540,13 @@
     <value>忽略文件变更</value>
   </data>
   <data name="ExclusiveControl_CatchAllBlock_CatchAllBlock" xml:space="preserve">
-    <value>尽可能全阻止</value>
+    <value>阻止全部探测</value>
   </data>
   <data name="ExclusiveControl_CatchAllAllow_CatchAllAllow" xml:space="preserve">
-    <value>尽可能全放行</value>
+    <value>允许全部探测</value>
   </data>
   <data name="MediaInfoExtractOptions_ExclusiveExtractFeatureControl_Exclusive_Extract_Feature_Control" xml:space="preserve">
-    <value>可选独占模式功能控制</value>
+    <value>独占功能控制</value>
   </data>
   <data name="MetadataEnhanceOptions_LocalEpisodeGroup_Store_or_load_episode_group_info_to_from_JSON_file__Default_is_OFF_" xml:space="preserve">
     <value>保存或加载剧集组至/自 JSON 文件，默认关闭。</value>
@@ -702,7 +702,7 @@
     <value>忽略外挂字幕变更</value>
   </data>
   <data name="ExclusiveControl_NoPersistIntegration_NoPersistIntegration" xml:space="preserve">
-    <value>无持久化整合</value>
+    <value>跳过持久化整合</value>
   </data>
   <data name="IntroSkipControl_ResetAndOverwrite_ResetAndOverwrite" xml:space="preserve">
     <value>重置时覆盖后续原生标记</value>
@@ -717,7 +717,7 @@
     <value>原生片头探测增强未启用，设置追更无效</value>
   </data>
   <data name="ExclusiveControl_ExtractOnFileChange_ExtractOnFileChange" xml:space="preserve">
-    <value>变更后自动提取</value>
+    <value>文件变更后重提取</value>
   </data>
   <data name="ModOptions_ExcludeOriginalTitle_Exclude_Original_Title" xml:space="preserve">
     <value>排除原语言标题</value>
@@ -771,7 +771,7 @@
     <value>合集按条目创建日期排序</value>
   </data>
   <data name="ExclusiveControl_NoIntroProtect_NoIntroProtect" xml:space="preserve">
-    <value>无片头标记保护</value>
+    <value>允许覆盖片头标记</value>
   </data>
   <data name="MediaInfoExtractOptions_ImageCaptureOffset_Image_Capture_Offset" xml:space="preserve">
     <value>截图位置（%）</value>
@@ -1173,7 +1173,7 @@
     <value>您确定要继续吗？</value>
   </data>
   <data name="ExclusiveControl_ExtractAlternative_ExtractAlternative" xml:space="preserve">
-    <value>播放停止后提取其他版本</value>
+    <value>刷新时提取其他版本</value>
   </data>
   <data name="ExperienceEnhanceOptions_MergeMoviePreferences_Movie_Merge_Preference" xml:space="preserve">
     <value>电影合并偏好</value>
@@ -1365,7 +1365,7 @@
     <value>同目录合并</value>
   </data>
   <data name="ExclusiveControl_NoNfoSaverOptimization_No_Nfo_Saver_Optimization" xml:space="preserve">
-    <value>无NFO保存优化</value>
+    <value>禁用 NFO 保存优化</value>
   </data>
   <data name="DeletePersonTask_Name_Delete_Persons" xml:space="preserve">
     <value>删除人员数据</value>

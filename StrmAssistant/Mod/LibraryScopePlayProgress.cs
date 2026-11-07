@@ -3,6 +3,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Data;
 using StrmAssistant.Common;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +34,16 @@ namespace StrmAssistant.Mod
 
         // item → 顶层媒体库 InternalId。GetCollectionFolders 会走库管理器，
         // 「继续观看」列表逐行计算 key 时不做缓存会明显拖慢。
-        private static readonly ConcurrentDictionary<long, long> FolderCache =
-            new ConcurrentDictionary<long, long>();
+        // 条目可能被移动到另一个库；缓存不能永久有效，否则会继续用旧库前缀。
+        private sealed class FolderCacheEntry
+        {
+            public long LibraryId;
+            public DateTime CachedUtc;
+        }
+
+        private static readonly TimeSpan FolderCacheTtl = TimeSpan.FromMinutes(5);
+        private static readonly ConcurrentDictionary<long, FolderCacheEntry> FolderCache =
+            new ConcurrentDictionary<long, FolderCacheEntry>();
 
         private static int _diagCount;
 
@@ -114,7 +123,11 @@ namespace StrmAssistant.Mod
 
         private static long? ResolveLibraryId(BaseItem item, IDataContext dataContext)
         {
-            if (FolderCache.TryGetValue(item.InternalId, out var cached)) return cached;
+            if (FolderCache.TryGetValue(item.InternalId, out var cached))
+            {
+                if (DateTime.UtcNow - cached.CachedUtc <= FolderCacheTtl) return cached.LibraryId;
+                FolderCache.TryRemove(item.InternalId, out _);
+            }
 
             var folders = dataContext != null
                 ? BaseItem.LibraryManager.GetCollectionFolders(item, dataContext, CancellationToken.None)
@@ -136,7 +149,11 @@ namespace StrmAssistant.Mod
                 return null;
             }
 
-            FolderCache[item.InternalId] = library.InternalId;
+            FolderCache[item.InternalId] = new FolderCacheEntry
+            {
+                LibraryId = library.InternalId,
+                CachedUtc = DateTime.UtcNow
+            };
             return library.InternalId;
         }
 

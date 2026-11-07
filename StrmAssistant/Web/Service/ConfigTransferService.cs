@@ -189,7 +189,7 @@ namespace StrmAssistant.Web.Service
             try
             {
                 using var document = JsonDocument.Parse(body);
-                if (!document.RootElement.TryGetProperty("values", out var valuesElement) ||
+                if (!TryGetValuesElement(document.RootElement, out var valuesElement) ||
                     valuesElement.ValueKind != JsonValueKind.Object)
                 {
                     response.Error = "missing values object";
@@ -347,6 +347,27 @@ namespace StrmAssistant.Web.Service
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// 兼容 Emby/System.Text.Json 的 PascalCase 与手写 JSON 的 camelCase：
+        /// 导出文件当前是 "Values"，历史/手工文件可能是 "values"。
+        /// </summary>
+        public static bool TryGetValuesElement(JsonElement root, out JsonElement values)
+        {
+            values = default;
+            if (root.ValueKind != JsonValueKind.Object) return false;
+
+            foreach (var property in root.EnumerateObject())
+            {
+                if (string.Equals(property.Name, "values", StringComparison.OrdinalIgnoreCase))
+                {
+                    values = property.Value;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static string ReadJsonScalar(JsonElement value)

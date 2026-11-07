@@ -92,6 +92,27 @@ namespace StrmAssistant.Options
             RuntimeInformation.ProcessArchitecture == Architecture.X64 ||
             RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
+        public override IEditObjectContainer CreateEditContainer()
+        {
+            var container = base.CreateEditContainer();
+            if (container is EditObjectContainer editContainer)
+            {
+                EditorGroupHelper.Rebuild(editContainer,
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionScope,
+                        "ExtractionScope", "ExtractionScope"),
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_AutoOnDemand,
+                        "AutoOnDemand", "AutoCatchup", "OnDemand"),
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_StorageCapture,
+                        "StorageCapture", "MediaInfoPersist", "ImageCapture"),
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionPerformance,
+                        "ExtractionPerformance", "ExtractionPerformance"),
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_IsoHdr,
+                        "IsoHdr", "IsoTool", "HdrTagging"));
+            }
+
+            return container;
+        }
+
         public void Initialize(ILibraryManager libraryManager)
         {
             ExtractionScope.Initialize(libraryManager);

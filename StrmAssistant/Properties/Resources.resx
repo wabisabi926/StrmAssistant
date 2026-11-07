@@ -1539,7 +1539,7 @@
     <value>Extract media info for the next episode in the background while playing. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
-    <value>Exclusive &amp; Performance</value>
+    <value>Extraction Performance</value>
   </data>
   <data name="IntroSkipOptions_Group_Fingerprint" xml:space="preserve">
     <value>Fingerprint Detection</value>
@@ -1864,5 +1864,32 @@
   </data>
   <data name="Overview_Status_Restart" xml:space="preserve">
     <value>  · memory over limit, restarting in {0}s</value>
+  </data>
+  <data name="MediaInfoExtractOptions_Group_AutoOnDemand" xml:space="preserve">
+    <value>Automatic &amp; On-Demand</value>
+  </data>
+  <data name="MediaInfoExtractOptions_Group_StorageCapture" xml:space="preserve">
+    <value>Storage &amp; Capture</value>
+  </data>
+  <data name="MediaInfoExtractOptions_Group_IsoHdr" xml:space="preserve">
+    <value>ISO &amp; HDR</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_PosterPerson" xml:space="preserve">
+    <value>Posters &amp; People</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_ScrapeEpisodeGroup" xml:space="preserve">
+    <value>Scraping &amp; Episode Groups</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_RefreshCache" xml:space="preserve">
+    <value>Refresh &amp; Cache</value>
+  </data>
+  <data name="IntroSkipOptions_Group_PlaybackScrape" xml:space="preserve">
+    <value>Playback &amp; External Markers</value>
+  </data>
+  <data name="NetworkProxyOptions_Group_NetworkDirectLink" xml:space="preserve">
+    <value>Network &amp; Direct Link</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_Group_NotificationAndLogs" xml:space="preserve">
+    <value>Notifications &amp; Logs</value>
   </data>
 </root>

@@ -1,5 +1,6 @@
 ﻿using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Validation;
+using MediaBrowser.Model.GenericEdit;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
 using System;
@@ -112,6 +113,27 @@ namespace StrmAssistant.Options
                 if (v >= new Version("1.8.6")) return "1.8.6-1.8.x";
                 return "<1.8.6";
             }
+        }
+
+        public override IEditObjectContainer CreateEditContainer()
+        {
+            var container = base.CreateEditContainer();
+            if (container is EditObjectContainer editContainer)
+            {
+                EditorGroupHelper.Rebuild(editContainer,
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_ChineseMetadata,
+                        "ChineseMetadata", "ChineseMetadata"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_DoubanAssist,
+                        "DoubanAssist", "DoubanAssist"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_PosterPerson,
+                        "PosterPerson", "PosterSort", "PersonEnhance"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_ScrapeEpisodeGroup,
+                        "ScrapeEpisodeGroup", "ScrapeOptimize", "EpisodeGroup"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_RefreshCache,
+                        "RefreshCache", "MetadataRefresh", "MetadataCache"));
+            }
+
+            return container;
         }
 
         public void Initialize()

@@ -5427,5 +5427,86 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_Group_NotificationAndLogs {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_Group_NotificationAndLogs", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_Group_PlaybackScrape {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_Group_PlaybackScrape", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_Group_AutoOnDemand {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_Group_AutoOnDemand", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_Group_IsoHdr {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_Group_IsoHdr", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_Group_StorageCapture {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_Group_StorageCapture", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_Group_PosterPerson {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_Group_PosterPerson", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_Group_RefreshCache {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_Group_RefreshCache", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_Group_ScrapeEpisodeGroup {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_Group_ScrapeEpisodeGroup", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string NetworkProxyOptions_Group_NetworkDirectLink {
+            get {
+                return ResourceManager.GetString("NetworkProxyOptions_Group_NetworkDirectLink", resourceCulture);
+            }
+        }
+
     }
 }

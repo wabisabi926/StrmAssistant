@@ -73,10 +73,10 @@ namespace StrmAssistant.Tests
 
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
-            // 顺序：提取范围 → ISO 提取 → 图像捕获 → HDR 标注 → 独占与性能 → 信息持久化 → 自动补漏 → 按需提取
+            // 顺序：提取范围 → 自动与按需 → 存储与截图 → 提取性能 → ISO 与 HDR
             Assert.Equal(
-                new[] { "ExtractionScope", "IsoTool", "ImageCapture", "HdrTagging",
-                        "ExtractionPerformance", "MediaInfoPersist", "AutoCatchup", "OnDemand" },
+                new[] { "ExtractionScope", "AutoOnDemand", "StorageCapture",
+                        "ExtractionPerformance", "IsoHdr" },
                 groups.Select(g => g.Name).ToArray());
 
             // 不再有运行时合并组
@@ -88,11 +88,60 @@ namespace StrmAssistant.Tests
             Assert.Contains(perf.EditorItems, i => NameOrId(i, "MediaInfoExtractionTimeoutMs"));
             Assert.Contains(perf.EditorItems, i => NameOrId(i, "ImageExtractionTimeoutMultiplier"));
 
-            // 持久化组只放持久化相关项，不再混入独占/超时
-            var persist = groups.First(g => NameOrId(g, "MediaInfoPersist"));
-            Assert.Contains(persist.EditorItems, i => NameOrId(i, "PersistMediaInfoMode"));
-            Assert.DoesNotContain(persist.EditorItems, i => NameOrId(i, "ExclusiveExtract"));
-            Assert.DoesNotContain(persist.EditorItems, i => NameOrId(i, "MediaInfoExtractionTimeoutMs"));
+            // 存储与截图只放持久化/截图相关项，不再混入独占/超时
+            var storage = groups.First(g => NameOrId(g, "StorageCapture"));
+            Assert.Contains(storage.EditorItems, i => NameOrId(i, "PersistMediaInfoMode"));
+            Assert.Contains(storage.EditorItems, i => NameOrId(i, "EnableImageCapture"));
+            Assert.DoesNotContain(storage.EditorItems, i => NameOrId(i, "ExclusiveExtract"));
+            Assert.DoesNotContain(storage.EditorItems, i => NameOrId(i, "MediaInfoExtractionTimeoutMs"));
+        }
+
+        [Fact]
+        public void Metadata_Groups_AreMerged()
+        {
+            var container = (EditObjectContainer)new MetadataEnhanceOptions().CreateEditContainer();
+            var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
+
+            Assert.Equal(
+                new[] { "ChineseMetadata", "DoubanAssist", "PosterPerson",
+                        "ScrapeEpisodeGroup", "RefreshCache" },
+                groups.Select(g => g.Name).ToArray());
+        }
+
+        [Fact]
+        public void Intro_Groups_AreMerged()
+        {
+            var container = (EditObjectContainer)new IntroSkipOptions().CreateEditContainer();
+            var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
+
+            Assert.Equal(new[] { "PlaybackScrape", "Fingerprint" },
+                groups.Select(g => g.Name).ToArray());
+        }
+
+        [Fact]
+        public void Network_Groups_AreMerged()
+        {
+            var container = (EditObjectContainer)new NetworkProxyOptions().CreateEditContainer();
+            var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
+
+            Assert.Equal(new[] { "NetworkDirectLink", "TmdbReplacement" },
+                groups.Select(g => g.Name).ToArray());
+        }
+
+        [Fact]
+        public void Experience_Groups_AreMerged()
+        {
+            var container = (EditObjectContainer)new ExperienceEnhanceOptions().CreateEditContainer();
+            var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
+
+            Assert.Equal(
+                new[] { "MultipleVersions", "ItemDisplay", "LibraryOrder", "Playback", "NotificationsLogs" },
+                groups.Select(g => g.Name).ToArray());
+
+            var playback = groups.First(g => NameOrId(g, "Playback"));
+            Assert.Contains(playback.EditorItems, i => NameOrId(i, "DryRun"));
+            Assert.Contains(playback.EditorItems, i => NameOrId(i, "EnableDeepDelete"));
+            Assert.DoesNotContain(groups, g => NameOrId(g, "Safety"));
         }
 
         private static bool NameOrId(EditorBase editor, string name)

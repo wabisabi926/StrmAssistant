@@ -66,49 +66,22 @@ namespace StrmAssistant.Options
         public override IEditObjectContainer CreateEditContainer()
         {
             var container = base.CreateEditContainer();
-            if (!(container is EditObjectContainer editContainer) ||
-                editContainer.EditorRoot?.EditorItems == null) return container;
-
-            var root = editContainer.EditorRoot;
-            var items = root.EditorItems.ToList();
-            var merge = items.OfType<EditorGroup>().FirstOrDefault(g => IsEditor(g, nameof(Merge)));
-            var display = items.OfType<EditorGroup>().FirstOrDefault(g => IsEditor(g, nameof(Display)));
-            if (merge == null && display == null) return container;
-
-            var mergedItems = new List<EditorBase>();
-            if (merge?.EditorItems != null) mergedItems.AddRange(merge.EditorItems);
-            if (display?.EditorItems != null) mergedItems.AddRange(display.EditorItems);
-
-            var multipleVersions = new EditorGroup(Resources.ExperienceEnhanceOptions_Group_MultipleVersions,
-                mergedItems.ToArray(), "MultipleVersions", root.Id, null);
-            var anchor = merge ?? display;
-
-            var newItems = new List<EditorBase>();
-            foreach (var item in items)
+            if (container is EditObjectContainer editContainer)
             {
-                if (ReferenceEquals(item, anchor))
-                {
-                    newItems.Add(multipleVersions);
-                    continue;
-                }
-
-                if (ReferenceEquals(item, merge) || ReferenceEquals(item, display)) continue;
-
-                newItems.Add(item);
+                EditorGroupHelper.Rebuild(editContainer,
+                    new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_MultipleVersions,
+                        "MultipleVersions", "Merge", "Display"),
+                    new EditorGroupSpec(Resources.ItemDisplayOptions_EditorTitle_Item_Display,
+                        "ItemDisplay", "ItemDisplay"),
+                    new EditorGroupSpec(Resources.LibraryOrderOptions_EditorTitle_Library_and_Order,
+                        "LibraryOrder", "LibraryOrder"),
+                    new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_Playback,
+                        "Playback", "Safety", "Playback"),
+                    new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_NotificationAndLogs,
+                        "NotificationsLogs", "Notification", "SearchLog"));
             }
 
-            root.EditorItems = newItems.ToArray();
             return container;
-        }
-
-        private static bool IsEditor(EditorBase editor, string name)
-        {
-            if (editor == null) return false;
-            if (string.Equals(editor.Name, name, StringComparison.OrdinalIgnoreCase)) return true;
-            var id = editor.Id;
-            return !string.IsNullOrEmpty(id) &&
-                   (string.Equals(id, name, StringComparison.OrdinalIgnoreCase) ||
-                    id.EndsWith("." + name, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Emby.Web.GenericEdit;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.GenericEdit;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
 using System.ComponentModel;
@@ -35,6 +36,21 @@ namespace StrmAssistant.Options
         public bool IsModSupported =>
             RuntimeInformation.ProcessArchitecture == Architecture.X64 ||
             RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+
+        public override IEditObjectContainer CreateEditContainer()
+        {
+            var container = base.CreateEditContainer();
+            if (container is EditObjectContainer editContainer)
+            {
+                EditorGroupHelper.Rebuild(editContainer,
+                    new EditorGroupSpec(Resources.IntroSkipOptions_Group_PlaybackScrape,
+                        "PlaybackScrape", "Playback", "Scrape"),
+                    new EditorGroupSpec(Resources.IntroSkipOptions_Group_Fingerprint,
+                        "Fingerprint", "Fingerprint"));
+            }
+
+            return container;
+        }
 
         public void Initialize(ILibraryManager libraryManager)
         {

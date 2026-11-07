@@ -1,4 +1,5 @@
 using Emby.Web.GenericEdit;
+using MediaBrowser.Model.GenericEdit;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
 
@@ -26,6 +27,21 @@ namespace StrmAssistant.Options
         /// <summary>TMDB 替换：自定义 TMDB API / 图片地址与 API Key。</summary>
         [DisplayNameL("MetadataEnhanceOptions_Group_AltMovieDb", typeof(Resources))]
         public AltMovieDbOptions TmdbReplacement { get; set; } = new AltMovieDbOptions();
+
+        public override IEditObjectContainer CreateEditContainer()
+        {
+            var container = base.CreateEditContainer();
+            if (container is EditObjectContainer editContainer)
+            {
+                EditorGroupHelper.Rebuild(editContainer,
+                    new EditorGroupSpec(Resources.NetworkProxyOptions_Group_NetworkDirectLink,
+                        "NetworkDirectLink", "Network", "DirectLink"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_AltMovieDb,
+                        "TmdbReplacement", "TmdbReplacement"));
+            }
+
+            return container;
+        }
 
         public void Initialize()
         {

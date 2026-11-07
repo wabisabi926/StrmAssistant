@@ -1452,7 +1452,7 @@
     <value>播放劇集時，在背景為下一集擷取媒體資訊。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
-    <value>獨佔與效能</value>
+    <value>提取效能</value>
   </data>
   <data name="IntroSkipOptions_Group_Fingerprint" xml:space="preserve">
     <value>聲紋探測</value>
@@ -1777,5 +1777,32 @@
   </data>
   <data name="Overview_Status_Restart" xml:space="preserve">
     <value>　· 記憶體超限，{0} 秒後重啟</value>
+  </data>
+  <data name="MediaInfoExtractOptions_Group_AutoOnDemand" xml:space="preserve">
+    <value>自動與按需</value>
+  </data>
+  <data name="MediaInfoExtractOptions_Group_StorageCapture" xml:space="preserve">
+    <value>儲存與截圖</value>
+  </data>
+  <data name="MediaInfoExtractOptions_Group_IsoHdr" xml:space="preserve">
+    <value>ISO 與 HDR</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_PosterPerson" xml:space="preserve">
+    <value>海報與人物</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_ScrapeEpisodeGroup" xml:space="preserve">
+    <value>刮削與劇集組</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_RefreshCache" xml:space="preserve">
+    <value>重新整理與快取</value>
+  </data>
+  <data name="IntroSkipOptions_Group_PlaybackScrape" xml:space="preserve">
+    <value>播放與外部標記</value>
+  </data>
+  <data name="NetworkProxyOptions_Group_NetworkDirectLink" xml:space="preserve">
+    <value>網路與直鏈</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_Group_NotificationAndLogs" xml:space="preserve">
+    <value>通知與日誌</value>
   </data>
 </root>

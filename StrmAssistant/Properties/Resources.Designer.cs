@@ -4707,5 +4707,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_LibraryScopePlayProgress_Description {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_LibraryScopePlayProgress_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_LibraryScopePlayProgress_Title {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_LibraryScopePlayProgress_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting {
+            get {
+                return ResourceManager.GetString("RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys {
+            get {
+                return ResourceManager.GetString("RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys", resourceCulture);
+            }
+        }
+
     }
 }

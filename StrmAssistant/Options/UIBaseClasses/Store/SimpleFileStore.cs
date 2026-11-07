@@ -72,7 +72,12 @@
                 {
                     if (!this.fileSystem.FileExists(this.OptionsFilePath))
                     {
-                        return tempOptions;
+                        // 首次安装或配置文件被删除时必须把默认实例缓存下来：
+                        // 否则每次 GetOptions() 都返回一个新对象，凡是「读-改-写」分两次
+                        // GetOptions() 的调用都会改在临时对象上，落盘的仍是全默认值
+                        // （例：Plugin.cs 里 NoBoxsetsAutoCreation 的自动回写）。
+                        this.options = tempOptions;
+                        return this.options;
                     }
 
                     using (var stream = this.fileSystem.OpenRead(this.OptionsFilePath))

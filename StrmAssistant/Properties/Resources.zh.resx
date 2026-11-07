@@ -1538,4 +1538,16 @@
   <data name="DisclaimerDialog_Contact_Description" xml:space="preserve">
     <value>如果认为本项目可能侵犯相关方的合法权益，请与开发者取得联系。</value>
   </data>
+  <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Title" xml:space="preserve">
+    <value>各媒体库内记录播放进度</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
+    <value>不同媒体库中的同一内容分别记录播放进度与收藏。切换后需重启 Emby 并运行「重建播放进度键」任务；原有进度会暂时不可见，关闭开关、重启并再运行一次该任务即可恢复。</value>
+  </data>
+  <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
+    <value>重建播放进度键</value>
+  </data>
+  <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
+    <value>按当前开关重算并落库每个电影与剧集的播放进度键。切换「各媒体库内记录播放进度」并重启 Emby 后运行一次；关闭开关后运行可恢复原键。</value>
+  </data>
 </root>

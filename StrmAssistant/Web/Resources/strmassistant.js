@@ -743,7 +743,8 @@ define([
                 chip.className = 'mediaInfoItem mv-quality-badge';
                 const label = info.Label || info.label;
                 const hdr = info.Hdr || info.hdr;
-                chip.textContent = label + (hdr ? ' \u00b7 ' + hdr : '');
+                const audio = info.Audio || info.audio;
+                chip.textContent = label + (hdr ? ' \u00b7 ' + hdr : '') + (audio ? ' \u00b7 ' + audio : '');
                 chip.setAttribute('style', 'color:#7ee787;background:rgba(46,160,67,.18);font-weight:600;');
                 return chip;
             }
@@ -806,9 +807,10 @@ define([
                         if (!host) return;
                         if (host.style.position !== 'absolute' && !host.style.position) host.style.position = 'relative';
                         const hdr = info.Hdr || info.hdr;
+                        const audio = info.Audio || info.audio;
                         const pill = document.createElement('div');
                         pill.className = 'mv-quality-pill';
-                        pill.textContent = label + (hdr ? ' \u00b7 ' + hdr : '');
+                        pill.textContent = label + (hdr ? ' \u00b7 ' + hdr : '') + (audio ? ' \u00b7 ' + audio : '');
                         pill.setAttribute('style', 'position:absolute;top:4px;left:4px;z-index:5;background:rgba(46,160,67,.85);' +
                             'color:#fff;font-size:11px;line-height:15px;padding:0 5px;border-radius:6px;pointer-events:none;white-space:nowrap;');
                         host.appendChild(pill);

@@ -102,6 +102,29 @@ namespace StrmAssistant.Options.Store
                     }
                 }
 
+                if (changedProperties.Contains(nameof(ExperiencePlaybackOptions.LibraryScopePlayProgress)))
+                {
+                    // 重启生效：GetUserDataKey 方法体极小，JIT 可能已内联，
+                    // 运行中 Patch/Unpatch 会出现「部分调用点不生效」。
+                    Mod.LibraryScopePlayProgress.ClearCache();
+
+                    if (options.Playback.LibraryScopePlayProgress && options.IsModSupported)
+                    {
+                        PatchManager.LibraryScopePlayProgress.Patch();
+                    }
+                    else
+                    {
+                        PatchManager.LibraryScopePlayProgress.Unpatch();
+                    }
+
+                    Plugin.Instance.ApplicationHost.NotifyPendingRestart();
+
+                    _logger.Warn(options.Playback.LibraryScopePlayProgress
+                        ? "LibraryScopePlayProgress enabled - restart Emby, then run 'Refresh missing metadata' on the affected libraries. " +
+                          "Existing play progress/favorites will be temporarily invisible until refreshed."
+                        : "LibraryScopePlayProgress disabled - restart Emby to restore the original user data keys.");
+                }
+
                 if (changedProperties.Contains(nameof(ExperienceNotificationOptions.EnhanceNotificationSystem)))
                 {
                     if (options.Notification.EnhanceNotificationSystem)

@@ -1625,4 +1625,16 @@
   <data name="DisclaimerDialog_Contact_Description" xml:space="preserve">
     <value>If you believe this project may infringe any rights, please contact the developer.</value>
   </data>
+  <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Title" xml:space="preserve">
+    <value>Track Play Progress per Library</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
+    <value>Record play progress and favorites separately for the same title in different libraries. After toggling, restart Emby and run the 'Rebuild Play Progress Keys' task. Existing progress becomes temporarily invisible; disable the switch, restart and run the task again to restore it.</value>
+  </data>
+  <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
+    <value>Rebuild Play Progress Keys</value>
+  </data>
+  <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
+    <value>Recompute and persist the per-library play progress key for every movie and episode. Run once after toggling Track Play Progress per Library and restarting Emby.</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Services;
+using StrmAssistant.Common;
 using StrmAssistant.Web.Api;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace StrmAssistant.Web.Service
             public int? Height { get; set; }
             public string Label { get; set; }
             public string Hdr { get; set; }
+            public string Audio { get; set; }
             public long? Bitrate { get; set; }
         }
 
@@ -142,6 +144,7 @@ namespace StrmAssistant.Web.Service
                         Height = video?.Height,
                         Label = label,
                         Hdr = GetHdrLabel(source.MediaStreams),
+                        Audio = GetAudioLabel(source.MediaStreams, path),
                         Bitrate = source.Bitrate
                         }
                     };
@@ -291,6 +294,22 @@ namespace StrmAssistant.Web.Service
         /// 因此这里需要扫描**全部视频流**取最优档位，只看主视频流会漏掉 DV 信息。
         /// 档位顺序须与 <c>strmassistant.js</c> 的 <c>hdrs</c> 列表保持一致（前 = 最优）。
         /// </summary>
+        /// <summary>
+        /// 音轨标识：Atmos / DTS:X。
+        /// Emby 的 MediaStream 没有音频扩展类型字段，只能按「轨道标题 → 文件名」做文本识别，
+        /// 且限定无损/对象音频编码（见 <see cref="AudioTagDetector"/>），避免误标。
+        /// </summary>
+        private static string GetAudioLabel(IEnumerable<MediaStream> streams, string path)
+        {
+            var audio = streams?
+                .FirstOrDefault(s => s != null && s.Type == MediaStreamType.Audio);
+
+            if (audio == null) return null;
+
+            return AudioTagDetector.ToLabel(
+                AudioTagDetector.Detect(audio.Title, audio.Codec, path));
+        }
+
         private static string GetHdrLabel(IEnumerable<MediaStream> streams)
         {
             var videos = streams?

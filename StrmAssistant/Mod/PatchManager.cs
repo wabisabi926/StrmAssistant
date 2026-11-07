@@ -55,6 +55,7 @@ namespace StrmAssistant.Mod
         public static DolbyVisionProfile DolbyVisionProfile;
         public static HdrVividTagging HdrVividTagging;
         public static DoubanRatingRefresh DoubanRatingRefresh;
+        public static LibraryScopePlayProgress LibraryScopePlayProgress;
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod> HarmonyMethodCache 
             = new ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod>();
@@ -125,6 +126,7 @@ namespace StrmAssistant.Mod
             DolbyVisionProfile = new DolbyVisionProfile();
             HdrVividTagging = new HdrVividTagging();
             DoubanRatingRefresh = new DoubanRatingRefresh();
+            LibraryScopePlayProgress = new LibraryScopePlayProgress();
 
             // ★ 总览日志：遍历所有 PatchTracker，打印每个模块的最终状态（Info 级别，无需开启 DebugMode）
             try
@@ -209,7 +211,8 @@ namespace StrmAssistant.Mod
                 typeof(MovieDbEpisodeGroup),
                 typeof(OptimizeMovieDbEpisodeScraping),
                 typeof(StrmDirectRedirect),
-                typeof(LiveTvDirectRedirect)
+                typeof(LiveTvDirectRedirect),
+                typeof(LibraryScopePlayProgress)
             };
             
             // 核心功能补丁（这些失败会影响整体状态）

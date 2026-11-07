@@ -46,6 +46,12 @@ namespace StrmAssistant.Options
         [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
         public bool OptimizeSubtitle { get; set; } = false;
 
+        [DisplayNameL("ExperienceEnhanceOptions_LibraryScopePlayProgress_Title", typeof(Resources))]
+        [DescriptionL("ExperienceEnhanceOptions_LibraryScopePlayProgress_Description", typeof(Resources))]
+        [Required]
+        [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
+        public bool LibraryScopePlayProgress { get; set; } = false;
+
         [Browsable(false)]
         public bool IsModSupported =>
             RuntimeInformation.ProcessArchitecture == Architecture.X64 ||

@@ -5193,5 +5193,50 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_ {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_ExtractOnBrowse_Extract_When_Opening_Details {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_ExtractOnBrowse_Extract_When_Opening_Details", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_ {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_Group_OnDemand {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_Group_OnDemand", resourceCulture);
+            }
+        }
+
     }
 }

@@ -54,6 +54,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("MediaInfoExtractOptions_Group_AutoCatchup", typeof(Resources))]
         public AutoCatchupOptions AutoCatchup { get; set; } = new AutoCatchupOptions();
 
+        /// <summary>按需提取：打开详情页缺流时入队、播放时预取下一集。</summary>
+        [DisplayNameL("MediaInfoExtractOptions_Group_OnDemand", typeof(Resources))]
+        public OnDemandExtractOptions OnDemand { get; set; } = new OnDemandExtractOptions();
+
         public enum ExclusiveControl
         {
             [DescriptionL("ExclusiveControl_IgnoreFileChange_IgnoreFileChange", typeof(Resources))]

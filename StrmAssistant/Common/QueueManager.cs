@@ -36,6 +36,7 @@ namespace StrmAssistant.Common
 
         private static readonly Random Random = new Random();
         private static readonly object ConcurrencySettingsLock = new object();
+        private static readonly object MediaInfoStartLock = new object();
         private static int _currentMasterMaxConcurrentCount;
         private static int _currentTier2MaxConcurrentCount;
 
@@ -74,29 +75,7 @@ namespace StrmAssistant.Common
 
         public static void Initialize()
         {
-            if (MediaInfoProcessTask is null)
-            {
-                MediaInfoExtractItemQueue.Clear();
-                MediaInfoProcessTask = MediaInfo_ProcessItemQueueAsync()
-                    .ContinueWith(task =>
-                    {
-                        if (task.IsFaulted)
-                        {
-                            Logger.Debug(
-                                $"(Trace) MediaInfo_ProcessItemQueueAsync terminated unexpectedly. Exception: {task.Exception?.Flatten()}");
-                        }
-                        else if (task.IsCanceled)
-                        {
-                            Logger.Debug("(Trace) MediaInfo_ProcessItemQueueAsync was canceled.");
-                        }
-                        else
-                        {
-                            Logger.Debug("(Trace) MediaInfo_ProcessItemQueueAsync completed successfully.");
-                        }
-
-                        MediaInfoProcessTask = null;
-                    }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
-            }
+            StartMediaInfoProcessing(clearQueue: true);
 
             if (FingerprintProcessTask is null)
             {
@@ -147,6 +126,38 @@ namespace StrmAssistant.Common
             }
         }
 
+        /// <summary>按需入队后确保媒体信息队列在跑；不清空已有队列。</summary>
+        public static void EnsureMediaInfoProcessing() => StartMediaInfoProcessing();
+
+        private static void StartMediaInfoProcessing(bool clearQueue = false)
+        {
+            lock (MediaInfoStartLock)
+            {
+                if (MediaInfoProcessTask is not null) return;
+                if (clearQueue) MediaInfoExtractItemQueue.Clear();
+
+                MediaInfoProcessTask = MediaInfo_ProcessItemQueueAsync()
+                    .ContinueWith(task =>
+                    {
+                        if (task.IsFaulted)
+                        {
+                            Logger.Debug(
+                                $"(Trace) MediaInfo_ProcessItemQueueAsync terminated unexpectedly. Exception: {task.Exception?.Flatten()}");
+                        }
+                        else if (task.IsCanceled)
+                        {
+                            Logger.Debug("(Trace) MediaInfo_ProcessItemQueueAsync was canceled.");
+                        }
+                        else
+                        {
+                            Logger.Debug("(Trace) MediaInfo_ProcessItemQueueAsync completed successfully.");
+                        }
+
+                        MediaInfoProcessTask = null;
+                    }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            }
+        }
+
         public static void UpdateMasterSemaphore(int maxConcurrentCount)
         {
             lock (ConcurrencySettingsLock)
@@ -185,6 +196,12 @@ namespace StrmAssistant.Common
 
             foreach (var item in items)
             {
+                if (MediaInfoPrefetch.IsOnDemand(item.InternalId))
+                {
+                    ready.Add(item);
+                    continue;
+                }
+
                 var wait = minWait - (DateTime.UtcNow - item.DateCreated);
 
                 if (wait > tolerance) requeue(item);

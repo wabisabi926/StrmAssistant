@@ -626,6 +626,11 @@ namespace StrmAssistant.Common
                     resultItems = resultItems.Concat(filteredItems).ToList();
                 }
             }
+            else
+            {
+                // 追更/补漏未勾选媒体信息时，队列里只会有详情页/下一集按需入队的条目
+                resultItems = items.Where(item => item is Video || item is Audio).ToList();
+            }
 
             if (IsCatchupTaskSelected(TaskConcurrencyOptions.CatchupTask.IntroSkip))
             {

@@ -1,4 +1,5 @@
 using HarmonyLib;
+using StrmAssistant.Common;
 using System;
 using System.Reflection;
 using static StrmAssistant.Mod.PatchManager;
@@ -8,6 +9,7 @@ namespace StrmAssistant.Mod
     /// <summary>
     /// 详情页按需刷新豆瓣评分：补丁 Emby 的单条目详情接口（Web / App / TV 共用），
     /// 使「打开过详情页」的条目在冷却到期后于后台更新豆瓣分，不再只依赖播放。
+    /// 同一入口同时触发按需媒体信息提取；两者各自检查开关。
     /// Kodi 库视图读取本地数据库、不发该请求，由 <see cref="Plugin.OnPlaybackStart"/> 兜底。
     /// </summary>
     public class DoubanRatingRefresh : PatchBase<DoubanRatingRefresh>
@@ -70,12 +72,15 @@ namespace StrmAssistant.Mod
         {
             try
             {
-                if (Plugin.DoubanAssist == null || !Plugin.IsPluginEnabled) return;
+                if (!Plugin.IsPluginEnabled) return;
 
                 if (!(_getItemId?.GetValue(__0) is string id) || !long.TryParse(id, out var itemId)) return;
 
                 var item = Plugin.LibraryManager.GetItemById(itemId);
-                if (item != null) Plugin.DoubanAssist.TryScheduleRatingRefresh(item, "DetailPage");
+                if (item == null) return;
+
+                Plugin.DoubanAssist?.TryScheduleRatingRefresh(item, "DetailPage");
+                MediaInfoPrefetch.TryEnqueueFromBrowse(item);
             }
             catch (Exception e)
             {

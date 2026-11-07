@@ -658,13 +658,14 @@ namespace StrmAssistant
         /// </summary>
         private void OnPlaybackStart(object sender, PlaybackProgressEventArgs e)
         {
-            if (!MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist) return;
-
-            // Episode 会在 TryScheduleRatingRefresh 内归一到所属剧集
-            if (e.Item is Movie || e.Item is Episode || e.Item is Series || e.Item is Season)
+            if (MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist &&
+                (e.Item is Movie || e.Item is Episode || e.Item is Series || e.Item is Season))
             {
+                // Episode 会在 TryScheduleRatingRefresh 内归一到所属剧集
                 DoubanAssist.TryScheduleRatingRefresh(e.Item, "PlaybackStart");
             }
+
+            MediaInfoPrefetch.TryScheduleNextEpisode(e.Item);
         }
 
         private void OnPlaybackStopped(object sender, PlaybackProgressEventArgs e)

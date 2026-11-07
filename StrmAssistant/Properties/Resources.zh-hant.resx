@@ -1430,6 +1430,21 @@
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
     <value>單一條目的最大重試次數，超過後移出重試佇列。預設 3。</value>
   </data>
+  <data name="MediaInfoExtractOptions_Group_OnDemand" xml:space="preserve">
+    <value>按需擷取</value>
+  </data>
+  <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_When_Opening_Details" xml:space="preserve">
+    <value>開啟詳情頁時擷取</value>
+  </data>
+  <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_" xml:space="preserve">
+    <value>條目缺少媒體資訊時，開啟詳情頁後在背景擷取。預設關閉。</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback" xml:space="preserve">
+    <value>播放時預載下一集</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_" xml:space="preserve">
+    <value>播放劇集時，在背景為下一集擷取媒體資訊。預設關閉。</value>
+  </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>獨佔與效能</value>
   </data>

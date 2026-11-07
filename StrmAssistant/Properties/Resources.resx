@@ -1517,6 +1517,21 @@
   <data name="MediaInfoExtractOptions_MaxRetryAttempts_Maximum_retry_attempts_per_item__items_exceeding_this_limit_are_removed_from_the_queue__Default_is_3_" xml:space="preserve">
     <value>Maximum retry attempts per item; items exceeding this limit are removed from the queue. Default is 3.</value>
   </data>
+  <data name="MediaInfoExtractOptions_Group_OnDemand" xml:space="preserve">
+    <value>On-Demand Extraction</value>
+  </data>
+  <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_When_Opening_Details" xml:space="preserve">
+    <value>Extract When Opening Details</value>
+  </data>
+  <data name="MediaInfoExtractOptions_ExtractOnBrowse_Extract_in_the_background_when_opening_a_detail_page_for_an_item_without_media_info__Default_is_OFF_" xml:space="preserve">
+    <value>Extract media info in the background when opening a detail page for an item that has none. Default is OFF.</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Preload_Next_Episode_During_Playback" xml:space="preserve">
+    <value>Preload Next Episode During Playback</value>
+  </data>
+  <data name="MediaInfoExtractOptions_EnableMediaInfoPreload_Extract_media_info_for_the_next_episode_in_the_background_while_playing__Default_is_OFF_" xml:space="preserve">
+    <value>Extract media info for the next episode in the background while playing. Default is OFF.</value>
+  </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
     <value>Exclusive &amp; Performance</value>
   </data>

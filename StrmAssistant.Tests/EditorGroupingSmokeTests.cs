@@ -58,10 +58,10 @@ namespace StrmAssistant.Tests
 
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
-            // 顺序：提取范围 → ISO 提取 → 图像捕获 → HDR 标注 → 独占与性能 → 信息持久化 → 自动补漏
+            // 顺序：提取范围 → ISO 提取 → 图像捕获 → HDR 标注 → 独占与性能 → 信息持久化 → 自动补漏 → 按需提取
             Assert.Equal(
                 new[] { "ExtractionScope", "IsoTool", "ImageCapture", "HdrTagging",
-                        "ExtractionPerformance", "MediaInfoPersist", "AutoCatchup" },
+                        "ExtractionPerformance", "MediaInfoPersist", "AutoCatchup", "OnDemand" },
                 groups.Select(g => g.Name).ToArray());
 
             // 不再有运行时合并组

@@ -1556,4 +1556,61 @@
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_" xml:space="preserve">
     <value>把同一套版本標籤寫入伺服器端下發的版本名，讓 Kodi、Apple TV、手機 App 的版本下拉也顯示畫質 / HDR / 音軌。僅在條目有多個版本時生效；預設關閉。</value>
   </data>
+  <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
+    <value>計畫任務</value>
+  </data>
+  <data name="ScheduledTasks_List_Task_List" xml:space="preserve">
+    <value>任務列表</value>
+  </data>
+  <data name="ScheduledTasks_Run_Run" xml:space="preserve">
+    <value>執行</value>
+  </data>
+  <data name="ScheduledTasks_None" xml:space="preserve">
+    <value>沒有可執行的任務</value>
+  </data>
+  <data name="ScheduledTasks_NeverRun" xml:space="preserve">
+    <value>從未執行</value>
+  </data>
+  <data name="ScheduledTasks_LastRun" xml:space="preserve">
+    <value>上次：{0} · 耗時 {1} · {2}</value>
+  </data>
+  <data name="ScheduledTasks_Status_Completed" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="ScheduledTasks_Status_Failed" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="ScheduledTasks_Status_Cancelled" xml:space="preserve">
+    <value>已取消</value>
+  </data>
+  <data name="ScheduledTasks_Status_Aborted" xml:space="preserve">
+    <value>已中止</value>
+  </data>
+  <data name="ScheduledTasks_Status_Running" xml:space="preserve">
+    <value>執行中 {0}%</value>
+  </data>
+  <data name="ScheduledTasks_Duration_Seconds" xml:space="preserve">
+    <value>{0} 秒</value>
+  </data>
+  <data name="ScheduledTasks_Duration_Minutes" xml:space="preserve">
+    <value>{0} 分 {1} 秒</value>
+  </data>
+  <data name="ScheduledTasks_Duration_Hours" xml:space="preserve">
+    <value>{0} 小時 {1} 分</value>
+  </data>
+  <data name="ScheduledTasks_Started" xml:space="preserve">
+    <value>已開始執行：{0}</value>
+  </data>
+  <data name="ScheduledTasks_AlreadyRunning" xml:space="preserve">
+    <value>任務正在執行：{0}</value>
+  </data>
+  <data name="ScheduledTasks_NotFound" xml:space="preserve">
+    <value>任務不存在：{0}</value>
+  </data>
+  <data name="RuntimeStatus_RestartCountdown" xml:space="preserve">
+    <value>記憶體已超過上限 {0} MB，伺服器將在 {1} 秒後自動重啟。</value>
+  </data>
+  <data name="ScheduledTasks_List_Task_List_Description" xml:space="preserve">
+    <value>點「執行」會立即開始任務，頁面上未儲存的變更可能遺失；需要保留時請先儲存。</value>
+  </data>
 </root>

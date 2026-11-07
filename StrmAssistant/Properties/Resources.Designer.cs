@@ -4761,5 +4761,176 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_AlreadyRunning {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_AlreadyRunning", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Duration_Hours {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Duration_Hours", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Duration_Minutes {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Duration_Minutes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Duration_Seconds {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Duration_Seconds", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_EditorTitle_Scheduled_Tasks {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_EditorTitle_Scheduled_Tasks", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_LastRun {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_LastRun", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_List_Task_List {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_List_Task_List", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_NeverRun {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_NeverRun", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_None {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_None", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_NotFound {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_NotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Run_Run {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Run_Run", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Started {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Started", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Status_Aborted {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Status_Aborted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Status_Cancelled {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Status_Cancelled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Status_Completed {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Status_Completed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Status_Failed {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Status_Failed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Status_Running {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Status_Running", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string RuntimeStatus_RestartCountdown {
+            get {
+                return ResourceManager.GetString("RuntimeStatus_RestartCountdown", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_List_Task_List_Description {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_List_Task_List_Description", resourceCulture);
+            }
+        }
+
     }
 }

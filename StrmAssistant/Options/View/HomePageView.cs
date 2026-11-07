@@ -22,6 +22,8 @@ namespace StrmAssistant.Options.View
 {
     internal class HomePageView : PluginPageView
     {
+        private const string RunScheduledTaskCommand = "RunScheduledTask";
+
         private readonly PluginInfo _pluginInfo;
         private readonly PluginOptionsStore _store;
         private readonly ITaskManager _taskManager;
@@ -41,11 +43,201 @@ namespace StrmAssistant.Options.View
             PluginOptions.TaskConcurrency.Initialize();
             PluginOptions.ChineseSearch.Initialize();
             PluginOptions.AboutOptions.Initialize();
+            PluginOptions.ScheduledTasks.Initialize();
 
+            PopulateScheduledTasks();
             PopulateRuntimeStatus(PluginOptions);
         }
 
         public PluginOptions PluginOptions => ContentData as PluginOptions;
+
+        /// <summary>
+        /// 生成「计划任务」列表：只列本插件自己的任务（按程序集过滤），
+        /// 每行带「执行」按钮，并显示上次执行的状态、耗时与时间。
+        /// </summary>
+        private void PopulateScheduledTasks()
+        {
+            var list = PluginOptions.ScheduledTasks.TaskList;
+            list.Clear();
+
+            try
+            {
+                // 按程序集过滤：第三方插件可能有同名 Key 的任务，既不能被列进来，更不能被误执行
+                var pluginAssembly = typeof(Plugin).Assembly;
+
+                var workers = _taskManager.ScheduledTasks
+                    .Where(t => t?.ScheduledTask != null && t.ScheduledTask.GetType().Assembly == pluginAssembly)
+                    .OrderBy(t => t.Name, StringComparer.Ordinal)
+                    .ToList();
+
+                if (workers.Count == 0)
+                {
+                    list.Add(new GenericListItem
+                    {
+                        PrimaryText = Resources.ScheduledTasks_None,
+                        Icon = IconNames.schedule
+                    });
+                    return;
+                }
+
+                foreach (var worker in workers)
+                {
+                    list.Add(BuildTaskItem(worker));
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Warn($"HomePage - 生成计划任务列表失败: {e.Message}");
+                list.Add(new GenericListItem
+                {
+                    PrimaryText = e.Message,
+                    Icon = IconNames.warning,
+                    Status = ItemStatus.Failed
+                });
+            }
+        }
+
+        private static GenericListItem BuildTaskItem(IScheduledTaskWorker worker)
+        {
+            var isRunning = worker.State != TaskState.Idle;
+
+            var item = new GenericListItem
+            {
+                PrimaryText = worker.Name,
+                Icon = IconNames.schedule,
+                Status = isRunning ? ItemStatus.InProgress : MapCompletion(worker.LastExecutionResult),
+                Button1 = new ButtonItem(Resources.ScheduledTasks_Run_Run)
+                {
+                    Icon = IconNames.play_arrow,
+                    Data1 = RunScheduledTaskCommand,
+                    // 框架把按钮的 Data2 作为 itemId 回传给 RunCommand，这里放任务 Key
+                    Data2 = worker.ScheduledTask.Key,
+                    IsEnabled = !isRunning
+                }
+            };
+
+            if (isRunning)
+            {
+                var percent = worker.CurrentProgress ?? 0;
+                item.SecondaryText = string.Format(Resources.ScheduledTasks_Status_Running, (int)percent);
+                item.HasPercentage = percent > 0;
+                item.PercentComplete = (int)percent;
+            }
+            else
+            {
+                item.SecondaryText = DescribeLastRun(worker.LastExecutionResult);
+            }
+
+            return item;
+        }
+
+        private static ItemStatus MapCompletion(TaskResult result)
+        {
+            if (result == null || result.StartTimeUtc == default) return ItemStatus.Unavailable;
+
+            switch (result.Status)
+            {
+                case TaskCompletionStatus.Completed:
+                    return ItemStatus.Succeeded;
+                case TaskCompletionStatus.Failed:
+                case TaskCompletionStatus.Aborted:
+                    return ItemStatus.Failed;
+                case TaskCompletionStatus.Cancelled:
+                    return ItemStatus.Warning;
+                default:
+                    return ItemStatus.Unknown;
+            }
+        }
+
+        private static string DescribeLastRun(TaskResult result)
+        {
+            if (result == null || result.StartTimeUtc == default) return Resources.ScheduledTasks_NeverRun;
+
+            var duration = result.EndTimeUtc > result.StartTimeUtc
+                ? result.EndTimeUtc - result.StartTimeUtc
+                : TimeSpan.Zero;
+
+            var text = string.Format(Resources.ScheduledTasks_LastRun,
+                GetStatusText(result.Status), FormatDuration(duration),
+                result.EndTimeUtc.ToLocalTime().ToString("MM-dd HH:mm"));
+
+            if (result.Status == TaskCompletionStatus.Failed && !string.IsNullOrWhiteSpace(result.ErrorMessage))
+            {
+                var error = result.ErrorMessage.Trim().Replace(Environment.NewLine, " ");
+                if (error.Length > 80) error = error.Substring(0, 80) + "\u2026";
+                text += " \u00b7 " + error;
+            }
+
+            return text;
+        }
+
+        private static string GetStatusText(TaskCompletionStatus status)
+        {
+            switch (status)
+            {
+                case TaskCompletionStatus.Completed:
+                    return Resources.ScheduledTasks_Status_Completed;
+                case TaskCompletionStatus.Failed:
+                    return Resources.ScheduledTasks_Status_Failed;
+                case TaskCompletionStatus.Cancelled:
+                    return Resources.ScheduledTasks_Status_Cancelled;
+                case TaskCompletionStatus.Aborted:
+                    return Resources.ScheduledTasks_Status_Aborted;
+                default:
+                    return status.ToString();
+            }
+        }
+
+        private static string FormatDuration(TimeSpan duration)
+        {
+            if (duration.TotalHours >= 1)
+                return string.Format(Resources.ScheduledTasks_Duration_Hours,
+                    (int)duration.TotalHours, duration.Minutes);
+
+            if (duration.TotalMinutes >= 1)
+                return string.Format(Resources.ScheduledTasks_Duration_Minutes,
+                    (int)duration.TotalMinutes, duration.Seconds);
+
+            return string.Format(Resources.ScheduledTasks_Duration_Seconds,
+                Math.Max(0, (int)duration.TotalSeconds));
+        }
+
+        private void RunScheduledTask(string key)
+        {
+            try
+            {
+                var pluginAssembly = typeof(Plugin).Assembly;
+                var worker = _taskManager.ScheduledTasks.FirstOrDefault(t =>
+                    t?.ScheduledTask != null &&
+                    t.ScheduledTask.GetType().Assembly == pluginAssembly &&
+                    string.Equals(t.ScheduledTask.Key, key, StringComparison.OrdinalIgnoreCase));
+
+                if (worker == null)
+                {
+                    Notify(string.Format(Resources.ScheduledTasks_NotFound, key));
+                    return;
+                }
+
+                if (worker.State != TaskState.Idle)
+                {
+                    Notify(string.Format(Resources.ScheduledTasks_AlreadyRunning, worker.Name));
+                    return;
+                }
+
+                _taskManager.Execute(worker, new TaskOptions()).FireAndForget(Plugin.Instance.Logger);
+                Notify(string.Format(Resources.ScheduledTasks_Started, worker.Name));
+                Plugin.Instance.Logger.Info($"HomePage - 手动执行计划任务: {worker.Name} ({key})");
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Warn($"HomePage - 执行计划任务失败: {e.Message}");
+                Notify(e.Message);
+            }
+        }
+
+        private static void Notify(string message) =>
+            Plugin.NotificationApi?.SendMessageToAdmins(
+                $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {message}", 8000);
 
         private void PopulateRuntimeStatus(PluginOptions pluginOptions)
         {
@@ -63,6 +255,21 @@ namespace StrmAssistant.Options.View
                     PrimaryText = string.Format(Resources.RuntimeStatus_Memory, workingSetMb, gcHeapMb),
                     Icon = IconNames.memory
                 });
+
+                // 内存超限倒计时：这是唯一会「自己重启服务器」的状态，必须让用户看见
+                if (MemoryGuard.IsRestartPending && MemoryGuard.RestartAtUtc.HasValue)
+                {
+                    var seconds = Math.Max(0,
+                        (int)(MemoryGuard.RestartAtUtc.Value - DateTimeOffset.UtcNow).TotalSeconds);
+
+                    statusOptions.RuntimeStatusList.Add(new GenericListItem
+                    {
+                        PrimaryText = string.Format(Resources.RuntimeStatus_RestartCountdown,
+                            MemoryGuard.ThresholdMb, seconds),
+                        Icon = IconNames.warning,
+                        Status = ItemStatus.Failed
+                    });
+                }
 
                 var runningTasks = _taskManager.ScheduledTasks
                     .Where(t => t.State == TaskState.Running)
@@ -154,6 +361,13 @@ namespace StrmAssistant.Options.View
                 case "DisclaimerDialog":
                     var disclaimerDialog = new DisclaimerDialogView(_pluginInfo);
                     return Task.FromResult<IPluginUIView>(disclaimerDialog);
+
+                case RunScheduledTaskCommand:
+                    RunScheduledTask(itemId);
+                    PopulateScheduledTasks();
+                    PopulateRuntimeStatus(PluginOptions);
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
 
                 case "CleanMemoryNow":
                     MemoryCleaner.RequestCleanup("手动清理（选项页）");

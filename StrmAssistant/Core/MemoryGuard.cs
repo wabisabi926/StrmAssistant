@@ -17,6 +17,7 @@ namespace StrmAssistant.Core
         private static int _thresholdMb;
         private static int _overLimitCount;
         private static volatile bool _restarting;
+        private static DateTimeOffset? _restartAtUtc;
 
         private static readonly TimeSpan CheckInterval = TimeSpan.FromMinutes(5);
         private const int SustainedLimit = 2;
@@ -44,6 +45,15 @@ namespace StrmAssistant.Core
             }
         }
 
+        /// <summary>是否处于「已判定超限、正在倒计时重启」的状态（供状态页展示）。</summary>
+        public static bool IsRestartPending => _restarting;
+
+        /// <summary>倒计时结束的时刻（UTC）；未在倒计时则为 null。</summary>
+        public static DateTimeOffset? RestartAtUtc => _restartAtUtc;
+
+        /// <summary>当前配置的内存上限（MB）。</summary>
+        public static int ThresholdMb => _thresholdMb;
+
         public static void Stop()
         {
             lock (Lock)
@@ -57,6 +67,7 @@ namespace StrmAssistant.Core
             _timer?.Dispose();
             _timer = null;
             _overLimitCount = 0;
+            _restartAtUtc = null;
         }
 
         private static void Check(object state)
@@ -82,6 +93,7 @@ namespace StrmAssistant.Core
                 if (_overLimitCount < SustainedLimit) return;
 
                 _restarting = true;
+                _restartAtUtc = DateTimeOffset.UtcNow.AddSeconds(RestartCountdownSeconds);
                 _logger?.Warn($"MemoryGuard - Triggering auto restart in {RestartCountdownSeconds}s");
 
                 Task.Run(async () =>
@@ -98,6 +110,7 @@ namespace StrmAssistant.Core
                         {
                             _logger?.Info("MemoryGuard - Option disabled during countdown, restart cancelled");
                             _restarting = false;
+                            _restartAtUtc = null;
                             _overLimitCount = 0;
                             return;
                         }
@@ -108,6 +121,7 @@ namespace StrmAssistant.Core
                     {
                         _logger?.Error("MemoryGuard - Auto restart failed: " + e.Message);
                         _restarting = false;
+                        _restartAtUtc = null;
                         _overLimitCount = 0;
                     }
                 });

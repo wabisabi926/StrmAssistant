@@ -1,4 +1,4 @@
-using Emby.Web.GenericEdit;
+﻿using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Editors;
 using Emby.Web.GenericEdit.Elements;
 using Emby.Web.GenericEdit.Validation;
@@ -70,6 +70,13 @@ namespace StrmAssistant.Options
         /// <inheritdoc cref="GeneralOptions"/>
         [Browsable(false)]
         public ModOptions ModOptions { get; set; }
+
+        /// <summary>
+        /// 计划任务：插件自己的任务清单，每行可直接执行（含上次耗时/状态）。
+        /// 放在运行状态之前——「能做什么」比「现在怎么样」更常被查看。
+        /// </summary>
+        [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
+        public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
 
         /// <summary>
         /// 运行状态与维护（只读状态 + 清内存/重建索引/优化索引/重启）。

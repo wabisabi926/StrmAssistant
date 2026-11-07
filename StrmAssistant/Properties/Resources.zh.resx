@@ -360,7 +360,7 @@
     <value>替代 TMDB 图像地址</value>
   </data>
   <data name="MetadataEnhanceOptions_AltMovieDbApiUrl_Default_alternative_is_https___api_tmdb_org" xml:space="preserve">
-    <value>默认替代地址为 https://api.tmdb.org 留空使用系统默认 https://api.themoviedb.org</value>
+    <value>留空使用系统默认；可填写镜像地址，如 https://api.tmdb.org。</value>
   </data>
   <data name="MetadataEnhanceOptions_AltMovieDbImageUrl_No_default_alternative__Provide_by_yourself_" xml:space="preserve">
     <value>请自备替代地址，留空使用系统默认 https://image.tmdb.org</value>
@@ -462,7 +462,7 @@
     <value>代理服务器</value>
   </data>
   <data name="ModOptions_ProxyServer_Enable_http_proxy_server__Blank_is_OFF_" xml:space="preserve">
-    <value>支持 HTTP(S) 代理服务器，至 Google 的延迟必须小于 999 毫秒，测试失败或留空则禁用，设置变更后须重启生效。</value>
+    <value>HTTP(S) 代理；到 Google 延迟需低于 999 ms，留空或测试失败则禁用，修改后需重启。</value>
   </data>
   <data name="NetworkOptions_ProxyMode_Proxy_Mode" xml:space="preserve">
     <value>代理模式</value>
@@ -921,7 +921,7 @@
     <value>优化字幕下载</value>
   </data>
   <data name="ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_" xml:space="preserve">
-    <value>将 strm 媒体路径解析为本地挂载路径，使 Open Subtitles 插件可计算哈希并按文件名搜索（需安装 Open Subtitles 插件）。默认关闭。</value>
+    <value>把 strm 路径解析为本地挂载路径，供 Open Subtitles 计算哈希与按文件名搜索（需安装该插件）。默认关闭。</value>
   </data>
   <data name="ExperienceEnhanceOptions_FolderVideoGroupingLimit_Folder_Video_Grouping_Limit" xml:space="preserve">
     <value>同目录版本合并上限</value>
@@ -1089,19 +1089,19 @@
     <value>豆瓣 Access Token（可选）</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Used_to_assist_in_retrieving_Douban_info__Default_is_BLANK_" xml:space="preserve">
-    <value>用于通过豆瓣开放平台 V2 API（Authorization: Bearer）辅助获取豆瓣信息。配置后优先走官方接口，失败再回退网页刮削。默认留空。</value>
+    <value>豆瓣开放平台 V2 Token；配置后优先使用官方接口，失败回退网页刮削。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingOverride_Override_Rating_With_Douban" xml:space="preserve">
     <value>使用豆瓣评分覆盖</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_" xml:space="preserve">
-    <value>用豆瓣评分覆盖 Emby 的社区评分（CommunityRating）：开启后 Emby 显示的评分就是豆瓣分。默认关闭。</value>
+    <value>用豆瓣评分覆盖 Emby 社区评分。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
     <value>同步豆瓣评分到 Kodi</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_" xml:space="preserve">
-    <value>把豆瓣评分写入 ProviderIds，供 Kodi 皮肤作为第三种评分读取；Emby 主评分与影评人评分不受影响。默认关闭。</value>
+    <value>将豆瓣评分写入 ProviderIds，供 Kodi 皮肤读取；不覆盖主评分与影评人评分。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>按需刷新间隔（天）</value>
@@ -1131,7 +1131,7 @@
     <value>MdbList API 密钥</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Optional_MdbList_API_key_used_to_refresh_critic_ratings_Rotten_Tomatoes_Metacritic_alongside_Douban_rating_updates__Default_is_empty_" xml:space="preserve">
-    <value>可选的 MdbList API 密钥，在豆瓣评分更新时顺带刷新影评人评分（烂番茄、Metacritic）。默认为空。</value>
+    <value>可选。豆瓣评分更新时同步刷新烂番茄与 Metacritic 评分。</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days" xml:space="preserve">
     <value>评分更新回看天数</value>
@@ -1293,7 +1293,7 @@
     <value>构建本地元数据缓存</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Description" xml:space="preserve">
-    <value>本地 TMDB 缓存：优先读取 override/&lt;类型&gt;/&lt;tmdbid&gt;（你的自定义 JSON，最高优先级），其次 cache/&lt;类型&gt;/&lt;tmdbid&gt;（被动缓存，由在线结果写入）。可加速重建媒体库、断网可用。默认关闭。</value>
+    <value>优先读取本地 override JSON，其次读取被动缓存；可加速刮削并支持离线。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Metadata_Cache_Root_Folder" xml:space="preserve">
     <value>元数据缓存根目录</value>
@@ -1311,7 +1311,7 @@
     <value>启动时清空 TMDB 缓存</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearRecentTmdbCacheOnStartup_Description" xml:space="preserve">
-    <value>每次启动清空被动 TMDB 缓存（&lt;root&gt;\cache），用户 override 与合并补丁会保留。适用于 TMDB 侧修正了某部片信息后，让下次刮削立刻拿到新数据，而不是命中旧缓存。默认关闭。</value>
+    <value>每次启动清空被动 TMDB 缓存，保留 override 与合并补丁。默认关闭。</value>
   </data>
   <data name="MetadataCacheOption_None_None" xml:space="preserve">
     <value>关闭</value>
@@ -1482,7 +1482,7 @@
     <value>演练模式</value>
   </data>
   <data name="ExperienceEnhanceOptions_DryRun_Description" xml:space="preserve">
-    <value>清除片头、清理媒体信息、删除版本、深度删除、合并/拆分、删除人物、清理缓存等操作只记录日志，不写库、不删文件。默认关闭。</value>
+    <value>清除片头、清理媒体信息、删除版本等破坏性操作仅记录日志，不写库、不删文件。默认关闭。</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_Notification" xml:space="preserve">
     <value>通知</value>
@@ -1578,7 +1578,7 @@
     <value>各媒体库内记录播放进度</value>
   </data>
   <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
-    <value>同一部影片/剧集在不同库中各有一份条目时，分别记录播放进度与收藏。切换后需重启 Emby 并运行「重建按库播放进度索引」；原进度不会删除，但在新键下不可见，关闭开关、重启并再运行一次可恢复；开启期间产生的新进度在关闭后同样不可见。</value>
+    <value>同一影片/剧集在多个库各有一份时，分别记录进度与收藏。切换后需重启并运行「重建按库播放进度索引」；两种模式进度各自保留、互不可见。默认关闭。</value>
   </data>
   <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
     <value>重建按库播放进度索引</value>
@@ -1596,7 +1596,7 @@
     <value>服务端版本标签</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_" xml:space="preserve">
-    <value>按「版本显示方式」规则生成标签，加上 HDR 与 Atmos/DTS:X 标识写入服务端版本名；需开启「多版本画质标识」，仅多版本条目生效，「系统默认」不写入。Kodi 需重新同步后可见。默认关闭。</value>
+    <value>把版本标签写入 MediaSourceInfo.Name，Kodi、Apple TV 与手机 App 均可见；仅多版本条目生效。默认关闭。</value>
   </data>
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
     <value>计划任务</value>

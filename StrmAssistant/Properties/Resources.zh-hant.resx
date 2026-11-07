@@ -360,7 +360,7 @@
     <value>替代 TMDB 影像位址</value>
   </data>
   <data name="MetadataEnhanceOptions_AltMovieDbApiUrl_Default_alternative_is_https___api_tmdb_org" xml:space="preserve">
-    <value>預設替代位址為 https://api.tmdb.org 留空使用系統預設 https://api.themoviedb.org</value>
+    <value>留空使用系統預設；可填寫鏡像位址，如 https://api.tmdb.org。</value>
   </data>
   <data name="MetadataEnhanceOptions_AltMovieDbImageUrl_No_default_alternative__Provide_by_yourself_" xml:space="preserve">
     <value>請自備替代位址，留空使用系統預設 https://image.tmdb.org</value>
@@ -462,7 +462,7 @@
     <value>代理伺服器</value>
   </data>
   <data name="ModOptions_ProxyServer_Enable_http_proxy_server__Blank_is_OFF_" xml:space="preserve">
-    <value>支援 HTTP(S) 代理伺服器，至 Google 的延遲必須小於 999 毫秒，測試失敗或留空則停用，設定變更後須重新啟動生效。</value>
+    <value>HTTP(S) 代理；至 Google 延遲需低於 999 ms，留空或測試失敗則停用，修改後需重新啟動。</value>
   </data>
   <data name="NetworkOptions_ProxyMode_Proxy_Mode" xml:space="preserve">
     <value>代理模式</value>
@@ -921,7 +921,7 @@
     <value>最佳化字幕下載</value>
   </data>
   <data name="ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_" xml:space="preserve">
-    <value>將 strm 媒體路徑解析為本地掛載路徑，使 Open Subtitles 外掛可計算雜湊並按檔名搜索（需安裝 Open Subtitles 外掛）。預設為關閉。</value>
+    <value>將 strm 路徑解析為本機掛載路徑，供 Open Subtitles 計算雜湊與按檔名搜索（需安裝外掛）。預設關閉。</value>
   </data>
   <data name="ExperienceEnhanceOptions_FolderVideoGroupingLimit_Folder_Video_Grouping_Limit" xml:space="preserve">
     <value>同目錄版本合併上限</value>
@@ -1089,19 +1089,19 @@
     <value>豆瓣 Access Token（可選）</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Used_to_assist_in_retrieving_Douban_info__Default_is_BLANK_" xml:space="preserve">
-    <value>用於透過豆瓣開放平台 V2 API（Authorization: Bearer）輔助獲取豆瓣資訊。設定後優先走官方介面，失敗再回退網頁刮削。預設留空。</value>
+    <value>豆瓣開放平台 V2 Token；設定後優先使用官方介面，失敗回退網頁刮削。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingOverride_Override_Rating_With_Douban" xml:space="preserve">
     <value>使用豆瓣評分覆蓋</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_" xml:space="preserve">
-    <value>以豆瓣評分覆寫 Emby 的社群評分（CommunityRating）：開啟後 Emby 顯示的評分即為豆瓣分。預設為關閉。</value>
+    <value>以豆瓣評分覆寫 Emby 社群評分。預設關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
     <value>同步豆瓣評分到 Kodi</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_" xml:space="preserve">
-    <value>把豆瓣評分寫入 ProviderIds，供 Kodi 面板作為第三種評分讀取；Emby 主評分與影評人評分不受影響。預設為關閉。</value>
+    <value>將豆瓣評分寫入 ProviderIds，供 Kodi 面板讀取；不覆寫主評分與影評人評分。預設關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>按需重新整理間隔（天）</value>
@@ -1131,7 +1131,7 @@
     <value>MdbList API 金鑰</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Optional_MdbList_API_key_used_to_refresh_critic_ratings_Rotten_Tomatoes_Metacritic_alongside_Douban_rating_updates__Default_is_empty_" xml:space="preserve">
-    <value>可選的 MdbList API 金鑰，在豆瓣評分更新時順帶重新整理影評人評分（爛番茄、Metacritic）。預設為空。</value>
+    <value>選用。豆瓣評分更新時同步重新整理爛番茄與 Metacritic 評分。</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days" xml:space="preserve">
     <value>評分更新回看天數</value>
@@ -1293,7 +1293,7 @@
     <value>建立本機中繼資料快取</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Description" xml:space="preserve">
-    <value>本機 TMDB 快取：優先讀取 override/&lt;類型&gt;/&lt;tmdbid&gt;（你的自訂 JSON，最高優先），其次 cache/&lt;類型&gt;/&lt;tmdbid&gt;（被動快取，由線上結果寫入）。可加速重建媒體庫、離線可用。預設關閉。</value>
+    <value>優先讀取本機 override JSON，其次讀取被動快取；可加速刮削並支援離線。預設關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Metadata_Cache_Root_Folder" xml:space="preserve">
     <value>中繼資料快取根目錄</value>
@@ -1311,7 +1311,7 @@
     <value>啟動時清空 TMDB 快取</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearRecentTmdbCacheOnStartup_Description" xml:space="preserve">
-    <value>每次啟動清空被動 TMDB 快取（&lt;root&gt;\cache），使用者 override 與合併補丁會保留。適用於 TMDB 側修正了某部片資訊後，讓下次刮削立刻拿到新資料，而不是命中舊快取。預設關閉。</value>
+    <value>每次啟動清空被動 TMDB 快取，保留 override 與合併補丁。預設關閉。</value>
   </data>
   <data name="MetadataCacheOption_None_None" xml:space="preserve">
     <value>關閉</value>
@@ -1482,7 +1482,7 @@
     <value>演練模式</value>
   </data>
   <data name="ExperienceEnhanceOptions_DryRun_Description" xml:space="preserve">
-    <value>清除片頭、清理媒體資訊、刪除版本、深度刪除、合併/拆分、刪除人物、清理快取等操作只記錄日誌，不寫入資料庫、不刪除檔案。預設關閉。</value>
+    <value>清除片頭、清理媒體資訊、刪除版本等破壞性操作僅記錄日誌，不寫庫、不刪檔。預設關閉。</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_Notification" xml:space="preserve">
     <value>通知</value>
@@ -1578,7 +1578,7 @@
     <value>各媒體庫內記錄播放進度</value>
   </data>
   <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
-    <value>同一部影片/劇集在不同庫中各有一份條目時，分別記錄播放進度與收藏。切換後需重啟 Emby 並執行「重建按庫播放進度索引」；原進度不會刪除，但在新鍵下不可見，關閉開關、重啟並再執行一次可恢復；開啟期間產生的新進度在關閉後同樣不可見。</value>
+    <value>同一影片/劇集在多個庫各有一份時，分別記錄進度與收藏。切換後需重啟並執行「重建按庫播放進度索引」；兩種模式進度各自保留、互不可見。預設關閉。</value>
   </data>
   <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
     <value>重建按庫播放進度索引</value>
@@ -1596,7 +1596,7 @@
     <value>伺服器端版本標籤</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableServerSideVersionLabel_Write_the_same_label_into_MediaSourceInfo_Name_so_Kodi_Apple_TV_and_mobile_apps_see_it_too__Only_applies_when_a_title_has_multiple_versions__Default_is_OFF_" xml:space="preserve">
-    <value>依「版本顯示方式」規則產生標籤，加上 HDR 與 Atmos/DTS:X 標識寫入伺服器端版本名稱；需開啟「多版本畫質標識」，僅多版本條目生效，「系統預設」不寫入。Kodi 需重新同步後可見。預設關閉。</value>
+    <value>將版本標籤寫入 MediaSourceInfo.Name，Kodi、Apple TV 與手機 App 均可見；僅多版本條目生效。預設關閉。</value>
   </data>
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
     <value>計畫任務</value>

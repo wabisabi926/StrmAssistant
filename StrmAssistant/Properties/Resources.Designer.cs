@@ -5094,5 +5094,68 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Tasks_Queue {
+            get {
+                return ResourceManager.GetString("Overview_Tasks_Queue", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Tasks_Queue_Detail {
+            get {
+                return ResourceManager.GetString("Overview_Tasks_Queue_Detail", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Button_Extract_MediaInfo {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Button_Extract_MediaInfo", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Button_Merge_MultiVersion {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Button_Merge_MultiVersion", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Button_Rebuild_Keys {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Button_Rebuild_Keys", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_Button_Refresh_Episodes {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_Button_Refresh_Episodes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ScheduledTasks_EditorTitle_Common_Tasks {
+            get {
+                return ResourceManager.GetString("ScheduledTasks_EditorTitle_Common_Tasks", resourceCulture);
+            }
+        }
+
     }
 }

@@ -1667,4 +1667,25 @@
   <data name="Overview_Memory_Threshold" xml:space="preserve">
     <value>上限 {0} MB · 已用 {1}%</value>
   </data>
+  <data name="ScheduledTasks_EditorTitle_Common_Tasks" xml:space="preserve">
+    <value>常用任务</value>
+  </data>
+  <data name="ScheduledTasks_Button_Rebuild_Keys" xml:space="preserve">
+    <value>重建播放进度键</value>
+  </data>
+  <data name="ScheduledTasks_Button_Extract_MediaInfo" xml:space="preserve">
+    <value>提取媒体信息</value>
+  </data>
+  <data name="ScheduledTasks_Button_Merge_MultiVersion" xml:space="preserve">
+    <value>合并多版本</value>
+  </data>
+  <data name="ScheduledTasks_Button_Refresh_Episodes" xml:space="preserve">
+    <value>刷新剧集元数据</value>
+  </data>
+  <data name="Overview_Tasks_Queue" xml:space="preserve">
+    <value>运行中任务 {0} · 待处理队列 {1}</value>
+  </data>
+  <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
+    <value>任务：{0} ｜ 处理中：{1} ｜ 队列：媒体信息 {2} · 指纹 {3} · 片头 {4} · 剧集刷新 {5}</value>
+  </data>
 </root>

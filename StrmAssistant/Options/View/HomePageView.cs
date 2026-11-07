@@ -25,7 +25,6 @@ namespace StrmAssistant.Options.View
     internal class HomePageView : PluginPageView
     {
         private const string RunScheduledTaskCommand = "RunScheduledTask";
-        private const string StopSessionCommand = "StopSession";
 
         private readonly PluginInfo _pluginInfo;
         private readonly PluginOptionsStore _store;
@@ -46,166 +45,10 @@ namespace StrmAssistant.Options.View
             PluginOptions.TaskConcurrency.Initialize();
             PluginOptions.ChineseSearch.Initialize();
             PluginOptions.AboutOptions.Initialize();
-            PluginOptions.ScheduledTasks.Initialize();
-            PluginOptions.Sessions.Initialize();
-
-            PopulateScheduledTasks();
-            PopulateSessions();
             PopulateOverview();
         }
 
         public PluginOptions PluginOptions => ContentData as PluginOptions;
-
-        /// <summary>
-        /// 生成「计划任务」列表：只列本插件自己的任务（按程序集过滤），
-        /// 每行带「执行」按钮，并显示上次执行的状态、耗时与时间。
-        /// </summary>
-        private void PopulateScheduledTasks()
-        {
-            var list = PluginOptions.ScheduledTasks.TaskList;
-            list.Clear();
-
-            try
-            {
-                // 按程序集过滤：第三方插件可能有同名 Key 的任务，既不能被列进来，更不能被误执行
-                var pluginAssembly = typeof(Plugin).Assembly;
-
-                var workers = _taskManager.ScheduledTasks
-                    .Where(t => t?.ScheduledTask != null && t.ScheduledTask.GetType().Assembly == pluginAssembly)
-                    .OrderBy(t => t.Name, StringComparer.Ordinal)
-                    .ToList();
-
-                if (workers.Count == 0)
-                {
-                    list.Add(new GenericListItem
-                    {
-                        PrimaryText = Resources.ScheduledTasks_None,
-                        Icon = IconNames.schedule
-                    });
-                    return;
-                }
-
-                foreach (var worker in workers)
-                {
-                    list.Add(BuildTaskItem(worker));
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Instance.Logger.Warn($"HomePage - 生成计划任务列表失败: {e.Message}");
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = e.Message,
-                    Icon = IconNames.warning,
-                    Status = ItemStatus.Failed
-                });
-            }
-        }
-
-        private static GenericListItem BuildTaskItem(IScheduledTaskWorker worker)
-        {
-            var isRunning = worker.State != TaskState.Idle;
-
-            var item = new GenericListItem
-            {
-                PrimaryText = worker.Name,
-                Icon = IconNames.schedule,
-                Status = isRunning ? ItemStatus.InProgress : MapCompletion(worker.LastExecutionResult),
-                Button1 = new ButtonItem(Resources.ScheduledTasks_Run_Run)
-                {
-                    Icon = IconNames.play_arrow,
-                    Data1 = RunScheduledTaskCommand,
-                    // 框架把按钮的 Data2 作为 itemId 回传给 RunCommand，这里放任务 Key
-                    Data2 = worker.ScheduledTask.Key,
-                    IsEnabled = !isRunning
-                }
-            };
-
-            if (isRunning)
-            {
-                var percent = worker.CurrentProgress ?? 0;
-                item.SecondaryText = string.Format(Resources.ScheduledTasks_Status_Running, (int)percent);
-                item.HasPercentage = percent > 0;
-                item.PercentComplete = (int)percent;
-            }
-            else
-            {
-                item.SecondaryText = DescribeLastRun(worker.LastExecutionResult);
-            }
-
-            return item;
-        }
-
-        private static ItemStatus MapCompletion(TaskResult result)
-        {
-            if (result == null || result.StartTimeUtc == default) return ItemStatus.Unavailable;
-
-            switch (result.Status)
-            {
-                case TaskCompletionStatus.Completed:
-                    return ItemStatus.Succeeded;
-                case TaskCompletionStatus.Failed:
-                case TaskCompletionStatus.Aborted:
-                    return ItemStatus.Failed;
-                case TaskCompletionStatus.Cancelled:
-                    return ItemStatus.Warning;
-                default:
-                    return ItemStatus.Unknown;
-            }
-        }
-
-        private static string DescribeLastRun(TaskResult result)
-        {
-            if (result == null || result.StartTimeUtc == default) return Resources.ScheduledTasks_NeverRun;
-
-            var duration = result.EndTimeUtc > result.StartTimeUtc
-                ? result.EndTimeUtc - result.StartTimeUtc
-                : TimeSpan.Zero;
-
-            var text = string.Format(Resources.ScheduledTasks_LastRun,
-                GetStatusText(result.Status), FormatDuration(duration),
-                result.EndTimeUtc.ToLocalTime().ToString("MM-dd HH:mm"));
-
-            if (result.Status == TaskCompletionStatus.Failed && !string.IsNullOrWhiteSpace(result.ErrorMessage))
-            {
-                var error = result.ErrorMessage.Trim().Replace(Environment.NewLine, " ");
-                if (error.Length > 80) error = error.Substring(0, 80) + "\u2026";
-                text += " \u00b7 " + error;
-            }
-
-            return text;
-        }
-
-        private static string GetStatusText(TaskCompletionStatus status)
-        {
-            switch (status)
-            {
-                case TaskCompletionStatus.Completed:
-                    return Resources.ScheduledTasks_Status_Completed;
-                case TaskCompletionStatus.Failed:
-                    return Resources.ScheduledTasks_Status_Failed;
-                case TaskCompletionStatus.Cancelled:
-                    return Resources.ScheduledTasks_Status_Cancelled;
-                case TaskCompletionStatus.Aborted:
-                    return Resources.ScheduledTasks_Status_Aborted;
-                default:
-                    return status.ToString();
-            }
-        }
-
-        private static string FormatDuration(TimeSpan duration)
-        {
-            if (duration.TotalHours >= 1)
-                return string.Format(Resources.ScheduledTasks_Duration_Hours,
-                    (int)duration.TotalHours, duration.Minutes);
-
-            if (duration.TotalMinutes >= 1)
-                return string.Format(Resources.ScheduledTasks_Duration_Minutes,
-                    (int)duration.TotalMinutes, duration.Seconds);
-
-            return string.Format(Resources.ScheduledTasks_Duration_Seconds,
-                Math.Max(0, (int)duration.TotalSeconds));
-        }
 
         private void RunScheduledTask(string key)
         {
@@ -243,124 +86,6 @@ namespace StrmAssistant.Options.View
         private static void Notify(string message) =>
             Plugin.NotificationApi?.SendMessageToAdmins(
                 $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {message}", 8000);
-
-        /// <summary>
-        /// 生成「活动会话」列表：谁在播什么，播放中的行带「停止播放」按钮。
-        /// </summary>
-        private void PopulateSessions()
-        {
-            var list = PluginOptions.Sessions.SessionList;
-            list.Clear();
-
-            try
-            {
-                var sessions = _sessionManager.Sessions?
-                    .Where(s => s != null && !string.IsNullOrEmpty(s.Id))
-                    .OrderByDescending(s => s.NowPlayingItem != null)
-                    .ThenBy(s => s.UserName, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                if (sessions == null || sessions.Count == 0)
-                {
-                    list.Add(new GenericListItem
-                    {
-                        PrimaryText = Resources.Sessions_None,
-                        Icon = IconNames.devices
-                    });
-                    return;
-                }
-
-                foreach (var session in sessions)
-                {
-                    list.Add(BuildSessionItem(session));
-                }
-            }
-            catch (Exception e)
-            {
-                Plugin.Instance.Logger.Warn($"HomePage - 生成会话列表失败: {e.Message}");
-            }
-        }
-
-        private static GenericListItem BuildSessionItem(SessionInfo session)
-        {
-            var playing = session.NowPlayingItem;
-            var who = string.IsNullOrEmpty(session.UserName) ? session.DeviceName : session.UserName;
-            var client = string.IsNullOrEmpty(session.Client) ? session.DeviceName : session.Client;
-
-            var item = new GenericListItem
-            {
-                PrimaryText = string.Join(" \u00b7 ",
-                    new[] { who, client }.Where(x => !string.IsNullOrEmpty(x)).Distinct()),
-                Icon = IconNames.devices,
-                Status = playing != null ? ItemStatus.InProgress : ItemStatus.None
-            };
-
-            if (playing == null)
-            {
-                item.SecondaryText = string.Format(Resources.Sessions_Idle,
-                    session.LastActivityDate.ToLocalTime().ToString("MM-dd HH:mm"));
-                return item;
-            }
-
-            var title = playing.SeriesName != null &&
-                        playing.ParentIndexNumber.HasValue && playing.IndexNumber.HasValue
-                ? $"{playing.SeriesName} S{playing.ParentIndexNumber:00}E{playing.IndexNumber:00}"
-                : playing.Name;
-
-            item.SecondaryText = string.Format(
-                session.PlayState != null && session.PlayState.IsPaused
-                    ? Resources.Sessions_Paused
-                    : Resources.Sessions_Playing,
-                title);
-
-            item.Button1 = new ButtonItem(Resources.Sessions_Stop_Stop_Playback)
-            {
-                Icon = IconNames.stop,
-                Data1 = StopSessionCommand,
-                Data2 = session.Id
-            };
-
-            return item;
-        }
-
-        private void StopSession(string sessionId)
-        {
-            try
-            {
-                var session = _sessionManager.Sessions?
-                    .FirstOrDefault(s => string.Equals(s?.Id, sessionId, StringComparison.OrdinalIgnoreCase));
-
-                if (session == null)
-                {
-                    Notify(Resources.Sessions_NotFound);
-                    return;
-                }
-
-                if (session.NowPlayingItem == null)
-                {
-                    Notify(Resources.Sessions_NotPlaying);
-                    return;
-                }
-
-                var request = new PlaystateRequest
-                {
-                    Command = PlaystateCommand.Stop,
-                    ControllingUserId = session.UserId
-                };
-
-                _sessionManager.SendPlaystateCommand(null, session.Id, request, CancellationToken.None)
-                    .FireAndForget(Plugin.Instance.Logger);
-
-                Notify(string.Format(Resources.Sessions_Stopped, session.NowPlayingItem.Name));
-                Plugin.Instance.Logger.Info(
-                    $"HomePage - 停止播放: {session.UserName}/{session.Client} ({session.NowPlayingItem.Name})");
-            }
-            catch (Exception e)
-            {
-                Plugin.Instance.Logger.Warn($"HomePage - 停止播放失败: {e.Message}");
-                Notify(e.Message);
-            }
-        }
 
         /// <summary>
         /// 生成「运行概览」：内存 / 任务 / 会话 / 队列 / 索引的实时状态，位于页面最顶部。
@@ -421,36 +146,6 @@ namespace StrmAssistant.Options.View
                     .Select(t => t.ScheduledTask.Name)
                     .ToList();
 
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_RunningTasks,
-                        runningTasks.Count, runningTasks.Count > 0 ? string.Join(", ", runningTasks) : "-"),
-                    Icon = IconNames.schedule
-                });
-
-                var sessions = _sessionManager.Sessions?
-                    .Where(s => !string.IsNullOrEmpty(s.Client))
-                    .ToList();
-                var playingCount = sessions?.Count(s => s.FullNowPlayingItem != null) ?? 0;
-
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_Sessions,
-                        sessions?.Count ?? 0,
-                        playingCount,
-                        sessions is { Count: > 0 }
-                            ? string.Join(", ", sessions.Take(3).Select(s => $"{s.Client}/{s.UserName}"))
-                            : "-"),
-                    Icon = IconNames.devices
-                });
-
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_SearchIndex,
-                        EnhanceChineseSearch.GetSearchIndexStatus()),
-                    Icon = IconNames.search
-                });
-
                 var processing = new List<string>();
                 if (QueueManager.IsMediaInfoProcessTaskRunning)
                 {
@@ -462,24 +157,31 @@ namespace StrmAssistant.Options.View
                     processing.Add(Resources.CatchupTask_EpisodeRefresh_EpisodeRefresh);
                 }
 
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_ProcessingTasks,
-                        processing.Count > 0 ? string.Join(", ", processing) : "-"),
-                    Icon = IconNames.pending_actions
-                });
-
                 var mediaInfoQueue = QueueManager.MediaInfoExtractItemQueue.Count;
                 var fingerprintQueue = QueueManager.FingerprintItemQueue.Count;
                 var introQueue = QueueManager.IntroSkipItemQueue.Count;
                 var episodeRefreshQueue = QueueManager.EpisodeRefreshItemQueue.Count;
+                var pendingQueue = mediaInfoQueue + fingerprintQueue + introQueue + episodeRefreshQueue;
 
                 list.Add(new GenericListItem
                 {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_PendingQueue,
-                        mediaInfoQueue + fingerprintQueue + introQueue + episodeRefreshQueue,
+                    PrimaryText = string.Format(Resources.Overview_Tasks_Queue,
+                        runningTasks.Count, pendingQueue),
+                    SecondaryText = string.Format(Resources.Overview_Tasks_Queue_Detail,
+                        runningTasks.Count > 0 ? string.Join(", ", runningTasks) : "-",
+                        processing.Count > 0 ? string.Join(", ", processing) : "-",
                         mediaInfoQueue, fingerprintQueue, introQueue, episodeRefreshQueue),
-                    Icon = IconNames.queue
+                    Icon = IconNames.queue,
+                    Status = runningTasks.Count > 0 || pendingQueue > 0
+                        ? ItemStatus.InProgress
+                        : ItemStatus.None
+                });
+
+                list.Add(new GenericListItem
+                {
+                    PrimaryText = string.Format(Resources.RuntimeStatus_SearchIndex,
+                        EnhanceChineseSearch.GetSearchIndexStatus()),
+                    Icon = IconNames.search
                 });
 
                 var conflicts = ConflictDetector.GetConflictingAssemblies();
@@ -509,14 +211,6 @@ namespace StrmAssistant.Options.View
 
                 case RunScheduledTaskCommand:
                     RunScheduledTask(itemId);
-                    PopulateScheduledTasks();
-                    PopulateOverview();
-                    RaiseUIViewInfoChanged();
-                    return Task.FromResult<IPluginUIView>(this);
-
-                case StopSessionCommand:
-                    StopSession(itemId);
-                    PopulateSessions();
                     PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
@@ -529,8 +223,6 @@ namespace StrmAssistant.Options.View
 
                 case "RefreshStatus":
                     PopulateOverview();
-                    PopulateScheduledTasks();
-                    PopulateSessions();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
 

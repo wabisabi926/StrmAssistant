@@ -61,12 +61,6 @@ namespace StrmAssistant.Options
         [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
         public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
 
-        /// <summary>
-        /// 活动会话：谁在播什么，可一键停止播放。
-        /// 放在计划任务之后、运行状态之前——「现在谁在用」比「服务器怎么样」更常被点开。
-        /// </summary>
-        [DisplayNameL("Sessions_EditorTitle_Active_Sessions", typeof(Resources))]
-        public SessionsOptions Sessions { get; set; } = new SessionsOptions();
 
         // ---- 分组直接挂在页面根上（不再套 GeneralOptions / ModOptions 两层容器）----
         // 之前的结构是「任务与内存 → 任务并发 → 6 项」，三层嵌套只为一个标题；

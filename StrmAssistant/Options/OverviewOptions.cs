@@ -1,4 +1,4 @@
-using Emby.Web.GenericEdit;
+﻿using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Elements;
 using Emby.Web.GenericEdit.Elements.List;
 using MediaBrowser.Model.LocalizationAttributes;
@@ -21,11 +21,6 @@ namespace StrmAssistant.Options
         [DisplayNameL("Overview_List_Overview", typeof(Resources))]
         public GenericItemList OverviewList { get; set; } = new GenericItemList();
 
-        public ButtonItem RefreshButton =>
-            new ButtonItem(Resources.Overview_Refresh_Refresh)
-            {
-                Icon = IconNames.autorenew, Data1 = "RefreshStatus"
-            };
 
         public void Initialize()
         {

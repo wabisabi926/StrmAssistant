@@ -1754,4 +1754,25 @@
   <data name="Overview_Memory_Threshold" xml:space="preserve">
     <value>Limit {0} MB · {1}% used</value>
   </data>
+  <data name="ScheduledTasks_EditorTitle_Common_Tasks" xml:space="preserve">
+    <value>Common Tasks</value>
+  </data>
+  <data name="ScheduledTasks_Button_Rebuild_Keys" xml:space="preserve">
+    <value>Rebuild Play Progress Keys</value>
+  </data>
+  <data name="ScheduledTasks_Button_Extract_MediaInfo" xml:space="preserve">
+    <value>Extract Media Info</value>
+  </data>
+  <data name="ScheduledTasks_Button_Merge_MultiVersion" xml:space="preserve">
+    <value>Merge Versions</value>
+  </data>
+  <data name="ScheduledTasks_Button_Refresh_Episodes" xml:space="preserve">
+    <value>Refresh Episode Metadata</value>
+  </data>
+  <data name="Overview_Tasks_Queue" xml:space="preserve">
+    <value>Running tasks {0} · Pending queue {1}</value>
+  </data>
+  <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
+    <value>Tasks: {0} | Processing: {1} | Queue: media info {2} · fingerprint {3} · intro {4} · episode refresh {5}</value>
+  </data>
 </root>

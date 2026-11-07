@@ -265,5 +265,67 @@ namespace StrmAssistant.Common
 
             return parts.Count > 0 ? string.Join(Separator, parts) : null;
         }
+
+        /// <summary>
+        /// 为多个版本生成服务端版本名，并处理重名。
+        /// 默认 MediaInfo 只含画质/HDR/音轨，同规格的两个版本会得到相同字符串；
+        /// 重名时依次追加体积、码率、原名称，仍冲突则追加序号，保证客户端下拉可区分。
+        /// <see cref="MultiVersionDisplayOption.SystemDefault"/> 返回 null 项，调用方不得覆盖原值。
+        /// </summary>
+        public static List<string> BuildSourceNames(IReadOnlyList<MediaSourceInfo> sources,
+            MultiVersionDisplayOption displayOption, bool includeHdr, bool includeAudio)
+        {
+            var labels = new List<string>();
+            if (sources == null || sources.Count == 0) return labels;
+
+            for (var i = 0; i < sources.Count; i++)
+            {
+                labels.Add(BuildSourceName(sources[i], displayOption, includeHdr, includeAudio));
+            }
+
+            var counts = labels
+                .Where(label => !string.IsNullOrEmpty(label))
+                .GroupBy(label => label, StringComparer.Ordinal)
+                .ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal);
+
+            var used = new HashSet<string>(StringComparer.Ordinal);
+            for (var i = 0; i < labels.Count; i++)
+            {
+                var label = labels[i];
+                if (string.IsNullOrEmpty(label)) continue;
+
+                if (counts[label] > 1)
+                {
+                    var suffix = GetDisambiguator(sources[i]);
+                    label = string.IsNullOrEmpty(suffix)
+                        ? $"{label} #{i + 1}"
+                        : $"{label}{Separator}{suffix}";
+                }
+
+                if (!used.Add(label))
+                {
+                    var suffixIndex = 2;
+                    var candidate = $"{label} #{suffixIndex}";
+                    while (!used.Add(candidate))
+                    {
+                        candidate = $"{label} #{++suffixIndex}";
+                    }
+                    label = candidate;
+                }
+
+                labels[i] = label;
+            }
+
+            return labels;
+        }
+
+        private static string GetDisambiguator(MediaSourceInfo source)
+        {
+            if (source == null) return null;
+            if (source.Size.HasValue && source.Size.Value > 0) return FormatSize(source.Size.Value);
+            if (source.Bitrate.HasValue && source.Bitrate.Value > 0) return FormatBitrate(source.Bitrate.Value);
+            if (!string.IsNullOrWhiteSpace(source.Name)) return source.Name.Trim();
+            return string.IsNullOrEmpty(source.Path) ? null : GetFileNameLabel(source.Path);
+        }
     }
 }

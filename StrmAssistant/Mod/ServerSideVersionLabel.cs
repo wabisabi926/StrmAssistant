@@ -86,12 +86,12 @@ namespace StrmAssistant.Mod
                 var display = Plugin.Instance.ExperienceEnhanceStore.GetOptions().Display;
                 if (!display.EnableMultiVersionEnhance || !display.EnableServerSideVersionLabel) return;
 
-                foreach (var source in __result)
-                {
-                    var name = VersionLabelBuilder.BuildSourceName(
-                        source, display.MultiVersionDisplayOption, includeHdr: true, includeAudio: true);
+                var names = VersionLabelBuilder.BuildSourceNames(
+                    __result, display.MultiVersionDisplayOption, includeHdr: true, includeAudio: true);
 
-                    if (!string.IsNullOrEmpty(name)) source.Name = name;
+                for (var i = 0; i < __result.Count && i < names.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(names[i])) __result[i].Name = names[i];
                 }
             }
             catch (Exception e)

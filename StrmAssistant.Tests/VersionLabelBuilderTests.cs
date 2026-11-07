@@ -109,6 +109,54 @@ namespace StrmAssistant.Tests
         }
 
         [Fact]
+        public void DuplicateLabelsAreDisambiguatedBySize()
+        {
+            var first = Source(Video(1080), Audio("AAC 2.0", "aac"));
+            first.Size = 1L * 1024 * 1024 * 1024;
+            var second = Source(Video(1080), Audio("AAC 2.0", "aac"));
+            second.Size = 2L * 1024 * 1024 * 1024;
+
+            var names = VersionLabelBuilder.BuildSourceNames(
+                new[] { first, second }, MultiVersionDisplayOption.MediaInfo, true, true);
+
+            Assert.Equal(new[] { "1080p \u00b7 1GB", "1080p \u00b7 2GB" }, names);
+        }
+
+        [Fact]
+        public void DuplicateLabelsFallBackToBitrate()
+        {
+            var first = Source(Video(1080));
+            first.Bitrate = 10_000_000;
+            var second = Source(Video(1080));
+            second.Bitrate = 20_000_000;
+
+            var names = VersionLabelBuilder.BuildSourceNames(
+                new[] { first, second }, MultiVersionDisplayOption.MediaInfo, true, true);
+
+            Assert.Equal(new[] { "1080p \u00b7 10Mbps", "1080p \u00b7 20Mbps" }, names);
+        }
+
+        [Fact]
+        public void UniqueLabelsRemainUnchanged()
+        {
+            var names = VersionLabelBuilder.BuildSourceNames(
+                new[] { Source(Video(2160)), Source(Video(1080)) },
+                MultiVersionDisplayOption.MediaInfo, true, true);
+
+            Assert.Equal(new[] { "4K", "1080p" }, names);
+        }
+
+        [Fact]
+        public void SystemDefaultReturnsNoOverrides()
+        {
+            var names = VersionLabelBuilder.BuildSourceNames(
+                new[] { Source(Video(1080)), Source(Video(1080)) },
+                MultiVersionDisplayOption.SystemDefault, true, true);
+
+            Assert.All(names, Assert.Null);
+        }
+
+        [Fact]
         public void DvProfileOutranksHdrForSameResolution()
         {
             var dv = VersionLabelBuilder.QualityScore(2160, "DV P7");

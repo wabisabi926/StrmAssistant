@@ -31,6 +31,13 @@ namespace StrmAssistant.Options
         public BrandOptions BrandOptions { get; set; } = new BrandOptions();
 
         /// <summary>
+        /// 运行概览（一行状态条）：内存 / 任务 / 队列 / 索引。
+        /// 用 <see cref="StatusItem"/> 而不是独立分组——只读状态不该把「总开关 → 追更模式」这条配置流截断，
+        /// 放在品牌之后、总开关之前，进页面第一眼就能看到，往下全是设置。
+        /// </summary>
+        public StatusItem OverviewStatus { get; set; } = new StatusItem();
+
+        /// <summary>
         /// 插件总开关。关闭后 <c>Plugin.Initialize</c> 会整段跳过（不 patch、不订阅事件、
         /// 不初始化队列），定时任务与 Web 端点也会早退；修改后需重启服务器才生效。
         /// 之所以不做即时生效，是因为要撤销 36 个 Harmony patch 并逐个验证幂等性，
@@ -47,12 +54,6 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(IsModSuccess), SimpleCondition.IsFalse)]
         public StatusItem ModStatus { get; set; } = new StatusItem();
 
-        /// <summary>
-        /// 运行概览：内存 / 任务 / 会话 / 队列 / 索引的实时状态，放在页面最顶部。
-        /// 打开插件页第一眼应该是「现在怎么样」，而不是一串开关。
-        /// </summary>
-        [DisplayNameL("Overview_EditorTitle_Runtime_Overview", typeof(Resources))]
-        public OverviewOptions Overview { get; set; } = new OverviewOptions();
 
         /// <summary>
         /// 计划任务：插件自己的任务清单，每行可直接执行（含上次耗时/状态）。

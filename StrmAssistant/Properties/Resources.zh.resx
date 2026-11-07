@@ -1688,4 +1688,16 @@
   <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
     <value>任务：{0} ｜ 处理中：{1} ｜ 队列：媒体信息 {2} · 指纹 {3} · 片头 {4} · 剧集刷新 {5}</value>
   </data>
+  <data name="Overview_Status_Caption" xml:space="preserve">
+    <value>运行概览</value>
+  </data>
+  <data name="Overview_Status_Text" xml:space="preserve">
+    <value>内存 {0}/{1} MB（{2}%）· 任务 {3} · 队列 {4} · 索引 {5}</value>
+  </data>
+  <data name="Overview_Status_Conflict" xml:space="preserve">
+    <value>　· 冲突插件：{0}</value>
+  </data>
+  <data name="Overview_Status_Restart" xml:space="preserve">
+    <value>　· 内存超限，{0} 秒后重启</value>
+  </data>
 </root>

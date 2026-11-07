@@ -88,112 +88,56 @@ namespace StrmAssistant.Options.View
                 $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {message}", 8000);
 
         /// <summary>
-        /// 生成「运行概览」：内存 / 任务 / 会话 / 队列 / 索引的实时状态，位于页面最顶部。
+        /// 刷新「运行概览」状态条：内存 / 任务 / 队列 / 索引，异常时追加冲突插件与重启倒计时。
+        /// 只占一行，放在品牌之下、总开关之上。
         /// </summary>
         private void PopulateOverview()
         {
-            var list = PluginOptions.Overview.OverviewList;
-            list.Clear();
-
             try
             {
                 using var process = Process.GetCurrentProcess();
                 var workingSetMb = process.WorkingSet64 / 1024 / 1024;
-                var gcHeapMb = GC.GetTotalMemory(false) / 1024 / 1024;
 
                 var memoryOptions = _store.GetOptions().Memory;
                 var threshold = memoryOptions.MemoryAutoRestartThresholdMB;
+                var percent = threshold > 0
+                    ? Math.Min(100, (int)(workingSetMb * 100L / threshold))
+                    : 0;
 
-                var memoryItem = new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_Memory, workingSetMb, gcHeapMb),
-                    Icon = IconNames.memory
-                };
+                var runningTasks = _taskManager.ScheduledTasks.Count(t => t.State == TaskState.Running);
 
-                if (memoryOptions.EnableMemoryAutoRestart && threshold > 0)
+                var pendingQueue = QueueManager.MediaInfoExtractItemQueue.Count
+                                   + QueueManager.FingerprintItemQueue.Count
+                                   + QueueManager.IntroSkipItemQueue.Count
+                                   + QueueManager.EpisodeRefreshItemQueue.Count;
+
+                var conflicts = ConflictDetector.GetConflictingAssemblies();
+
+                var text = string.Format(Resources.Overview_Status_Text,
+                    workingSetMb, threshold, percent, runningTasks, pendingQueue,
+                    EnhanceChineseSearch.GetSearchIndexStatus());
+
+                if (conflicts.Length > 0)
                 {
-                    var percent = Math.Min(100, (int)(workingSetMb * 100L / threshold));
-                    memoryItem.HasPercentage = true;
-                    memoryItem.PercentComplete = percent;
-                    memoryItem.SecondaryText = string.Format(
-                        Resources.Overview_Memory_Threshold, threshold, percent);
-                    memoryItem.Status = percent >= 90
-                        ? ItemStatus.Failed
-                        : percent >= 75
-                            ? ItemStatus.Warning
-                            : ItemStatus.Succeeded;
+                    text += string.Format(Resources.Overview_Status_Conflict, string.Join(", ", conflicts));
                 }
 
-                list.Add(memoryItem);
-
-                // 内存超限倒计时：这是唯一会「自己重启服务器」的状态，必须让用户看见
                 if (MemoryGuard.IsRestartPending && MemoryGuard.RestartAtUtc.HasValue)
                 {
                     var seconds = Math.Max(0,
                         (int)(MemoryGuard.RestartAtUtc.Value - DateTimeOffset.UtcNow).TotalSeconds);
 
-                    list.Add(new GenericListItem
-                    {
-                        PrimaryText = string.Format(Resources.RuntimeStatus_RestartCountdown,
-                            MemoryGuard.ThresholdMb, seconds),
-                        Icon = IconNames.warning,
-                        Status = ItemStatus.Failed
-                    });
+                    text += string.Format(Resources.Overview_Status_Restart, seconds);
                 }
 
-                var runningTasks = _taskManager.ScheduledTasks
-                    .Where(t => t.State == TaskState.Running)
-                    .Select(t => t.ScheduledTask.Name)
-                    .ToList();
+                var status = MemoryGuard.IsRestartPending || conflicts.Length > 0 || percent >= 90
+                    ? ItemStatus.Failed
+                    : percent >= 75 || runningTasks > 0 || pendingQueue > 0
+                        ? ItemStatus.Warning
+                        : ItemStatus.Succeeded;
 
-                var processing = new List<string>();
-                if (QueueManager.IsMediaInfoProcessTaskRunning)
-                {
-                    processing.Add(Resources.CatchupTask_MediaInfo_MediaInfo);
-                }
-
-                if (QueueManager.IsEpisodeRefreshProcessTaskRunning)
-                {
-                    processing.Add(Resources.CatchupTask_EpisodeRefresh_EpisodeRefresh);
-                }
-
-                var mediaInfoQueue = QueueManager.MediaInfoExtractItemQueue.Count;
-                var fingerprintQueue = QueueManager.FingerprintItemQueue.Count;
-                var introQueue = QueueManager.IntroSkipItemQueue.Count;
-                var episodeRefreshQueue = QueueManager.EpisodeRefreshItemQueue.Count;
-                var pendingQueue = mediaInfoQueue + fingerprintQueue + introQueue + episodeRefreshQueue;
-
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.Overview_Tasks_Queue,
-                        runningTasks.Count, pendingQueue),
-                    SecondaryText = string.Format(Resources.Overview_Tasks_Queue_Detail,
-                        runningTasks.Count > 0 ? string.Join(", ", runningTasks) : "-",
-                        processing.Count > 0 ? string.Join(", ", processing) : "-",
-                        mediaInfoQueue, fingerprintQueue, introQueue, episodeRefreshQueue),
-                    Icon = IconNames.queue,
-                    Status = runningTasks.Count > 0 || pendingQueue > 0
-                        ? ItemStatus.InProgress
-                        : ItemStatus.None
-                });
-
-                list.Add(new GenericListItem
-                {
-                    PrimaryText = string.Format(Resources.RuntimeStatus_SearchIndex,
-                        EnhanceChineseSearch.GetSearchIndexStatus()),
-                    Icon = IconNames.search
-                });
-
-                var conflicts = ConflictDetector.GetConflictingAssemblies();
-                if (conflicts.Length > 0)
-                {
-                    list.Add(new GenericListItem
-                    {
-                        PrimaryText = string.Format(Resources.RuntimeStatus_ConflictPlugin,
-                            string.Join(", ", conflicts)),
-                        Icon = IconNames.warning
-                    });
-                }
+                PluginOptions.OverviewStatus = new StatusItem(
+                    Resources.Overview_Status_Caption, text, status);
             }
             catch (Exception)
             {

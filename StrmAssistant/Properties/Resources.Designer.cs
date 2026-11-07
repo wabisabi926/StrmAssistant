@@ -5157,5 +5157,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_Caption {
+            get {
+                return ResourceManager.GetString("Overview_Status_Caption", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_Conflict {
+            get {
+                return ResourceManager.GetString("Overview_Status_Conflict", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_Restart {
+            get {
+                return ResourceManager.GetString("Overview_Status_Restart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_Text {
+            get {
+                return ResourceManager.GetString("Overview_Status_Text", resourceCulture);
+            }
+        }
+
     }
 }

@@ -1775,4 +1775,16 @@
   <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
     <value>Tasks: {0} | Processing: {1} | Queue: media info {2} · fingerprint {3} · intro {4} · episode refresh {5}</value>
   </data>
+  <data name="Overview_Status_Caption" xml:space="preserve">
+    <value>Runtime Overview</value>
+  </data>
+  <data name="Overview_Status_Text" xml:space="preserve">
+    <value>Memory {0}/{1} MB ({2}%) · tasks {3} · queue {4} · index {5}</value>
+  </data>
+  <data name="Overview_Status_Conflict" xml:space="preserve">
+    <value>  · conflicting plugins: {0}</value>
+  </data>
+  <data name="Overview_Status_Restart" xml:space="preserve">
+    <value>  · memory over limit, restarting in {0}s</value>
+  </data>
 </root>

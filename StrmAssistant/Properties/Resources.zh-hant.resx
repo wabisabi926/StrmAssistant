@@ -1688,4 +1688,16 @@
   <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
     <value>任務：{0} ｜ 處理中：{1} ｜ 佇列：媒體資訊 {2} · 指紋 {3} · 片頭 {4} · 劇集重新整理 {5}</value>
   </data>
+  <data name="Overview_Status_Caption" xml:space="preserve">
+    <value>執行概覽</value>
+  </data>
+  <data name="Overview_Status_Text" xml:space="preserve">
+    <value>記憶體 {0}/{1} MB（{2}%）· 任務 {3} · 佇列 {4} · 索引 {5}</value>
+  </data>
+  <data name="Overview_Status_Conflict" xml:space="preserve">
+    <value>　· 衝突外掛：{0}</value>
+  </data>
+  <data name="Overview_Status_Restart" xml:space="preserve">
+    <value>　· 記憶體超限，{0} 秒後重啟</value>
+  </data>
 </root>

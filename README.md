@@ -16,7 +16,7 @@
 
 | 项目 | 说明 |
 |---|---|
-| 插件版本 | **3.0.0.72** |
+| 插件版本 | **3.0.0.73** |
 | 最低 Emby 版本 | 4.9.1.0 |
 | 适配展示版本 | 4.10.2.0+ |
 | 实测版本 | 4.10.2.0 |
@@ -25,7 +25,14 @@
 
 > 各版本详细变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-## 最新优化 (v3.0.0.66 ~ v3.0.0.72)
+## 最新优化 (v3.0.0.66 ~ v3.0.0.73)
+
+✅ **影音体验增强（3.0.0.73）**
+- 外挂音轨/字幕语言标签规范化：`und` / `chs` / `cht` / 双语等标记归一为 Emby 标准语言码，简繁与双语写入轨道标题；新增计划任务「规范化音轨字幕语言」
+- 片源体检（声明级）：交叉比对文件名宣称与媒体信息，检出假 4K / 假 HDR / 假 Atmos / 缺音轨 / 零时长等；报告写入插件配置目录，首页新增「立即体检」「导出体检报告」与摘要行
+- HDR 静态元数据补采：从 ffprobe `side_data` 读取 MaxCLL / MaxFALL / 母版色域与亮度，写入视频轨标题（仅在源自身携带静态元数据时生效）
+- 首页运行概览新增 FTS 索引条数与最近扫库时间，队列按媒体/片头/剧集分项；修复索引长期显示「—」的问题
+- 三项开关默认均为 OFF；常规推送与 PR 也会跑完整单测
 
 ✅ **首页与设置页重构（3.0.0.72）**
 - 首页改为仪表盘：运行概览一行显示内存、任务、队列与索引；常用任务一键触发，配置迁移与维护工具独立分组
@@ -211,10 +218,10 @@
 
 CI 支持两种触发方式：
 
-- **推送标签自动构建**：`git push origin v3.0.0.72` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
+- **推送标签自动构建**：`git push origin v3.0.0.73` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
 - **手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.72`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.73`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
 
 > 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 

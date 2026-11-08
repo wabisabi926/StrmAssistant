@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.72** |
+| Plugin Version | **3.0.0.73** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -25,7 +25,14 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.66 ~ v3.0.0.72)
+## Latest Optimizations (v3.0.0.66 ~ v3.0.0.73)
+
+✅ **Playback experience (3.0.0.73)**
+- External audio/subtitle language tags normalized (`und` / `chs` / `cht` / bilingual to standard Emby language codes, with Simplified/Traditional/bilingual written into track titles); new 'Normalize Track Languages' scheduled task
+- Media health check (declaration-level): cross-checks filename claims against probed media info, flags fake 4K / HDR / Atmos, missing audio and zero duration; reports written to the plugin config folder, with 'Run Health Check', 'Export Report' and a summary line on the Home page
+- HDR static metadata capture: reads MaxCLL / MaxFALL / mastering colour and luminance from ffprobe `side_data` into the video track title (only when the source carries static metadata)
+- Home runtime overview now shows the FTS index count and last library scan time, breaks the queue down into media / intro / episodes, and fixes the index count showing an empty dash
+- All three switches are OFF by default; full unit tests now run on every push and PR
 
 ✅ **Home and settings redesign (3.0.0.72)**
 - Home is now a dashboard: a one-line runtime overview for memory, tasks, queue and index; one-click common tasks; separate Config Transfer and Maintenance groups
@@ -211,10 +218,10 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 
 CI can be triggered two ways:
 
-- **Automatic on tag push**: `git push origin v3.0.0.72` builds and publishes that version (the tag name is validated against the project version)
+- **Automatic on tag push**: `git push origin v3.0.0.73` builds and publishes that version (the tag name is validated against the project version)
 - **Manually**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`
 
-When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.72`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
+When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.73`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
 
 > Always use the filename `StrmAssistantPlus.dll`. If an older copy such as `StrmAssistant.dll` is still in the plugins folder, delete it — Emby loads both and you end up with a duplicate plugin.
 

@@ -25,9 +25,13 @@ namespace StrmAssistant.Tests
             var listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
             var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            // 在当前线程先把 Accept 挂起：不能等到 Task.Run 委托里再调用，
+            // 否则高负载下线程池调度延迟可能让 finally 的 Stop() 先执行，
+            // Accept 随后抛出 "Not listening"（CI 上偶发）。
+            var accept = listener.AcceptTcpClientAsync();
             var server = Task.Run(async () =>
             {
-                using var client = await listener.AcceptTcpClientAsync();
+                using var client = await accept;
                 using var stream = client.GetStream();
                 var request = new byte[8192];
                 await stream.ReadAsync(request);
@@ -64,7 +68,15 @@ namespace StrmAssistant.Tests
             finally
             {
                 listener.Stop();
-                await server.WaitAsync(TimeSpan.FromSeconds(5));
+                try
+                {
+                    await server.WaitAsync(TimeSpan.FromSeconds(5));
+                }
+                catch (Exception e) when (e is SocketException or InvalidOperationException or ObjectDisposedException or OperationCanceledException)
+                {
+                    // 断言已在上面完成；监听器提前关闭会打断尚未完成的 Accept，
+                    // 这类清理阶段的竞态不应让用例失败。
+                }
                 if (File.Exists(path)) File.Delete(path);
             }
         }

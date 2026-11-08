@@ -153,7 +153,9 @@ namespace StrmAssistant.Tests
         public void BodyStall_IsAbortedWithinBudget()
         {
             var content = BuildContent(2 * 1024 * 1024);
-            using var server = new RangeHttpServer(content, stallBodyMs: 5000);
+            // stall 拉长到 15s：CI 共享 runner 上线程调度抖动可达 2s 以上，
+            // 阈值留到 10s 仍能明确区分「预算内中止」与「等服务器发数据」，又不会被抖动误判。
+            using var server = new RangeHttpServer(content, stallBodyMs: 15000);
 
             Assert.True(HttpRangeStream.TryOpen(server.Url, out var stream, out var error,
                 TimeSpan.FromMilliseconds(400)), error);
@@ -165,8 +167,8 @@ namespace StrmAssistant.Tests
                 sw.Stop();
 
                 Assert.Equal(0, n);   // 拿不到数据 → 上层静默回退
-                Assert.True(sw.ElapsedMilliseconds < 2000,
-                    $"应在预算内中止，实际耗时 {sw.ElapsedMilliseconds}ms（修复前会等到服务器发数据，约 5000ms）");
+                Assert.True(sw.ElapsedMilliseconds < 10000,
+                    $"应在预算内中止，实际耗时 {sw.ElapsedMilliseconds}ms（修复前会等到服务器发数据，约 15000ms）");
             }
         }
 

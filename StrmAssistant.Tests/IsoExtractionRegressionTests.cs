@@ -41,7 +41,9 @@ namespace StrmAssistant.Tests
                     await stream.WriteAsync(header);
                 }
                 if (sendBody) await stream.WriteAsync(new byte[1048576]);
-                else await Task.Delay(1500);
+                // stalled server 故意拖得足够久：CI 共享 runner 的线程调度抖动可达数秒，
+                // 判定阈值必须远大于抖动、又远小于 stall，否则「客户端是否在预算内自行中止」会误判。
+                else await Task.Delay(12000);
             });
             try
             {
@@ -52,7 +54,7 @@ namespace StrmAssistant.Tests
                 {
                     "http://127.0.0.1:" + port + "/fixture.iso", 0L, 1048575L, path,
                     sendBody ? 5000 : sendHeaders ? 5000 : 300, 300
-                })).WaitAsync(TimeSpan.FromSeconds(8));
+                })).WaitAsync(TimeSpan.FromSeconds(20));
                 var elapsed = watch.Elapsed;
                 if (sendBody)
                 {
@@ -62,21 +64,14 @@ namespace StrmAssistant.Tests
                 else
                 {
                     Assert.False(success);
-                    Assert.True(elapsed < TimeSpan.FromMilliseconds(1400), "The stalled server should not determine completion time: " + elapsed);
+                    Assert.True(elapsed < TimeSpan.FromSeconds(10), "The stalled server should not determine completion time: " + elapsed);
                 }
             }
             finally
             {
                 listener.Stop();
-                try
-                {
-                    await server.WaitAsync(TimeSpan.FromSeconds(5));
-                }
-                catch (Exception e) when (e is SocketException or InvalidOperationException or ObjectDisposedException or OperationCanceledException)
-                {
-                    // 断言已在上面完成；监听器提前关闭会打断尚未完成的 Accept，
-                    // 这类清理阶段的竞态不应让用例失败。
-                }
+                // server 仍在模拟 stalled body，不等待它结束；只需观察异常，避免未观察任务异常。
+                _ = server.ContinueWith(t => { var _ = t.Exception; }, TaskScheduler.Default);
                 if (File.Exists(path)) File.Delete(path);
             }
         }

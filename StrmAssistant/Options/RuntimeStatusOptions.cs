@@ -28,6 +28,25 @@ namespace StrmAssistant.Options
                 Icon = IconNames.queue, Data1 = "VerifyMetadataCache"
             };
 
+        /// <summary>
+        /// 片源体检：只读，不探测媒体、不改条目数据，结果写插件配置目录。
+        /// 与「校验元数据缓存」并列，属于同一类只读校验操作。
+        /// </summary>
+        public ButtonItem MediaHealthCheckButton =>
+            new ButtonItem(Resources.Health_Button_Run)
+            {
+                Icon = IconNames.info, Data1 = "RunScheduledTask", Data2 = "MediaHealthCheckTask"
+            };
+
+        public ButtonItem ExportMediaHealthButton =>
+            new ButtonItem(Resources.Health_Button_Export)
+            {
+                Icon = IconNames.queue, Data1 = "ExportMediaHealth"
+            };
+
+        /// <summary>上次体检摘要（只读），由 HomePageView.PopulateOverview 填充。</summary>
+        public StatusItem MediaHealthStatus { get; set; } = new StatusItem();
+
         public ButtonItem CleanMemoryNowButton =>
             new ButtonItem(Resources.GeneralOptions_CleanMemoryNow_Clean_Memory_Now)
             {

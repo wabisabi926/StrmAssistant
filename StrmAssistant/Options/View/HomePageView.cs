@@ -187,6 +187,35 @@ namespace StrmAssistant.Options.View
             {
                 // ignored
             }
+
+            PopulateMediaHealth();
+        }
+
+        /// <summary>
+        /// 片源体检摘要：只读上次报告文件，不触发任何扫描。
+        /// 任务在后台跑完后不会自动刷新页面，管理员点「刷新状态」或重开设置页即可看到最新结果。
+        /// </summary>
+        private void PopulateMediaHealth()
+        {
+            try
+            {
+                var report = MediaHealthService.Load();
+
+                var status = report == null
+                    ? ItemStatus.Succeeded
+                    : report.Critical > 0
+                        ? ItemStatus.Failed
+                        : report.Warning > 0
+                            ? ItemStatus.Warning
+                            : ItemStatus.Succeeded;
+
+                PluginOptions.RuntimeStatus.MediaHealthStatus = new StatusItem(
+                    Resources.Health_Status_Caption, MediaHealthService.BuildSummary(report), status);
+            }
+            catch
+            {
+                // 状态行失败不得影响设置页
+            }
         }
 
         private static string FormatCount(long count) =>
@@ -268,6 +297,19 @@ namespace StrmAssistant.Options.View
                     PopulateOverview();
                     RaiseUIViewInfoChanged();
                     return Task.FromResult<IPluginUIView>(this);
+
+                case "ExportMediaHealth":
+                {
+                    var message = File.Exists(MediaHealthService.MarkdownPath)
+                        ? string.Format(Resources.Health_Notify_Exported, MediaHealthService.MarkdownPath)
+                        : Resources.Health_Status_Empty;
+
+                    Plugin.Instance.Logger.Info("HomePage - " + message);
+                    Plugin.NotificationApi?.SendMessageToAdmins(message, 12000);
+                    PopulateOverview();
+                    RaiseUIViewInfoChanged();
+                    return Task.FromResult<IPluginUIView>(this);
+                }
 
                 case "ScheduleIndexRebuild":
                     EnhanceChineseSearch.ScheduleIndexRebuild();

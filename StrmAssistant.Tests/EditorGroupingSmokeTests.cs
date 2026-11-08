@@ -144,6 +144,28 @@ namespace StrmAssistant.Tests
             Assert.DoesNotContain(groups, g => NameOrId(g, "Safety"));
         }
 
+        [Fact]
+        public void RuntimeStatus_ContainsHealthStatusAndButtons()
+        {
+            // 片源体检的摘要行是项目里第一次把 StatusItem 放进子组。
+            // Emby 的 IsCompoundEditorType(StatusItem)=true，会走 CreateEditorStatusItem 生成
+            // EditorStatusItem（EditorBase），因此与根级状态行走同一条渲染路径。
+            var container = (EditObjectContainer)new PluginOptions().CreateEditContainer();
+            var runtime = container.EditorRoot.EditorItems.OfType<EditorGroup>()
+                .FirstOrDefault(g => NameOrId(g, "RuntimeStatus"));
+
+            Assert.NotNull(runtime);
+
+            // 状态项：Emby 会把子组里的 StatusItem 转成 EditorStatusItem（与根级同一路径）
+            Assert.Single(runtime.EditorItems.OfType<EditorStatusItem>());
+
+            // 按钮：连续的 ButtonItem 会被合并进同一个 EditorButtonGroup，
+            // 组内应包含「校验元数据缓存」+「立即体检」+「导出体检报告」三个
+            var buttonGroup = runtime.EditorItems.OfType<EditorButtonGroup>().FirstOrDefault();
+            Assert.NotNull(buttonGroup);
+            Assert.Equal(3, buttonGroup.EditorItems.Count());
+        }
+
         private static bool NameOrId(EditorBase editor, string name)
         {
             if (editor == null) return false;

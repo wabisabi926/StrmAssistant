@@ -1,4 +1,5 @@
 using Emby.Web.GenericEdit;
+using MediaBrowser.Model.Attributes;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
 
@@ -34,5 +35,14 @@ namespace StrmAssistant.Options
         [DisplayNameL("MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label", typeof(Resources))]
         [DescriptionL("MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_", typeof(Resources))]
         public bool EnableHdrVividTagging { get; set; } = true;
+
+        /// <summary>
+        /// HDR 静态元数据补采：把 ffprobe side_data 里的 MaxCLL / MaxFALL / 母版色域与亮度
+        /// 写进视频轨的 Title。仅补信息，不改变播放与画质判定。
+        /// </summary>
+        [DisplayNameL("MediaInfoExtractOptions_CaptureHdrStaticMetadata_Capture_HDR_static_metadata", typeof(Resources))]
+        [DescriptionL("MediaInfoExtractOptions_CaptureHdrStaticMetadata_Read_MaxCLL_MaxFALL_and_mastering_display_from_probe_side_data_and_write_them_to_the_video_track_title__Default_is_OFF_", typeof(Resources))]
+        [VisibleCondition(nameof(EnableHdrTagging), SimpleCondition.IsTrue)]
+        public bool CaptureHdrStaticMetadata { get; set; } = false;
     }
 }

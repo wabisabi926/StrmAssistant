@@ -298,6 +298,14 @@ namespace StrmAssistant.Common
                     }
                 }
 
+                if (IsLanguageNormalizeEnabled())
+                {
+                    foreach (var subtitleStream in externalSubtitleStreams)
+                    {
+                        NormalizeStreamTags(subtitleStream);
+                    }
+                }
+
                 currentStreams.AddRange(externalSubtitleStreams);
                 _itemRepository.SaveMediaStreams(item.InternalId, currentStreams, CancellationToken.None);
 
@@ -313,19 +321,23 @@ namespace StrmAssistant.Common
         /// <summary>
         /// 外挂音轨扩展名（与视频同目录同名前缀的独立音频文件）。
         /// </summary>
-        private static readonly HashSet<string> AudioExtensions =
-            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                ".mka", ".m4a", ".ac3", ".eac3", ".dts", ".dtshd", ".thd", ".truehd",
-                ".flac", ".opus", ".wav", ".aac", ".mp3"
-            };
-
+        /// <summary>
+        /// 关闭开关时沿用的原始映射，保证「关掉 = 行为与升级前逐字节一致」。
+        /// 开启开关后改由 <see cref="SubtitleLanguageNormalizer"/> 处理。
+        /// </summary>
         private static readonly Dictionary<string, string> AudioLanguageAliases =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "chs", "chi" }, { "sc", "chi" }, { "zho", "chi" }, { "zh", "chi" },
                 { "cht", "chi" }, { "tc", "chi" },
                 { "en", "eng" }, { "jp", "jpn" }, { "kr", "kor" }
+            };
+
+        private static readonly HashSet<string> AudioExtensions =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ".mka", ".m4a", ".ac3", ".eac3", ".dts", ".dtshd", ".thd", ".truehd",
+                ".flac", ".opus", ".wav", ".aac", ".mp3"
             };
 
         /// <summary>
@@ -379,10 +391,21 @@ namespace StrmAssistant.Common
 
                 if (!string.IsNullOrEmpty(languageCode))
                 {
-                    stream.Language = AudioLanguageAliases.TryGetValue(languageCode, out var lang)
-                        ? lang
-                        : languageCode.ToLowerInvariant();
-                    stream.Title = languageCode.ToUpperInvariant();
+                    if (IsLanguageNormalizeEnabled())
+                    {
+                        // chs / cht 不再一律折成 chi 而丢失简繁信息；判不出来时退回原始段
+                        var normalization = SubtitleLanguageNormalizer.Normalize(languageCode, null, null);
+                        stream.Language = normalization.Language ?? languageCode.ToLowerInvariant();
+                        stream.Title = normalization.Title ?? languageCode.ToUpperInvariant();
+                    }
+                    else
+                    {
+                        // 开关关闭：保持升级前的映射与标题写法，行为完全不变
+                        stream.Language = AudioLanguageAliases.TryGetValue(languageCode, out var lang)
+                            ? lang
+                            : languageCode.ToLowerInvariant();
+                        stream.Title = languageCode.ToUpperInvariant();
+                    }
                 }
 
                 result.Add(stream);
@@ -444,6 +467,80 @@ namespace StrmAssistant.Common
                 _ = Plugin.MediaInfoApi.SerializeMediaInfo(item.InternalId, null, true, "External Audio Update")
                     .ConfigureAwait(false);
             }
+        }
+
+        #endregion
+
+        #region Track Language Normalize
+
+        /// <summary>
+        /// 开关读取。放在静态方法里，便于任务与补丁路径共用同一判定。
+        /// </summary>
+        internal static bool IsLanguageNormalizeEnabled()
+        {
+            try
+            {
+                return Plugin.Instance?.ExperienceEnhanceStore?.GetOptions()?.Playback?.NormalizeTrackLanguage == true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 就地改写单个外挂轨道的语言标签。判定不出来或与现状一致时不动并返回 false。
+        /// 只处理外挂轨道：内嵌轨道的语言来自 ffprobe，通常比文件名可靠，不应被覆盖。
+        /// </summary>
+        internal static bool NormalizeStreamTags(MediaStream stream)
+        {
+            if (stream == null || string.IsNullOrEmpty(stream.Path)) return false;
+
+            var normalization = SubtitleLanguageNormalizer.Normalize(stream.Path, stream.Language, stream.Title,
+                stream.IsForced, stream.IsHearingImpaired);
+
+            if (!normalization.HasChange) return false;
+
+            stream.Language = normalization.Language;
+            stream.Title = normalization.Title;
+            if (normalization.IsForced.HasValue) stream.IsForced = normalization.IsForced.Value;
+            if (normalization.IsHearingImpaired.HasValue) stream.IsHearingImpaired = normalization.IsHearingImpaired.Value;
+
+            return true;
+        }
+
+        /// <summary>
+        /// 规范化一个条目上全部外挂音轨与字幕，返回实际修正的轨道数。
+        /// 仅在确有变化时落库，并按需同步重写 *-mediainfo.json——
+        /// 否则 RestoreMediaInfoTask 会用旧 json 把修正覆盖回去。
+        /// </summary>
+        public int NormalizeTrackLanguages(BaseItem item, bool persistMediaInfo)
+        {
+            if (item == null) return 0;
+            if (!IsLanguageNormalizeEnabled()) return 0;
+
+            var streams = item.GetMediaStreams();
+            if (streams == null || streams.Count == 0) return 0;
+
+            var changed = 0;
+            foreach (var stream in streams)
+            {
+                if (!stream.IsExternal) continue;
+                if (stream.Type != MediaStreamType.Audio && stream.Type != MediaStreamType.Subtitle) continue;
+                if (NormalizeStreamTags(stream)) changed++;
+            }
+
+            if (changed == 0) return 0;
+
+            _itemRepository.SaveMediaStreams(item.InternalId, streams, CancellationToken.None);
+
+            if (persistMediaInfo && Plugin.LibraryApi.IsLibraryInScope(item))
+            {
+                _ = Plugin.MediaInfoApi.SerializeMediaInfo(item.InternalId, null, true, "Track Language Normalize")
+                    .ConfigureAwait(false);
+            }
+
+            return changed;
         }
 
         #endregion

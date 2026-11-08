@@ -307,6 +307,7 @@ namespace StrmAssistant.Options.Store
                     _logger.Info("NoBoxsetsAutoCreation is set to {0}",
                         options.LibraryOrder.NoBoxsetsAutoCreation);
 
+                    _logger.Info("NormalizeTrackLanguage is set to {0}", options.Playback.NormalizeTrackLanguage);
                     _logger.Info("EnableAutoMarkWatched is set to {0}", options.Playback.EnableAutoMarkWatched);
                     _logger.Info("AutoMarkWatchedThreshold is set to {0}", options.Playback.AutoMarkWatchedThreshold);
                     _logger.Info("AutoMarkWatchedExcludeFavorites is set to {0}", options.Playback.AutoMarkWatchedExcludeFavorites);

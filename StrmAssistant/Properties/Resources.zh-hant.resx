@@ -1,4 +1,4 @@
-﻿<root>
+<root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -920,6 +920,90 @@
   <data name="ExperienceEnhanceOptions_OptimizeSubtitle_Optimize_Subtitle" xml:space="preserve">
     <value>最佳化字幕下載</value>
   </data>
+  <data name="ExperienceEnhanceOptions_NormalizeTrackLanguage_Normalize_Track_Language" xml:space="preserve">
+    <value>規範化音軌字幕語言</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_NormalizeTrackLanguage_Fix_undetermined_language_tags_on_external_audio_and_subtitles__Simplified_and_Traditional_Chinese_are_shown_in_titles__Default_is_OFF_" xml:space="preserve">
+    <value>修正外掛音軌與字幕上無法辨識的語言標記，讓 Emby 內建的語言偏好能正確比對；簡體與繁體顯示在軌道標題中。預設關閉。</value>
+  </data>
+  <data name="NormalizeTrackLanguageTask_Name_Normalize_Track_Language" xml:space="preserve">
+    <value>規範化音軌字幕語言</value>
+  </data>
+  <data name="NormalizeTrackLanguageTask_Description_Fix_language_tags_on_external_audio_and_subtitles" xml:space="preserve">
+    <value>修正外掛音軌與字幕的語言標記</value>
+  </data>
+  <data name="NormalizeTrackLanguageTask_Notify_Completed" xml:space="preserve">
+    <value>語言標記規範化完成：檢查 {0} 個項目，修正 {1} 個項目 / {2} 條軌道</value>
+  </data>
+  <data name="Health_Button_Run" xml:space="preserve">
+    <value>立即體檢</value>
+  </data>
+  <data name="Health_Button_Export" xml:space="preserve">
+    <value>匯出體檢報告</value>
+  </data>
+  <data name="Health_Status_Caption" xml:space="preserve">
+    <value>片源體檢</value>
+  </data>
+  <data name="Health_Status_Empty" xml:space="preserve">
+    <value>尚未體檢</value>
+  </data>
+  <data name="Health_Status_Summary" xml:space="preserve">
+    <value>上次體檢 {0} · 嚴重 {1} / 警告 {2} / 提示 {3}</value>
+  </data>
+  <data name="Health_Severity_Critical" xml:space="preserve">
+    <value>嚴重</value>
+  </data>
+  <data name="Health_Severity_Warning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="Health_Severity_Info" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="Health_Notify_Completed" xml:space="preserve">
+    <value>體檢完成：嚴重 {0} / 警告 {1} / 提示 {2}，報告：{3}</value>
+  </data>
+  <data name="Health_Notify_NoData" xml:space="preserve">
+    <value>沒有可用的媒體資訊，請先執行「提取媒體資訊」</value>
+  </data>
+  <data name="Health_Notify_WriteFailed" xml:space="preserve">
+    <value>體檢報告寫入失敗，詳見日誌</value>
+  </data>
+  <data name="Health_Notify_Exported" xml:space="preserve">
+    <value>報告：{0}</value>
+  </data>
+  <data name="Health_Markdown_Meta" xml:space="preserve">
+    <value>產生時間 {0} · 檢查 {1} 個項目 · {2} 個有問題</value>
+  </data>
+  <data name="Health_Markdown_Header" xml:space="preserve">
+    <value>嚴重度 | 項目 | 檔案 | 問題</value>
+  </data>
+  <data name="Health_Issue_Fake4K" xml:space="preserve">
+    <value>檔名標 4K，實際長邊僅 {0}</value>
+  </data>
+  <data name="Health_Issue_FakeHdr" xml:space="preserve">
+    <value>檔名標 HDR，實際為 SDR（{0}）</value>
+  </data>
+  <data name="Health_Issue_FakeAtmos" xml:space="preserve">
+    <value>檔名標 Atmos/DTS:X，音軌編碼為 {0}</value>
+  </data>
+  <data name="Health_Issue_NoAudio" xml:space="preserve">
+    <value>沒有音訊流</value>
+  </data>
+  <data name="Health_Issue_NoSubtitle" xml:space="preserve">
+    <value>沒有字幕流</value>
+  </data>
+  <data name="Health_Issue_ZeroDuration" xml:space="preserve">
+    <value>時長為 0 或未知</value>
+  </data>
+  <data name="Health_Issue_UndSubtitle" xml:space="preserve">
+    <value>有 {0} 條外掛字幕語言未辨識</value>
+  </data>
+  <data name="MediaHealthCheckTask_Name_Media_Health_Check" xml:space="preserve">
+    <value>片源體檢</value>
+  </data>
+  <data name="MediaHealthCheckTask_Description_Scan_media_info_for_declaration_mismatches" xml:space="preserve">
+    <value>交叉比對檔名宣稱與已提取的媒體資訊（唯讀）</value>
+  </data>
   <data name="ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_" xml:space="preserve">
     <value>將 strm 路徑解析為本機掛載，供 Open Subtitles 計算雜湊與按檔名搜索（需該外掛）。預設關閉。</value>
   </data>
@@ -1411,6 +1495,12 @@
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>顯示 HDR Vivid 標籤</value>
+  </data>
+  <data name="MediaInfoExtractOptions_CaptureHdrStaticMetadata_Capture_HDR_static_metadata" xml:space="preserve">
+    <value>補採 HDR 靜態中繼資料</value>
+  </data>
+  <data name="MediaInfoExtractOptions_CaptureHdrStaticMetadata_Read_MaxCLL_MaxFALL_and_mastering_display_from_probe_side_data_and_write_them_to_the_video_track_title__Default_is_OFF_" xml:space="preserve">
+    <value>從探測結果的 side_data 讀取 MaxCLL / MaxFALL 與母版顯示資訊，寫入視訊軌標題；僅補充資訊，不改變播放與畫質判定。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
     <value>偵測 CUVA 中繼資料；HDR 片源會額外讀取一幀。預設開啟。</value>

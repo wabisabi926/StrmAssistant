@@ -1849,6 +1849,51 @@ namespace StrmAssistant.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Normalize Track Language.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_NormalizeTrackLanguage_Normalize_Track_Language {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_NormalizeTrackLanguage_Normalize_Track_Language", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Fix undetermined language tags on external audio and subtitles so Emby&apos;s built-in language preferences can match. Simplified and Traditional Chinese are shown in track titles. Default is OFF..
+        /// </summary>
+        public static string ExperienceEnhanceOptions_NormalizeTrackLanguage_Fix_undetermined_language_tags_on_external_audio_and_subtitles__Simplified_and_Traditional_Chinese_are_shown_in_titles__Default_is_OFF_ {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_NormalizeTrackLanguage_Fix_undetermined_language_tags_on_external_audio_and_subtitles__Simplified_and_Traditional_Chinese_are_shown_in_titles__Default_is_OFF_", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Normalize Track Language.
+        /// </summary>
+        public static string NormalizeTrackLanguageTask_Name_Normalize_Track_Language {
+            get {
+                return ResourceManager.GetString("NormalizeTrackLanguageTask_Name_Normalize_Track_Language", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Fix language tags on external audio and subtitles.
+        /// </summary>
+        public static string NormalizeTrackLanguageTask_Description_Fix_language_tags_on_external_audio_and_subtitles {
+            get {
+                return ResourceManager.GetString("NormalizeTrackLanguageTask_Description_Fix_language_tags_on_external_audio_and_subtitles", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Language tag normalization complete: {0} item(s) checked, {1} item(s) / {2} track(s) updated.
+        /// </summary>
+        public static string NormalizeTrackLanguageTask_Notify_Completed {
+            get {
+                return ResourceManager.GetString("NormalizeTrackLanguageTask_Notify_Completed", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Resolve strm media path to local mount for OpenSubtitles hash and filename search (requires Open Subtitles plugin). Default is OFF..
         /// </summary>
         public static string ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_ {
@@ -5595,6 +5640,231 @@ namespace StrmAssistant.Properties {
         public static string Overview_Status_QueueMedia {
             get {
                 return ResourceManager.GetString("Overview_Status_QueueMedia", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Button_Export {
+            get {
+                return ResourceManager.GetString("Health_Button_Export", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Button_Run {
+            get {
+                return ResourceManager.GetString("Health_Button_Run", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_Fake4K {
+            get {
+                return ResourceManager.GetString("Health_Issue_Fake4K", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_FakeAtmos {
+            get {
+                return ResourceManager.GetString("Health_Issue_FakeAtmos", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_FakeHdr {
+            get {
+                return ResourceManager.GetString("Health_Issue_FakeHdr", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_NoAudio {
+            get {
+                return ResourceManager.GetString("Health_Issue_NoAudio", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_NoSubtitle {
+            get {
+                return ResourceManager.GetString("Health_Issue_NoSubtitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_UndSubtitle {
+            get {
+                return ResourceManager.GetString("Health_Issue_UndSubtitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Issue_ZeroDuration {
+            get {
+                return ResourceManager.GetString("Health_Issue_ZeroDuration", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Markdown_Header {
+            get {
+                return ResourceManager.GetString("Health_Markdown_Header", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Markdown_Meta {
+            get {
+                return ResourceManager.GetString("Health_Markdown_Meta", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Notify_Completed {
+            get {
+                return ResourceManager.GetString("Health_Notify_Completed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Notify_Exported {
+            get {
+                return ResourceManager.GetString("Health_Notify_Exported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Notify_NoData {
+            get {
+                return ResourceManager.GetString("Health_Notify_NoData", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Notify_WriteFailed {
+            get {
+                return ResourceManager.GetString("Health_Notify_WriteFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Severity_Critical {
+            get {
+                return ResourceManager.GetString("Health_Severity_Critical", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Severity_Info {
+            get {
+                return ResourceManager.GetString("Health_Severity_Info", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Severity_Warning {
+            get {
+                return ResourceManager.GetString("Health_Severity_Warning", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Status_Caption {
+            get {
+                return ResourceManager.GetString("Health_Status_Caption", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Status_Empty {
+            get {
+                return ResourceManager.GetString("Health_Status_Empty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Status_Summary {
+            get {
+                return ResourceManager.GetString("Health_Status_Summary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaHealthCheckTask_Description_Scan_media_info_for_declaration_mismatches {
+            get {
+                return ResourceManager.GetString("MediaHealthCheckTask_Description_Scan_media_info_for_declaration_mismatches", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaHealthCheckTask_Name_Media_Health_Check {
+            get {
+                return ResourceManager.GetString("MediaHealthCheckTask_Name_Media_Health_Check", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_CaptureHdrStaticMetadata_Capture_HDR_static_metadata {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_CaptureHdrStaticMetadata_Capture_HDR_static_metadata", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MediaInfoExtractOptions_CaptureHdrStaticMetadata_Read_MaxCLL_MaxFALL_and_mastering_display_from_probe_side_data_and_write_them_to_the_video_track_title__Default_is_OFF_ {
+            get {
+                return ResourceManager.GetString("MediaInfoExtractOptions_CaptureHdrStaticMetadata_Read_MaxCLL_MaxFALL_and_mastering_display_from_probe_side_data_and_write_them_to_the_video_track_title__Default_is_OFF_", resourceCulture);
             }
         }
 

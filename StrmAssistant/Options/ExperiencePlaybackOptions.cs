@@ -46,6 +46,11 @@ namespace StrmAssistant.Options
         [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
         public bool OptimizeSubtitle { get; set; } = false;
 
+        [DisplayNameL("ExperienceEnhanceOptions_NormalizeTrackLanguage_Normalize_Track_Language", typeof(Resources))]
+        [DescriptionL("ExperienceEnhanceOptions_NormalizeTrackLanguage_Fix_undetermined_language_tags_on_external_audio_and_subtitles__Simplified_and_Traditional_Chinese_are_shown_in_titles__Default_is_OFF_", typeof(Resources))]
+        [Required]
+        public bool NormalizeTrackLanguage { get; set; } = false;
+
         [DisplayNameL("ExperienceEnhanceOptions_LibraryScopePlayProgress_Title", typeof(Resources))]
         [DescriptionL("ExperienceEnhanceOptions_LibraryScopePlayProgress_Description", typeof(Resources))]
         [Required]

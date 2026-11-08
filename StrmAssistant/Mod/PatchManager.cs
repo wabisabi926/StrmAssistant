@@ -54,6 +54,7 @@ namespace StrmAssistant.Mod
         public static IsoExtraction IsoExtraction;
         public static DolbyVisionProfile DolbyVisionProfile;
         public static HdrVividTagging HdrVividTagging;
+        public static HdrStaticMetadata HdrStaticMetadata;
         public static DoubanRatingRefresh DoubanRatingRefresh;
         public static LibraryScopePlayProgress LibraryScopePlayProgress;
         public static ServerSideVersionLabel ServerSideVersionLabel;
@@ -126,6 +127,7 @@ namespace StrmAssistant.Mod
             IsoExtraction = new IsoExtraction();
             DolbyVisionProfile = new DolbyVisionProfile();
             HdrVividTagging = new HdrVividTagging();
+            HdrStaticMetadata = new HdrStaticMetadata();
             DoubanRatingRefresh = new DoubanRatingRefresh();
             LibraryScopePlayProgress = new LibraryScopePlayProgress();
             ServerSideVersionLabel = new ServerSideVersionLabel();

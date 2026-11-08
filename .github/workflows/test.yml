@@ -1,0 +1,68 @@
+name: Test
+
+# build.yml 只在工作流手动触发与版本标签推送时运行（它负责打包发布）。
+# 这里覆盖日常提交与 PR：每次推送都构建插件并跑全量单测，让测试真正成为持续门禁。
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # 插件目标 net6.0，测试项目目标 net8.0，两个 SDK 都要装。
+      - name: Setup .NET 6
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.x'
+
+      - name: Setup .NET 8 for tests
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Python for resource check
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore StrmAssistant/StrmAssistant.csproj
+
+      # 置空输出目录可跳过「部署到本机 Emby」的构建目标。
+      # 顺序必须是先构建插件再跑测试：测试项目直接引用构建出的 DLL，没有 ProjectReference。
+      - name: Build the plugin
+        run: dotnet build StrmAssistant/StrmAssistant.csproj --no-restore --configuration Release -p:UseSharedCompilation=false -p:StrmAssistantPluginOutputDir=
+
+      - name: Check localized resource keys
+        run: python tools/check_resx_keys.py --quiet
+
+      - name: Run unit tests
+        run: dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.sha }}
+          path: TestResults/*.trx
+          retention-days: 7

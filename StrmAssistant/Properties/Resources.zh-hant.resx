@@ -1770,7 +1770,25 @@
     <value>執行概覽</value>
   </data>
   <data name="Overview_Status_Text" xml:space="preserve">
-    <value>記憶體 {0}/{1} MB（{2}%）· 任務 {3} · 佇列 {4} · 索引 {5}</value>
+    <value>記憶體 {0}/{1} MB（{2}%）· 任務 {3} · 佇列 {4} · 索引 {5} · 最近掃描 {6}</value>
+  </data>
+  <data name="Overview_Status_QueueBreakdown" xml:space="preserve">
+    <value>{0}（{1}）</value>
+  </data>
+  <data name="Overview_Status_QueueMedia" xml:space="preserve">
+    <value>媒體 {0}</value>
+  </data>
+  <data name="Overview_Status_QueueIntro" xml:space="preserve">
+    <value>片頭 {0}</value>
+  </data>
+  <data name="Overview_Status_QueueEpisode" xml:space="preserve">
+    <value>劇集 {0}</value>
+  </data>
+  <data name="Overview_Status_IndexPending" xml:space="preserve">
+    <value>待重建</value>
+  </data>
+  <data name="Overview_Status_None" xml:space="preserve">
+    <value>—</value>
   </data>
   <data name="Overview_Status_DryRun" xml:space="preserve">
     <value>　· 演練模式</value>

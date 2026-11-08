@@ -105,13 +105,73 @@ namespace StrmAssistant.Mod
         };
 
         /// <summary>
-        /// 搜索索引状态摘要（运维页展示）：分词器名与索引同步状态。
+        /// 搜索索引是否与当前分词器同步。
         /// </summary>
-        public static string GetSearchIndexStatus()
-        {
-            var inSync = HasNormV2Marker() && GetTokenizerMarker() == ComputeSha1(_tokenizerPath);
+        public static bool IsSearchIndexInSync =>
+            HasNormV2Marker() && GetTokenizerMarker() == ComputeSha1(_tokenizerPath);
 
-            return $"{CurrentTokenizerName} ({(inSync ? "InSync" : "RebuildPending")})";
+        private static long? _cachedIndexCount;
+        private static DateTime _cachedIndexCountAt = DateTime.MinValue;
+        private static readonly TimeSpan IndexCountCacheTtl = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan IndexCountFailureRetry = TimeSpan.FromSeconds(30);
+
+        /// <summary>
+        /// FTS 索引条目数（缓存 5 分钟）；索引表不存在或库不可读时返回 null。
+        /// </summary>
+        public static long? GetSearchIndexCount()
+        {
+            var cacheTtl = _cachedIndexCount.HasValue ? IndexCountCacheTtl : IndexCountFailureRetry;
+            if (DateTime.UtcNow - _cachedIndexCountAt < cacheTtl)
+            {
+                return _cachedIndexCount;
+            }
+
+            var dbPath = ResolveLibraryDbPath();
+            if (string.IsNullOrEmpty(dbPath))
+            {
+                Plugin.Instance.Logger.Warn("Chinese search: library.db not found for index count");
+                _cachedIndexCount = null;
+                _cachedIndexCountAt = DateTime.UtcNow;
+                return null;
+            }
+
+            try
+            {
+                // SQLitePCL 的只读连接打不开 Emby 的 WAL 库，这里用读写连接执行只读查询。
+                using var connection = SQLite3.Open(dbPath, ConnectionFlags.ReadWrite, null, true);
+                connection.Execute("PRAGMA busy_timeout = 2000");
+
+                // 直接读 FTS5 影子表：count(*) 不需要加载 simple 分词器。
+                foreach (var table in new[] { "fts_search9_docsize", "fts_search9_content" })
+                {
+                    try
+                    {
+                        using var statement = connection.PrepareStatement($"SELECT count(*) FROM {table}");
+                        if (statement.MoveNext())
+                        {
+                            _cachedIndexCount = statement.Current.GetInt64(0);
+                            _cachedIndexCountAt = DateTime.UtcNow;
+                            return _cachedIndexCount;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (Plugin.Instance.DebugMode)
+                        {
+                            Plugin.Instance.Logger.Debug($"Chinese search: count {table} failed: {e.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Warn($"Chinese search: index count failed: {e.Message}");
+            }
+
+            Plugin.Instance.Logger.Warn($"Chinese search: index count unavailable ({dbPath})");
+            _cachedIndexCount = null;
+            _cachedIndexCountAt = DateTime.UtcNow;
+            return null;
         }
 
         /// <summary>

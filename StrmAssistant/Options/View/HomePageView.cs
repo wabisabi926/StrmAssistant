@@ -17,6 +17,7 @@ using StrmAssistant.Web.Service;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -109,16 +110,51 @@ namespace StrmAssistant.Options.View
 
                 var runningTasks = _taskManager.ScheduledTasks.Count(t => t.State == TaskState.Running);
 
-                var pendingQueue = QueueManager.MediaInfoExtractItemQueue.Count
-                                   + QueueManager.FingerprintItemQueue.Count
-                                   + QueueManager.IntroSkipItemQueue.Count
-                                   + QueueManager.EpisodeRefreshItemQueue.Count;
+                var mediaQueue = QueueManager.MediaInfoExtractItemQueue.Count;
+                var introQueue = QueueManager.FingerprintItemQueue.Count + QueueManager.IntroSkipItemQueue.Count;
+                var episodeQueue = QueueManager.EpisodeRefreshItemQueue.Count;
+                var pendingQueue = mediaQueue + introQueue + episodeQueue;
+
+                var queueParts = new List<string>();
+                if (mediaQueue > 0) queueParts.Add(string.Format(Resources.Overview_Status_QueueMedia, mediaQueue));
+                if (introQueue > 0) queueParts.Add(string.Format(Resources.Overview_Status_QueueIntro, introQueue));
+                if (episodeQueue > 0) queueParts.Add(string.Format(Resources.Overview_Status_QueueEpisode, episodeQueue));
+
+                var queueText = queueParts.Count > 0
+                    ? string.Format(Resources.Overview_Status_QueueBreakdown, pendingQueue,
+                        string.Join(" / ", queueParts))
+                    : pendingQueue.ToString(CultureInfo.InvariantCulture);
+
+                var chineseSearchEnabled = _store.GetOptions().ChineseSearch.EnhanceChineseSearch;
+                var indexInSync = !chineseSearchEnabled || EnhanceChineseSearch.IsSearchIndexInSync;
+                string indexText;
+                if (!chineseSearchEnabled)
+                {
+                    indexText = Resources.Overview_Status_None;
+                }
+                else if (!indexInSync)
+                {
+                    indexText = Resources.Overview_Status_IndexPending;
+                }
+                else
+                {
+                    var indexCount = EnhanceChineseSearch.GetSearchIndexCount();
+                    indexText = indexCount.HasValue
+                        ? FormatCount(indexCount.Value)
+                        : Resources.Overview_Status_None;
+                }
+
+                var lastScan = _taskManager.ScheduledTasks
+                    .FirstOrDefault(t => string.Equals(t.ScheduledTask?.Key, "RefreshLibrary", StringComparison.Ordinal))
+                    ?.LastExecutionResult?.EndTimeUtc;
+                var lastScanText = lastScan.HasValue
+                    ? FormatLastScan(lastScan.Value)
+                    : Resources.Overview_Status_None;
 
                 var conflicts = ConflictDetector.GetConflictingAssemblies();
 
                 var text = string.Format(Resources.Overview_Status_Text,
-                    workingSetMb, threshold, percent, runningTasks, pendingQueue,
-                    EnhanceChineseSearch.GetSearchIndexStatus());
+                    workingSetMb, threshold, percent, runningTasks, queueText, indexText, lastScanText);
 
                 if (conflicts.Length > 0)
                 {
@@ -140,7 +176,7 @@ namespace StrmAssistant.Options.View
 
                 var status = MemoryGuard.IsRestartPending || conflicts.Length > 0 || percent >= 90
                     ? ItemStatus.Failed
-                    : percent >= 75 || runningTasks > 0 || pendingQueue > 0 || DryRunMode.Enabled
+                    : percent >= 75 || !indexInSync || DryRunMode.Enabled
                         ? ItemStatus.Warning
                         : ItemStatus.Succeeded;
 
@@ -151,6 +187,19 @@ namespace StrmAssistant.Options.View
             {
                 // ignored
             }
+        }
+
+        private static string FormatCount(long count) =>
+            count >= 1000
+                ? (count / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) + "k"
+                : count.ToString(CultureInfo.InvariantCulture);
+
+        private static string FormatLastScan(DateTimeOffset endTimeUtc)
+        {
+            var local = endTimeUtc.ToLocalTime();
+            return local.Date == DateTimeOffset.Now.Date
+                ? local.ToString("HH:mm", CultureInfo.InvariantCulture)
+                : local.ToString("MM-dd HH:mm", CultureInfo.InvariantCulture);
         }
 
         public override Task<IPluginUIView> RunCommand(string itemId, string commandId, string data)

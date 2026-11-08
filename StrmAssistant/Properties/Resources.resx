@@ -1857,7 +1857,25 @@
     <value>Runtime Overview</value>
   </data>
   <data name="Overview_Status_Text" xml:space="preserve">
-    <value>Memory {0}/{1} MB ({2}%) · tasks {3} · queue {4} · index {5}</value>
+    <value>Memory {0}/{1} MB ({2}%) · tasks {3} · queue {4} · index {5} · last scan {6}</value>
+  </data>
+  <data name="Overview_Status_QueueBreakdown" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Overview_Status_QueueMedia" xml:space="preserve">
+    <value>media {0}</value>
+  </data>
+  <data name="Overview_Status_QueueIntro" xml:space="preserve">
+    <value>intro {0}</value>
+  </data>
+  <data name="Overview_Status_QueueEpisode" xml:space="preserve">
+    <value>episodes {0}</value>
+  </data>
+  <data name="Overview_Status_IndexPending" xml:space="preserve">
+    <value>rebuild pending</value>
+  </data>
+  <data name="Overview_Status_None" xml:space="preserve">
+    <value>—</value>
   </data>
   <data name="Overview_Status_DryRun" xml:space="preserve">
     <value> · dry run</value>

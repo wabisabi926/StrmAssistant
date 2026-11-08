@@ -5544,5 +5544,59 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_IndexPending {
+            get {
+                return ResourceManager.GetString("Overview_Status_IndexPending", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_None {
+            get {
+                return ResourceManager.GetString("Overview_Status_None", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_QueueBreakdown {
+            get {
+                return ResourceManager.GetString("Overview_Status_QueueBreakdown", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_QueueEpisode {
+            get {
+                return ResourceManager.GetString("Overview_Status_QueueEpisode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_QueueIntro {
+            get {
+                return ResourceManager.GetString("Overview_Status_QueueIntro", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_QueueMedia {
+            get {
+                return ResourceManager.GetString("Overview_Status_QueueMedia", resourceCulture);
+            }
+        }
+
     }
 }

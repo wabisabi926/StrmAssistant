@@ -38,6 +38,35 @@ namespace StrmAssistant.Tests
         }
 
         [Theory]
+        [InlineData(CommunityRatingSourceOption.None, false, false)]
+        [InlineData(CommunityRatingSourceOption.Tmdb, false, false)]
+        [InlineData(CommunityRatingSourceOption.Imdb, false, false)]
+        [InlineData(CommunityRatingSourceOption.Douban, false, true)]
+        [InlineData(CommunityRatingSourceOption.Tmdb, true, true)]
+        public void DoubanDataLayer_ActivatesForDoubanSourceOrCapability(CommunityRatingSourceOption source,
+            bool capability, bool expected)
+        {
+            var options = new MetadataEnhanceOptions
+            {
+                CommunityRating = { CommunityRatingSource = source.ToString() },
+                DoubanAssist = { DoubanFetchRating = capability }
+            };
+
+            Assert.Equal(source == CommunityRatingSourceOption.Douban, options.IsDoubanRatingSource);
+            Assert.Equal(expected, options.IsDoubanDataEnabled);
+        }
+
+        [Fact]
+        public void DoubanDataLayer_ActivatesForAnyMetadataCapability()
+        {
+            Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanFillOverview = true } }.IsDoubanDataEnabled);
+            Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanCastChinese = true } }.IsDoubanDataEnabled);
+            Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanPosterFallback = true } }.IsDoubanDataEnabled);
+            Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanRatingToKodi = true } }.IsDoubanDataEnabled);
+            Assert.False(new MetadataEnhanceOptions().IsDoubanDataEnabled);
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData("zh-CN")]
         [InlineData("zh-Hant")]

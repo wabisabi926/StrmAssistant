@@ -1,4 +1,4 @@
-﻿// Emby 4.10 的 AMD 加载器（alameda）配置里没有 paths 映射，裸 id 会被解析成 /web/<id>.js 而 404，
+﻿﻿// Emby 4.10 的 AMD 加载器（alameda）配置里没有 paths 映射，裸 id 会被解析成 /web/<id>.js 而 404，
 // 导致整个模块加载失败、导出为空。这里必须与 Emby 自身模块一致，改用相对于本模块路径的依赖。
 define([
     '../../modules/emby-apiclient/connectionmanager.js',
@@ -550,10 +550,13 @@ define([
                     if (!source) continue;
                     const shown = displayedRating(container, star);
                     // 二次校验：页面可能缓存着写入前的旧数字。豆瓣来源以豆瓣分为准，
-                    // 其它来源以当前主评分为准；主字段缺失时互相回退（兼容旧响应）。
+                    // 其它来源以当前主评分为准；仅豆瓣来源保留「主字段缺失时回退豆瓣分」的旧数据兼容，
+                    // TMDB / IMDb 必须拿到 CommunityRating，避免把豆瓣数字误标成其它来源。
                     const primary = source === 'douban' ? ratingOf(info) : communityRatingOf(info);
-                    const fallback = source === 'douban' ? communityRatingOf(info) : ratingOf(info);
-                    const expected = Number(primary != null ? primary : fallback);
+                    const fallback = source === 'douban' ? communityRatingOf(info) : null;
+                    const expected = primary != null
+                        ? Number(primary)
+                        : (fallback != null ? Number(fallback) : NaN);
                     if (shown === null || isNaN(expected) || Math.abs(shown - expected) > 0.05) continue;
                     const mark = makeSourceMark(source, '1.15em', '-0.15em');
                     if (mark) container.replaceChild(mark, star);
@@ -674,7 +677,9 @@ define([
                 fetchRatings([id]).then(function (list) {
                     if (hashId() !== id) return;
                     const info = list && list[0];
-                    if (!info || !ratingOf(info)) return;
+                    // 来源可能是 TMDB / IMDb（此时没有豆瓣分），不能再用「必须有豆瓣分」作为门槛，
+                    // 否则来源图标永远不会登记。只要条目有主评分或豆瓣分就交给 applyStars 判断。
+                    if (!info || (!ratingOf(info) && communityRatingOf(info) == null)) return;
                     doubanIds[String(idOf(info))] = info;
                     // 详情页评分行换豆瓣 logo；不再额外追加 pill，避免与评分行重复。
                     applyStars();
@@ -708,7 +713,7 @@ define([
                         (list || []).forEach(function (info) { byId[idOf(info)] = info; });
                         cards.forEach(function (card) {
                             const info = byId[card.getAttribute('data-id')];
-                            if (info && ratingOf(info)) decorateCard(card, info);
+                            if (info && (ratingOf(info) || communityRatingOf(info) != null)) decorateCard(card, info);
                             else card.setAttribute('data-douban-badge', '1');
                         });
                         applyStars();

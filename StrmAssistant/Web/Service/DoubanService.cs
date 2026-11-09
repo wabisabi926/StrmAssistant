@@ -1,5 +1,6 @@
 using MediaBrowser.Controller.Api;
 using MediaBrowser.Model.Services;
+using StrmAssistant.Options;
 using StrmAssistant.Provider.Douban;
 using StrmAssistant.Web.Api;
 using System;
@@ -36,7 +37,13 @@ namespace StrmAssistant.Web.Service
             // API Key 权限等价管理员，此时不做可见性过滤，保持既有集成可用。
             var user = GetUserForRequest(null, true);
 
-            if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
+            // Web 详情页的评分图标不只服务豆瓣：来源选 TMDB / IMDb 时也需要本接口
+            // 返回 CommunityRating 与来源标记，否则前端会直接禁用整个评分图标模块。
+            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
+            var ratingIconsEnabled = options.IsDoubanDataEnabled ||
+                                     options.CommunityRating?.ParsedSource != CommunityRatingSourceOption.None;
+
+            if (!ratingIconsEnabled)
             {
                 return response;
             }
@@ -58,6 +65,19 @@ namespace StrmAssistant.Web.Service
             // 逐条按当前用户可见性过滤，与 MultiVersionService 保持一致
             response.Ratings = Plugin.DoubanAssist.GetRatings(itemIds, user);
 
+            // 未勾选「抓取豆瓣评分」且来源不是豆瓣时，不把豆瓣分暴露给 Web 端，
+            // 避免「只要了简介却附带豆瓣徽章」的隐式行为。主评分来源图标仍可正常使用。
+            if (options.CommunityRating?.ParsedSource != CommunityRatingSourceOption.Douban &&
+                !options.DoubanAssist.DoubanFetchRating)
+            {
+                foreach (var rating in response.Ratings)
+                {
+                    rating.Rating = null;
+                    rating.Votes = null;
+                    rating.Applied = false;
+                }
+            }
+
             return response;
         }
 
@@ -72,7 +92,7 @@ namespace StrmAssistant.Web.Service
 
             var user = GetUserForRequest(null, true);
 
-            if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
+            if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().IsDoubanDataEnabled)
             {
                 return response;
             }
@@ -93,6 +113,20 @@ namespace StrmAssistant.Web.Service
                 .ToList();
 
             response.Ratings = Plugin.DoubanAssist.GetRatingsByImdb(imdbIds, user);
+
+            // Kodi 端同理：只有需要豆瓣评分（主评分/徽章/第三评分）时才暴露分数。
+            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
+            if (options.CommunityRating?.ParsedSource != CommunityRatingSourceOption.Douban &&
+                !options.DoubanAssist.DoubanFetchRating &&
+                !options.DoubanAssist.DoubanRatingToKodi)
+            {
+                foreach (var rating in response.Ratings)
+                {
+                    rating.Rating = null;
+                    rating.Votes = null;
+                    rating.Applied = false;
+                }
+            }
 
             return response;
         }

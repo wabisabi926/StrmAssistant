@@ -3,26 +3,29 @@
 ## [3.0.0.74] - 2026-11-09
 
 ### 新增
-- **社区评分统一（来源单选）**：「使用豆瓣评分覆盖」升级为「社区评分来源」单选（原生 / TMDb / IMDb / 豆瓣，互斥）。选 TMDb 时复用内置 MovieDb 的 API 配置按 TMDB ID 取 `vote_average`；选 IMDb 时走 MdbList 按 IMDb ID 取分；选豆瓣时新增轻量通道 `api.douban.com/v2/movie/imdb/{id}`（公开 web apikey，按 IMDb ID 直接返回评分与票数，不依赖网页刮削，实测有效）。写入 `CommunityRating` 并带 `CommunityRatingSource` / `TmdbRating` / `ImdbRating` / `DoubanRating` 标记。
-- **统一全库入口**：新增计划任务「统一社区评分」与「立即统一社区评分」按钮，支持演练模式（只统计不写入）。按来源自适应分派：TMDb / IMDb 走统一服务（TMDB 120ms、MdbList 1.1s 节流，7 天内存缓存），豆瓣走轻量通道（1.5s + 抖动节流、7 天评分缓存、5 次失败熔断 30 分钟），输出 total / updated / noId / noRating / lowVotes / failed 等统计。
+- **社区评分统一（来源单选）**：「使用豆瓣评分覆盖」升级为「社区评分来源」单选（不干预 / TMDb / IMDb / 豆瓣，互斥）。选 TMDb 时复用内置 MovieDb 的 API 配置按 TMDB ID 取 `vote_average`；选 IMDb 时走 MdbList 按 IMDb ID 取分；选豆瓣时**优先使用已匹配豆瓣条目的评分**，没有豆瓣 ID 或条目无评分时才回退 `api.douban.com/v2/movie/imdb/{id}`（公开 web apikey）。写入 `CommunityRating` 并带 `CommunityRatingSource` / `TmdbRating` / `ImdbRating` / `DoubanRating` 标记。
+- **统一全库入口**：新增计划任务「同步社区评分」与「立即同步社区评分」按钮，支持演练模式（只统计不写入，仅 TMDb / IMDb）。按来源自适应分派：TMDb / IMDb 走统一服务（TMDB 120ms、MdbList 1.1s 节流，7 天内存缓存），豆瓣走豆瓣数据层（条目分优先、IMDb 兜底；2 秒网页频控、1.5 秒 API 频控、熔断与 7 天缓存），输出 total / updated / cleared / locked / noId / noRating / lookback / failed 等统计。
 - **最低票数门槛**：可配置最低评分票数（默认 5），票数不足的条目不写入，避免小样本分噪声。
 - **详情页多源评分图标**：Emby Web 详情页评分行按 `CommunityRatingSource` 显示来源图标（豆瓣官方 favicon；TMDB / IMDb 使用 Arctic Fuse 3 皮肤的实际 PNG，base64 内联），来源非豆瓣时额外显示豆瓣徽章。
 
 ### 改进
-- 来源互斥：选 TMDb / IMDb 时豆瓣不再写主评分；旧 `DoubanRatingOverride=true` 首次保存时自动迁移为「来源=豆瓣」。
+- 来源互斥：选 TMDb / IMDb 时豆瓣不再写主评分；**选豆瓣即直接接管主评分，删除独立「使用豆瓣评分覆盖」开关**，旧开关 `true` 启动时自动迁移为「来源=豆瓣」。
+- **豆瓣能力拆分为独立勾选**：删除「豆瓣辅助刮削」总开关和「生效范围」多选，改为：抓取豆瓣评分（详情页徽章）、同步豆瓣评分到 Kodi、补全简介/类型/制片地区、演员中文名、海报兜底、更新影评人评分（MdbList）。勾哪个做哪个，不再有隐式依赖。
+- **豆瓣数据层自动判断**：来源=豆瓣，或任意豆瓣能力开启时才请求豆瓣；全部关闭时不产生任何豆瓣请求。旧配置按原「生效范围」自动迁移。
 - `GetRatings` 的「已覆盖」判定改为优先读来源标记，仅无标记时按数值推断，避免多源同分误判。
-- 豆瓣轻量通道尊重字段勾选（「使用豆瓣评分」）与回看期（`RatingUpdateLookbackDays`）约束，跳过 `IsLocked` / `CommunityRating` 锁定条目。
-- 「构建豆瓣缓存」恢复为纯数据预取，不再写主评分，与「统一社区评分」职责分离。
+- 豆瓣全库评分会写评分快照（含无豆瓣 ID 时的 `imdb:tt...` 键），徽章 / Kodi 能读到分；`ProviderIds["DoubanRating"]` 统一受「同步豆瓣评分到 Kodi」开关控制。
+- **计划任务收敛**：「同步社区评分」只管主评分；「预取豆瓣数据」升级为「同步豆瓣数据」，全库执行豆瓣能力（ID、缓存、徽章、Kodi、简介、演员、海报、MdbList）。「扫库后填充豆瓣 ID」保持增量自动任务。
+- 切换 TMDb / IMDb 来源时清理另一来源的旧快照，避免 Kodi / 前端读到旧值；清空主评分时保留独立的 `DoubanRating`。
 
 ### 修复
 - 设置页保存报错 `A child editor group of name 'MetadataCache' could not be found`：`MetadataCacheOptions` 改为内部直接校验，不再走 `ValidateChildGroup`（该组已被合并进「刷新缓存」组）。
 
 ### 测试
 - 新增 `CommunityRatingOptionsTests`（默认值 / 解析 / 资源键三语言一致性）。
-- 全量 368 例通过；`check_resx_keys.py` 通过；构建 0 警告 0 错误。
+- 全量 374 例通过；`check_resx_keys.py` 通过；构建 0 错误。
 
 ### 说明
-- 来源默认「原生」，不影响升级前行为；真机已验证 TMDb 与豆瓣两条通道的写入与前端图标。
+- 来源默认「不干预」，不影响升级前行为；升级后建议先跑一次「同步社区评分」确认结果。
 - `CommunityRating` 为单槽位，多来源互斥设计由此而来；如需多源并显请用 `TmdbRating` / `ImdbRating` / `DoubanRating` 辅助字段。
 - IMDb 无官方免费 API，MdbList 免费额度有限且节流较保守（1.1s/条）；豆瓣轻量通道依赖公开接口，存在风控可能，统一入口已内置熔断。
 

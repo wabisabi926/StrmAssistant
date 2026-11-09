@@ -27,10 +27,11 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 ## Latest Optimizations (v3.0.0.66 ~ v3.0.0.74)
 
-✅ **Unified community rating (3.0.0.74)**
-- Community rating source selector: Native / TMDb / IMDb / Douban, mutually exclusive; the legacy Douban override switch migrates automatically
-- TMDb reuses the built-in MovieDb config, IMDb uses MdbList, and Douban gets a lightweight channel (direct lookup by IMDb ID via a public API, no web scraping dependency)
-- New 'Unify Community Rating' scheduled task and a one-click settings button with dry-run support; configurable minimum vote threshold (default 5)
+✅ **Community rating sync (3.0.0.74)**
+- Community rating source selector: Do not interfere / TMDb / IMDb / Douban, mutually exclusive; choosing Douban takes over the main rating directly, and the legacy Douban override switch migrates automatically
+- Douban capabilities are independent checkboxes: fetch Douban rating (badge), sync to Kodi, overview/genres/locations, Chinese cast names, poster fallback, MdbList critic ratings; only what you check is done
+- The Douban data layer activates automatically when the source is Douban or any Douban capability is checked; with everything off, detail pages never request Douban
+- New 'Sync Community Rating' scheduled task and a one-click settings button with dry-run support; configurable minimum vote threshold (default 5)
 - The web detail page rating row shows a per-source icon (Douban / TMDB / IMDb), plus a Douban badge for non-Douban sources
 
 ✅ **Playback experience (3.0.0.73)**
@@ -186,7 +187,7 @@ An **option search box** at the top-left of the settings page filters options by
 | Extract Intro Fingerprints | Generate audio fingerprints for intro detection |
 | Scrape IntroDb | Sync intro/credits markers online |
 | Merge Multi Versions | Scan and merge multiple versions of the same title |
-| Build Douban Cache | Batch-match Douban entries, fill ratings and season mappings |
+| Sync Douban Data | Sync Douban IDs, cache, badge/Kodi ratings, overview, cast, poster and critic ratings for the whole library |
 | Populate Douban IDs | Incrementally fill missing Douban IDs (with retry queue) |
 | Refresh Episodes | Refresh episodes by scope and lookback days |
 | Refresh / Delete Persons | Person metadata maintenance |

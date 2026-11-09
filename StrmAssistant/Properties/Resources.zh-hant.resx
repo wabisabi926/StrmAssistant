@@ -516,7 +516,7 @@
     <value>社群評分來源</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
-    <value>把 CommunityRating 統一為所選來源，豆瓣也在其中。選豆瓣即由豆瓣評分直接接管主評分，無需額外開關；選 TMDB / IMDb 時豆瓣不再修改主評分。預設不干預。</value>
+    <value>將 CommunityRating 統一為所選來源。選豆瓣則由豆瓣分直接接管主評分；選 TMDB 或 IMDb 時豆瓣不修改主評分。</value>
   </data>
   <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
     <value>不干預（保持現狀）</value>
@@ -534,31 +534,31 @@
     <value>最低票數</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingMinVotes_Description" xml:space="preserve">
-    <value>TMDB 票數低於該值時視為分數不可信（1 票也能算出 10.0），跳過該條目。0 表示不限制。預設 5。IMDb 經 MdbList 沒有票數，不受此項影響。</value>
+    <value>TMDB 票數低於此值時跳過該條目，避免樣本過少導致分數虛高。0 表示不限制。僅作用於 TMDB。</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Clear_When_No_Rating" xml:space="preserve">
     <value>無評分時清空</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Description" xml:space="preserve">
-    <value>所選來源沒有可用評分時，清空原有社群評分（多半來自其它來源）。代價是這些條目會顯示為無評分。預設關閉。</value>
+    <value>所選來源無可用評分時清空原有社群評分，條目將顯示為無評分。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now" xml:space="preserve">
     <value>立即同步社群評分</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
-    <value>按目前來源同步 CommunityRating。TMDB / IMDb 走輕量介面，通常一兩分鐘；豆瓣優先使用已匹配豆瓣條目的評分，缺少時才按 IMDb ID 查詢第三方介面。演練模式僅對 TMDB / IMDb 生效。請先儲存設定。</value>
+    <value>依目前來源同步全庫 CommunityRating。請先儲存設定。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
-    <value>豆瓣評分優先使用已匹配豆瓣條目的評分；沒有豆瓣條目時按 IMDb ID 查詢第三方介面。過程有頻控與熔斷，介面失效時評分保持不變。繼續？</value>
+    <value>豆瓣評分優先取自已比對的豆瓣條目，缺失時依 IMDb ID 查詢第三方介面。查詢失敗時保持原評分。繼續？</value>
   </data>
   <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
     <value>同步社群評分</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
-    <value>按「中繼資料增強 → 社群評分」所選來源，同步全庫電影與劇集的社群評分。</value>
+    <value>依所選來源同步全庫電影與劇集的社群評分。</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
-    <value>豆瓣與附加評分</value>
+    <value>豆瓣增強</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_EpisodeGroup" xml:space="preserve">
     <value>劇集組</value>
@@ -1212,85 +1212,64 @@
     <value>電影/劇集/季重新整理後從豆瓣補全缺失的中文簡介、類型與製片地區（僅中文媒體庫）。只影響中繼資料，不決定主評分。預設為關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
-    <value>抓取豆瓣評分（用於詳情頁徽章）</value>
+    <value>抓取豆瓣評分</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>抓取豆瓣評分並快取，用於詳情頁的豆瓣徽章；不修改主評分。來源=豆瓣時自動啟用。</value>
+    <value>抓取並快取豆瓣評分，用於詳細頁徽章，不修改主評分。來源為豆瓣時自動生效。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
-    <value>補全簡介、類型、製片地區</value>
+    <value>補全簡介與類型</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Description" xml:space="preserve">
-    <value>只補缺失的簡介、類型與製片地區，不覆寫已有內容；僅中文媒體庫。</value>
+    <value>僅補缺失的簡介、類型與製片地區，不覆蓋既有值。僅對中文條目生效。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings" xml:space="preserve">
-    <value>更新影評人評分（MdbList）</value>
+    <value>更新影評人評分</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>透過 MdbList 更新爛番茄影評人評分；使用的 API Key 在上方「社群評分」分組填寫。</value>
+    <value>將爛番茄評分寫入影評人評分（CriticRating），不修改主評分。需填寫 MdbList API Key。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
-    <value>將豆瓣評分寫入 ProviderIds，供 Kodi 面板讀取；需抓取豆瓣評分（來源=豆瓣時自動滿足）。</value>
+    <value>將豆瓣評分寫入 ProviderIds 供 Kodi 面板讀取，不修改主評分。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCastChinese_Description" xml:space="preserve">
-    <value>把目前為純英文的演員名替換為豆瓣中文名；需抓取豆瓣條目。</value>
+    <value>將純英文演員名替換為豆瓣中文名。僅對中文條目生效。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanPosterFallback_Description" xml:space="preserve">
-    <value>電影沒有主圖時，使用豆瓣海報作為主圖。</value>
+    <value>電影無主圖時使用豆瓣海報。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description" xml:space="preserve">
-    <value>條目被檢視或播放時，距上次檢查超過該天數才更新；0 表示關閉自動更新。預設 7 天。</value>
+    <value>條目被檢視或播放時，距上次檢查超過此天數才重新整理。0 表示關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Description" xml:space="preserve">
-    <value>評分更新只作用於首播日期在回看期內的條目；0 表示不限制。預設 365 天。</value>
+    <value>只更新首播日期在此天數內的條目。0 表示不限制。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
-    <value>選用的豆瓣 Cookie，用於通過反爬驗證。</value>
+    <value>用於通過豆瓣反爬驗證。留空時以匿名身分存取。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
-    <value>豆瓣開放平台 V2 Token；設定後優先使用官方介面，失敗回退網頁刮削。</value>
+    <value>豆瓣開放平台 V2 Token。設定後優先使用官方介面。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>供「社群評分來源 = IMDb」與豆瓣分組的「更新影評人評分」共用。留空時 IMDb 來源會被跳過。</value>
+    <value>依 IMDb ID 取分：來源為 IMDb 時寫入主評分，啟用影評人評分時寫入爛番茄分。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
-    <value>清除快取的季對應，強制重新比對季條目。季比對錯誤後使用。</value>
+    <value>清除已快取的季對應，讓季條目重新比對。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Douban_Cookie" xml:space="preserve">
-    <value>豆瓣 Cookie（可選）</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanCookie_Optional_Douban_cookie_for_anti_crawler_verification__Default_is_empty_" xml:space="preserve">
-    <value>可選的豆瓣 Cookie，用於通過反爬驗證。預設留空。</value>
+    <value>豆瓣 Cookie</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Douban_Access_Token" xml:space="preserve">
-    <value>豆瓣 Access Token（可選）</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanAccessToken_Used_to_assist_in_retrieving_Douban_info__Default_is_BLANK_" xml:space="preserve">
-    <value>豆瓣開放平台 V2 Token；設定後優先使用官方介面，失敗回退網頁刮削。</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanRatingOverride_Override_Rating_With_Douban" xml:space="preserve">
-    <value>使用豆瓣評分覆蓋</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_" xml:space="preserve">
-    <value>以豆瓣評分覆寫 Emby 社群評分。預設關閉。</value>
+    <value>豆瓣 Access Token</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
     <value>同步豆瓣評分到 Kodi</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_" xml:space="preserve">
-    <value>將豆瓣評分寫入 ProviderIds，供 Kodi 面板讀取；不覆寫主評分與影評人評分。預設關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>按需重新整理間隔（天）</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_" xml:space="preserve">
     <value>條目被檢視或播放時，距上次檢查超過該天數才更新豆瓣評分；0 表示關閉自動更新。預設為 7 天。</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_Assist_Scope" xml:space="preserve">
-    <value>豆瓣輔助生效範圍</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_assist_scope__Default_is_ALL_" xml:space="preserve">
-    <value>豆瓣輔助可改寫的中繼資料欄位。評分項控制影評人評分（MdbList）；主評分由「社群評分來源」決定，Kodi 第三評分由「同步豆瓣評分到 Kodi」控制。預設為全部。</value>
   </data>
   <data name="DoubanAssistScrapeOption_Rating_Rating" xml:space="preserve">
     <value>評分</value>
@@ -1305,10 +1284,7 @@
     <value>海報</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_MdbList_Api_Key" xml:space="preserve">
-    <value>MdbList API 金鑰</value>
-  </data>
-  <data name="MetadataEnhanceOptions_MdbListApiKey_Optional_MdbList_API_key_used_to_refresh_critic_ratings_Rotten_Tomatoes_Metacritic_alongside_Douban_rating_updates__Default_is_empty_" xml:space="preserve">
-    <value>選用。豆瓣評分更新時同步重新整理爛番茄與 Metacritic 評分。</value>
+    <value>MdbList API Key</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days" xml:space="preserve">
     <value>評分更新回看天數</value>
@@ -1335,16 +1311,10 @@
     <value>新建媒體庫時優先使用 TheMovieDb 作為預設刮削器。預設為關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCastChinese_Douban_Cast_Chinese_Names" xml:space="preserve">
-    <value>豆瓣演員中文名</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanCastChinese_Replace_English_actor_names_with_Douban_Chinese_names_for_matched_items__Default_is_OFF_" xml:space="preserve">
-    <value>將匹配條目中的英文演員名替換為豆瓣中文名，已中文名的演員不動。預設為關閉。</value>
+    <value>演員中文名</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanPosterFallback_Douban_Poster_Fallback" xml:space="preserve">
-    <value>豆瓣海報兜底</value>
-  </data>
-  <data name="MetadataEnhanceOptions_DoubanPosterFallback_Set_Douban_poster_as_primary_image_when_the_movie_has_none__Default_is_OFF_" xml:space="preserve">
-    <value>電影沒有主圖時使用豆瓣海報作為主圖。預設為關閉。</value>
+    <value>海報兜底</value>
   </data>
   <data name="AreYouSureToContinue" xml:space="preserve">
     <value>確定要繼續執行？</value>
@@ -1557,7 +1527,7 @@
     <value>同步豆瓣資料</value>
   </data>
   <data name="BuildDoubanCacheTask_Description_Pre_fetches_Douban_subject_data_for_movies_and_series_into_the_local_cache__Cached_items_are_skipped" xml:space="preserve">
-    <value>全庫同步豆瓣資料：比對豆瓣 ID、快取 subject，並依勾選套用徽章評分、Kodi 第三評分、簡介、演員、海報、影評人評分。來源=豆瓣時同時寫主評分。</value>
+    <value>同步電影、劇集與季的豆瓣資料：比對豆瓣 ID、快取條目，並依勾選套用評分、簡介、演員、海報與影評人評分。來源為豆瓣時同步寫入主評分。</value>
   </data>
   <data name="RefreshEpisodeTask_Name_Refresh_Episode" xml:space="preserve">
     <value>重新整理劇集中繼資料</value>
@@ -1699,9 +1669,6 @@
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Clear_Season_Map" xml:space="preserve">
     <value>清除季映射</value>
-  </data>
-  <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Remove_cached_series_season_mappings_so_season_items_are_matched_again__Useful_after_a_wrong_season_match_" xml:space="preserve">
-    <value>清除已快取的劇集→季映射，讓季條目重新匹配。季條目匹配錯誤後可點此重置。</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_MultipleVersions" xml:space="preserve">
     <value>多版本</value>

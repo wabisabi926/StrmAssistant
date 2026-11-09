@@ -963,16 +963,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_DoubanCookie_Douban_Cookie", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Optional Douban cookie for anti-crawler verification. Default is empty..
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanCookie_Optional_Douban_cookie_for_anti_crawler_verification__Default_is_empty_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanCookie_Optional_Douban_cookie_for_anti_crawler_verification__Default_is_empty_", resourceCulture);
-            }
-        }
-
         /// <summary>
         ///   Looks up a localized string similar to Douban Access Token (Optional).
         /// </summary>
@@ -981,34 +971,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_DoubanAccessToken_Douban_Access_Token", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Used to assist in retrieving Douban info via the official V2 API (Authorization: Bearer). When set, the API is preferred over HTML scraping. Default is BLANK..
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanAccessToken_Used_to_assist_in_retrieving_Douban_info__Default_is_BLANK_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanAccessToken_Used_to_assist_in_retrieving_Douban_info__Default_is_BLANK_", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Override Rating With Douban.
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanRatingOverride_Override_Rating_With_Douban {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRatingOverride_Override_Rating_With_Douban", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Overwrite the community rating (CommunityRating) with the Douban rating..
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_", resourceCulture);
-            }
-        }
-
         /// <summary>
         ///   Looks up a localized string similar to Douban Cast Chinese Names.
         /// </summary>
@@ -1017,16 +979,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_DoubanCastChinese_Douban_Cast_Chinese_Names", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Replace English actor names with Douban Chinese names for matched items. Default is OFF..
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanCastChinese_Replace_English_actor_names_with_Douban_Chinese_names_for_matched_items__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanCastChinese_Replace_English_actor_names_with_Douban_Chinese_names_for_matched_items__Default_is_OFF_", resourceCulture);
-            }
-        }
-
         /// <summary>
         ///   Looks up a localized string similar to Douban Poster Fallback.
         /// </summary>
@@ -1035,16 +987,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_DoubanPosterFallback_Douban_Poster_Fallback", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Set Douban poster as primary image when the movie has none. Default is OFF..
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanPosterFallback_Set_Douban_poster_as_primary_image_when_the_movie_has_none__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanPosterFallback_Set_Douban_poster_as_primary_image_when_the_movie_has_none__Default_is_OFF_", resourceCulture);
-            }
-        }
-        
         /// <summary>
         ///   Looks up a localized string similar to Notification Enhanced.
         /// </summary>
@@ -1513,26 +1455,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("ExperienceEnhanceOptions_MetadataUpdateTrackedFields_Comma_separated_metadata_fields_that_trigger_the_metadata_update_notification__blank_notifies_all__Default_is_EMPTY_", resourceCulture);
             }
         }
-
-        /// <summary>
-        /// <summary>
-        ///   Looks up a localized string similar to Douban Assist Scope
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_Assist_Scope {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_Assist_Scope", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Which fields Douban assist may write. Default is ALL.
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_assist_scope__Default_is_ALL_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_assist_scope__Default_is_ALL_", resourceCulture);
-            }
-        }
-
         /// <summary>
         ///   Looks up a localized string similar to Rating.
         /// </summary>
@@ -1828,16 +1750,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_MdbListApiKey_MdbList_Api_Key", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Optional MdbList API key used to refresh critic ratings (Rotten Tomatoes, Metacritic) alongside Douban rating updates. Default is empty..
-        /// </summary>
-        public static string MetadataEnhanceOptions_MdbListApiKey_Optional_MdbList_API_key_used_to_refresh_critic_ratings_Rotten_Tomatoes_Metacritic_alongside_Douban_rating_updates__Default_is_empty_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_MdbListApiKey_Optional_MdbList_API_key_used_to_refresh_critic_ratings_Rotten_Tomatoes_Metacritic_alongside_Douban_rating_updates__Default_is_empty_", resourceCulture);
-            }
-        }
-
         /// <summary>
         /// <summary>
         ///   Looks up a localized string similar to Optimize Subtitle.
@@ -4436,16 +4348,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_ClearSeasonMapButton_Clear_Season_Map", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Remove cached series-to-season mappings so season items are matched again. Useful after a wrong season match.
-        /// </summary>
-        public static string MetadataEnhanceOptions_ClearSeasonMapButton_Remove_cached_series_season_mappings_so_season_items_are_matched_again__Useful_after_a_wrong_season_match_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_ClearSeasonMapButton_Remove_cached_series_season_mappings_so_season_items_are_matched_again__Useful_after_a_wrong_season_match_", resourceCulture);
-            }
-        }
-
         /// <summary>
         ///   Looks up a localized string.
         /// </summary>
@@ -4724,16 +4626,6 @@ namespace StrmAssistant.Properties {
                 return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRatingToKodi_Write_the_Douban_rating_into_ProviderIds_for_Kodi_skins_as_a_third_rating__the_main_and_critic_ratings_stay_untouched__Default_is_OFF_", resourceCulture);
-            }
-        }
-
         /// <summary>
         ///   Looks up a localized string.
         /// </summary>

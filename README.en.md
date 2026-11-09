@@ -85,7 +85,8 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - Persistent mount manifest + startup reconciliation + shutdown release hook
 - Rewritten frame extraction for ISO screenshots/chapter images, fixed corrupted frames
 
-✅ **Douban assist**
+✅ **Douban enhancements**
+- Community rating can read Douban directly (subject page / V2 API first, IMDb fallback); the rating override switch and scope list are removed
 - Season mapping table (title-body validation + single-season fallback) with a "Clear Season Map" button
 - Fixed four blocking layers (language fallback / Wikidata genid filtering / IMDb path fallback / full-pipeline logging)
 - Same-source rating badge marking, rating snapshot backfill, incremental Douban ID population with retry queue
@@ -148,7 +149,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 ### Metadata Enhancement
 
 - **Chinese metadata**: custom TMDB / TVDB fallback languages and priority order
-- **Douban assist**: rating override, Chinese cast names, title/overview, poster fallback; season matching with title-body validation and mapping cache
+- **Douban enhancements**: Community rating can let Douban take over the main rating; badge rating, Kodi third rating, overview, cast, poster and critic rating are independent options; season matching with title validation and mapping cache
 - **Episode group scraping**: TMDB episode groups and local episode group JSON
 - **Person enhancement**: cast aliases, season cast import, series cast merging
 - **Poster & sorting**: original-language poster priority, Pinyin initial sorting, NFO enhancement, tagline clearing
@@ -170,7 +171,7 @@ The plugin settings are organized into 6 tabs, with a **master switch** at the t
 | Basic | Master switch, task concurrency, memory management, Chinese search, UI features, runtime status & maintenance |
 | Advanced | Multi-version merge & display, playback & cleanup, notifications, item display, library & sorting, search & logs |
 | Media Info | Extraction scope, image capture, ISO extraction, HDR tagging, persistence, performance & exclusivity |
-| Metadata | Chinese metadata, episode groups, scraping optimization, person enhancement, Douban assist, poster & sorting, metadata refresh, local metadata cache |
+| Metadata | Chinese metadata, community ratings, Douban enhancements, episode groups, scraping optimization, person enhancement, poster & sorting, metadata refresh, local metadata cache |
 | Intro & Credits | Fingerprint detection, behavior detection, online scraping |
 | Network | Network & local discovery, media direct link, TMDB replacement |
 

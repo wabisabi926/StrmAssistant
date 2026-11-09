@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **3.0.0.73** |
+| Plugin Version | **3.0.0.74** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -25,7 +25,13 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > See [CHANGELOG.md](CHANGELOG.md) for per-version details.
 
-## Latest Optimizations (v3.0.0.66 ~ v3.0.0.73)
+## Latest Optimizations (v3.0.0.66 ~ v3.0.0.74)
+
+✅ **Unified community rating (3.0.0.74)**
+- Community rating source selector: Native / TMDb / IMDb / Douban, mutually exclusive; the legacy Douban override switch migrates automatically
+- TMDb reuses the built-in MovieDb config, IMDb uses MdbList, and Douban gets a lightweight channel (direct lookup by IMDb ID via a public API, no web scraping dependency)
+- New 'Unify Community Rating' scheduled task and a one-click settings button with dry-run support; configurable minimum vote threshold (default 5)
+- The web detail page rating row shows a per-source icon (Douban / TMDB / IMDb), plus a Douban badge for non-Douban sources
 
 ✅ **Playback experience (3.0.0.73)**
 - External audio/subtitle language tags normalized (`und` / `chs` / `cht` / bilingual to standard Emby language codes, with Simplified/Traditional/bilingual written into track titles); new 'Normalize Track Languages' scheduled task

@@ -546,7 +546,7 @@
     <value>立即同步社群評分</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
-    <value>依目前來源同步全庫 CommunityRating。請先儲存設定。</value>
+    <value>依目前來源同步全庫 CommunityRating。請先儲存設定；可在「計畫任務」中設定定期觸發器。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
     <value>豆瓣評分優先取自已比對的豆瓣條目，缺失時依 IMDb ID 查詢第三方介面。查詢失敗時保持原評分。繼續？</value>
@@ -555,7 +555,7 @@
     <value>同步社群評分</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
-    <value>依所選來源同步全庫電影與劇集的社群評分。</value>
+    <value>依所選來源同步全庫電影與劇集的社群評分。預設無觸發器，可在計畫任務中依需啟用。</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
     <value>豆瓣增強</value>

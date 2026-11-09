@@ -155,6 +155,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - **Poster & sorting**: original-language poster priority, Pinyin initial sorting, NFO enhancement, tagline clearing
 - **Local metadata cache**: two-layer `override/` + `cache/` structure, enables offline library rebuild
 - **Scraping optimization**: season-level episode metadata fetch, optional skip of per-episode fallback and episode images
+- **Sync tasks**: new items update automatically after scraping; "Sync Community Ratings" and "Sync Douban Data" ship without triggers — add a weekly or monthly trigger in Emby's Scheduled Tasks if needed
 
 ### Search & Network
 

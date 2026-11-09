@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace StrmAssistant.ScheduledTask
 {
     /// <summary>
-    /// 统一社区评分：按「元数据增强 → 社区评分 → 来源」把全库电影与剧集的
-    /// <c>CommunityRating</c> 写成同一个来源（TMDB / IMDb）。
+    /// 同步社区评分：按「元数据增强 → 社区评分 → 来源」把全库电影与剧集的
+    /// <c>CommunityRating</c> 写成同一个来源（TMDB / IMDb / 豆瓣）。
     ///
     /// 默认不自动触发，由管理员在计划任务页手动运行。开启「体验增强 → 安全 → 演练模式」时
-    /// 只统计差异、不写库，用于先看报告再决定是否执行。
+    /// 只统计差异、不写库（仅 TMDB / IMDb），豆瓣来源不支持演练。
     /// </summary>
     public class UnifyCommunityRatingTask : IScheduledTask
     {
@@ -39,7 +39,7 @@ namespace StrmAssistant.ScheduledTask
             var logger = Plugin.Instance.Logger;
             var options = CommunityRatingService.GetOptions();
 
-            // 豆瓣来源：走豆瓣批量缓存（2 秒频控 + 熔断），不适用演练模式。
+            // 豆瓣来源：优先豆瓣条目分，缺失时回退 IMDb API；带 2 秒频控 + 熔断，不适用演练模式。
             if (options?.ParsedSource == CommunityRatingSourceOption.Douban)
             {
                 if (DryRunMode.Enabled)
@@ -50,7 +50,7 @@ namespace StrmAssistant.ScheduledTask
                     return;
                 }
 
-                logger.Info("CommunityRating - Task Execute (source=Douban, lightweight IMDb lookup)");
+                logger.Info("CommunityRating - Task Execute (source=Douban, subject first, IMDb fallback)");
                 var doubanReport = await Plugin.DoubanAssist
                     .UnifyRatingsAsync(progress, cancellationToken).ConfigureAwait(false);
                 logger.Info(doubanReport.BuildSummary());

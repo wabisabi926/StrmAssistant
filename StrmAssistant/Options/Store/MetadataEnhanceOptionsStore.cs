@@ -66,15 +66,8 @@ namespace StrmAssistant.Options.Store
                     options.MetadataRefresh.EpisodeRefreshScope = EpisodeRefreshOption.NoOverview.ToString();
                 }
 
-                // 旧配置兼容：豆瓣覆盖开关已并入「社区评分来源」下拉（UI 不再单独显示）。
-                // 首次保存时把 true 迁移为「来源=豆瓣」，之后二者不会再同时生效。
-                if (options.DoubanAssist.DoubanRatingOverride &&
-                    string.Equals(options.CommunityRating.CommunityRatingSource,
-                        CommunityRatingSourceOption.None.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    options.CommunityRating.CommunityRatingSource = CommunityRatingSourceOption.Douban.ToString();
-                    options.DoubanAssist.DoubanRatingOverride = false;
-                }
+                // 旧配置兼容由 MetadataEnhanceOptionsMigration 在启动时完成：
+                // 「使用豆瓣评分覆盖」已删除，true 会迁移为「来源=豆瓣」。
 
                 var changes = PropertyChangeDetector.DetectObjectPropertyChanges(MetadataEnhanceOptions, options);
                 var changedProperties = new HashSet<string>(changes.Select(c => c.PropertyName));
@@ -271,12 +264,16 @@ namespace StrmAssistant.Options.Store
                         .Where(d => d != null) ?? Enumerable.Empty<string>());
                 _logger.Info("EpisodeRefreshScope is set to {0}", episodeRefreshScope);
                 _logger.Info("EpisodeRefreshLookbackDays is set to {0}", options.MetadataRefresh.EpisodeRefreshLookbackDays);
-                _logger.Info("EnableDoubanAssist is set to {0}", options.DoubanAssist.EnableDoubanAssist);
+                _logger.Info("Douban capabilities: fetchRating={0}, toKodi={1}, overview={2}, cast={3}, poster={4}, mdbList={5}",
+                    options.DoubanAssist.DoubanFetchRating, options.DoubanAssist.DoubanRatingToKodi,
+                    options.DoubanAssist.DoubanFillOverview, options.DoubanAssist.DoubanCastChinese,
+                    options.DoubanAssist.DoubanPosterFallback, options.DoubanAssist.EnableMdbListCriticRating);
                 _logger.Info("DoubanCookie is set to {0}",
                     !string.IsNullOrEmpty(options.DoubanAssist.DoubanCookie) ? "CONFIGURED" : "EMPTY");
                 _logger.Info("DoubanAccessToken is set to {0}",
                     !string.IsNullOrEmpty(options.DoubanAssist.DoubanAccessToken) ? "CONFIGURED" : "EMPTY");
-                _logger.Info("DoubanRatingOverride is set to {0}", options.DoubanAssist.DoubanRatingOverride);
+                _logger.Info("CommunityRatingSource is set to {0}",
+                    options.CommunityRating.CommunityRatingSource);
                 _logger.Info("DoubanCastChinese is set to {0}", options.DoubanAssist.DoubanCastChinese);
                 _logger.Info("DoubanPosterFallback is set to {0}", options.DoubanAssist.DoubanPosterFallback);
                 _logger.Info("EpisodeRefreshLibraryScope is set to {0}",

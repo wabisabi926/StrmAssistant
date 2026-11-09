@@ -25,7 +25,8 @@ namespace StrmAssistant.Common
     /// 谁最后写谁生效，且 Emby 不记录来源（官方文档明确说明无法识别）。本服务是唯一写入口：
     /// 按配置的来源取分、写入，并在 ProviderIds 留下来源标记，供前端与 Kodi 判断。
     ///
-    /// 与豆瓣覆盖互斥：来源选 TMDB / IMDb 时，豆瓣辅助只抓分与写 DoubanRating，不再改 CommunityRating。
+    /// 与豆瓣评分互斥：来源选 TMDB / IMDb 时，豆瓣评分只写 <c>DoubanRating</c>（若开启同步到 Kodi），
+    /// 不再修改 <c>CommunityRating</c>；来源选豆瓣时由 <c>DoubanAssist</c> 接管主评分。
     /// </summary>
     public class CommunityRatingService
     {
@@ -510,6 +511,13 @@ namespace StrmAssistant.Common
                 changed = true;
             }
 
+            // 切换主评分来源时清掉另一来源的快照，避免 Kodi/前端读到旧值。
+            // DoubanRating 是独立的第三评分载体，不在这里清理。
+            var staleKey = source == CommunityRatingSourceOption.Tmdb
+                ? ImdbRatingProviderId
+                : TmdbRatingProviderId;
+            if (item.ProviderIds.Remove(staleKey)) changed = true;
+
             if (!changed) return CommunityRatingUnifyOutcome.Same;
 
             item.UpdateToRepository(ItemUpdateType.MetadataEdit);
@@ -526,6 +534,8 @@ namespace StrmAssistant.Common
                 changed = true;
             }
 
+            // 只清主评分及其来源快照；DoubanRating 是独立的第三评分载体，
+            // 由「同步豆瓣评分到 Kodi」开关管理，不随主评分清空。
             foreach (var key in new[] { SourceProviderId, TmdbRatingProviderId, ImdbRatingProviderId })
             {
                 if (item.ProviderIds.Remove(key)) changed = true;

@@ -6012,5 +6012,140 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_ClearSeasonMapButton_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_ClearSeasonMapButton_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanAccessToken_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanAccessToken_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanCastChinese_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanCastChinese_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanCookie_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanCookie_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanFetchRating_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanFetchRating_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanFillOverview_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanFillOverview_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanPosterFallback_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanPosterFallback_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanRatingToKodi_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRatingToKodi_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_EnableMdbListCriticRating_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_EnableMdbListCriticRating_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_MdbListApiKey_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_MdbListApiKey_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_RatingUpdateLookbackDays_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_RatingUpdateLookbackDays_Description", resourceCulture);
+            }
+        }
+
     }
 }

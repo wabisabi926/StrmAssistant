@@ -9,11 +9,9 @@ using System.Threading.Tasks;
 namespace StrmAssistant.ScheduledTask
 {
     /// <summary>
-    /// 构建豆瓣缓存：遍历电影/剧集条目，预取豆瓣数据写入本地磁盘缓存
-    /// （strmassistant_douban_cache.json + 评分快照），供后续刮削离线命中、
-    /// 降低限流风险。已缓存的条目自动跳过，不产生网络请求。
-    /// 豆瓣评分统一请用「统一社区评分」（轻量 IMDb 通道，见
-    /// <see cref="DoubanAssist"/> 的 UnifyRatingsAsync），本任务只做完整数据预取。
+    /// 同步豆瓣数据：遍历电影/剧集/季，匹配并写入豆瓣关联 ID，缓存 subject 数据与评分快照，
+    /// 并按勾选应用徽章评分 / Kodi 第三评分 / 简介 / 演员 / 海报 / MdbList。
+    /// 来源=豆瓣时同时写主评分；来源不是豆瓣时不动主评分。
     /// </summary>
     public class BuildDoubanCacheTask : IScheduledTask
     {
@@ -23,12 +21,12 @@ namespace StrmAssistant.ScheduledTask
         {
             if (!Plugin.IsPluginEnabled) return;
 
-            _logger.Info("DoubanCacheBuild - Scheduled Task Execute");
+            _logger.Info("DoubanSync - Scheduled Task Execute");
 
-            var report = await Plugin.DoubanAssist.BuildAllCacheAsync(progress, cancellationToken)
+            var report = await Plugin.DoubanAssist.SyncAllDoubanDataAsync(progress, cancellationToken)
                 .ConfigureAwait(false);
 
-            _logger.Info("DoubanCacheBuild - Scheduled Task Complete: " + report.BuildSummary());
+            _logger.Info("DoubanSync - Scheduled Task Complete: " + report.BuildSummary());
         }
 
         public string Category =>

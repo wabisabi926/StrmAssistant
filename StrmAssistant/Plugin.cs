@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common;
+﻿﻿﻿﻿using MediaBrowser.Common;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Common.Plugins;
@@ -508,7 +508,10 @@ namespace StrmAssistant
                 _ = BackgroundTaskRunner.Run("ImagePostProcess.ProcessItem", () => ImagePostProcessor.ProcessItem(refreshedItem, postProcessMode));
             }
 
-            if (MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
+            // 豆瓣数据层：来源=豆瓣，或任意豆瓣能力（徽章/ Kodi / 简介 / 演员 / 海报）开启。
+            var metadataOptions = MetadataEnhanceStore.GetOptions();
+
+            if (metadataOptions.IsDoubanDataEnabled)
             {
                 if (e.Argument.Item is Movie doubanMovie)
                 {
@@ -524,8 +527,28 @@ namespace StrmAssistant
                 }
             }
 
+            // 影评人评分独立于豆瓣：只依赖 IMDb ID 与 MdbList Key。
+            // 豆瓣数据层已启用时由 ApplyAsync 顺带处理，这里只兜底「只要影评人评分」的配置。
+            if (!metadataOptions.IsDoubanDataEnabled &&
+                metadataOptions.DoubanAssist.EnableMdbListCriticRating &&
+                !string.IsNullOrWhiteSpace(metadataOptions.DoubanAssist.MdbListApiKey) &&
+                (e.Argument.Item is Movie || e.Argument.Item is Series))
+            {
+                var mdbItem = e.Argument.Item;
+                var lookbackDays = metadataOptions.DoubanAssist.RatingUpdateLookbackDays;
+                var inLookback = lookbackDays <= 0 || !mdbItem.PremiereDate.HasValue ||
+                                 mdbItem.PremiereDate.Value >= DateTime.UtcNow.AddDays(-lookbackDays);
+
+                if (inLookback)
+                {
+                    var mdbKey = metadataOptions.DoubanAssist.MdbListApiKey;
+                    _ = BackgroundTaskRunner.Run("MdbList.CriticRating",
+                        () => DoubanAssist.UpdateMdbListRatingsAsync(mdbItem, mdbKey, CancellationToken.None));
+                }
+            }
+
             // 社区评分统一：单条刷新完成后按配置来源回写。扫库期间 OnRefreshCompleted 已提前返回，
-            // 不会逐条触发；全库对齐交给「统一社区评分」计划任务。
+            // 不会逐条触发；全库对齐交给「同步社区评分」计划任务。
             if (CommunityRatingService.IsUnificationEnabled)
             {
                 var ratingItem = e.Argument.Item;
@@ -684,7 +707,7 @@ namespace StrmAssistant
         /// </summary>
         private void OnPlaybackStart(object sender, PlaybackProgressEventArgs e)
         {
-            if (MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist &&
+            if (MetadataEnhanceStore.GetOptions().IsDoubanDataEnabled &&
                 (e.Item is Movie || e.Item is Episode || e.Item is Series || e.Item is Season))
             {
                 // Episode 会在 TryScheduleRatingRefresh 内归一到所属剧集

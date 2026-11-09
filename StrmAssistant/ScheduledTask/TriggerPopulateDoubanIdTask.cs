@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿﻿﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Controller.Library;
@@ -14,7 +14,7 @@ namespace StrmAssistant.ScheduledTask
     {
         public Task Run(IProgress<double> progress, CancellationToken cancellationToken)
         {
-            if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().DoubanAssist.EnableDoubanAssist)
+            if (!Plugin.Instance.MetadataEnhanceStore.GetOptions().IsDoubanDataEnabled)
             {
                 return Task.CompletedTask;
             }

@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Model.Plugins;
+﻿﻿﻿﻿using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Plugins.UI.Views;
 using StrmAssistant.Common;
 using StrmAssistant.Options.Store;
@@ -52,7 +52,7 @@ namespace StrmAssistant.Options.View
                 {
                     try
                     {
-                        // 豆瓣：走批量缓存（2 秒频控 + 熔断），不支持演练模式。
+                        // 豆瓣：条目分优先、IMDb API 兜底；带频控 + 熔断，不支持演练模式。
                         if (source == CommunityRatingSourceOption.Douban)
                         {
                             if (DryRunMode.Enabled)

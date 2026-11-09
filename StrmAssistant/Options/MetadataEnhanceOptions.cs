@@ -1,4 +1,4 @@
-﻿using Emby.Web.GenericEdit;
+﻿﻿﻿﻿using Emby.Web.GenericEdit;
 using Emby.Web.GenericEdit.Validation;
 using MediaBrowser.Model.GenericEdit;
 using MediaBrowser.Model.LocalizationAttributes;
@@ -43,7 +43,7 @@ namespace StrmAssistant.Options
         [DisplayNameL("MetadataEnhanceOptions_Group_CommunityRating", typeof(Resources))]
         public CommunityRatingOptions CommunityRating { get; set; } = new CommunityRatingOptions();
 
-        /// <summary>豆瓣辅助：评分 / 演员 / 简介补全，MdbList 影评人评分。</summary>
+        /// <summary>豆瓣与附加评分：每个能力独立勾选，主评分由「社区评分来源」决定。</summary>
         [DisplayNameL("MetadataEnhanceOptions_Group_DoubanAssist", typeof(Resources))]
         public DoubanAssistOptions DoubanAssist { get; set; } = new DoubanAssistOptions();
 
@@ -58,6 +58,24 @@ namespace StrmAssistant.Options
         /// <summary>本地元数据缓存：缓存模式与缓存根目录。</summary>
         [DisplayNameL("MetadataEnhanceOptions_Group_MetadataCache", typeof(Resources))]
         public MetadataCacheOptions MetadataCache { get; set; } = new MetadataCacheOptions();
+
+        /// <summary>社区评分来源是否为豆瓣；为 true 时豆瓣评分直接接管主评分，无需额外开关。</summary>
+        [Browsable(false)]
+        public bool IsDoubanRatingSource => CommunityRating?.ParsedSource == CommunityRatingSourceOption.Douban;
+
+        /// <summary>
+        /// 是否需要豆瓣数据层（关联 ID / subject 抓取 / 缓存）：
+        /// 来源=豆瓣，或任意豆瓣能力（徽章评分 / Kodi 第三评分 / 简介 / 演员 / 海报）开启。
+        /// 全部关闭时不会产生任何豆瓣请求。
+        /// </summary>
+        [Browsable(false)]
+        public bool IsDoubanDataEnabled =>
+            IsDoubanRatingSource ||
+            DoubanAssist?.DoubanFetchRating == true ||
+            DoubanAssist?.DoubanRatingToKodi == true ||
+            DoubanAssist?.DoubanFillOverview == true ||
+            DoubanAssist?.DoubanCastChinese == true ||
+            DoubanAssist?.DoubanPosterFallback == true;
 
         [Browsable(false)]
         public bool IsModSupported => RuntimeInformation.ProcessArchitecture == Architecture.X64 || RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
@@ -147,7 +165,6 @@ namespace StrmAssistant.Options
             ChineseMetadata.Initialize();
             PersonEnhance.Initialize();
             CommunityRating.Initialize();
-            DoubanAssist.Initialize();
             MetadataRefresh.Initialize();
             MetadataCache.Initialize();
         }

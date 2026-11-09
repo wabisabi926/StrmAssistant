@@ -74,7 +74,7 @@ namespace StrmAssistant.Options
                 ? source
                 : CommunityRatingSourceOption.None;
 
-        /// <summary>是否由本分组接管 CommunityRating（豆瓣仍走原来的豆瓣覆盖开关）。</summary>
+        /// <summary>是否由本分组接管 CommunityRating（TMDB / IMDb）；豆瓣由 DoubanAssist 的评分流程接管。</summary>
         [Browsable(false)]
         public bool IsUnificationEnabled =>
             ParsedSource == CommunityRatingSourceOption.Tmdb || ParsedSource == CommunityRatingSourceOption.Imdb;

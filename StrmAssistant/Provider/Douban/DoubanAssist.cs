@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common.Net;
+﻿﻿﻿﻿using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
@@ -20,13 +20,14 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using DoubanScrapeOption = StrmAssistant.Options.DoubanAssistScrapeOption;
 
 namespace StrmAssistant.Provider.Douban
 {
     /// <summary>
-    /// 豆瓣辅助刮削（电影）：刷新完成后按 IMDb（Wikidata P4529 解析）或标题匹配豆瓣条目，
-    /// 仅填充缺失的中文简介/类型/制片地区，评分可选覆盖。带 7 天文件缓存、2 秒频控与风控熔断。
+    /// 豆瓣数据层：按 IMDb（Wikidata P4529 解析）或标题匹配豆瓣条目，负责
+    /// ① 建立 ProviderIds["Douban"] 关联；② 预取/缓存 subject 数据；③ 按「社区评分来源」
+    /// 写入主评分；④ 按开关写 Kodi 第三评分；⑤ 可选补全简介/演员/海报。
+    /// 带 7 天文件缓存、2 秒频控与风控熔断。
     /// </summary>
     public class DoubanAssist
     {
@@ -105,6 +106,7 @@ namespace StrmAssistant.Provider.Douban
 
                 if (changed)
                 {
+                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
                     _logger.Info("MdbList - Ratings updated for {0}: {1}", item.Name,
                         string.Join(" · ", summaryParts));
                 }
@@ -150,6 +152,12 @@ namespace StrmAssistant.Provider.Douban
 
         private static readonly TimeSpan RequestInterval = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(7);
+
+        /// <summary>
+        /// IMDb API 快照的复用窗口：快照按 <c>imdb:tt...</c> 落盘，
+        /// 避免重启后对同一批没有豆瓣 ID 的条目重复请求第三方接口。
+        /// </summary>
+        private static readonly TimeSpan ImdbRatingCacheDuration = TimeSpan.FromDays(7);
         private static readonly TimeSpan BreakerCooldown = TimeSpan.FromHours(6);
         private const int BreakerThreshold = 5;
 
@@ -371,8 +379,7 @@ namespace StrmAssistant.Provider.Douban
             public int SkippedLanguage;
             public int RatingApplied;
             public int RatingSkippedLookback;
-            public int RatingSkippedField;
-            public int RatingSkippedOverride;
+            public int RatingSkippedSource;
         }
 
         private PopulateStats _populateStats;
@@ -428,6 +435,16 @@ namespace StrmAssistant.Provider.Douban
                         if (!string.IsNullOrEmpty(subjectId))
                         {
                             _ratings.TryGetValue(subjectId, out snapshot);
+                        }
+
+                        // 没有豆瓣 ID 时，全库评分把结果记在 imdb:tt... 名下，这里按 IMDb 兜底查一次。
+                        if (snapshot == null)
+                        {
+                            var imdbKey = GetImdbSnapshotKey(item.GetProviderId(MetadataProviders.Imdb));
+                            if (!string.IsNullOrEmpty(imdbKey))
+                            {
+                                _ratings.TryGetValue(imdbKey, out snapshot);
+                            }
                         }
 
                         // 既没有豆瓣条目、也没有显式来源：不是本模块关心的数据。
@@ -519,6 +536,31 @@ namespace StrmAssistant.Provider.Douban
                     }
                 }
 
+                // 没有豆瓣 ID 或还没有 subject 快照时，按 IMDb key 读取全库评分落下的快照。
+                if (rating == null)
+                {
+                    var imdbKey = GetImdbSnapshotKey(imdb);
+
+                    if (!string.IsNullOrEmpty(imdbKey))
+                    {
+                        lock (_ratingsLock)
+                        {
+                            if (_ratings == null) LoadRatings();
+
+                            if (_ratings.TryGetValue(imdbKey, out var imdbSnapshot))
+                            {
+                                rating = imdbSnapshot.Rating;
+                                votes = imdbSnapshot.Votes;
+
+                                var ratingMatches = item.CommunityRating.HasValue &&
+                                                    Math.Abs(item.CommunityRating.Value - imdbSnapshot.Rating) <= 0.05;
+                                applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
+                                          string.IsNullOrEmpty(source) && ratingMatches;
+                            }
+                        }
+                    }
+                }
+
                 if (string.IsNullOrEmpty(source) && applied) source = "douban";
 
                 result.Add(new DoubanImdbRatingInfo
@@ -600,14 +642,29 @@ namespace StrmAssistant.Provider.Douban
             }
         }
 
-        private void RecordRatingSnapshot(string subjectId, double rating, long? votes)        {
+        /// <summary>没有豆瓣 ID 时，评分快照按 IMDb 外部 ID 落盘（<c>imdb:tt...</c>）。</summary>
+        private static string GetImdbSnapshotKey(string imdbId)
+        {
+            return string.IsNullOrWhiteSpace(imdbId)
+                ? null
+                : "imdb:" + imdbId.Trim().ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// 写入评分快照。key 可以是豆瓣 subject ID，也可以是 <see cref="GetImdbSnapshotKey"/> 的 IMDb key，
+        /// 两种来源共用同一份文件与同一套 Applied/Checked 语义。
+        /// </summary>
+        private void RecordRatingSnapshot(string key, double rating, long? votes)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+
             lock (_ratingsLock)
             {
                 if (_ratings == null) LoadRatings();
 
                 var now = DateTime.UtcNow;
 
-                if (_ratings.TryGetValue(subjectId, out var existing))
+                if (_ratings.TryGetValue(key, out var existing))
                 {
                     var ratingChanged = Math.Abs(existing.Rating - rating) >= 0.001 || existing.Votes != votes;
 
@@ -629,14 +686,14 @@ namespace StrmAssistant.Provider.Douban
                     existing.Votes = votes;
                     existing.Updated = now;
                     // 豆瓣分变了，CommunityRating 还停在旧分，两者已不同源：
-                    // 先置 false，等 ApplyAsync 真正写入后再由 MarkRatingApplied 置 true。
+                    // 先置 false，等真正写入主评分后再由 MarkRatingApplied 置 true。
                     existing.Applied = false;
 
                     SaveRatings();
                     return;
                 }
 
-                _ratings[subjectId] = new DoubanRatingSnapshot
+                _ratings[key] = new DoubanRatingSnapshot
                 {
                     Rating = rating,
                     Votes = votes,
@@ -684,15 +741,40 @@ namespace StrmAssistant.Provider.Douban
             }
         }
 
+        /// <summary>读取指定 key（豆瓣 ID 或 IMDb key）的完整快照状态，供全库评分复用与降频。</summary>
+        private bool TryGetSnapshotState(string key, out double rating, out long? votes, out DateTime? checkedAt)
+        {
+            rating = 0;
+            votes = null;
+            checkedAt = null;
+
+            if (string.IsNullOrEmpty(key)) return false;
+
+            lock (_ratingsLock)
+            {
+                if (_ratings == null) LoadRatings();
+
+                if (!_ratings.TryGetValue(key, out var snapshot)) return false;
+
+                rating = snapshot.Rating;
+                votes = snapshot.Votes;
+                checkedAt = snapshot.Checked ??
+                            (snapshot.Updated == default ? (DateTime?)null : snapshot.Updated);
+
+                return snapshot.Rating > 0;
+            }
+        }
+
         /// <summary>
         /// 按豆瓣分数同步 <c>ProviderIds["DoubanRating"]</c>，返回是否修改了条目。
+        /// 只看「同步豆瓣评分到 Kodi」开关，不再受「豆瓣辅助生效范围」影响；
         /// 开关关闭时顺手移除遗留 key。
         /// </summary>
-        private static bool SyncRatingProviderId(BaseItem item, DoubanSubject subject, bool enabled, bool allowRating)
+        private static bool SyncRatingProviderId(BaseItem item, double? rating, bool enabled)
         {
-            if (enabled && allowRating && subject?.Rating.HasValue == true)
+            if (enabled && rating.HasValue)
             {
-                var value = subject.Rating.Value.ToString("0.#", CultureInfo.InvariantCulture);
+                var value = rating.Value.ToString("0.#", CultureInfo.InvariantCulture);
 
                 if (!string.Equals(item.GetProviderId(DoubanRatingProviderId), value, StringComparison.Ordinal))
                 {
@@ -713,6 +795,32 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
+        /// 「无评分时清空」：只清主评分及其来源快照，保留独立的 DoubanRating 第三评分。
+        /// </summary>
+        private static bool ClearMainRating(BaseItem item)
+        {
+            var changed = false;
+
+            if (item.CommunityRating.HasValue)
+            {
+                item.CommunityRating = null;
+                changed = true;
+            }
+
+            foreach (var key in new[]
+                     {
+                         CommunityRatingService.SourceProviderId,
+                         CommunityRatingService.TmdbRatingProviderId,
+                         CommunityRatingService.ImdbRatingProviderId
+                     })
+            {
+                if (item.ProviderIds.Remove(key)) changed = true;
+            }
+
+            return changed;
+        }
+
+        /// <summary>
         /// 按需刷新入口（详情页 / 开始播放）：冷却到期才抓豆瓣，异步执行，不阻塞调用方。
         /// 只处理已有豆瓣 ID 的条目——缺 ID 的由扫库补全任务负责。
         /// </summary>
@@ -725,7 +833,7 @@ namespace StrmAssistant.Provider.Douban
 
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
 
-            if (!options.DoubanAssist.EnableDoubanAssist) return false;
+            if (!options.IsDoubanDataEnabled) return false;
             if (options.DoubanAssist.DoubanRefreshIntervalDays <= 0) return false;
             if (item.IsLocked) return false;
 
@@ -769,7 +877,7 @@ namespace StrmAssistant.Provider.Douban
         {
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
 
-            if (!options.DoubanAssist.EnableDoubanAssist || items == null) return;
+            if (!options.IsDoubanDataEnabled || items == null) return;
 
             var writeKey = options.DoubanAssist.DoubanRatingToKodi;
             var repaired = 0;
@@ -792,8 +900,11 @@ namespace StrmAssistant.Provider.Douban
                     }
 
                     var subjectId = item.GetProviderId(DoubanProviderId);
-                    if (string.IsNullOrEmpty(subjectId)) continue;
-                    if (!TryGetSnapshotRating(subjectId, out var rating)) continue;
+                    var snapshotKey = !string.IsNullOrEmpty(subjectId)
+                        ? subjectId
+                        : GetImdbSnapshotKey(item.GetProviderId(MetadataProviders.Imdb));
+                    if (string.IsNullOrEmpty(snapshotKey)) continue;
+                    if (!TryGetSnapshotRating(snapshotKey, out var rating)) continue;
 
                     var desired = rating.ToString("0.#", CultureInfo.InvariantCulture);
                     if (string.Equals(current, desired, StringComparison.Ordinal)) continue;
@@ -1090,30 +1201,6 @@ namespace StrmAssistant.Provider.Douban
         /// <summary>
         /// 季刷新完成后调用：按「剧名 第N季」匹配豆瓣季条目（阿拉伯/中文数字各试一次）。
         /// </summary>
-        /// <summary>
-        /// 「豆瓣辅助生效范围」= 允许豆瓣改写的字段。
-        /// 空值或旧版库 ID 值（不含任何已知字段名）一律视为「全部」。
-        /// </summary>
-        private static bool IsScrapeFieldEnabled(StrmAssistant.Options.MetadataEnhanceOptions options,
-            DoubanScrapeOption option)
-        {
-            var scope = options.DoubanAssist.DoubanAssistScrapeScope;
-            if (string.IsNullOrWhiteSpace(scope)) return true;
-
-            var tokens = scope.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
-
-            if (tokens.Length == 0) return true;
-
-            var known = Enum.GetNames(typeof(DoubanScrapeOption));
-            var hasKnown = tokens.Any(t => known.Any(k => string.Equals(k, t, StringComparison.OrdinalIgnoreCase)));
-
-            // 兼容旧值：以前该字段存的是媒体库 ID 列表，不认识任何字段名 → 视为全部
-            if (!hasKnown) return true;
-
-            return tokens.Any(t => string.Equals(t, option.ToString(), StringComparison.OrdinalIgnoreCase));
-        }
-
         public Task ApplyAsync(Season season, CancellationToken cancellationToken)
         {
             return ApplyAsync(season, "tv", season?.IndexNumber, cancellationToken);
@@ -1232,10 +1319,9 @@ namespace StrmAssistant.Provider.Douban
                 _logger.Info(
                     "DoubanPopulate - Summary: candidates={0} matched={1} noMatch={2} " +
                     "skipped[locked={3}, language={4}] ratingApplied={5} " +
-                    "ratingSkipped[lookback={6}, fieldNotSelected={7}, overrideOff={8}]",
+                    "ratingSkipped[lookback={6}, sourceNotDouban={7}]",
                     stats.Total, stats.Matched, stats.NoMatch, stats.SkippedLocked, stats.SkippedLanguage,
-                    stats.RatingApplied, stats.RatingSkippedLookback, stats.RatingSkippedField,
-                    stats.RatingSkippedOverride);
+                    stats.RatingApplied, stats.RatingSkippedLookback, stats.RatingSkippedSource);
 
                 lock (_retryLock)
                 {
@@ -1248,116 +1334,43 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 构建缓存：预取豆瓣数据落盘（subject + 评分快照），并回填条目
-        /// <c>ProviderIds["DoubanRating"]</c>。
-        /// 已有豆瓣 ID 且缓存未过期的条目不再请求网络，但仍从缓存回填评分 ProviderId。
+        /// 全库同步豆瓣数据：逐条匹配豆瓣条目、写关联 ID、缓存 subject，
+        /// 并按勾选应用徽章评分 / Kodi 第三评分 / 简介 / 演员 / 海报 / MdbList。
+        /// 来源=豆瓣时 ApplyAsync 会同时写主评分；来源不是豆瓣时不动主评分。
+        /// 全程复用 2 秒频控、6 小时熔断、缓存命中跳过。
         /// </summary>
-        public async Task<bool> BuildCacheAsync(BaseItem item, CancellationToken cancellationToken)
-        {
-            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
-            if (!options.DoubanAssist.EnableDoubanAssist || item == null || item.IsLocked) return false;
-
-            var language = ResolveMetadataLanguage(item);
-            if (string.IsNullOrEmpty(language) || !language.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            var suggestType = item is Movie ? "movie" : "tv";
-            var cachedId = item.GetProviderId(DoubanProviderId);
-            var allowRating = IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating);
-            var cacheValid = false;
-
-            lock (_cacheLock)
-            {
-                if (_cache == null) LoadCache();
-                cacheValid = !string.IsNullOrEmpty(cachedId) &&
-                             _cache.TryGetValue("subject:" + cachedId, out var entry) &&
-                             entry.Expiry > DateTime.UtcNow;
-            }
-
-            var ratingChanged = false;
-
-            try
-            {
-                if (cacheValid)
-                {
-                    // 缓存命中：FetchSubjectAsync 只读缓存并补记评分快照，不产生网络请求。
-                    var cachedSubject = await FetchSubjectAsync(cachedId, cancellationToken).ConfigureAwait(false);
-
-                    ratingChanged = SyncRatingProviderId(item, cachedSubject,
-                        options.DoubanAssist.DoubanRatingToKodi, allowRating);
-
-                    if (ratingChanged)
-                    {
-                        item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                        _logger.Debug("DoubanCacheBuild - Rating provider updated for {0}", item.Name);
-                    }
-
-                    return false;
-                }
-
-                // 季条目必须带季号，否则会按剧集主条目解析（豆瓣季是独立 subject）。
-                var seasonNumber = (item as Season)?.IndexNumber;
-
-                var subject = await FindSubjectAsync(item, suggestType, seasonNumber, cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (subject == null) return false;
-
-                // 手动回填（构建缓存任务）时顺手补齐第三评分载体，避免「缓存有了、Kodi 侧却没有分」。
-                ratingChanged = SyncRatingProviderId(item, subject, options.DoubanAssist.DoubanRatingToKodi,
-                    allowRating);
-
-                if (ratingChanged)
-                {
-                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                    _logger.Debug("DoubanCacheBuild - Rating provider updated for {0}", item.Name);
-                }
-
-                return true;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.Warn("DoubanCacheBuild - Failed for {0}: {1}", item.Name, ex.Message);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 全库构建豆瓣缓存：遍历电影/剧集逐条抓取并写完整数据（简介/演员/海报等）。
-        /// 豆瓣评分统一不走这里，改用 <see cref="UnifyRatingsAsync"/> 的轻量 IMDb 通道；
-        /// 全程复用 2 秒频控、6 小时熔断、缓存命中跳过与失败重试。
-        /// </summary>
-        public async Task<DoubanCacheBuildReport> BuildAllCacheAsync(IProgress<double> progress,
+        public async Task<DoubanDataSyncReport> SyncAllDoubanDataAsync(IProgress<double> progress,
             CancellationToken cancellationToken)
         {
-            var report = new DoubanCacheBuildReport();
+            var report = new DoubanDataSyncReport();
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
 
-            if (!options.DoubanAssist.EnableDoubanAssist)
+            var doubanEnabled = options.IsDoubanDataEnabled;
+            var mdbListOnly = !doubanEnabled &&
+                              options.DoubanAssist.EnableMdbListCriticRating &&
+                              !string.IsNullOrWhiteSpace(options.DoubanAssist.MdbListApiKey);
+
+            if (!doubanEnabled && !mdbListOnly)
             {
-                _logger.Warn("DoubanCacheBuild - skipped: EnableDoubanAssist is off");
+                _logger.Warn("DoubanSync - skipped: no Douban capability or MdbList critic rating is enabled");
                 progress?.Report(100);
                 return report;
             }
 
             if (Plugin.LibraryManager == null)
             {
-                _logger.Warn("DoubanCacheBuild - skipped: library manager not ready");
+                _logger.Warn("DoubanSync - skipped: library manager not ready");
                 progress?.Report(100);
                 return report;
             }
 
             var items = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
             {
-                IncludeItemTypes = new[] { nameof(Movie), nameof(Series) }
+                IncludeItemTypes = new[] { nameof(Movie), nameof(Series), nameof(Season) }
             });
 
             report.Total = items.Length;
-            _logger.Info($"DoubanCacheBuild - items={items.Length}");
+            _logger.Info($"DoubanSync - items={items.Length} mode={(doubanEnabled ? "douban" : "mdblist")}");
 
             var index = 0;
 
@@ -1367,9 +1380,25 @@ namespace StrmAssistant.Provider.Douban
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if (await BuildCacheAsync(item, cancellationToken).ConfigureAwait(false))
+                    if (doubanEnabled)
                     {
-                        report.Cached++;
+                        var suggestType = item is Movie ? "movie" : "tv";
+                        var seasonNumber = (item as Season)?.IndexNumber;
+                        await ApplyAsync(item, suggestType, seasonNumber, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await UpdateMdbListRatingsAsync(item, options.DoubanAssist.MdbListApiKey, cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+
+                    var hasKey = doubanEnabled
+                        ? !string.IsNullOrEmpty(item.GetProviderId(DoubanProviderId))
+                        : !string.IsNullOrEmpty(item.GetProviderId(MetadataProviders.Imdb));
+
+                    if (hasKey)
+                    {
+                        report.Matched++;
                     }
                     else
                     {
@@ -1378,7 +1407,7 @@ namespace StrmAssistant.Provider.Douban
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.Info("DoubanCacheBuild - cancelled");
+                    _logger.Info("DoubanSync - cancelled");
                     throw;
                 }
                 catch (Exception e)
@@ -1386,7 +1415,7 @@ namespace StrmAssistant.Provider.Douban
                     report.Failed++;
                     if (report.Failed <= 10)
                     {
-                        _logger.Warn($"DoubanCacheBuild - {item.Name}: {e.Message}");
+                        _logger.Warn($"DoubanSync - {item.Name}: {e.Message}");
                     }
                 }
                 finally
@@ -1401,9 +1430,10 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 豆瓣轻量统一：只按 IMDb ID 查评分（<see cref="DoubanRatingClient"/>，不抓 subject 页面），
-        /// 写主评分、来源标记与 <c>ProviderIds["DoubanRating"]</c>。
-        /// 失败不回退网页刮削，避免把风控压力拉回来；受评分字段勾选与回看天数约束。
+        /// 豆瓣全库评分：优先使用已匹配豆瓣条目的评分（subject 缓存 / 页面 / V2 API），
+        /// 没有豆瓣 ID 或条目无评分时才回退到 IMDb → 第三方 API。
+        /// 两条通道的结果都会写入同一份评分快照；主评分、来源标记与
+        /// <c>ProviderIds["DoubanRating"]</c>（受「同步到 Kodi」开关控制）由本方法统一写入。
         /// </summary>
         public async Task<DoubanUnifyReport> UnifyRatingsAsync(IProgress<double> progress,
             CancellationToken cancellationToken)
@@ -1411,16 +1441,9 @@ namespace StrmAssistant.Provider.Douban
             var report = new DoubanUnifyReport();
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
 
-            if (!options.DoubanAssist.EnableDoubanAssist)
+            if (!options.IsDoubanRatingSource)
             {
-                _logger.Warn("DoubanUnify - skipped: EnableDoubanAssist is off");
-                progress?.Report(100);
-                return report;
-            }
-
-            if (!IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating))
-            {
-                _logger.Warn("DoubanUnify - skipped: rating field not selected in scope");
+                _logger.Warn("DoubanUnify - skipped: community rating source is not Douban");
                 progress?.Report(100);
                 return report;
             }
@@ -1433,6 +1456,7 @@ namespace StrmAssistant.Provider.Douban
             }
 
             var lookbackDays = options.DoubanAssist.RatingUpdateLookbackDays;
+            var toKodi = options.DoubanAssist.DoubanRatingToKodi;
 
             var items = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
             {
@@ -1444,102 +1468,161 @@ namespace StrmAssistant.Provider.Douban
 
             var index = 0;
 
-            foreach (var item in items)
+            try
             {
-                try
+                foreach (var item in items)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    index++;
-                    progress?.Report(items.Length == 0 ? 100 : index * 100.0 / items.Length);
-
-                    if (CommunityRatingService.IsRatingLocked(item))
+                    try
                     {
-                        report.Locked++;
-                        continue;
-                    }
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                    if (lookbackDays > 0 && item.PremiereDate.HasValue &&
-                        item.PremiereDate.Value < DateTime.UtcNow.AddDays(-lookbackDays))
+                        index++;
+                        progress?.Report(items.Length == 0 ? 100 : index * 100.0 / items.Length);
+
+                        if (CommunityRatingService.IsRatingLocked(item))
+                        {
+                            report.Locked++;
+                            continue;
+                        }
+
+                        if (lookbackDays > 0 && item.PremiereDate.HasValue &&
+                            item.PremiereDate.Value < DateTime.UtcNow.AddDays(-lookbackDays))
+                        {
+                            report.SkippedLookback++;
+                            continue;
+                        }
+
+                        var doubanId = item.GetProviderId(DoubanProviderId);
+                        var imdbId = item.GetProviderId(MetadataProviders.Imdb);
+
+                        double? rating = null;
+                        string snapshotKey = null;
+
+                        // ① 条目本身已匹配豆瓣：优先用豆瓣条目分（subject 缓存命中时不发请求）。
+                        if (!string.IsNullOrEmpty(doubanId))
+                        {
+                            var subject = await FetchSubjectAsync(doubanId, cancellationToken)
+                                .ConfigureAwait(false);
+
+                            if (subject?.Rating.HasValue == true)
+                            {
+                                rating = subject.Rating.Value;
+                                snapshotKey = doubanId;
+                            }
+                        }
+
+                        // ② 没有豆瓣 ID 或豆瓣条目无评分：回退 IMDb 第三方 API。
+                        if (!rating.HasValue && !string.IsNullOrWhiteSpace(imdbId))
+                        {
+                            var imdbKey = GetImdbSnapshotKey(imdbId);
+
+                            if (TryGetSnapshotState(imdbKey, out var cachedRating, out _,
+                                    out var checkedAt) &&
+                                checkedAt.HasValue &&
+                                DateTime.UtcNow - checkedAt.Value < ImdbRatingCacheDuration)
+                            {
+                                rating = cachedRating;
+                                snapshotKey = imdbKey;
+                            }
+                            else
+                            {
+                                var result = await _ratingClient.GetRatingAsync(imdbId, cancellationToken)
+                                    .ConfigureAwait(false);
+
+                                if (result.Status == DoubanRatingClient.DoubanLightStatus.Failed)
+                                {
+                                    report.Failed++;
+                                    continue;
+                                }
+
+                                if (result.Status == DoubanRatingClient.DoubanLightStatus.Ok)
+                                {
+                                    rating = result.Rating;
+                                    // 有豆瓣 ID 时把回退分记到该 subject 名下，徽章/Kodi 仍能按条目读到分。
+                                    snapshotKey = !string.IsNullOrEmpty(doubanId) ? doubanId : imdbKey;
+                                    RecordRatingSnapshot(snapshotKey, result.Rating, result.Votes);
+                                }
+                            }
+                        }
+
+                        if (!rating.HasValue)
+                        {
+                            if (options.CommunityRating.CommunityRatingClearWhenMissing && ClearMainRating(item))
+                            {
+                                item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                                report.Cleared++;
+                            }
+                            else if (string.IsNullOrEmpty(doubanId) && string.IsNullOrWhiteSpace(imdbId))
+                            {
+                                report.NoId++;
+                            }
+                            else
+                            {
+                                report.NoRating++;
+                            }
+
+                            continue;
+                        }
+
+                        var target = (float)Math.Round(rating.Value, 1);
+                        var changed = false;
+
+                        if (!item.CommunityRating.HasValue ||
+                            Math.Abs(item.CommunityRating.Value - target) > 0.05f)
+                        {
+                            item.CommunityRating = target;
+                            changed = true;
+                        }
+
+                        if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            item.ProviderIds[CommunityRatingService.SourceProviderId] = "douban";
+                            changed = true;
+                        }
+
+                        if (SyncRatingProviderId(item, rating, toKodi))
+                        {
+                            changed = true;
+                        }
+
+                        if (!string.IsNullOrEmpty(snapshotKey))
+                        {
+                            MarkRatingApplied(snapshotKey, true);
+                        }
+
+                        if (!changed)
+                        {
+                            report.Same++;
+                            continue;
+                        }
+
+                        item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                        report.Updated++;
+
+                        if (report.Samples.Count < 20)
+                        {
+                            report.Samples.Add($"update | {item.Name} | {item.InternalId}");
+                        }
+                    }
+                    catch (OperationCanceledException)
                     {
-                        report.SkippedLookback++;
-                        continue;
+                        _logger.Info("DoubanUnify - cancelled");
+                        throw;
                     }
-
-                    var imdbId = item.GetProviderId(MetadataProviders.Imdb);
-                    if (string.IsNullOrWhiteSpace(imdbId))
-                    {
-                        report.NoImdb++;
-                        continue;
-                    }
-
-                    var result = await _ratingClient.GetRatingAsync(imdbId, cancellationToken)
-                        .ConfigureAwait(false);
-
-                    if (result.Status == DoubanRatingClient.DoubanLightStatus.NoId ||
-                        result.Status == DoubanRatingClient.DoubanLightStatus.NoRating)
-                    {
-                        report.NoRating++;
-                        continue;
-                    }
-
-                    if (result.Status == DoubanRatingClient.DoubanLightStatus.Failed)
+                    catch (Exception e)
                     {
                         report.Failed++;
-                        continue;
-                    }
-
-                    var changed = false;
-                    var target = (float)Math.Round(result.Rating, 1);
-
-                    if (!item.CommunityRating.HasValue || Math.Abs(item.CommunityRating.Value - target) > 0.05f)
-                    {
-                        item.CommunityRating = target;
-                        changed = true;
-                    }
-
-                    if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        item.ProviderIds[CommunityRatingService.SourceProviderId] = "douban";
-                        changed = true;
-                    }
-
-                    var ratingText = target.ToString("0.#", CultureInfo.InvariantCulture);
-                    if (!string.Equals(item.GetProviderId(DoubanRatingProviderId), ratingText,
-                            StringComparison.Ordinal))
-                    {
-                        item.ProviderIds[DoubanRatingProviderId] = ratingText;
-                        changed = true;
-                    }
-
-                    if (!changed)
-                    {
-                        report.Same++;
-                        continue;
-                    }
-
-                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                    report.Updated++;
-
-                    if (report.Samples.Count < 20)
-                    {
-                        report.Samples.Add($"update | {item.Name} | {item.InternalId}");
+                        if (report.Failed <= 10)
+                        {
+                            _logger.Warn($"DoubanUnify - {item.Name}: {e.Message}");
+                        }
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                    _logger.Info("DoubanUnify - cancelled");
-                    throw;
-                }
-                catch (Exception e)
-                {
-                    report.Failed++;
-                    if (report.Failed <= 10)
-                    {
-                        _logger.Warn($"DoubanUnify - {item.Name}: {e.Message}");
-                    }
-                }
+            }
+            finally
+            {
+                FlushRatings();
             }
 
             _logger.Info(report.BuildSummary());
@@ -1569,7 +1652,13 @@ namespace StrmAssistant.Provider.Douban
         {
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
 
-            if (!options.DoubanAssist.EnableDoubanAssist || item == null) return;
+            if (!options.IsDoubanDataEnabled || item == null) return;
+
+            // 主评分由「社区评分来源」决定；本方法只处理豆瓣相关能力，每个能力独立开关。
+            var isDoubanRatingSource = options.IsDoubanRatingSource;
+            var metadataEnabled = options.DoubanAssist.DoubanFillOverview ||
+                                  options.DoubanAssist.DoubanCastChinese ||
+                                  options.DoubanAssist.DoubanPosterFallback;
 
             var stats = _populateStats;
 
@@ -1580,13 +1669,20 @@ namespace StrmAssistant.Provider.Douban
                 return;
             }
 
-            var language = ResolveMetadataLanguage(item);
-            if (string.IsNullOrEmpty(language) || !language.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+            var metadataAllowed = metadataEnabled;
+
+            if (metadataEnabled)
             {
-                if (stats != null) Interlocked.Increment(ref stats.SkippedLanguage);
-                _logger.Info("DoubanAssist - Skipped (reason=Language, lang={0}): {1}",
-                    language ?? "(empty)", item.Name);
-                return;
+                var language = ResolveMetadataLanguage(item);
+                metadataAllowed = !string.IsNullOrEmpty(language) &&
+                                  language.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+
+                if (!metadataAllowed)
+                {
+                    if (stats != null) Interlocked.Increment(ref stats.SkippedLanguage);
+                    _logger.Debug("DoubanAssist - Metadata skipped (reason=Language, lang={0}): {1}",
+                        language ?? "(empty)", item.Name);
+                }
             }
 
             if (!_inFlight.TryAdd(item.InternalId, 0)) return;
@@ -1606,11 +1702,34 @@ namespace StrmAssistant.Provider.Douban
 
                 var changed = false;
 
-                // 「豆瓣辅助生效范围」字段门控（空值/旧值 = 全部）
-                var allowNameOverview = IsScrapeFieldEnabled(options, DoubanScrapeOption.NameOverview);
-                var allowRating = IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating);
-                var allowCast = IsScrapeFieldEnabled(options, DoubanScrapeOption.CastCharacter);
-                var allowPoster = IsScrapeFieldEnabled(options, DoubanScrapeOption.Poster);
+                // 评分值：豆瓣条目分优先；条目本身无评分时才回退 IMDb 第三方 API。
+                // 只有需要豆瓣评分的能力（主评分/徽章/Kodi）开启时才做这一步。
+                var needDoubanRating = isDoubanRatingSource ||
+                                       options.DoubanAssist.DoubanFetchRating ||
+                                       options.DoubanAssist.DoubanRatingToKodi;
+                var doubanRating = subject.Rating;
+
+                if (!doubanRating.HasValue && needDoubanRating)
+                {
+                    var imdbId = item.GetProviderId(MetadataProviders.Imdb);
+
+                    if (!string.IsNullOrWhiteSpace(imdbId))
+                    {
+                        var result = await _ratingClient.GetRatingAsync(imdbId, cancellationToken)
+                            .ConfigureAwait(false);
+
+                        if (result.Status == DoubanRatingClient.DoubanLightStatus.Ok)
+                        {
+                            doubanRating = result.Rating;
+                            RecordRatingSnapshot(subject.SubjectId, result.Rating, result.Votes);
+                        }
+                    }
+                }
+
+                // 每个能力独立勾选，不再做「生效范围」二次门控。
+                var allowNameOverview = options.DoubanAssist.DoubanFillOverview && metadataAllowed;
+                var allowCast = options.DoubanAssist.DoubanCastChinese && metadataAllowed;
+                var allowPoster = options.DoubanAssist.DoubanPosterFallback && metadataAllowed;
 
                 if (!string.Equals(item.GetProviderId(DoubanProviderId), subject.SubjectId, StringComparison.Ordinal))
                 {
@@ -1620,7 +1739,7 @@ namespace StrmAssistant.Provider.Douban
 
                 // 第三形态：豆瓣分写入 ProviderIds，供 Kodi 皮肤独立读取；
                 // 与主评分（CommunityRating）/ 次评分（CriticRating）互不影响。
-                if (SyncRatingProviderId(item, subject, options.DoubanAssist.DoubanRatingToKodi, allowRating))
+                if (SyncRatingProviderId(item, doubanRating, options.DoubanAssist.DoubanRatingToKodi))
                 {
                     changed = true;
                 }
@@ -1663,16 +1782,11 @@ namespace StrmAssistant.Provider.Douban
                     }
                 }
 
-                // 社区评分来源互斥：来源选 TMDB / IMDb 时豆瓣让位，只抓分与写 DoubanRating，
-                // 不再改 CommunityRating；来源选「豆瓣」时无条件接管；「不干预」沿用旧的豆瓣覆盖开关。
-                var communityRatingSource = Plugin.Instance?.MetadataEnhanceStore?.GetOptions()?.CommunityRating
-                    ?.ParsedSource ?? CommunityRatingSourceOption.None;
-                var doubanOwnsCommunityRating =
-                    communityRatingSource == CommunityRatingSourceOption.Douban ||
-                    communityRatingSource == CommunityRatingSourceOption.None &&
-                    options.DoubanAssist.DoubanRatingOverride;
-
-                if (doubanOwnsCommunityRating && allowRating && subject.Rating.HasValue)
+                // 主评分只由「社区评分来源」决定：选豆瓣时豆瓣无条件接管，
+                // 不再需要旧的「使用豆瓣评分覆盖」开关。
+                // 但 CommunityRating 字段被锁定时不写，与全库同步保持同一规则。
+                if (isDoubanRatingSource && doubanRating.HasValue &&
+                    !CommunityRatingService.IsRatingLocked(item))
                 {
                     // RatingUpdateLookbackDays：评分更新只作用于首播日期在回看期内的条目
                     var lookbackDays = options.DoubanAssist.RatingUpdateLookbackDays;
@@ -1683,12 +1797,12 @@ namespace StrmAssistant.Provider.Douban
                     {
                         var previousRating = item.CommunityRating;
 
-                        if (Math.Abs((previousRating ?? 0) - subject.Rating.Value) > 0.05)
+                        if (Math.Abs((previousRating ?? 0) - doubanRating.Value) > 0.05)
                         {
-                            item.CommunityRating = (float)subject.Rating.Value;
+                            item.CommunityRating = (float)doubanRating.Value;
                             changed = true;
                             _logger.Info("DoubanAssist - Rating updated for {0}: {1} -> {2} (votes {3})",
-                                item.Name, previousRating?.ToString("0.0") ?? "N/A", subject.Rating.Value,
+                                item.Name, previousRating?.ToString("0.0") ?? "N/A", doubanRating.Value,
                                 subject.Votes);
                         }
 
@@ -1712,36 +1826,36 @@ namespace StrmAssistant.Provider.Douban
                             item.Name);
                     }
                 }
-                else if (subject.Rating.HasValue)
+                else if (isDoubanRatingSource && doubanRating.HasValue)
                 {
-                    if (stats != null)
-                    {
-                        if (!allowRating) Interlocked.Increment(ref stats.RatingSkippedField);
-                        else Interlocked.Increment(ref stats.RatingSkippedOverride);
-                    }
+                    _logger.Info("DoubanAssist - Rating skipped (reason=LockedField): {0}", item.Name);
+                }
+                else if (doubanRating.HasValue)
+                {
+                    if (stats != null) Interlocked.Increment(ref stats.RatingSkippedSource);
 
-                    _logger.Debug("DoubanAssist - Rating skipped (reason={0}): {1}",
-                        !allowRating ? "FieldNotSelected"
-                        : doubanOwnsCommunityRating ? "OverrideOff"
-                        : "SourceNotDouban", item.Name);
+                    _logger.Debug("DoubanAssist - Rating skipped (reason=SourceNotDouban): {0}", item.Name);
                 }
 
-                var ratingInLookback = options.DoubanAssist.RatingUpdateLookbackDays <= 0 || !item.PremiereDate.HasValue ||
-                                       item.PremiereDate.Value >= DateTime.UtcNow.AddDays(-options.DoubanAssist.RatingUpdateLookbackDays);
-
-                if (ratingInLookback && allowRating && !string.IsNullOrWhiteSpace(options.DoubanAssist.MdbListApiKey))
+                // 影评人评分独立于豆瓣主评分，但与豆瓣数据层共用同一次刷新；
+                // 数据层未启用时由 Plugin 的独立 MdbList 钩子处理。
+                if (options.DoubanAssist.EnableMdbListCriticRating &&
+                    !string.IsNullOrWhiteSpace(options.DoubanAssist.MdbListApiKey) &&
+                    (options.DoubanAssist.RatingUpdateLookbackDays <= 0 || !item.PremiereDate.HasValue ||
+                     item.PremiereDate.Value >= DateTime.UtcNow.AddDays(
+                         -options.DoubanAssist.RatingUpdateLookbackDays)))
                 {
-                    changed = await UpdateMdbListRatingsAsync(item, options.DoubanAssist.MdbListApiKey, cancellationToken)
-                        .ConfigureAwait(false) || changed;
+                    await UpdateMdbListRatingsAsync(item, options.DoubanAssist.MdbListApiKey, cancellationToken)
+                        .ConfigureAwait(false);
                 }
 
-                if (options.DoubanAssist.DoubanCastChinese && allowCast)
+                if (allowCast)
                 {
                     changed = await ApplyCastChineseNamesAsync(item, subject.SubjectId, cancellationToken)
                         .ConfigureAwait(false) || changed;
                 }
 
-                if (options.DoubanAssist.DoubanPosterFallback && allowPoster && !item.HasImage(ImageType.Primary) && suggestType == "movie")
+                if (allowPoster && !item.HasImage(ImageType.Primary) && suggestType == "movie")
                 {
                     changed = await TrySetDoubanPosterAsync(item, subject.SubjectId, cancellationToken)
                         .ConfigureAwait(false) || changed;
@@ -2613,18 +2727,18 @@ namespace StrmAssistant.Provider.Douban
         }
     }
 
-    /// <summary>豆瓣全库缓存构建的统计结果；与 TMDB/IMDb 的统一报告分开，避免日志混淆。</summary>
-    public sealed class DoubanCacheBuildReport
+    /// <summary>豆瓣全库同步的统计结果；与 TMDB/IMDb 的统一报告分开，避免日志混淆。</summary>
+    public sealed class DoubanDataSyncReport
     {
         public int Total { get; set; }
-        public int Cached { get; set; }
+        public int Matched { get; set; }
         public int Skipped { get; set; }
         public int Failed { get; set; }
 
         public string BuildSummary()
         {
-            return string.Format("DoubanCacheBuild - total={0} cached={1} skipped={2} failed={3}",
-                Total, Cached, Skipped, Failed);
+            return string.Format("DoubanSync - total={0} matched={1} skipped={2} failed={3}",
+                Total, Matched, Skipped, Failed);
         }
     }
 
@@ -2636,8 +2750,9 @@ namespace StrmAssistant.Provider.Douban
         public int Total { get; set; }
         public int Updated { get; set; }
         public int Same { get; set; }
+        public int Cleared { get; set; }
         public int Locked { get; set; }
-        public int NoImdb { get; set; }
+        public int NoId { get; set; }
         public int NoRating { get; set; }
         public int SkippedLookback { get; set; }
         public int Failed { get; set; }
@@ -2646,8 +2761,8 @@ namespace StrmAssistant.Provider.Douban
         public string BuildSummary()
         {
             return string.Format(
-                "DoubanUnify - total={0} updated={1} same={2} locked={3} noImdb={4} noRating={5} lookback={6} failed={7}",
-                Total, Updated, Same, Locked, NoImdb, NoRating, SkippedLookback, Failed);
+                "DoubanUnify - total={0} updated={1} same={2} cleared={3} locked={4} noId={5} noRating={6} lookback={7} failed={8}",
+                Total, Updated, Same, Cleared, Locked, NoId, NoRating, SkippedLookback, Failed);
         }
     }
 }

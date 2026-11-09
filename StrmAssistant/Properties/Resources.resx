@@ -603,7 +603,7 @@
     <value>Community rating source</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
-    <value>Write the CommunityRating field from a single source, including Douban. Choosing TMDB or IMDb disables the separate Douban rating override. Default is Do not interfere.</value>
+    <value>Write the CommunityRating field from a single source, including Douban. Choosing Douban makes it take over the main rating directly, with no extra switch; choosing TMDB or IMDb stops Douban from touching the main rating. Default is Do not interfere.</value>
   </data>
   <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
     <value>Do not interfere (keep as is)</value>
@@ -630,22 +630,22 @@
     <value>Clear the existing CommunityRating when the selected source has no usable score (often left over from another source). Those items will show no rating. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now" xml:space="preserve">
-    <value>Unify community rating now</value>
+    <value>Sync community rating now</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
-    <value>Unify the CommunityRating field with the selected source. TMDB / IMDb use lightweight APIs and usually finish in a minute or two. Douban looks up ratings by IMDb ID only, throttled to one request per 1.5 seconds; no subject pages are fetched. Dry Run only applies to TMDB / IMDb. Save the settings first.</value>
+    <value>Sync the CommunityRating field with the selected source. TMDB / IMDb use lightweight APIs and usually finish in a minute or two. Douban prefers the rating of the matched Douban subject and only falls back to an IMDb lookup when needed. Dry Run only applies to TMDB / IMDb. Save the settings first.</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
-    <value>Douban ratings are looked up by IMDb ID via third-party reverse-engineered endpoints, one request per 1.5 seconds. Items without an IMDb id are skipped. Endpoints may stop working; ratings stay unchanged in that case. Continue?</value>
+    <value>Douban ratings prefer the matched Douban subject; items without a Douban match fall back to a third-party IMDb lookup. Requests are throttled and breakered; ratings stay unchanged if the endpoint fails. Continue?</value>
   </data>
   <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
-    <value>Unify community rating</value>
+    <value>Sync community rating</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
-    <value>Write CommunityRating for all movies and series from the source configured in Metadata Enhance - Community rating.</value>
+    <value>Sync CommunityRating for all movies and series from the source configured in Metadata Enhance - Community rating.</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
-    <value>Douban Assist</value>
+    <value>Douban &amp; Extra Ratings</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_EpisodeGroup" xml:space="preserve">
     <value>Episode Group</value>
@@ -1296,7 +1296,52 @@
     <value>Douban Assist Scraping</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_" xml:space="preserve">
-    <value>After movie refresh, fill missing Chinese overview, genres and production locations from Douban (Chinese libraries only). Default is OFF.</value>
+    <value>After movie, series or season refresh, fill missing Chinese overview, genres and production locations from Douban (Chinese libraries only). Metadata only; it does not decide the main rating. Default is OFF.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
+    <value>Fetch Douban rating (detail-page badge)</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
+    <value>Fetch and cache the Douban rating for the detail-page badge; the main rating is not changed. Automatically enabled when the rating source is Douban.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
+    <value>Fill overview, genres, production locations</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanFillOverview_Description" xml:space="preserve">
+    <value>Fill only missing overview, genres and production locations; existing values are not overwritten. Chinese libraries only.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings" xml:space="preserve">
+    <value>Update critic ratings (MdbList)</value>
+  </data>
+  <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
+    <value>Update Rotten Tomatoes critic ratings via MdbList. Requires an API key.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
+    <value>Write the Douban rating into ProviderIds for Kodi skins. Requires the Douban rating to be fetched (automatically satisfied when the rating source is Douban).</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanCastChinese_Description" xml:space="preserve">
+    <value>Replace English actor names with Douban Chinese names. Requires the Douban subject to be fetched.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanPosterFallback_Description" xml:space="preserve">
+    <value>Use the Douban poster as the primary image when a movie has none.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description" xml:space="preserve">
+    <value>Refresh when an item is viewed or played and the last check is older than this many days. 0 disables automatic refresh. Default is 7 days.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Description" xml:space="preserve">
+    <value>Rating updates only apply to items whose premiere date is within this lookback window. 0 disables the limit. Default is 365 days.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
+    <value>Optional Douban cookie used to pass anti-crawler verification.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
+    <value>Douban open-platform V2 token. When set, the official API is preferred and HTML scraping is used as fallback.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
+    <value>Used when "Update critic ratings" is enabled. Leave empty to skip critic rating updates.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
+    <value>Clear cached season mappings so season items are matched again. Useful after a wrong season match.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Douban_Cookie" xml:space="preserve">
     <value>Douban Cookie (Optional)</value>
@@ -1332,7 +1377,7 @@
     <value>Douban Assist Scope</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAssistScrapeScope_Douban_assist_scope__Default_is_ALL_" xml:space="preserve">
-    <value>Which fields Douban assist may write: Rating, CastCharacter, NameOverview, Poster. Default is ALL.</value>
+    <value>Metadata fields Douban assist may rewrite. The rating item controls critic ratings (MdbList); the main rating is decided by Community rating source, and the Kodi third rating by Sync Douban rating to Kodi. Default is ALL.</value>
   </data>
   <data name="DoubanAssistScrapeOption_Rating_Rating" xml:space="preserve">
     <value>Rating</value>
@@ -1596,10 +1641,10 @@
     <value>Merge Multi Versions</value>
   </data>
   <data name="BuildDoubanCacheTask_Name_Build_Douban_Cache" xml:space="preserve">
-    <value>Build Douban Cache</value>
+    <value>Sync Douban Data</value>
   </data>
   <data name="BuildDoubanCacheTask_Description_Pre_fetches_Douban_subject_data_for_movies_and_series_into_the_local_cache__Cached_items_are_skipped" xml:space="preserve">
-    <value>Pre-fetches Douban subject data for movies and series into the local cache. Cached items are skipped.</value>
+    <value>Sync Douban data for the whole library: match Douban IDs, cache subjects, and apply the checked badge rating, Kodi third rating, overview, cast, poster and critic ratings. When the rating source is Douban, the main rating is also written.</value>
   </data>
   <data name="RefreshEpisodeTask_Name_Refresh_Episode" xml:space="preserve">
     <value>Refresh Episode</value>

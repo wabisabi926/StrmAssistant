@@ -2,6 +2,7 @@ using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace StrmAssistant.Options.Store
 {
@@ -70,6 +71,13 @@ namespace StrmAssistant.Options.Store
         };
 
         public static void MigrateIfNeeded(string optionsFilePath, IJsonSerializer jsonSerializer, ILogger logger)
+        {
+            MigrateFlatLayoutIfNeeded(optionsFilePath, jsonSerializer, logger);
+            MigrateDoubanLegacySettings(optionsFilePath, jsonSerializer, logger);
+        }
+
+        private static void MigrateFlatLayoutIfNeeded(string optionsFilePath, IJsonSerializer jsonSerializer,
+            ILogger logger)
         {
             try
             {
@@ -166,15 +174,28 @@ namespace StrmAssistant.Options.Store
             personEnhance.RefreshPersonMode = legacy.RefreshPersonMode;
 
             var douban = options.DoubanAssist;
-            douban.EnableDoubanAssist = legacy.EnableDoubanAssist;
             douban.DoubanCookie = legacy.DoubanCookie;
             douban.DoubanAccessToken = legacy.DoubanAccessToken;
-            douban.DoubanRatingOverride = legacy.DoubanRatingOverride;
-            douban.DoubanAssistScrapeScope = legacy.DoubanAssistScrapeScope;
+            // 「使用豆瓣评分覆盖」已删除：旧开关等价于「来源=豆瓣」。
+            if (legacy.DoubanRatingOverride)
+            {
+                options.CommunityRating.CommunityRatingSource = CommunityRatingSourceOption.Douban.ToString();
+            }
+
+            // 「豆瓣辅助」总开关拆分：按旧生效范围映射为独立能力。
+            var assist = legacy.EnableDoubanAssist;
+            var scope = legacy.DoubanAssistScrapeScope;
+            var all = ScopeIsAll(scope);
+            douban.DoubanFetchRating = assist && (all || ScopeHas(scope, "Rating"));
+            douban.DoubanFillOverview = assist && (all || ScopeHas(scope, "NameOverview"));
+            douban.DoubanCastChinese = assist && legacy.DoubanCastChinese &&
+                                       (all || ScopeHas(scope, "CastCharacter"));
+            douban.DoubanPosterFallback = assist && legacy.DoubanPosterFallback &&
+                                          (all || ScopeHas(scope, "Poster"));
+            douban.EnableMdbListCriticRating = assist && (all || ScopeHas(scope, "Rating")) &&
+                                               !string.IsNullOrWhiteSpace(legacy.MdbListApiKey);
             douban.MdbListApiKey = legacy.MdbListApiKey;
             douban.RatingUpdateLookbackDays = legacy.RatingUpdateLookbackDays;
-            douban.DoubanCastChinese = legacy.DoubanCastChinese;
-            douban.DoubanPosterFallback = legacy.DoubanPosterFallback;
 
             var posterSort = options.PosterSort;
             posterSort.PreferOriginalPoster = legacy.PreferOriginalPoster;
@@ -192,6 +213,154 @@ namespace StrmAssistant.Options.Store
             cache.MetadataCacheRootFolder = legacy.MetadataCacheRootFolder;
             cache.MetadataCacheOptionalImageTypes = legacy.MetadataCacheOptionalImageTypes;
         }
+
+        /// <summary>
+        /// 旧版豆瓣配置迁移（一次性）：
+        /// 1) 「使用豆瓣评分覆盖」true → 来源=豆瓣；
+        /// 2) 「豆瓣辅助」总开关 → 独立能力勾选（按旧生效范围映射）。
+        /// 两项必须一次性读取并重写，否则先写回的迁移会丢掉另一项的旧键。
+        /// </summary>
+        private static void MigrateDoubanLegacySettings(string optionsFilePath, IJsonSerializer jsonSerializer,
+            ILogger logger)
+        {
+            try
+            {
+                if (!File.Exists(optionsFilePath)) return;
+
+                var text = File.ReadAllText(optionsFilePath);
+                var hasOverride = text.Contains("\"DoubanRatingOverride\"");
+                var hasAssist = text.Contains("\"EnableDoubanAssist\"") ||
+                                text.Contains("\"DoubanAssistScrapeScope\"");
+                if (!hasOverride && !hasAssist) return;
+
+                // 平铺配置由 MigrateFlatLayoutIfNeeded 处理。
+                if (!IsGroupedLayout(text)) return;
+
+                var probe = jsonSerializer.DeserializeFromString<GroupedDoubanLegacyProbe>(text);
+                var options = jsonSerializer.DeserializeFromString<MetadataEnhanceOptions>(text);
+                if (options == null) return;
+
+                var legacy = probe?.DoubanAssist;
+                var douban = options.DoubanAssist;
+                if (douban == null)
+                {
+                    douban = new DoubanAssistOptions();
+                    options.DoubanAssist = douban;
+                }
+
+                if (hasOverride && legacy?.DoubanRatingOverride == true &&
+                    string.Equals(probe.CommunityRating?.CommunityRatingSource,
+                        CommunityRatingSourceOption.None.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (options.CommunityRating == null)
+                    {
+                        options.CommunityRating = new CommunityRatingOptions();
+                    }
+
+                    options.CommunityRating.CommunityRatingSource =
+                        CommunityRatingSourceOption.Douban.ToString();
+
+                    logger.Info(
+                        "MetadataEnhanceOptions: migrated DoubanRatingOverride=true to CommunityRatingSource=Douban");
+                }
+
+                if (hasAssist && legacy != null)
+                {
+                    var assist = legacy.EnableDoubanAssist;
+                    var scope = legacy.DoubanAssistScrapeScope;
+                    var all = ScopeIsAll(scope);
+
+                    douban.DoubanFetchRating = assist && (all || ScopeHas(scope, "Rating"));
+                    douban.DoubanFillOverview = assist && (all || ScopeHas(scope, "NameOverview"));
+                    douban.DoubanCastChinese = assist && legacy.DoubanCastChinese &&
+                                               (all || ScopeHas(scope, "CastCharacter"));
+                    douban.DoubanPosterFallback = assist && legacy.DoubanPosterFallback &&
+                                                  (all || ScopeHas(scope, "Poster"));
+                    douban.EnableMdbListCriticRating = assist && (all || ScopeHas(scope, "Rating")) &&
+                                                       !string.IsNullOrWhiteSpace(legacy.MdbListApiKey);
+
+                    logger.Info(
+                        "MetadataEnhanceOptions: migrated Douban assist to independent capabilities");
+                }
+
+                byte[] bytes;
+
+                using (var stream = new MemoryStream())
+                {
+                    jsonSerializer.SerializeToStream(options, stream, new JsonSerializerOptions { Indent = true });
+                    bytes = stream.ToArray();
+                }
+
+                File.WriteAllBytes(optionsFilePath, bytes);
+            }
+            catch (Exception e)
+            {
+                logger.Warn("MetadataEnhanceOptions Douban legacy migration failed: " + e.Message);
+            }
+        }
+
+        private class GroupedDoubanLegacyProbe
+        {
+            public DoubanLegacyAssistProbe DoubanAssist { get; set; }
+            public CommunityRatingSourceProbe CommunityRating { get; set; }
+        }
+
+        private class DoubanLegacyAssistProbe
+        {
+            public bool DoubanRatingOverride { get; set; }
+            public bool EnableDoubanAssist { get; set; }
+            public string DoubanAssistScrapeScope { get; set; }
+            public bool DoubanCastChinese { get; set; }
+            public bool DoubanPosterFallback { get; set; }
+            public string MdbListApiKey { get; set; }
+        }
+
+        private class CommunityRatingSourceProbe
+        {
+            public string CommunityRatingSource { get; set; }
+        }
+
+        private static readonly string[] KnownScopeFields =
+        {
+            "Rating", "CastCharacter", "NameOverview", "Poster"
+        };
+
+        /// <summary>旧生效范围为空、只有媒体库 ID、或包含全部字段时视为全部。</summary>
+        private static bool ScopeIsAll(string scope)
+        {
+            if (string.IsNullOrWhiteSpace(scope)) return true;
+
+            var tokens = SplitScope(scope);
+            if (tokens.Length == 0) return true;
+            if (!HasKnownScopeField(tokens)) return true;
+
+            return KnownScopeFields.All(k =>
+                tokens.Any(t => string.Equals(k, t, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        private static bool ScopeHas(string scope, string field)
+        {
+            if (string.IsNullOrWhiteSpace(scope)) return true;
+
+            var tokens = SplitScope(scope);
+            if (tokens.Length == 0) return true;
+            if (!HasKnownScopeField(tokens)) return true;
+
+            return tokens.Any(t => string.Equals(t, field, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string[] SplitScope(string scope)
+        {
+            return scope.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
+        }
+
+        private static bool HasKnownScopeField(string[] tokens)
+        {
+            return tokens.Any(t => KnownScopeFields.Any(k =>
+                string.Equals(k, t, StringComparison.OrdinalIgnoreCase)));
+        }
+
 
         /// <summary>
         /// 旧版（3.0.55 及以前）的平铺配置 DTO，仅用于一次性迁移读取。

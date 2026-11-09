@@ -1227,7 +1227,7 @@
     <value>更新影評人評分（MdbList）</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>透過 MdbList 更新爛番茄影評人評分；需填寫 API Key。</value>
+    <value>透過 MdbList 更新爛番茄影評人評分；使用的 API Key 在上方「社群評分」分組填寫。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
     <value>將豆瓣評分寫入 ProviderIds，供 Kodi 面板讀取；需抓取豆瓣評分（來源=豆瓣時自動滿足）。</value>
@@ -1251,7 +1251,7 @@
     <value>豆瓣開放平台 V2 Token；設定後優先使用官方介面，失敗回退網頁刮削。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>啟用「更新影評人評分」後使用；留空則不更新。</value>
+    <value>供「社群評分來源 = IMDb」與豆瓣分組的「更新影評人評分」共用。留空時 IMDb 來源會被跳過。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>清除快取的季對應，強制重新比對季條目。季比對錯誤後使用。</value>

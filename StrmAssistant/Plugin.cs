@@ -531,7 +531,7 @@ namespace StrmAssistant
             // 豆瓣数据层已启用时由 ApplyAsync 顺带处理，这里只兜底「只要影评人评分」的配置。
             if (!metadataOptions.IsDoubanDataEnabled &&
                 metadataOptions.DoubanAssist.EnableMdbListCriticRating &&
-                !string.IsNullOrWhiteSpace(metadataOptions.DoubanAssist.MdbListApiKey) &&
+                !string.IsNullOrWhiteSpace(metadataOptions.CommunityRating?.MdbListApiKey) &&
                 (e.Argument.Item is Movie || e.Argument.Item is Series))
             {
                 var mdbItem = e.Argument.Item;
@@ -541,7 +541,7 @@ namespace StrmAssistant
 
                 if (inLookback)
                 {
-                    var mdbKey = metadataOptions.DoubanAssist.MdbListApiKey;
+                    var mdbKey = metadataOptions.CommunityRating.MdbListApiKey;
                     _ = BackgroundTaskRunner.Run("MdbList.CriticRating",
                         () => DoubanAssist.UpdateMdbListRatingsAsync(mdbItem, mdbKey, CancellationToken.None));
                 }

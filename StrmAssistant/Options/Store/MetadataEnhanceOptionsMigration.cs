@@ -74,6 +74,7 @@ namespace StrmAssistant.Options.Store
         {
             MigrateFlatLayoutIfNeeded(optionsFilePath, jsonSerializer, logger);
             MigrateDoubanLegacySettings(optionsFilePath, jsonSerializer, logger);
+            MigrateMdbListKey(optionsFilePath, jsonSerializer, logger);
         }
 
         private static void MigrateFlatLayoutIfNeeded(string optionsFilePath, IJsonSerializer jsonSerializer,
@@ -194,7 +195,8 @@ namespace StrmAssistant.Options.Store
                                           (all || ScopeHas(scope, "Poster"));
             douban.EnableMdbListCriticRating = assist && (all || ScopeHas(scope, "Rating")) &&
                                                !string.IsNullOrWhiteSpace(legacy.MdbListApiKey);
-            douban.MdbListApiKey = legacy.MdbListApiKey;
+            // MdbList Key 属于外部评分源凭据，已迁到「社区评分」分组。
+            options.CommunityRating.MdbListApiKey = legacy.MdbListApiKey;
             douban.RatingUpdateLookbackDays = legacy.RatingUpdateLookbackDays;
 
             var posterSort = options.PosterSort;
@@ -283,6 +285,21 @@ namespace StrmAssistant.Options.Store
                         "MetadataEnhanceOptions: migrated Douban assist to independent capabilities");
                 }
 
+                // MdbList Key 在迁移前属于豆瓣分组，写回前必须搬到社区评分分组，
+                // 否则序列化时会随旧属性一起消失。
+                if (legacy != null && !string.IsNullOrWhiteSpace(legacy.MdbListApiKey))
+                {
+                    if (options.CommunityRating == null)
+                    {
+                        options.CommunityRating = new CommunityRatingOptions();
+                    }
+
+                    if (string.IsNullOrWhiteSpace(options.CommunityRating.MdbListApiKey))
+                    {
+                        options.CommunityRating.MdbListApiKey = legacy.MdbListApiKey;
+                    }
+                }
+
                 byte[] bytes;
 
                 using (var stream = new MemoryStream())
@@ -296,6 +313,56 @@ namespace StrmAssistant.Options.Store
             catch (Exception e)
             {
                 logger.Warn("MetadataEnhanceOptions Douban legacy migration failed: " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// MdbList Key 从「豆瓣与附加评分」迁到「社区评分」：凭据属于外部评分源，
+        /// 不应随豆瓣分组。目标位置已有值时保留新值。旧键在反序列化时被忽略，
+        /// 写回后自然消失。
+        /// </summary>
+        private static void MigrateMdbListKey(string optionsFilePath, IJsonSerializer jsonSerializer,
+            ILogger logger)
+        {
+            try
+            {
+                if (!File.Exists(optionsFilePath)) return;
+
+                var text = File.ReadAllText(optionsFilePath);
+                if (!text.Contains("\"MdbListApiKey\"") || !IsGroupedLayout(text)) return;
+
+                var probe = jsonSerializer.DeserializeFromString<GroupedDoubanLegacyProbe>(text);
+                var legacyKey = probe?.DoubanAssist?.MdbListApiKey;
+                if (string.IsNullOrWhiteSpace(legacyKey)) return;
+
+                var options = jsonSerializer.DeserializeFromString<MetadataEnhanceOptions>(text);
+                if (options == null) return;
+
+                if (options.CommunityRating == null)
+                {
+                    options.CommunityRating = new CommunityRatingOptions();
+                }
+
+                if (string.IsNullOrWhiteSpace(options.CommunityRating.MdbListApiKey))
+                {
+                    options.CommunityRating.MdbListApiKey = legacyKey;
+                }
+
+                byte[] bytes;
+
+                using (var stream = new MemoryStream())
+                {
+                    jsonSerializer.SerializeToStream(options, stream, new JsonSerializerOptions { Indent = true });
+                    bytes = stream.ToArray();
+                }
+
+                File.WriteAllBytes(optionsFilePath, bytes);
+
+                logger.Info("MetadataEnhanceOptions: moved MdbList API key to CommunityRating group");
+            }
+            catch (Exception e)
+            {
+                logger.Warn("MetadataEnhanceOptions MdbList key migration failed: " + e.Message);
             }
         }
 

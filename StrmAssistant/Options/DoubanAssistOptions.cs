@@ -50,11 +50,6 @@ namespace StrmAssistant.Options
         [Required]
         public bool EnableMdbListCriticRating { get; set; } = false;
 
-        [DisplayNameL("MetadataEnhanceOptions_MdbListApiKey_MdbList_Api_Key", typeof(Resources))]
-        [DescriptionL("MetadataEnhanceOptions_MdbListApiKey_Description", typeof(Resources))]
-        [VisibleCondition(nameof(EnableMdbListCriticRating), SimpleCondition.IsTrue)]
-        public string MdbListApiKey { get; set; } = string.Empty;
-
         [DisplayNameL("MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days", typeof(Resources))]
         [DescriptionL("MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description", typeof(Resources))]
         [Required, MinValue(0)]

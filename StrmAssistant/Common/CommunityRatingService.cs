@@ -133,7 +133,7 @@ namespace StrmAssistant.Common
             }
 
             if (options.ParsedSource == CommunityRatingSourceOption.Imdb &&
-                string.IsNullOrWhiteSpace(root.DoubanAssist?.MdbListApiKey))
+                string.IsNullOrWhiteSpace(options.MdbListApiKey))
             {
                 Logger?.Warn("CommunityRating - skipped: IMDb source requires MdbList API key");
                 progress?.Report(100);
@@ -195,7 +195,7 @@ namespace StrmAssistant.Common
 
                 try
                 {
-                    var outcome = await UnifyItemCoreAsync(item, root, options, apply, cancellationToken)
+                    var outcome = await UnifyItemCoreAsync(item, options, apply, cancellationToken)
                         .ConfigureAwait(false);
                     report.Record(outcome, item);
                 }
@@ -226,7 +226,7 @@ namespace StrmAssistant.Common
 
             try
             {
-                var outcome = await UnifyItemCoreAsync(item, root, options, true, cancellationToken)
+                var outcome = await UnifyItemCoreAsync(item, options, true, cancellationToken)
                     .ConfigureAwait(false);
                 return outcome == CommunityRatingUnifyOutcome.Updated ||
                        outcome == CommunityRatingUnifyOutcome.Cleared;
@@ -243,14 +243,13 @@ namespace StrmAssistant.Common
         }
 
         private async Task<CommunityRatingUnifyOutcome> UnifyItemCoreAsync(BaseItem item,
-            MetadataEnhanceOptions root, CommunityRatingOptions options, bool apply,
-            CancellationToken cancellationToken)
+            CommunityRatingOptions options, bool apply, CancellationToken cancellationToken)
         {
             if (item == null || item.IsVirtualItem) return CommunityRatingUnifyOutcome.NoId;
 
             if (IsRatingLocked(item)) return CommunityRatingUnifyOutcome.Locked;
 
-            var lookup = await LookupAsync(item, root, options, cancellationToken).ConfigureAwait(false);
+            var lookup = await LookupAsync(item, options, cancellationToken).ConfigureAwait(false);
 
             switch (lookup.Status)
             {
@@ -271,7 +270,7 @@ namespace StrmAssistant.Common
             return ApplyRating(item, lookup, options.ParsedSource);
         }
 
-        private async Task<RatingLookup> LookupAsync(BaseItem item, MetadataEnhanceOptions root,
+        private async Task<RatingLookup> LookupAsync(BaseItem item,
             CommunityRatingOptions options, CancellationToken cancellationToken)
         {
             switch (options.ParsedSource)
@@ -279,7 +278,7 @@ namespace StrmAssistant.Common
                 case CommunityRatingSourceOption.Tmdb:
                     return await LookupTmdbAsync(item, options, cancellationToken).ConfigureAwait(false);
                 case CommunityRatingSourceOption.Imdb:
-                    return await LookupImdbAsync(item, root.DoubanAssist?.MdbListApiKey, cancellationToken)
+                    return await LookupImdbAsync(item, options.MdbListApiKey, cancellationToken)
                         .ConfigureAwait(false);
                 default:
                     return new RatingLookup { Status = LookupStatus.NoId, Detail = "source not set" };
@@ -521,6 +520,9 @@ namespace StrmAssistant.Common
             if (!changed) return CommunityRatingUnifyOutcome.Same;
 
             item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+            // 主评分已被 TMDB / IMDb 接管，豆瓣快照的「已应用」标记必须复位，
+            // 否则前端仍会凭旧标记显示豆瓣图标。
+            Plugin.DoubanAssist?.InvalidateRatingApplied(item);
             return CommunityRatingUnifyOutcome.Updated;
         }
 
@@ -544,6 +546,7 @@ namespace StrmAssistant.Common
             if (!changed) return CommunityRatingUnifyOutcome.Same;
 
             item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+            Plugin.DoubanAssist?.InvalidateRatingApplied(item);
             return CommunityRatingUnifyOutcome.Cleared;
         }
 

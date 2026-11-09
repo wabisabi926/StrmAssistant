@@ -1314,7 +1314,7 @@
     <value>Update critic ratings (MdbList)</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>Update Rotten Tomatoes critic ratings via MdbList. Requires an API key.</value>
+    <value>Update Rotten Tomatoes critic ratings via MdbList. Set the API key in the Community Rating group above.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
     <value>Write the Douban rating into ProviderIds for Kodi skins. Requires the Douban rating to be fetched (automatically satisfied when the rating source is Douban).</value>
@@ -1338,7 +1338,7 @@
     <value>Douban open-platform V2 token. When set, the official API is preferred and HTML scraping is used as fallback.</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>Used when "Update critic ratings" is enabled. Leave empty to skip critic rating updates.</value>
+    <value>Shared by the IMDb rating source and the critic rating update in the Douban group. The IMDb source is skipped when empty.</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>Clear cached season mappings so season items are matched again. Useful after a wrong season match.</value>

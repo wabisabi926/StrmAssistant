@@ -66,6 +66,20 @@ namespace StrmAssistant.Tests
             Assert.False(new MetadataEnhanceOptions().IsDoubanDataEnabled);
         }
 
+        [Fact]
+        public void MdbListKey_LivesOnCommunityRatingAndDoesNotActivateDoubanLayer()
+        {
+            var options = new MetadataEnhanceOptions
+            {
+                CommunityRating = { MdbListApiKey = "test-key" }
+            };
+
+            // 凭据属于外部评分源：不影响豆瓣数据层，也不会让豆瓣能力隐式开启。
+            Assert.Equal("test-key", options.CommunityRating.MdbListApiKey);
+            Assert.False(options.IsDoubanDataEnabled);
+            Assert.False(options.DoubanAssist.EnableMdbListCriticRating);
+        }
+
         [Theory]
         [InlineData("")]
         [InlineData("zh-CN")]

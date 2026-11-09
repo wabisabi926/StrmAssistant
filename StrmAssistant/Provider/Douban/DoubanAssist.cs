@@ -187,6 +187,13 @@ namespace StrmAssistant.Provider.Douban
             public bool? Applied { get; set; }
 
             /// <summary>
+            /// 最近一次写主评分时记录的来源：<c>douban</c> / <c>tmdb</c> / <c>imdb</c>；
+            /// 空表示旧版快照（无此字段）。读取时与 <see cref="Applied"/> 配合，
+            /// 避免仅凭「主评分与豆瓣分相等」把别的来源误判成豆瓣。
+            /// </summary>
+            public string WrittenSource { get; set; }
+
+            /// <summary>
             /// 最近一次成功检查豆瓣条目的时间（与评分是否变化无关），用于「按需刷新」冷却判定。
             /// 可空：旧版快照无此字段，回退用 <see cref="Updated"/>。
             /// </summary>
@@ -457,8 +464,14 @@ namespace StrmAssistant.Provider.Douban
                         // 豆瓣与 TMDB 同分时会把 TMDB 的分错标成豆瓣 logo。
                         var ratingMatches = snapshot != null && item.CommunityRating.HasValue &&
                                             Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
+
+                        // 有 WrittenSource 时以它为准（能区分「同分不同源」）；
+                        // 旧快照没有该字段才退回数字比对。
+                        var writtenSource = snapshot?.WrittenSource;
                         var applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                      string.IsNullOrEmpty(source) && ratingMatches;
+                                      string.IsNullOrEmpty(source) &&
+                                      (string.Equals(writtenSource, "douban", StringComparison.OrdinalIgnoreCase) ||
+                                       string.IsNullOrEmpty(writtenSource) && ratingMatches);
 
                         if (string.IsNullOrEmpty(source) && applied) source = "douban";
 
@@ -554,8 +567,11 @@ namespace StrmAssistant.Provider.Douban
 
                                 var ratingMatches = item.CommunityRating.HasValue &&
                                                     Math.Abs(item.CommunityRating.Value - imdbSnapshot.Rating) <= 0.05;
+                                var writtenSource = imdbSnapshot.WrittenSource;
                                 applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                          string.IsNullOrEmpty(source) && ratingMatches;
+                                          string.IsNullOrEmpty(source) &&
+                                          (string.Equals(writtenSource, "douban", StringComparison.OrdinalIgnoreCase) ||
+                                           string.IsNullOrEmpty(writtenSource) && ratingMatches);
                             }
                         }
                     }
@@ -688,6 +704,7 @@ namespace StrmAssistant.Provider.Douban
                     // 豆瓣分变了，CommunityRating 还停在旧分，两者已不同源：
                     // 先置 false，等真正写入主评分后再由 MarkRatingApplied 置 true。
                     existing.Applied = false;
+                    existing.WrittenSource = null;
 
                     SaveRatings();
                     return;
@@ -699,7 +716,8 @@ namespace StrmAssistant.Provider.Douban
                     Votes = votes,
                     Updated = now,
                     Checked = now,
-                    Applied = false
+                    Applied = false,
+                    WrittenSource = null
                 };
 
                 SaveRatings();
@@ -937,9 +955,13 @@ namespace StrmAssistant.Provider.Douban
                 if (_ratings == null) LoadRatings();
 
                 if (!_ratings.TryGetValue(subjectId, out var snapshot)) return;
-                if (snapshot.Applied == applied) return;
+
+                var writtenSource = applied ? "douban" : null;
+
+                if (snapshot.Applied == applied && snapshot.WrittenSource == writtenSource) return;
 
                 snapshot.Applied = applied;
+                snapshot.WrittenSource = writtenSource;
 
                 if (DateTime.UtcNow - _lastRatingsSave < RatingsSaveThrottle) return;
                 _lastRatingsSave = DateTime.UtcNow;
@@ -947,8 +969,23 @@ namespace StrmAssistant.Provider.Douban
             }
         }
 
+        /// <summary>
+        /// 主评分被 TMDB / IMDb 接管或清空时，把该条目的豆瓣快照应用标记复位，
+        /// 避免前端继续凭旧标记显示豆瓣图标。批量任务收尾由 <see cref="FlushRatings"/> 落盘。
+        /// </summary>
+        public void InvalidateRatingApplied(BaseItem item)
+        {
+            if (item == null) return;
+
+            var subjectId = item.GetProviderId(DoubanProviderId);
+            if (!string.IsNullOrEmpty(subjectId)) MarkRatingApplied(subjectId, false);
+
+            var imdbKey = GetImdbSnapshotKey(item.GetProviderId(MetadataProviders.Imdb));
+            if (!string.IsNullOrEmpty(imdbKey)) MarkRatingApplied(imdbKey, false);
+        }
+
         /// <summary>强制把评分快照落盘（批量任务收尾用，避免节流窗口内的最后一次改动丢失）。</summary>
-        private void FlushRatings()
+        public void FlushRatings()
         {
             lock (_ratingsLock)
             {
@@ -1348,7 +1385,7 @@ namespace StrmAssistant.Provider.Douban
             var doubanEnabled = options.IsDoubanDataEnabled;
             var mdbListOnly = !doubanEnabled &&
                               options.DoubanAssist.EnableMdbListCriticRating &&
-                              !string.IsNullOrWhiteSpace(options.DoubanAssist.MdbListApiKey);
+                              !string.IsNullOrWhiteSpace(options.CommunityRating?.MdbListApiKey);
 
             if (!doubanEnabled && !mdbListOnly)
             {
@@ -1388,7 +1425,7 @@ namespace StrmAssistant.Provider.Douban
                     }
                     else
                     {
-                        await UpdateMdbListRatingsAsync(item, options.DoubanAssist.MdbListApiKey, cancellationToken)
+                        await UpdateMdbListRatingsAsync(item, options.CommunityRating?.MdbListApiKey, cancellationToken)
                             .ConfigureAwait(false);
                     }
 
@@ -1840,12 +1877,12 @@ namespace StrmAssistant.Provider.Douban
                 // 影评人评分独立于豆瓣主评分，但与豆瓣数据层共用同一次刷新；
                 // 数据层未启用时由 Plugin 的独立 MdbList 钩子处理。
                 if (options.DoubanAssist.EnableMdbListCriticRating &&
-                    !string.IsNullOrWhiteSpace(options.DoubanAssist.MdbListApiKey) &&
+                    !string.IsNullOrWhiteSpace(options.CommunityRating?.MdbListApiKey) &&
                     (options.DoubanAssist.RatingUpdateLookbackDays <= 0 || !item.PremiereDate.HasValue ||
                      item.PremiereDate.Value >= DateTime.UtcNow.AddDays(
                          -options.DoubanAssist.RatingUpdateLookbackDays)))
                 {
-                    await UpdateMdbListRatingsAsync(item, options.DoubanAssist.MdbListApiKey, cancellationToken)
+                    await UpdateMdbListRatingsAsync(item, options.CommunityRating?.MdbListApiKey, cancellationToken)
                         .ConfigureAwait(false);
                 }
 

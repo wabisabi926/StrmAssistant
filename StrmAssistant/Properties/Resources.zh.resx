@@ -1227,7 +1227,7 @@
     <value>更新影评人评分（MdbList）</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>通过 MdbList 更新烂番茄影评人评分；需填写 API Key。</value>
+    <value>通过 MdbList 更新烂番茄影评人评分；使用的 API Key 在上方「社区评分」分组填写。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
     <value>将豆瓣评分写入 ProviderIds，供 Kodi 皮肤读取；需抓取豆瓣评分（来源=豆瓣时自动满足）。</value>
@@ -1251,7 +1251,7 @@
     <value>豆瓣开放平台 V2 Token；配置后优先使用官方接口，失败回退网页刮削。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>启用「更新影评人评分」后使用；留空则不更新。</value>
+    <value>供「社区评分来源 = IMDb」与豆瓣分组的「更新影评人评分」共用。留空时 IMDb 来源会被跳过。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>清除缓存的季映射，强制重新匹配季条目。季匹配错误后使用。</value>

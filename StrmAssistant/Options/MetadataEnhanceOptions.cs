@@ -43,7 +43,7 @@ namespace StrmAssistant.Options
         [DisplayNameL("MetadataEnhanceOptions_Group_CommunityRating", typeof(Resources))]
         public CommunityRatingOptions CommunityRating { get; set; } = new CommunityRatingOptions();
 
-        /// <summary>豆瓣与附加评分：每个能力独立勾选，主评分由「社区评分来源」决定。</summary>
+        /// <summary>豆瓣与附加评分：每个能力独立勾选，社区评分由「社区评分来源」决定。</summary>
         [DisplayNameL("MetadataEnhanceOptions_Group_DoubanAssist", typeof(Resources))]
         public DoubanAssistOptions DoubanAssist { get; set; } = new DoubanAssistOptions();
 
@@ -59,7 +59,7 @@ namespace StrmAssistant.Options
         [DisplayNameL("MetadataEnhanceOptions_Group_MetadataCache", typeof(Resources))]
         public MetadataCacheOptions MetadataCache { get; set; } = new MetadataCacheOptions();
 
-        /// <summary>社区评分来源是否为豆瓣；为 true 时豆瓣评分直接接管主评分，无需额外开关。</summary>
+        /// <summary>社区评分来源是否为豆瓣；为 true 时豆瓣评分直接接管社区评分，无需额外开关。</summary>
         [Browsable(false)]
         public bool IsDoubanRatingSource => CommunityRating?.ParsedSource == CommunityRatingSourceOption.Douban;
 

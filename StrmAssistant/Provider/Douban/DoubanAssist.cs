@@ -26,7 +26,7 @@ namespace StrmAssistant.Provider.Douban
     /// <summary>
     /// 豆瓣数据层：按 IMDb（Wikidata P4529 解析）或标题匹配豆瓣条目，负责
     /// ① 建立 ProviderIds["Douban"] 关联；② 预取/缓存 subject 数据；③ 按「社区评分来源」
-    /// 写入主评分；④ 按开关写 Kodi 第三评分；⑤ 可选补全简介/演员/海报。
+    /// 写入社区评分；④ 按开关写 Kodi 第三评分；⑤ 可选补全简介/演员/海报。
     /// 带 7 天文件缓存、2 秒频控与风控熔断。
     /// </summary>
     public class DoubanAssist
@@ -187,9 +187,9 @@ namespace StrmAssistant.Provider.Douban
             public bool? Applied { get; set; }
 
             /// <summary>
-            /// 最近一次写主评分时记录的来源：<c>douban</c> / <c>tmdb</c> / <c>imdb</c>；
+            /// 最近一次写社区评分时记录的来源：<c>douban</c> / <c>tmdb</c> / <c>imdb</c>；
             /// 空表示旧版快照（无此字段）。读取时与 <see cref="Applied"/> 配合，
-            /// 避免仅凭「主评分与豆瓣分相等」把别的来源误判成豆瓣。
+            /// 避免仅凭「社区评分与豆瓣分相等」把别的来源误判成豆瓣。
             /// </summary>
             public string WrittenSource { get; set; }
 
@@ -216,7 +216,7 @@ namespace StrmAssistant.Provider.Douban
             /// </summary>
             public string Source { get; set; }
 
-            /// <summary>条目当前的主评分，供前端校验「图标与数字同源」。</summary>
+            /// <summary>条目当前的社区评分，供前端校验「图标与数字同源」。</summary>
             public double? CommunityRating { get; set; }
         }
 
@@ -232,10 +232,10 @@ namespace StrmAssistant.Provider.Douban
             public long? Votes { get; set; }
             public bool Applied { get; set; }
 
-            /// <summary>主评分来源：douban / tmdb / imdb，空表示无显式来源。</summary>
+            /// <summary>社区评分来源：douban / tmdb / imdb，空表示无显式来源。</summary>
             public string Source { get; set; }
 
-            /// <summary>条目当前的主评分，供调用方校验「图标与数字同源」。</summary>
+            /// <summary>条目当前的社区评分，供调用方校验「图标与数字同源」。</summary>
             public double? CommunityRating { get; set; }
         }
 
@@ -458,7 +458,7 @@ namespace StrmAssistant.Provider.Douban
                         if (snapshot == null && string.IsNullOrEmpty(source)) continue;
 
                         // Applied 以显式来源优先：
-                        //   来源=douban → 主评分确由豆瓣写入，直接为真；
+                        //   来源=douban → 社区评分确由豆瓣写入，直接为真；
                         //   无来源标记 → 退回「当前 CommunityRating 与豆瓣快照相等」的实测推断（兼容旧数据）。
                         // 不能再把两者做 &&：实测相等只能证明数字相同，不能证明来源，
                         // 豆瓣与 TMDB 同分时会把 TMDB 的分错标成豆瓣 logo。
@@ -702,7 +702,7 @@ namespace StrmAssistant.Provider.Douban
                     existing.Votes = votes;
                     existing.Updated = now;
                     // 豆瓣分变了，CommunityRating 还停在旧分，两者已不同源：
-                    // 先置 false，等真正写入主评分后再由 MarkRatingApplied 置 true。
+                    // 先置 false，等真正写入社区评分后再由 MarkRatingApplied 置 true。
                     existing.Applied = false;
                     existing.WrittenSource = null;
 
@@ -813,7 +813,7 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 「无评分时清空」：只清主评分及其来源快照，保留独立的 DoubanRating 第三评分。
+        /// 「无评分时清空」：只清社区评分及其来源快照，保留独立的 DoubanRating 第三评分。
         /// </summary>
         private static bool ClearMainRating(BaseItem item)
         {
@@ -970,7 +970,7 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 主评分被 TMDB / IMDb 接管或清空时，把该条目的豆瓣快照应用标记复位，
+        /// 社区评分被 TMDB / IMDb 接管或清空时，把该条目的豆瓣快照应用标记复位，
         /// 避免前端继续凭旧标记显示豆瓣图标。批量任务收尾由 <see cref="FlushRatings"/> 落盘。
         /// </summary>
         public void InvalidateRatingApplied(BaseItem item)
@@ -1373,7 +1373,7 @@ namespace StrmAssistant.Provider.Douban
         /// <summary>
         /// 全库同步豆瓣数据：逐条匹配豆瓣条目、写关联 ID、缓存 subject，
         /// 并按勾选应用徽章评分 / Kodi 第三评分 / 简介 / 演员 / 海报 / MdbList。
-        /// 来源=豆瓣时 ApplyAsync 会同时写主评分；来源不是豆瓣时不动主评分。
+        /// 来源=豆瓣时 ApplyAsync 会同时写社区评分；来源不是豆瓣时不动社区评分。
         /// 全程复用 2 秒频控、6 小时熔断、缓存命中跳过。
         /// </summary>
         public async Task<DoubanDataSyncReport> SyncAllDoubanDataAsync(IProgress<double> progress,
@@ -1469,7 +1469,7 @@ namespace StrmAssistant.Provider.Douban
         /// <summary>
         /// 豆瓣全库评分：优先使用已匹配豆瓣条目的评分（subject 缓存 / 页面 / V2 API），
         /// 没有豆瓣 ID 或条目无评分时才回退到 IMDb → 第三方 API。
-        /// 两条通道的结果都会写入同一份评分快照；主评分、来源标记与
+        /// 两条通道的结果都会写入同一份评分快照；社区评分、来源标记与
         /// <c>ProviderIds["DoubanRating"]</c>（受「同步到 Kodi」开关控制）由本方法统一写入。
         /// </summary>
         public async Task<DoubanUnifyReport> UnifyRatingsAsync(IProgress<double> progress,
@@ -1691,7 +1691,7 @@ namespace StrmAssistant.Provider.Douban
 
             if (!options.IsDoubanDataEnabled || item == null) return;
 
-            // 主评分由「社区评分来源」决定；本方法只处理豆瓣相关能力，每个能力独立开关。
+            // 社区评分由「社区评分来源」决定；本方法只处理豆瓣相关能力，每个能力独立开关。
             var isDoubanRatingSource = options.IsDoubanRatingSource;
             var metadataEnabled = options.DoubanAssist.DoubanFillOverview ||
                                   options.DoubanAssist.DoubanCastChinese ||
@@ -1740,7 +1740,7 @@ namespace StrmAssistant.Provider.Douban
                 var changed = false;
 
                 // 评分值：豆瓣条目分优先；条目本身无评分时才回退 IMDb 第三方 API。
-                // 只有需要豆瓣评分的能力（主评分/徽章/Kodi）开启时才做这一步。
+                // 只有需要豆瓣评分的能力（社区评分/徽章/Kodi）开启时才做这一步。
                 var needDoubanRating = isDoubanRatingSource ||
                                        options.DoubanAssist.DoubanFetchRating ||
                                        options.DoubanAssist.DoubanRatingToKodi;
@@ -1775,7 +1775,7 @@ namespace StrmAssistant.Provider.Douban
                 }
 
                 // 第三形态：豆瓣分写入 ProviderIds，供 Kodi 皮肤独立读取；
-                // 与主评分（CommunityRating）/ 次评分（CriticRating）互不影响。
+                // 与社区评分（CommunityRating）/ 次评分（CriticRating）互不影响。
                 if (SyncRatingProviderId(item, doubanRating, options.DoubanAssist.DoubanRatingToKodi))
                 {
                     changed = true;
@@ -1819,7 +1819,7 @@ namespace StrmAssistant.Provider.Douban
                     }
                 }
 
-                // 主评分只由「社区评分来源」决定：选豆瓣时豆瓣无条件接管，
+                // 社区评分只由「社区评分来源」决定：选豆瓣时豆瓣无条件接管，
                 // 不再需要旧的「使用豆瓣评分覆盖」开关。
                 // 但 CommunityRating 字段被锁定时不写，与全库同步保持同一规则。
                 if (isDoubanRatingSource && doubanRating.HasValue &&
@@ -1843,7 +1843,7 @@ namespace StrmAssistant.Provider.Douban
                                 subject.Votes);
                         }
 
-                        // 主评分此刻归豆瓣所有：写来源标记，前端据此换豆瓣 logo，
+                        // 社区评分此刻归豆瓣所有：写来源标记，前端据此换豆瓣 logo，
                         // 也避免「豆瓣分与 TMDB 分恰好相等」时把来源判错。
                         if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
                                 StringComparison.OrdinalIgnoreCase))
@@ -1874,7 +1874,7 @@ namespace StrmAssistant.Provider.Douban
                     _logger.Debug("DoubanAssist - Rating skipped (reason=SourceNotDouban): {0}", item.Name);
                 }
 
-                // 影评人评分独立于豆瓣主评分，但与豆瓣数据层共用同一次刷新；
+                // 影评人评分独立于豆瓣社区评分，但与豆瓣数据层共用同一次刷新；
                 // 数据层未启用时由 Plugin 的独立 MdbList 钩子处理。
                 if (options.DoubanAssist.EnableMdbListCriticRating &&
                     !string.IsNullOrWhiteSpace(options.CommunityRating?.MdbListApiKey) &&

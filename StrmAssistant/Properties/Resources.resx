@@ -603,7 +603,7 @@
     <value>Community rating source</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
-    <value>Unifies CommunityRating to the selected source. With Douban the Douban score takes over the main rating; with TMDB or IMDb, Douban leaves it untouched.</value>
+    <value>Unifies CommunityRating to the selected source. With Douban the Douban score takes over the community rating; with TMDB or IMDb, Douban leaves it untouched.</value>
   </data>
   <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
     <value>Do not interfere (keep as is)</value>
@@ -1296,13 +1296,13 @@
     <value>Douban Assist Scraping</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_" xml:space="preserve">
-    <value>After movie, series or season refresh, fill missing Chinese overview, genres and production locations from Douban (Chinese libraries only). Metadata only; it does not decide the main rating. Default is OFF.</value>
+    <value>After movie, series or season refresh, fill missing Chinese overview, genres and production locations from Douban (Chinese libraries only). Metadata only; it does not decide the community rating. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
     <value>Fetch Douban Rating</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>Fetches and caches the Douban rating for the detail-page badge without touching the main rating. Enabled automatically when the source is Douban.</value>
+    <value>Fetches and caches the Douban rating for the detail-page badge without touching the community rating. Enabled automatically when the source is Douban.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>Fill Overview and Genres</value>
@@ -1314,10 +1314,10 @@
     <value>Update Critic Ratings</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>Writes the Rotten Tomatoes score to the critic rating (CriticRating) without touching the main rating. Requires an MdbList API key.</value>
+    <value>Writes the Rotten Tomatoes score to the critic rating (CriticRating) without touching the community rating. Requires an MdbList API key.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
-    <value>Writes the Douban rating to ProviderIds for Kodi skins without touching the main rating.</value>
+    <value>Writes the Douban rating to ProviderIds for Kodi skins without touching the community rating.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCastChinese_Description" xml:space="preserve">
     <value>Replaces English-only cast names with Douban Chinese names. Chinese items only.</value>
@@ -1338,7 +1338,7 @@
     <value>Douban open-platform V2 token. The official API is preferred when set.</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>Fetches ratings by IMDb ID: the IMDb score for the main rating and the Rotten Tomatoes score for the critic rating.</value>
+    <value>Fetches ratings by IMDb ID: the IMDb score for the community rating and the Rotten Tomatoes score for the critic rating.</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>Clears cached season mappings so season items are matched again.</value>
@@ -1614,7 +1614,7 @@
     <value>Sync Douban Data</value>
   </data>
   <data name="BuildDoubanCacheTask_Description_Pre_fetches_Douban_subject_data_for_movies_and_series_into_the_local_cache__Cached_items_are_skipped" xml:space="preserve">
-    <value>Syncs Douban data for movies, series and seasons: matches Douban IDs, caches subjects, and applies ratings, overview, cast, poster and critic rating as configured. Writes the main rating when the source is Douban.</value>
+    <value>Syncs Douban data for movies, series and seasons: matches Douban IDs, caches subjects, and applies ratings, overview, cast, poster and critic rating as configured. Writes the community rating when the source is Douban.</value>
   </data>
   <data name="RefreshEpisodeTask_Name_Refresh_Episode" xml:space="preserve">
     <value>Refresh Episode</value>

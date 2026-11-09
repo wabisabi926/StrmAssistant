@@ -26,14 +26,14 @@ namespace StrmAssistant.Common
     /// 按配置的来源取分、写入，并在 ProviderIds 留下来源标记，供前端与 Kodi 判断。
     ///
     /// 与豆瓣评分互斥：来源选 TMDB / IMDb 时，豆瓣评分只写 <c>DoubanRating</c>（若开启同步到 Kodi），
-    /// 不再修改 <c>CommunityRating</c>；来源选豆瓣时由 <c>DoubanAssist</c> 接管主评分。
+    /// 不再修改 <c>CommunityRating</c>；来源选豆瓣时由 <c>DoubanAssist</c> 接管社区评分。
     /// </summary>
     public class CommunityRatingService
     {
         /// <summary>来源标记：tmdb / imdb。Emby 本身不记录来源，只能自己写。</summary>
         public const string SourceProviderId = "CommunityRatingSource";
 
-        /// <summary>各来源的分数快照，供 Kodi 皮肤并存读取，与主评分互不抢占。</summary>
+        /// <summary>各来源的分数快照，供 Kodi 皮肤并存读取，与社区评分互不抢占。</summary>
         public const string TmdbRatingProviderId = "TmdbRating";
 
         public const string ImdbRatingProviderId = "ImdbRating";
@@ -510,7 +510,7 @@ namespace StrmAssistant.Common
                 changed = true;
             }
 
-            // 切换主评分来源时清掉另一来源的快照，避免 Kodi/前端读到旧值。
+            // 切换社区评分来源时清掉另一来源的快照，避免 Kodi/前端读到旧值。
             // DoubanRating 是独立的第三评分载体，不在这里清理。
             var staleKey = source == CommunityRatingSourceOption.Tmdb
                 ? ImdbRatingProviderId
@@ -520,7 +520,7 @@ namespace StrmAssistant.Common
             if (!changed) return CommunityRatingUnifyOutcome.Same;
 
             item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-            // 主评分已被 TMDB / IMDb 接管，豆瓣快照的「已应用」标记必须复位，
+            // 社区评分已被 TMDB / IMDb 接管，豆瓣快照的「已应用」标记必须复位，
             // 否则前端仍会凭旧标记显示豆瓣图标。
             Plugin.DoubanAssist?.InvalidateRatingApplied(item);
             return CommunityRatingUnifyOutcome.Updated;
@@ -536,8 +536,8 @@ namespace StrmAssistant.Common
                 changed = true;
             }
 
-            // 只清主评分及其来源快照；DoubanRating 是独立的第三评分载体，
-            // 由「同步豆瓣评分到 Kodi」开关管理，不随主评分清空。
+            // 只清社区评分及其来源快照；DoubanRating 是独立的第三评分载体，
+            // 由「同步豆瓣评分到 Kodi」开关管理，不随社区评分清空。
             foreach (var key in new[] { SourceProviderId, TmdbRatingProviderId, ImdbRatingProviderId })
             {
                 if (item.ProviderIds.Remove(key)) changed = true;

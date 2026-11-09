@@ -66,7 +66,7 @@ namespace StrmAssistant.Web.Service
             response.Ratings = Plugin.DoubanAssist.GetRatings(itemIds, user);
 
             // 未勾选「抓取豆瓣评分」且来源不是豆瓣时，不把豆瓣分暴露给 Web 端，
-            // 避免「只要了简介却附带豆瓣徽章」的隐式行为。主评分来源图标仍可正常使用。
+            // 避免「只要了简介却附带豆瓣徽章」的隐式行为。社区评分来源图标仍可正常使用。
             if (options.CommunityRating?.ParsedSource != CommunityRatingSourceOption.Douban &&
                 !options.DoubanAssist.DoubanFetchRating)
             {
@@ -114,7 +114,7 @@ namespace StrmAssistant.Web.Service
 
             response.Ratings = Plugin.DoubanAssist.GetRatingsByImdb(imdbIds, user);
 
-            // Kodi 端同理：只有需要豆瓣评分（主评分/徽章/第三评分）时才暴露分数。
+            // Kodi 端同理：只有需要豆瓣评分（社区评分/徽章/第三评分）时才暴露分数。
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
             if (options.CommunityRating?.ParsedSource != CommunityRatingSourceOption.Douban &&
                 !options.DoubanAssist.DoubanFetchRating &&

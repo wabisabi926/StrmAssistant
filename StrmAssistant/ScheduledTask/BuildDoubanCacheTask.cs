@@ -11,7 +11,7 @@ namespace StrmAssistant.ScheduledTask
     /// <summary>
     /// 同步豆瓣数据：遍历电影/剧集/季，匹配并写入豆瓣关联 ID，缓存 subject 数据与评分快照，
     /// 并按勾选应用徽章评分 / Kodi 第三评分 / 简介 / 演员 / 海报 / MdbList。
-    /// 来源=豆瓣时同时写主评分；来源不是豆瓣时不动主评分。
+    /// 来源=豆瓣时同时写社区评分；来源不是豆瓣时不动社区评分。
     /// </summary>
     public class BuildDoubanCacheTask : IScheduledTask
     {

@@ -550,7 +550,7 @@ define([
                     if (!source) continue;
                     const shown = displayedRating(container, star);
                     // 二次校验：页面可能缓存着写入前的旧数字。豆瓣来源以豆瓣分为准，
-                    // 其它来源以当前主评分为准；仅豆瓣来源保留「主字段缺失时回退豆瓣分」的旧数据兼容，
+                    // 其它来源以当前社区评分为准；仅豆瓣来源保留「主字段缺失时回退豆瓣分」的旧数据兼容，
                     // TMDB / IMDb 必须拿到 CommunityRating，避免把豆瓣数字误标成其它来源。
                     const primary = source === 'douban' ? ratingOf(info) : communityRatingOf(info);
                     const fallback = source === 'douban' ? communityRatingOf(info) : null;
@@ -678,7 +678,7 @@ define([
                     if (hashId() !== id) return;
                     const info = list && list[0];
                     // 来源可能是 TMDB / IMDb（此时没有豆瓣分），不能再用「必须有豆瓣分」作为门槛，
-                    // 否则来源图标永远不会登记。只要条目有主评分或豆瓣分就交给 applyStars 判断。
+                    // 否则来源图标永远不会登记。只要条目有社区评分或豆瓣分就交给 applyStars 判断。
                     if (!info || (!ratingOf(info) && communityRatingOf(info) == null)) return;
                     doubanIds[String(idOf(info))] = info;
                     // 详情页评分行换豆瓣 logo；不再额外追加 pill，避免与评分行重复。

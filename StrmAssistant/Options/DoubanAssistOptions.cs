@@ -12,7 +12,7 @@ namespace StrmAssistant.Options
     /// 元数据增强 · 豆瓣与附加评分分组。
     ///
     /// 设计原则：每个能力独立勾选，互不隐式依赖。
-    /// - 主评分由「社区评分来源」决定，本分组不参与。
+    /// - 社区评分由「社区评分来源」决定，本分组不参与。
     /// - 豆瓣数据层（关联 ID / subject 抓取 / 缓存）在这些勾选中任意一个开启时自动生效。
     /// </summary>
     public class DoubanAssistOptions : EditableOptionsBase

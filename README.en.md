@@ -28,7 +28,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 ## Latest Optimizations (v3.0.0.66 ~ v3.0.0.74)
 
 ✅ **Community rating sync (3.0.0.74)**
-- Community rating source selector: Do not interfere / TMDb / IMDb / Douban, mutually exclusive; choosing Douban takes over the main rating directly, and the legacy Douban override switch migrates automatically
+- Community rating source selector: Do not interfere / TMDb / IMDb / Douban, mutually exclusive; choosing Douban takes over the community rating directly, and the legacy Douban override switch migrates automatically
 - Douban capabilities are independent checkboxes: fetch Douban rating (badge), sync to Kodi, overview/genres/locations, Chinese cast names, poster fallback, MdbList critic ratings; only what you check is done
 - The Douban data layer activates automatically when the source is Douban or any Douban capability is checked; with everything off, detail pages never request Douban
 - New 'Sync Community Rating' scheduled task and a one-click settings button with dry-run support; configurable minimum vote threshold (default 5)
@@ -149,7 +149,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 ### Metadata Enhancement
 
 - **Chinese metadata**: custom TMDB / TVDB fallback languages and priority order
-- **Douban enhancements**: Community rating can let Douban take over the main rating; badge rating, Kodi third rating, overview, cast, poster and critic rating are independent options; season matching with title validation and mapping cache
+- **Douban enhancements**: Community rating can let Douban take over the community rating; badge rating, Kodi third rating, overview, cast, poster and critic rating are independent options; season matching with title validation and mapping cache
 - **Episode group scraping**: TMDB episode groups and local episode group JSON
 - **Person enhancement**: cast aliases, season cast import, series cast merging
 - **Poster & sorting**: original-language poster priority, Pinyin initial sorting, NFO enhancement, tagline clearing

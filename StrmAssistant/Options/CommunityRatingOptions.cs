@@ -47,7 +47,7 @@ namespace StrmAssistant.Options
         public string CommunityRatingSource { get; set; } = CommunityRatingSourceOption.None.ToString();
 
         /// <summary>
-        /// MdbList API Key：外部评分源的凭据，由「来源 = IMDb」的主评分与
+        /// MdbList API Key：外部评分源的凭据，由「来源 = IMDb」的社区评分与
         /// 豆瓣分组里的「更新影评人评分」共用。凭据属于服务而非某个功能，因此放在本分组。
         /// </summary>
         [DisplayNameL("MetadataEnhanceOptions_MdbListApiKey_MdbList_Api_Key", typeof(Resources))]

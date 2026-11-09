@@ -516,7 +516,7 @@
     <value>社区评分来源</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
-    <value>将 CommunityRating 统一为所选来源。选豆瓣则由豆瓣分直接接管主评分；选 TMDB 或 IMDb 时豆瓣不修改主评分。</value>
+    <value>将 CommunityRating 统一为所选来源。选豆瓣则由豆瓣分直接接管社区评分；选 TMDB 或 IMDb 时豆瓣不修改社区评分。</value>
   </data>
   <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
     <value>不干预（保持现状）</value>
@@ -1209,13 +1209,13 @@
     <value>豆瓣辅助刮削</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_" xml:space="preserve">
-    <value>电影/剧集/季刷新后从豆瓣补全缺失的中文简介、类型和制片地区（仅中文媒体库）。只影响元数据，不决定主评分。默认关闭。</value>
+    <value>电影/剧集/季刷新后从豆瓣补全缺失的中文简介、类型和制片地区（仅中文媒体库）。只影响元数据，不决定社区评分。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
     <value>抓取豆瓣评分</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>抓取并缓存豆瓣评分，用于详情页徽章，不修改主评分。来源为豆瓣时自动生效。</value>
+    <value>抓取并缓存豆瓣评分，用于详情页徽章，不修改社区评分。来源为豆瓣时自动生效。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>补全简介与类型</value>
@@ -1227,10 +1227,10 @@
     <value>更新影评人评分</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>将烂番茄评分写入影评人评分（CriticRating），不修改主评分。需填写 MdbList API Key。</value>
+    <value>将烂番茄评分写入影评人评分（CriticRating），不修改社区评分。需填写 MdbList API Key。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
-    <value>将豆瓣评分写入 ProviderIds 供 Kodi 皮肤读取，不修改主评分。</value>
+    <value>将豆瓣评分写入 ProviderIds 供 Kodi 皮肤读取，不修改社区评分。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCastChinese_Description" xml:space="preserve">
     <value>将纯英文演员名替换为豆瓣中文名。仅对中文条目生效。</value>
@@ -1251,7 +1251,7 @@
     <value>豆瓣开放平台 V2 Token。配置后优先使用官方接口。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>按 IMDb ID 取分：来源为 IMDb 时写入主评分，启用影评人评分时写入烂番茄分。</value>
+    <value>按 IMDb ID 取分：来源为 IMDb 时写入社区评分，启用影评人评分时写入烂番茄分。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>清除已缓存的季映射，让季条目重新匹配。</value>
@@ -1527,7 +1527,7 @@
     <value>同步豆瓣数据</value>
   </data>
   <data name="BuildDoubanCacheTask_Description_Pre_fetches_Douban_subject_data_for_movies_and_series_into_the_local_cache__Cached_items_are_skipped" xml:space="preserve">
-    <value>同步电影、剧集与季的豆瓣数据：匹配豆瓣 ID、缓存条目，并按勾选应用评分、简介、演员、海报与影评人评分。来源为豆瓣时同步写入主评分。</value>
+    <value>同步电影、剧集与季的豆瓣数据：匹配豆瓣 ID、缓存条目，并按勾选应用评分、简介、演员、海报与影评人评分。来源为豆瓣时同步写入社区评分。</value>
   </data>
   <data name="RefreshEpisodeTask_Name_Refresh_Episode" xml:space="preserve">
     <value>刷新剧集元数据</value>

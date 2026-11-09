@@ -409,11 +409,13 @@ namespace StrmAssistant.Common
                 return new RatingLookup { Status = LookupStatus.Failed, Detail = "missing MdbList api key" };
             }
 
-            var cacheKey = $"imdb:{imdbId.Trim()}";
+            // MdbList 要求显式媒体类型：/imdb/movie/{id} 或 /imdb/show/{id}，缺类型会返回 405。
+            var mediaType = item is Movie ? "movie" : "show";
+            var cacheKey = $"imdb:{mediaType}:{imdbId.Trim()}";
             if (TryGetCache(cacheKey, out var cached)) return cached;
 
             var url =
-                $"{MdbListBaseUrl}/imdb/{Uri.EscapeDataString(imdbId.Trim())}?apikey={Uri.EscapeDataString(apiKey.Trim())}&format=json";
+                $"{MdbListBaseUrl}/imdb/{mediaType}/{Uri.EscapeDataString(imdbId.Trim())}?apikey={Uri.EscapeDataString(apiKey.Trim())}&format=json";
 
             var requestOptions = new HttpRequestOptions
             {

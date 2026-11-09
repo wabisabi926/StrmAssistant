@@ -47,7 +47,9 @@ namespace StrmAssistant.Provider.Douban
 
             try
             {
-                var url = $"{MdbListBaseUrl}/imdb/{imdbId.Trim()}?apikey={Uri.EscapeDataString(apiKey.Trim())}&format=json";
+                // MdbList 要求显式媒体类型：/imdb/movie/{id} 或 /imdb/show/{id}，缺类型会返回 405。
+                var mediaType = item is Movie ? "movie" : "show";
+                var url = $"{MdbListBaseUrl}/imdb/{mediaType}/{imdbId.Trim()}?apikey={Uri.EscapeDataString(apiKey.Trim())}&format=json";
 
                 var requestOptions = new HttpRequestOptions
                 {

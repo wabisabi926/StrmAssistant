@@ -509,6 +509,54 @@
   <data name="MetadataEnhanceOptions_Group_ChineseMetadata" xml:space="preserve">
     <value>中文元数据</value>
   </data>
+  <data name="MetadataEnhanceOptions_Group_CommunityRating" xml:space="preserve">
+    <value>社区评分</value>
+  </data>
+  <data name="MetadataEnhanceOptions_CommunityRatingSource_Community_Rating_Source" xml:space="preserve">
+    <value>社区评分来源</value>
+  </data>
+  <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
+    <value>把 CommunityRating 统一为所选来源，豆瓣也在这里选。选 TMDB / IMDb 后豆瓣评分覆盖会自动停用。默认不干预。</value>
+  </data>
+  <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
+    <value>不干预（保持现状）</value>
+  </data>
+  <data name="CommunityRatingSourceOption_Tmdb_TMDb" xml:space="preserve">
+    <value>TMDB</value>
+  </data>
+  <data name="CommunityRatingSourceOption_Imdb_IMDb_via_MdbList" xml:space="preserve">
+    <value>IMDb（经 MdbList）</value>
+  </data>
+  <data name="CommunityRatingSourceOption_Douban_Douban" xml:space="preserve">
+    <value>豆瓣</value>
+  </data>
+  <data name="MetadataEnhanceOptions_CommunityRatingMinVotes_Minimum_Votes" xml:space="preserve">
+    <value>最低票数</value>
+  </data>
+  <data name="MetadataEnhanceOptions_CommunityRatingMinVotes_Description" xml:space="preserve">
+    <value>TMDB 票数低于该值时视为分数不可信（1 票也能算出 10.0），跳过该条目。0 表示不限制。默认 5。IMDb 经 MdbList 没有票数，不受此项影响。</value>
+  </data>
+  <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Clear_When_No_Rating" xml:space="preserve">
+    <value>无评分时清空</value>
+  </data>
+  <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Description" xml:space="preserve">
+    <value>所选来源没有可用评分时，清空原有社区评分（多半来自其它来源）。代价是这些条目会显示为无评分。默认关闭。</value>
+  </data>
+  <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now" xml:space="preserve">
+    <value>立即统一社区评分</value>
+  </data>
+  <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
+    <value>按当前来源统一 CommunityRating。TMDB / IMDb 走轻量接口，通常一两分钟；豆瓣只按 IMDb ID 查评分，1.5 秒/条，不抓豆瓣页面。演练模式仅对 TMDB / IMDb 生效。请先保存设置。</value>
+  </data>
+  <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
+    <value>豆瓣评分通过第三方逆向接口按 IMDb ID 查询，1.5 秒/条；没有 IMDb ID 的条目会跳过。接口可能失效，失效时评分保持不变。继续？</value>
+  </data>
+  <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
+    <value>统一社区评分</value>
+  </data>
+  <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
+    <value>按「元数据增强 → 社区评分」所选来源，统一全库电影与剧集的社区评分。</value>
+  </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
     <value>豆瓣辅助</value>
   </data>

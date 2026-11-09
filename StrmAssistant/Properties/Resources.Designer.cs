@@ -5868,5 +5868,149 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CommunityRatingSourceOption_Douban_Douban {
+            get {
+                return ResourceManager.GetString("CommunityRatingSourceOption_Douban_Douban", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CommunityRatingSourceOption_Imdb_IMDb_via_MdbList {
+            get {
+                return ResourceManager.GetString("CommunityRatingSourceOption_Imdb_IMDb_via_MdbList", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CommunityRatingSourceOption_None_Do_Not_Interfere {
+            get {
+                return ResourceManager.GetString("CommunityRatingSourceOption_None_Do_Not_Interfere", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CommunityRatingSourceOption_Tmdb_TMDb {
+            get {
+                return ResourceManager.GetString("CommunityRatingSourceOption_Tmdb_TMDb", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Clear_When_No_Rating {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Clear_When_No_Rating", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_CommunityRatingMinVotes_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_CommunityRatingMinVotes_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_CommunityRatingMinVotes_Minimum_Votes {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_CommunityRatingMinVotes_Minimum_Votes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_CommunityRatingSource_Community_Rating_Source {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_CommunityRatingSource_Community_Rating_Source", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_CommunityRatingSource_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_CommunityRatingSource_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_Group_CommunityRating {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_Group_CommunityRating", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_UnifyCommunityRatingButton_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_UnifyCommunityRatingButton_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source {
+            get {
+                return ResourceManager.GetString("UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string UnifyCommunityRatingTask_Name_Unify_Community_Rating {
+            get {
+                return ResourceManager.GetString("UnifyCommunityRatingTask_Name_Unify_Community_Rating", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation", resourceCulture);
+            }
+        }
+
     }
 }

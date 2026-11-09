@@ -53,6 +53,7 @@ namespace StrmAssistant.Options
         [DescriptionL("MetadataEnhanceOptions_DoubanRatingOverride_Overwrite_CommunityRating_with_Douban_rating__Default_is_OFF_", typeof(Resources))]
         [VisibleCondition(nameof(EnableDoubanAssist), SimpleCondition.IsTrue)]
         [Required]
+        [Browsable(false)]
         public bool DoubanRatingOverride { get; set; } = false;
 
         [DisplayNameL("MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi", typeof(Resources))]

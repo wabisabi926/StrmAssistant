@@ -9,6 +9,7 @@ using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
 using StrmAssistant.Common;
+using StrmAssistant.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -193,6 +194,15 @@ namespace StrmAssistant.Provider.Douban
 
             /// <summary>当前 <c>CommunityRating</c> 是否确为豆瓣评分（已扣除被外部刮削覆盖的情况）。</summary>
             public bool Applied { get; set; }
+
+            /// <summary>
+            /// 当前 <c>CommunityRating</c> 的来源：douban / tmdb / imdb，空表示无显式来源。
+            /// 前端据此把红五星换成对应来源的图标（Emby 原生客户端不读这个字段）。
+            /// </summary>
+            public string Source { get; set; }
+
+            /// <summary>条目当前的主评分，供前端校验「图标与数字同源」。</summary>
+            public double? CommunityRating { get; set; }
         }
 
         /// <summary>
@@ -206,6 +216,12 @@ namespace StrmAssistant.Provider.Douban
             public double? Rating { get; set; }
             public long? Votes { get; set; }
             public bool Applied { get; set; }
+
+            /// <summary>主评分来源：douban / tmdb / imdb，空表示无显式来源。</summary>
+            public string Source { get; set; }
+
+            /// <summary>条目当前的主评分，供调用方校验「图标与数字同源」。</summary>
+            public double? CommunityRating { get; set; }
         }
 
         public class DoubanSubject
@@ -280,6 +296,7 @@ namespace StrmAssistant.Provider.Douban
         private readonly IProviderManager _providerManager;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
+        private readonly DoubanRatingClient _ratingClient = new DoubanRatingClient();
 
         private readonly string _cachePath;
         private readonly string _ratingsPath;
@@ -396,8 +413,6 @@ namespace StrmAssistant.Provider.Douban
             {
                 if (_ratings == null) LoadRatings();
 
-                if (_ratings.Count == 0) return result;
-
                 foreach (var itemId in itemIds)
                 {
                     try
@@ -407,31 +422,39 @@ namespace StrmAssistant.Provider.Douban
                         if (user != null && !item.IsVisible(user)) continue;
 
                         var subjectId = item.GetProviderId(DoubanProviderId);
+                        var source = item.GetProviderId(CommunityRatingService.SourceProviderId);
 
-                        if (string.IsNullOrEmpty(subjectId)) continue;
-
-                        if (_ratings.TryGetValue(subjectId, out var snapshot))
+                        DoubanRatingSnapshot snapshot = null;
+                        if (!string.IsNullOrEmpty(subjectId))
                         {
-                            // Applied 以「当前 CommunityRating 实测」为准：
-                            // 条目被 TMDB 等重新刮削后 CommunityRating 可能已不是豆瓣分，实测比对能把它纠正回来。
-                            //
-                            // ⚠️ 不能再与快照标记做 &&：那只能把「假 true」纠正为 false，无法把「假 false」
-                            // 纠正为 true —— 快照一旦写坏（如 2026-10-17 那批 Applied=false），徽章就永久不显示。
-                            // 实测相等已是最强证据：条目上展示的数字确实等于豆瓣分。
-                            // 快照里的 Applied 仍写回，保留为诊断信息（下次排查能看到当时是否由我们写入）。
-                            var ratingMatches = item.CommunityRating.HasValue &&
-                                                Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
-                            var applied = ratingMatches;
-
-                            result.Add(new DoubanRatingInfo
-                            {
-                                ItemId = itemId,
-                                SubjectId = subjectId,
-                                Rating = snapshot.Rating,
-                                Votes = snapshot.Votes,
-                                Applied = applied
-                            });
+                            _ratings.TryGetValue(subjectId, out snapshot);
                         }
+
+                        // 既没有豆瓣条目、也没有显式来源：不是本模块关心的数据。
+                        if (snapshot == null && string.IsNullOrEmpty(source)) continue;
+
+                        // Applied 以显式来源优先：
+                        //   来源=douban → 主评分确由豆瓣写入，直接为真；
+                        //   无来源标记 → 退回「当前 CommunityRating 与豆瓣快照相等」的实测推断（兼容旧数据）。
+                        // 不能再把两者做 &&：实测相等只能证明数字相同，不能证明来源，
+                        // 豆瓣与 TMDB 同分时会把 TMDB 的分错标成豆瓣 logo。
+                        var ratingMatches = snapshot != null && item.CommunityRating.HasValue &&
+                                            Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
+                        var applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
+                                      string.IsNullOrEmpty(source) && ratingMatches;
+
+                        if (string.IsNullOrEmpty(source) && applied) source = "douban";
+
+                        result.Add(new DoubanRatingInfo
+                        {
+                            ItemId = itemId,
+                            SubjectId = subjectId,
+                            Rating = snapshot?.Rating,
+                            Votes = snapshot?.Votes,
+                            Applied = applied,
+                            Source = source,
+                            CommunityRating = item.CommunityRating
+                        });
                     }
                     catch
                     {
@@ -472,6 +495,7 @@ namespace StrmAssistant.Provider.Douban
                 if (user != null && !item.IsVisible(user)) continue;
 
                 var subjectId = item.GetProviderId(DoubanProviderId);
+                var source = item.GetProviderId(CommunityRatingService.SourceProviderId);
                 double? rating = null;
                 long? votes = null;
                 var applied = false;
@@ -486,11 +510,16 @@ namespace StrmAssistant.Provider.Douban
                         {
                             rating = snapshot.Rating;
                             votes = snapshot.Votes;
-                            applied = item.CommunityRating.HasValue &&
-                                      Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
+
+                            var ratingMatches = item.CommunityRating.HasValue &&
+                                                Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
+                            applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
+                                      string.IsNullOrEmpty(source) && ratingMatches;
                         }
                     }
                 }
+
+                if (string.IsNullOrEmpty(source) && applied) source = "douban";
 
                 result.Add(new DoubanImdbRatingInfo
                 {
@@ -499,7 +528,9 @@ namespace StrmAssistant.Provider.Douban
                     SubjectId = subjectId,
                     Rating = rating,
                     Votes = votes,
-                    Applied = applied
+                    Applied = applied,
+                    Source = source,
+                    CommunityRating = item.CommunityRating
                 });
             }
 
@@ -1243,6 +1274,8 @@ namespace StrmAssistant.Provider.Douban
                              entry.Expiry > DateTime.UtcNow;
             }
 
+            var ratingChanged = false;
+
             try
             {
                 if (cacheValid)
@@ -1250,7 +1283,10 @@ namespace StrmAssistant.Provider.Douban
                     // 缓存命中：FetchSubjectAsync 只读缓存并补记评分快照，不产生网络请求。
                     var cachedSubject = await FetchSubjectAsync(cachedId, cancellationToken).ConfigureAwait(false);
 
-                    if (SyncRatingProviderId(item, cachedSubject, options.DoubanAssist.DoubanRatingToKodi, allowRating))
+                    ratingChanged = SyncRatingProviderId(item, cachedSubject,
+                        options.DoubanAssist.DoubanRatingToKodi, allowRating);
+
+                    if (ratingChanged)
                     {
                         item.UpdateToRepository(ItemUpdateType.MetadataEdit);
                         _logger.Debug("DoubanCacheBuild - Rating provider updated for {0}", item.Name);
@@ -1268,7 +1304,10 @@ namespace StrmAssistant.Provider.Douban
                 if (subject == null) return false;
 
                 // 手动回填（构建缓存任务）时顺手补齐第三评分载体，避免「缓存有了、Kodi 侧却没有分」。
-                if (SyncRatingProviderId(item, subject, options.DoubanAssist.DoubanRatingToKodi, allowRating))
+                ratingChanged = SyncRatingProviderId(item, subject, options.DoubanAssist.DoubanRatingToKodi,
+                    allowRating);
+
+                if (ratingChanged)
                 {
                     item.UpdateToRepository(ItemUpdateType.MetadataEdit);
                     _logger.Debug("DoubanCacheBuild - Rating provider updated for {0}", item.Name);
@@ -1285,6 +1324,226 @@ namespace StrmAssistant.Provider.Douban
                 _logger.Warn("DoubanCacheBuild - Failed for {0}: {1}", item.Name, ex.Message);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 全库构建豆瓣缓存：遍历电影/剧集逐条抓取并写完整数据（简介/演员/海报等）。
+        /// 豆瓣评分统一不走这里，改用 <see cref="UnifyRatingsAsync"/> 的轻量 IMDb 通道；
+        /// 全程复用 2 秒频控、6 小时熔断、缓存命中跳过与失败重试。
+        /// </summary>
+        public async Task<DoubanCacheBuildReport> BuildAllCacheAsync(IProgress<double> progress,
+            CancellationToken cancellationToken)
+        {
+            var report = new DoubanCacheBuildReport();
+            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
+
+            if (!options.DoubanAssist.EnableDoubanAssist)
+            {
+                _logger.Warn("DoubanCacheBuild - skipped: EnableDoubanAssist is off");
+                progress?.Report(100);
+                return report;
+            }
+
+            if (Plugin.LibraryManager == null)
+            {
+                _logger.Warn("DoubanCacheBuild - skipped: library manager not ready");
+                progress?.Report(100);
+                return report;
+            }
+
+            var items = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
+            {
+                IncludeItemTypes = new[] { nameof(Movie), nameof(Series) }
+            });
+
+            report.Total = items.Length;
+            _logger.Info($"DoubanCacheBuild - items={items.Length}");
+
+            var index = 0;
+
+            foreach (var item in items)
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if (await BuildCacheAsync(item, cancellationToken).ConfigureAwait(false))
+                    {
+                        report.Cached++;
+                    }
+                    else
+                    {
+                        report.Skipped++;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.Info("DoubanCacheBuild - cancelled");
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    report.Failed++;
+                    if (report.Failed <= 10)
+                    {
+                        _logger.Warn($"DoubanCacheBuild - {item.Name}: {e.Message}");
+                    }
+                }
+                finally
+                {
+                    index++;
+                    progress?.Report(items.Length == 0 ? 100 : index * 100.0 / items.Length);
+                }
+            }
+
+            _logger.Info(report.BuildSummary());
+            return report;
+        }
+
+        /// <summary>
+        /// 豆瓣轻量统一：只按 IMDb ID 查评分（<see cref="DoubanRatingClient"/>，不抓 subject 页面），
+        /// 写主评分、来源标记与 <c>ProviderIds["DoubanRating"]</c>。
+        /// 失败不回退网页刮削，避免把风控压力拉回来；受评分字段勾选与回看天数约束。
+        /// </summary>
+        public async Task<DoubanUnifyReport> UnifyRatingsAsync(IProgress<double> progress,
+            CancellationToken cancellationToken)
+        {
+            var report = new DoubanUnifyReport();
+            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
+
+            if (!options.DoubanAssist.EnableDoubanAssist)
+            {
+                _logger.Warn("DoubanUnify - skipped: EnableDoubanAssist is off");
+                progress?.Report(100);
+                return report;
+            }
+
+            if (!IsScrapeFieldEnabled(options, DoubanScrapeOption.Rating))
+            {
+                _logger.Warn("DoubanUnify - skipped: rating field not selected in scope");
+                progress?.Report(100);
+                return report;
+            }
+
+            if (Plugin.LibraryManager == null)
+            {
+                _logger.Warn("DoubanUnify - skipped: library manager not ready");
+                progress?.Report(100);
+                return report;
+            }
+
+            var lookbackDays = options.DoubanAssist.RatingUpdateLookbackDays;
+
+            var items = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
+            {
+                IncludeItemTypes = new[] { nameof(Movie), nameof(Series) }
+            });
+
+            report.Total = items.Length;
+            _logger.Info($"DoubanUnify - items={items.Length}");
+
+            var index = 0;
+
+            foreach (var item in items)
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    index++;
+                    progress?.Report(items.Length == 0 ? 100 : index * 100.0 / items.Length);
+
+                    if (CommunityRatingService.IsRatingLocked(item))
+                    {
+                        report.Locked++;
+                        continue;
+                    }
+
+                    if (lookbackDays > 0 && item.PremiereDate.HasValue &&
+                        item.PremiereDate.Value < DateTime.UtcNow.AddDays(-lookbackDays))
+                    {
+                        report.SkippedLookback++;
+                        continue;
+                    }
+
+                    var imdbId = item.GetProviderId(MetadataProviders.Imdb);
+                    if (string.IsNullOrWhiteSpace(imdbId))
+                    {
+                        report.NoImdb++;
+                        continue;
+                    }
+
+                    var result = await _ratingClient.GetRatingAsync(imdbId, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (result.Status == DoubanRatingClient.DoubanLightStatus.NoId ||
+                        result.Status == DoubanRatingClient.DoubanLightStatus.NoRating)
+                    {
+                        report.NoRating++;
+                        continue;
+                    }
+
+                    if (result.Status == DoubanRatingClient.DoubanLightStatus.Failed)
+                    {
+                        report.Failed++;
+                        continue;
+                    }
+
+                    var changed = false;
+                    var target = (float)Math.Round(result.Rating, 1);
+
+                    if (!item.CommunityRating.HasValue || Math.Abs(item.CommunityRating.Value - target) > 0.05f)
+                    {
+                        item.CommunityRating = target;
+                        changed = true;
+                    }
+
+                    if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        item.ProviderIds[CommunityRatingService.SourceProviderId] = "douban";
+                        changed = true;
+                    }
+
+                    var ratingText = target.ToString("0.#", CultureInfo.InvariantCulture);
+                    if (!string.Equals(item.GetProviderId(DoubanRatingProviderId), ratingText,
+                            StringComparison.Ordinal))
+                    {
+                        item.ProviderIds[DoubanRatingProviderId] = ratingText;
+                        changed = true;
+                    }
+
+                    if (!changed)
+                    {
+                        report.Same++;
+                        continue;
+                    }
+
+                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                    report.Updated++;
+
+                    if (report.Samples.Count < 20)
+                    {
+                        report.Samples.Add($"update | {item.Name} | {item.InternalId}");
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.Info("DoubanUnify - cancelled");
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    report.Failed++;
+                    if (report.Failed <= 10)
+                    {
+                        _logger.Warn($"DoubanUnify - {item.Name}: {e.Message}");
+                    }
+                }
+            }
+
+            _logger.Info(report.BuildSummary());
+            return report;
         }
 
         /// <summary>
@@ -1404,7 +1663,16 @@ namespace StrmAssistant.Provider.Douban
                     }
                 }
 
-                if (options.DoubanAssist.DoubanRatingOverride && allowRating && subject.Rating.HasValue)
+                // 社区评分来源互斥：来源选 TMDB / IMDb 时豆瓣让位，只抓分与写 DoubanRating，
+                // 不再改 CommunityRating；来源选「豆瓣」时无条件接管；「不干预」沿用旧的豆瓣覆盖开关。
+                var communityRatingSource = Plugin.Instance?.MetadataEnhanceStore?.GetOptions()?.CommunityRating
+                    ?.ParsedSource ?? CommunityRatingSourceOption.None;
+                var doubanOwnsCommunityRating =
+                    communityRatingSource == CommunityRatingSourceOption.Douban ||
+                    communityRatingSource == CommunityRatingSourceOption.None &&
+                    options.DoubanAssist.DoubanRatingOverride;
+
+                if (doubanOwnsCommunityRating && allowRating && subject.Rating.HasValue)
                 {
                     // RatingUpdateLookbackDays：评分更新只作用于首播日期在回看期内的条目
                     var lookbackDays = options.DoubanAssist.RatingUpdateLookbackDays;
@@ -1422,6 +1690,15 @@ namespace StrmAssistant.Provider.Douban
                             _logger.Info("DoubanAssist - Rating updated for {0}: {1} -> {2} (votes {3})",
                                 item.Name, previousRating?.ToString("0.0") ?? "N/A", subject.Rating.Value,
                                 subject.Votes);
+                        }
+
+                        // 主评分此刻归豆瓣所有：写来源标记，前端据此换豆瓣 logo，
+                        // 也避免「豆瓣分与 TMDB 分恰好相等」时把来源判错。
+                        if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            item.ProviderIds[CommunityRatingService.SourceProviderId] = "douban";
+                            changed = true;
                         }
 
                         // 走到这里说明 CommunityRating 此刻确为豆瓣分（含「本来就相等、无需改写」）
@@ -1444,7 +1721,9 @@ namespace StrmAssistant.Provider.Douban
                     }
 
                     _logger.Debug("DoubanAssist - Rating skipped (reason={0}): {1}",
-                        !allowRating ? "FieldNotSelected" : "OverrideOff", item.Name);
+                        !allowRating ? "FieldNotSelected"
+                        : doubanOwnsCommunityRating ? "OverrideOff"
+                        : "SourceNotDouban", item.Name);
                 }
 
                 var ratingInLookback = options.DoubanAssist.RatingUpdateLookbackDays <= 0 || !item.PremiereDate.HasValue ||
@@ -2331,6 +2610,44 @@ namespace StrmAssistant.Provider.Douban
             {
                 _logger.Debug("DoubanAssist - Cache save failed: {0}", e.Message);
             }
+        }
+    }
+
+    /// <summary>豆瓣全库缓存构建的统计结果；与 TMDB/IMDb 的统一报告分开，避免日志混淆。</summary>
+    public sealed class DoubanCacheBuildReport
+    {
+        public int Total { get; set; }
+        public int Cached { get; set; }
+        public int Skipped { get; set; }
+        public int Failed { get; set; }
+
+        public string BuildSummary()
+        {
+            return string.Format("DoubanCacheBuild - total={0} cached={1} skipped={2} failed={3}",
+                Total, Cached, Skipped, Failed);
+        }
+    }
+
+    /// <summary>豆瓣轻量统一（按 IMDb 查评分）的统计结果。</summary>
+    public sealed class DoubanUnifyReport
+    {
+        private const int MaxSamples = 20;
+
+        public int Total { get; set; }
+        public int Updated { get; set; }
+        public int Same { get; set; }
+        public int Locked { get; set; }
+        public int NoImdb { get; set; }
+        public int NoRating { get; set; }
+        public int SkippedLookback { get; set; }
+        public int Failed { get; set; }
+        public List<string> Samples { get; } = new List<string>();
+
+        public string BuildSummary()
+        {
+            return string.Format(
+                "DoubanUnify - total={0} updated={1} same={2} locked={3} noImdb={4} noRating={5} lookback={6} failed={7}",
+                Total, Updated, Same, Locked, NoImdb, NoRating, SkippedLookback, Failed);
         }
     }
 }

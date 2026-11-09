@@ -455,9 +455,46 @@ define([
                 return info && (info.ItemId !== undefined ? info.ItemId : info.itemId);
             }
 
+            function sourceOf(info) {
+                if (!info) return null;
+                const source = info.Source !== undefined ? info.Source : info.source;
+                if (source) return String(source).toLowerCase();
+                return ratingApplied(info) ? 'douban' : null;
+            }
+
+            function communityRatingOf(info) {
+                return info && (info.CommunityRating !== undefined ? info.CommunityRating : info.communityRating);
+            }
+
+            // 评分来源图标：TMDB / IMDb 取自 Arctic Fuse 3 皮肤的 ratings 图标，
+            // 以 data URI 内联，避免运行时依赖外网资源；豆瓣沿用官方 favicon。
+            // 只有 Emby Web 能这样换图标；原生客户端只认 CommunityRating 数字。
+            const TMDB_LOGO = 'data:image/png;base64,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';
+            const IMDB_LOGO = 'data:image/png;base64,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';
+
+            const SOURCE_MARKS = {
+                tmdb: { src: TMDB_LOGO, title: 'TMDB' },
+                imdb: { src: IMDB_LOGO, title: 'IMDb' }
+            };
+
+            function makeSourceMark(source, size, verticalAlign) {
+                if (source === 'douban') return makeDoubanMark(size, verticalAlign);
+                const cfg = SOURCE_MARKS[source];
+                if (!cfg) return null;
+                const mark = document.createElement('img');
+                mark.className = 'rating-source-mark rating-source-' + source;
+                mark.alt = cfg.title;
+                mark.title = cfg.title;
+                mark.src = cfg.src;
+                mark.setAttribute('style', 'display:inline-block;border-radius:3px;margin-right:4px;' +
+                    'height:' + size + ';width:auto;max-width:none;' +
+                    'vertical-align:' + verticalAlign + ';');
+                return mark;
+            }
+
             // 豆瓣官方 logo（32x32 PNG，取自 https://www.douban.com/favicon.ico），
             // 以 data URI 内联，避免运行时依赖外网资源。
-            const DOUBAN_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAEFSURBVFhH7ZK9CsJAEISt7WzFws7Cwso3shY7QSysJIKN72EhiKCI4iOIEvCnkSAKFmIZsDhZ8I64ExR/siGSga+Z3Z0bQhKJakqFChjSgCENGNJwY3d2VFCibP5eXAAKiAOGNGDcmR+W/At+LMri+dEqsDptVWNsvQXd/KxAzx7A/BV0Exf4nwKh/4TfKpoFNMP1xAQ5l73KWoWn0I4W3fI8AAxGqVs2gaRcuwg7Gpp5Rbd8BwCDkWnmH0Ir/RrsaGjmFd3yHQAMHxZH24SONlOYa2imRTd87gsYPrRmHRPsXl2VrKdhhzyaadEN3/GFG0GLvxcXgALigCENGNKAIQ0YwtwAQLQd2sJ3hRwAAAAASUVORK5CYII=';
+            const DOUBAN_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAADoklEQVR4nO2bW0gUURjH/9/xAlKZrd00NQlfoojWoihXfchIBbtJWSRtgUEFURDVS750gS5oD9VD0IMFPVSQUqAuKlSkZYRbFFGQWaRJWesmhuG6e3rwkrNmuuuZ+aTZ39POx57Db/7MOWdmOEMYhciqmM2QlAqCFYBVAnGj/XcyIiXaQNQI+JxC4FXvOnfF3/5HIyrV0ZYIGV4CyF16SxoJAY4wSUU9ua5Wv/ofwqumryGIWmPVDIak3ZPtvj50OPgjojpmJyRd47EyFglfVl/OjzpgIICoSktCH8lPvFrG4iFvLLK7XAIAvCSvcgsZTf88B1CkI2aj9FE5txAHBJkvfD4s5hZhQ1KqAISV24MNglVAypXcHoxYBRHmcVtwIYE4wS3BjekDCA+mUabFhpoVd1W7TIi1T9fjgetRwO1MfwWEAuAW4CaoOQDoH3P/AxRRNUNyS3Bi+iFg+gCCngMGybTYkGFJU+ESMA9d9UGt/cOZcAAAUJxyTEU3AaNiIjb9EDB9AEqGgD8n353Vo1tdhpouAaiYnPzJtNiU9jeI6YdAKABuAW5CAXALcGP6AHRZBjMsaWzPB4GiSwBczwbBYPohYPoAlAwBve79jUC3d4IrY5Yjb3YuKjscaOhsDKqPRVMXYnv8Ftz7WolG9zPFhv0onwS3xm3GjvgC5MxaCwBIjkoKOoBdCYU4mLwPRxccQlVHDW58volb7XdU6qq9AqaGTcFzWwOSohI19QKnHeVf7gXU16zImXhhe4yZkbFDtdZfbVhWn45Oj1uJL6B4Euz2/sSp5nMj6geS9wbcV2F8gebkAaC05ZLSkwd0WAXKWm+gukO71dA2YxV2JxQG1M+OeQWa49fdb3Dp45UJ+/mjyzJ45n0JvNKrqRXGbxt3+6JEO5ZM025dOt18XombP7oE0NDZiAsfLmtq6ZbV436rU5Ro1xw3dT3H7XZ9NrLpdiNU2nIRL7peamr75+8Zs13+3A1IjV6qqR1/e0Kp23B0C+Bb7/cRV8GmOXljtjuy4KDmuL7zCWq/31eppiHgZbA45dikfdgJZpeI6Z8FQgFwC3AT2iDBLcBNKAAp0cYtwQUB7aL/0zLT4hSAz8ltwYaEUwiBV9webJBsEr3r3BUEOLhdjIfKenPcdwQAhEkq4tYxGg/1HQYGlsGeXFcrSNr/3eT/QcKXhewuFxD6dFZ7I9SX86POQ95YgMoMF9MZAhzhkhKHn/xA/e+Y5fP536ZWDibYri/KAAAAAElFTkSuQmCC';
 
             function makeDoubanMark(size, verticalAlign) {
                 const mark = document.createElement('img');
@@ -488,10 +525,9 @@ define([
                 return m ? parseFloat(m[0]) : null;
             }
 
-            // 评分行：只有后端确认「该条目当前显示的评分确由豆瓣写入」（Applied=true）时，
-            // 才把红五星替换为豆瓣 logo——保证「图标与数字同源」（严格语义）。
-            // 若条目有豆瓣 ID 但 CommunityRating 未写入豆瓣分（超出回看期 / 未勾选评分字段 /
-            // 覆盖开关关闭），Applied 为 false，此时保留红五星，避免「豆瓣图标 + 他源数字」。
+            // 评分行：按后端返回的来源（douban / tmdb / imdb）把红五星换成对应标记。
+            // 判定条件：页面数字必须等于该来源的分数，保证「图标与数字同源」。
+            // 无显式来源时回退到旧逻辑（Applied=true 视为豆瓣）。
             // 采用全量 DOM 扫描 + 幂等替换：既能覆盖卡片/列表/详情页，
             // 也不怕「评分行晚于卡片渲染」的时序问题——下一次 scan 会重新命中并替换。
             function ratingApplied(info) {
@@ -510,12 +546,17 @@ define([
                     const id = holder ? holder.getAttribute('data-id') : detailId;
                     if (!id || !doubanIds[id]) continue;
                     const info = doubanIds[id];
-                    if (!ratingApplied(info)) continue;
+                    const source = sourceOf(info);
+                    if (!source) continue;
                     const shown = displayedRating(container, star);
-                    const douban = Number(ratingOf(info));
-                    // 二次校验：页面可能缓存着写入前的旧数字
-                    if (shown === null || isNaN(douban) || Math.abs(shown - douban) > 0.05) continue;
-                    container.replaceChild(makeDoubanMark('1.15em', '-0.15em'), star);
+                    // 二次校验：页面可能缓存着写入前的旧数字。豆瓣来源以豆瓣分为准，
+                    // 其它来源以当前主评分为准；主字段缺失时互相回退（兼容旧响应）。
+                    const primary = source === 'douban' ? ratingOf(info) : communityRatingOf(info);
+                    const fallback = source === 'douban' ? communityRatingOf(info) : ratingOf(info);
+                    const expected = Number(primary != null ? primary : fallback);
+                    if (shown === null || isNaN(expected) || Math.abs(shown - expected) > 0.05) continue;
+                    const mark = makeSourceMark(source, '1.15em', '-0.15em');
+                    if (mark) container.replaceChild(mark, star);
                 }
             }
 
@@ -547,8 +588,8 @@ define([
                 const info = doubanIds[detailId];
                 const douban = info ? Number(ratingOf(info)) : NaN;
 
-                // 无豆瓣分，或覆盖已生效（星星即豆瓣）时，不追加
-                if (!info || isNaN(douban) || douban <= 0 || ratingApplied(info)) {
+                // 无豆瓣分，或星星本身已是豆瓣图标时，不追加
+                if (!info || isNaN(douban) || douban <= 0 || sourceOf(info) === 'douban') {
                     removeDoubanBadge();
                     return;
                 }

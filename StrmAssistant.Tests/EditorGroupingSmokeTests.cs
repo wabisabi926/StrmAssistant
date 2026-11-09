@@ -103,7 +103,7 @@ namespace StrmAssistant.Tests
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
             Assert.Equal(
-                new[] { "ChineseMetadata", "DoubanAssist", "PosterPerson",
+                new[] { "ChineseMetadata", "CommunityRating", "DoubanAssist", "PosterPerson",
                         "ScrapeEpisodeGroup", "RefreshCache" },
                 groups.Select(g => g.Name).ToArray());
         }

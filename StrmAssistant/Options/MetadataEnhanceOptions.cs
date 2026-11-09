@@ -39,6 +39,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("MetadataEnhanceOptions_Group_PersonEnhance", typeof(Resources))]
         public PersonEnhanceOptions PersonEnhance { get; set; } = new PersonEnhanceOptions();
 
+        /// <summary>社区评分：把 CommunityRating 统一为 TMDB / IMDb / 豆瓣（互斥）。</summary>
+        [DisplayNameL("MetadataEnhanceOptions_Group_CommunityRating", typeof(Resources))]
+        public CommunityRatingOptions CommunityRating { get; set; } = new CommunityRatingOptions();
+
         /// <summary>豆瓣辅助：评分 / 演员 / 简介补全，MdbList 影评人评分。</summary>
         [DisplayNameL("MetadataEnhanceOptions_Group_DoubanAssist", typeof(Resources))]
         public DoubanAssistOptions DoubanAssist { get; set; } = new DoubanAssistOptions();
@@ -123,6 +127,8 @@ namespace StrmAssistant.Options
                 EditorGroupHelper.Rebuild(editContainer,
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_ChineseMetadata,
                         "ChineseMetadata", "ChineseMetadata"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_CommunityRating,
+                        "CommunityRating", "CommunityRating"),
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_DoubanAssist,
                         "DoubanAssist", "DoubanAssist"),
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_PosterPerson,
@@ -140,6 +146,7 @@ namespace StrmAssistant.Options
         {
             ChineseMetadata.Initialize();
             PersonEnhance.Initialize();
+            CommunityRating.Initialize();
             DoubanAssist.Initialize();
             MetadataRefresh.Initialize();
             MetadataCache.Initialize();
@@ -147,7 +154,11 @@ namespace StrmAssistant.Options
 
         protected override void Validate(ValidationContext context)
         {
-            ValidateChildGroup(context, nameof(MetadataCache));
+            // UI 上 MetadataCache 已由 EditorGroupHelper 合并进 RefreshCache 组，
+            // ValidateChildGroup 按组名查找会失败并抛
+            // "A child editor group of name 'MetadataCache' could not be found"。
+            // 这里直接调用子对象的校验逻辑，校验规则本身不变。
+            MetadataCache.ValidateOptions(context);
         }
     }
 }

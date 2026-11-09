@@ -66,6 +66,16 @@ namespace StrmAssistant.Options.Store
                     options.MetadataRefresh.EpisodeRefreshScope = EpisodeRefreshOption.NoOverview.ToString();
                 }
 
+                // 旧配置兼容：豆瓣覆盖开关已并入「社区评分来源」下拉（UI 不再单独显示）。
+                // 首次保存时把 true 迁移为「来源=豆瓣」，之后二者不会再同时生效。
+                if (options.DoubanAssist.DoubanRatingOverride &&
+                    string.Equals(options.CommunityRating.CommunityRatingSource,
+                        CommunityRatingSourceOption.None.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    options.CommunityRating.CommunityRatingSource = CommunityRatingSourceOption.Douban.ToString();
+                    options.DoubanAssist.DoubanRatingOverride = false;
+                }
+
                 var changes = PropertyChangeDetector.DetectObjectPropertyChanges(MetadataEnhanceOptions, options);
                 var changedProperties = new HashSet<string>(changes.Select(c => c.PropertyName));
 

@@ -127,7 +127,6 @@ namespace StrmAssistant.Options
             {
                 return;
             }
-
             string cacheError = null;
 
             if (string.IsNullOrWhiteSpace(MetadataCacheRootFolder))
@@ -150,6 +149,16 @@ namespace StrmAssistant.Options
             {
                 context.AddValidationError(cacheError);
             }
+        }
+
+        /// <summary>
+        /// 供父级直接调用。UI 分组里 MetadataCache 已被合并进 RefreshCache，
+        /// 父级不能再通过 ValidateChildGroup 按组名查找子组，否则会抛
+        /// "A child editor group of name 'MetadataCache' could not be found"。
+        /// </summary>
+        internal void ValidateOptions(ValidationContext context)
+        {
+            Validate(context);
         }
     }
 }

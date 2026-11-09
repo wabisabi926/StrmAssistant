@@ -82,6 +82,7 @@ namespace StrmAssistant
         public static IntroDbApi IntroDbApi { get; private set; }
         public static ImagePostProcessor ImagePostProcessor { get; private set; }
         public static global::StrmAssistant.Provider.Douban.DoubanAssist DoubanAssist { get; private set; }
+        public static CommunityRatingService RatingUnifier { get; private set; }
         public static MetadataApi MetadataApi { get; private set; }
         public static VideoThumbnailApi VideoThumbnailApi { get; private set; }
 
@@ -334,6 +335,7 @@ namespace StrmAssistant
             ImagePostProcessor = new ImagePostProcessor(ffmpegManager, providerManager, fileSystem);
             DoubanAssist = new global::StrmAssistant.Provider.Douban.DoubanAssist(httpClient, jsonSerializer,
                 providerManager, fileSystem);
+            RatingUnifier = new CommunityRatingService();
             FingerprintApi = new FingerprintApi(libraryManager, fileSystem, applicationPaths, ffmpegManager,
                 mediaEncoder, mediaMountManager, jsonSerializer, itemRepository, serverApplicationHost);
             PlaySessionMonitor = new PlaySessionMonitor(libraryManager, userManager, sessionManager);
@@ -519,6 +521,18 @@ namespace StrmAssistant
                 else if (e.Argument.Item is Season doubanSeason)
                 {
                     _ = BackgroundTaskRunner.Run("Douban.Apply.Season", () => DoubanAssist.ApplyAsync(doubanSeason, CancellationToken.None));
+                }
+            }
+
+            // 社区评分统一：单条刷新完成后按配置来源回写。扫库期间 OnRefreshCompleted 已提前返回，
+            // 不会逐条触发；全库对齐交给「统一社区评分」计划任务。
+            if (CommunityRatingService.IsUnificationEnabled)
+            {
+                var ratingItem = e.Argument.Item;
+                if (ratingItem is Movie || ratingItem is Series)
+                {
+                    _ = BackgroundTaskRunner.Run("CommunityRating.UnifyItem",
+                        () => RatingUnifier.UnifyItemAsync(ratingItem, CancellationToken.None));
                 }
             }
 

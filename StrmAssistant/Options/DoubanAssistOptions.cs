@@ -30,6 +30,11 @@ namespace StrmAssistant.Options
         [Required]
         public bool DoubanRatingToKodi { get; set; } = false;
 
+        [DisplayNameL("MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings", typeof(Resources))]
+        [DescriptionL("MetadataEnhanceOptions_EnableMdbListCriticRating_Description", typeof(Resources))]
+        [Required]
+        public bool EnableMdbListCriticRating { get; set; } = false;
+
         [DisplayNameL("MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions", typeof(Resources))]
         [DescriptionL("MetadataEnhanceOptions_DoubanFillOverview_Description", typeof(Resources))]
         [Required]
@@ -44,11 +49,6 @@ namespace StrmAssistant.Options
         [DescriptionL("MetadataEnhanceOptions_DoubanPosterFallback_Description", typeof(Resources))]
         [Required]
         public bool DoubanPosterFallback { get; set; } = false;
-
-        [DisplayNameL("MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings", typeof(Resources))]
-        [DescriptionL("MetadataEnhanceOptions_EnableMdbListCriticRating_Description", typeof(Resources))]
-        [Required]
-        public bool EnableMdbListCriticRating { get; set; } = false;
 
         [DisplayNameL("MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days", typeof(Resources))]
         [DescriptionL("MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description", typeof(Resources))]

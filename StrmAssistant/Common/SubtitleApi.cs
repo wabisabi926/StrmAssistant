@@ -202,7 +202,7 @@ namespace StrmAssistant.Common
         }
 
         [HarmonyReversePatch]
-        private static async Task<bool> UpdateExternalSubtitleStreamStub(object instance, BaseItem item,
+        private static Task<bool> UpdateExternalSubtitleStreamStub(object instance, BaseItem item,
             MediaStream subtitleStream, MetadataRefreshOptions options, LibraryOptions libraryOptions,
             CancellationToken cancellationToken) =>
             throw new NotImplementedException();

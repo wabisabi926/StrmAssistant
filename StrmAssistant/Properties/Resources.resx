@@ -930,7 +930,7 @@
     <value>ISO Extraction</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>Include local/remote ISOs; Windows mounts natively, Linux/Docker needs a custom ffprobe; no remote capture. Default is OFF.</value>
+    <value>Include local/remote ISOs; Windows mounts natively, Linux/Docker uses in-process UDF title sampling; no remote capture. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>Clear Embedded Metadata</value>

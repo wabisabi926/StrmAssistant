@@ -843,7 +843,7 @@
     <value>ISO 擷取</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>本機/遠端 ISO 納入擷取；Windows 自動掛載，Linux/Docker 需自訂 ffprobe；遠端不支援截圖。預設關閉。</value>
+    <value>本機/遠端 ISO 納入擷取；Windows 自動掛載，Linux/Docker 用行程內 UDF 選片取樣；遠端不支援截圖。預設關閉。</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>清除內嵌中繼資料</value>

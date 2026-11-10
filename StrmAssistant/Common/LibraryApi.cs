@@ -156,7 +156,7 @@ namespace StrmAssistant.Common
         /// 大库扫库时是纯浪费。设置保存后 key 变化会自动失效，不需要显式清理。
         /// <para>
         /// ISO 默认被排除（Emby 原生 ffprobe 通常无法直接读取）；当用户开启「ISO 提取」时不再强制排除：
-        /// Windows 由挂载卷上的正片作答，Linux/Docker 交由 <c>CustomProbePath</c> 指定的自定义 ffprobe 直读 ISO。
+        /// Windows 由挂载卷上的正片作答，Linux/Docker 用进程内 UDF 选片并把正片样本交给 ffprobe。
         /// </para>
         /// </summary>
         private static void EnsureExcludeMediaCache()

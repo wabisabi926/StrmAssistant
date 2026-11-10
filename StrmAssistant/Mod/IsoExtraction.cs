@@ -30,7 +30,7 @@ namespace StrmAssistant.Mod
     /// 2. **替换探测输入**：Prefix <c>MediaProbeManager.GetMediaInfoInternal</c>，把
     ///    <c>inputPath</c>（形如 <c>file:"D:\a.iso"</c> 或 <c>"http://x/a.iso"</c>）替换为
     ///    ffprobe 能稳定读取的本地路径：
-    ///    - 本地 .iso → Windows 挂载取正片；失败退回进程内 UDF 选片（不改输入，交由 ffprobe 直读）。
+    ///    - 本地 .iso → Windows 挂载取正片；无挂载时进程内 UDF 选片，并把正片样本写成临时文件交给 ffprobe。
     ///    - 远程 http(s) ISO → HTTP Range 拉取头部窗口到本地临时文件再探测。
     ///
     /// 3. **补写章节**（Postfix 同方法，**仅本地 .iso**）：m2ts 没有章节原子，ffprobe 即使带
@@ -149,6 +149,10 @@ namespace StrmAssistant.Mod
             {
                 if (string.IsNullOrWhiteSpace(inputPath)) return;
 
+                // Emby 启动早期 FfmpegConfiguration 可能为 null，覆盖会延后；探测前再兜底一次，
+                // 保证首个 ISO 探测已经用上自定义 ffprobe。
+                FfmpegPathOverride.EnsureApplied();
+
                 var logger = Plugin.Instance.Logger;
 
                 // ① 远程/流式 ISO（strm → http/https）：拉取头部窗口到本地临时文件
@@ -187,12 +191,13 @@ namespace StrmAssistant.Mod
                         inputPath = '"' + probePath + '"';
                         protocol = MediaProtocol.File;
                         logger.Info($"IsoExtraction - probing mounted title for {isoPath} -> {probePath}");
-
-                        // ★ 章节补写（本地）：m2ts 无章节原子，ffprobe 即便带 -show_chapters 也取不到；
-                        //   这里把 MPLS PlayListMark 解析出的章节带出，由 postfix 注入探测结果，
-                        //   使 Emby 能把它落库到 Chapters3（BaseMediaInfoProber → metadataResult.Chapters）。
-                        __state = BuildLocalHint(isoPath);
                     }
+
+                    // ★ 章节/语言补写（本地）：m2ts 没有章节原子，ffprobe 即便带 -show_chapters 也取不到。
+                    //   Windows 挂载成功时用挂载卷解析；Linux 无挂载时 GetProbePath 返回 null，
+                    //   但进程内 UDF 选片已经缓存了 playlist 信息，这里同样把 hint 交给 postfix。
+                    //   ApplyChapters 会校验探测时长与 playlist 时长，避免把别的 m2ts 的结果套进来。
+                    __state = BuildLocalHint(isoPath);
 
                     return;
                 }
@@ -307,6 +312,17 @@ namespace StrmAssistant.Mod
                 return;
             }
 
+            // Linux 无挂载时探测的是整个 ISO，ffprobe 可能扫到别的 m2ts；
+            // 时长对不上就不注入章节，宁可没有也不能把别的片段的章节标错。
+            var probedSeconds = mediaInfo.RunTimeTicks.Value / (double)TimeSpan.TicksPerSecond;
+            if (!RuntimesMatch(probedSeconds, hint.DurationSeconds))
+            {
+                Plugin.Instance.Logger.Info(
+                    $"IsoExtraction - probed runtime {probedSeconds:F1}s does not match playlist " +
+                    $"{hint.DurationSeconds:F1}s; playlist chapters skipped");
+                return;
+            }
+
             mediaInfo.Chapters = chapters.ToArray();
 
             Plugin.Instance.Logger.Info(
@@ -325,6 +341,18 @@ namespace StrmAssistant.Mod
             var streams = mediaInfo.MediaStreams;
             if (streams == null || streams.Count == 0) return;
             if (hint.AudioStreams.Count == 0 && hint.SubtitleStreams.Count == 0) return;
+
+            // 与章节同理：探测时长对不上说明 ffprobe 读的不是 playlist 选中的标题，
+            // 此时按位置补语言可能标错，宁可不补。
+            if (!mediaInfo.RunTimeTicks.HasValue || mediaInfo.RunTimeTicks.Value <= 0) return;
+            var probedSeconds = mediaInfo.RunTimeTicks.Value / (double)TimeSpan.TicksPerSecond;
+            if (!RuntimesMatch(probedSeconds, hint.DurationSeconds))
+            {
+                Plugin.Instance.Logger.Info(
+                    $"IsoExtraction - probed runtime {probedSeconds:F1}s does not match playlist " +
+                    $"{hint.DurationSeconds:F1}s; playlist stream details skipped");
+                return;
+            }
 
             var audioFilled =
                 FillMissingStreamDetails(streams.Where(s => s.Type == MediaStreamType.Audio).ToList(),
@@ -387,5 +415,18 @@ namespace StrmAssistant.Mod
         private static bool IsUnknownLanguage(string language) =>
             string.IsNullOrWhiteSpace(language) ||
             string.Equals(language, "und", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// playlist 时长与探测时长是否可视为同一条标题。容忍 5 秒，覆盖 m2ts 首尾时间戳差异；
+        /// 任一未知时返回 false，由调用方决定是否跳过。
+        /// </summary>
+        internal static bool RuntimesMatch(double probedSeconds, double playlistSeconds)
+        {
+            if (probedSeconds <= 0 || playlistSeconds <= 0) return false;
+            if (double.IsNaN(probedSeconds) || double.IsInfinity(probedSeconds) ||
+                double.IsNaN(playlistSeconds) || double.IsInfinity(playlistSeconds)) return false;
+
+            return Math.Abs(probedSeconds - playlistSeconds) <= 5;
+        }
     }
 }

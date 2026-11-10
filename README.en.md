@@ -81,7 +81,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - Chinese dropdowns for multi-version display and sorting
 
 ✅ **Full ISO extraction pipeline**
-- Remote ISO (strm → http) now writes MPLS chapters; custom ffprobe reads UDF images directly
+- Remote/local ISO titles are sampled for ffprobe and get MPLS chapters; Linux/Docker needs no mount or libudfread
 - Persistent mount manifest + startup reconciliation + shutdown release hook
 - Rewritten frame extraction for ISO screenshots/chapter images, fixed corrupted frames
 
@@ -126,7 +126,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 - **Pre-extract media info**: probe before/after library import so playback starts without waiting for ffprobe
 - **Exclusive extraction mode**: takes over Emby's native ffprobe and image capture; custom ffprobe binary supported (rffmpeg for distributed extraction)
-- **ISO direct read**: custom ffprobe reads UDF images directly on Linux/Docker, with MPLS playlist language and chapter parsing
+- **ISO sample extraction**: on Linux/Docker, in-process UDF title selection feeds a title sample to ffprobe, with MPLS playlist language and chapter parsing (no mount or libudfread required)
 - **Media info persistence**: writes `*-mediainfo.json` with backup / restore / clear-then-re-extract support
 - **Image capture**: video screenshots, preview thumbnails, backdrop generation (with multi-select post-processing)
 - **HDR tagging**: detects CUVA dynamic metadata and shows the range label as `HDR Vivid`; dual-layer Dolby Vision is tagged Profile 7 on the enhancement layer
@@ -220,6 +220,8 @@ The plugin adapts dynamically: it detects the Emby version at startup, prefers H
 |---|---|---|
 | x86-64 / x64 | ✅ Full | All features available |
 | ARM64 / aarch64 | ✅ Full | Requires Harmony 2.4.2+, incl. Chinese search |
+
+> ISO extraction: Emby's third-party `IsoMounter` plugin is incompatible with 4.10 and blocks ISO probing; disable or remove it. This plugin does not depend on it. Local ISOs need no mount on Linux/Docker, and Windows falls back to title sampling when mounting fails.
 
 ## Build
 

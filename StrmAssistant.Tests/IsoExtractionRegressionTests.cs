@@ -9,12 +9,45 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using StrmAssistant.Common;
+using StrmAssistant.Mod;
 using Xunit;
 
 namespace StrmAssistant.Tests
 {
     public class IsoExtractionRegressionTests
     {
+        [Theory]
+        [InlineData(30.7, 30.7, true)]
+        [InlineData(30.0, 35.0, true)]
+        [InlineData(30.0, 35.1, false)]
+        [InlineData(30.7, 90.0, false)]
+        [InlineData(0.0, 30.0, false)]
+        [InlineData(30.0, 0.0, false)]
+        public void RuntimesMatch_ToleratesFiveSeconds(double probedSeconds, double playlistSeconds, bool expected)
+        {
+            Assert.Equal(expected, IsoExtraction.RuntimesMatch(probedSeconds, playlistSeconds));
+        }
+
+        [IsoSampleFact]
+        public void LocalIsoSample_BuildsProbeFileAndHint()
+        {
+            var isoPath = IsoSample.ResolvedPath;
+
+            var sample = IsoMounter.GetLocalProbePath(isoPath);
+
+            Assert.NotNull(sample);
+            Assert.True(File.Exists(sample));
+            Assert.True(new FileInfo(sample).Length > 0);
+            Assert.True(IsoMounter.TryGetTitleHint(isoPath, out var hint));
+            Assert.True(hint.IsProbeSample);
+            Assert.True(hint.DurationSeconds > 0);
+
+            // 同一 ISO 第二次应命中缓存，不再生成新文件
+            Assert.Equal(sample, IsoMounter.GetLocalProbePath(isoPath));
+
+            File.Delete(sample);
+        }
+
         [Theory]
         [InlineData(false, false)]
         [InlineData(true, false)]

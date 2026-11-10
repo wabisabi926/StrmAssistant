@@ -10,8 +10,8 @@ namespace StrmAssistant.Options
     /// 提取 · ISO 与外部工具分组。
     /// <para>
     /// <c>EnableIsoExtraction</c> 与 <c>CustomProbePath</c> 是同一件事的两面：Windows 走系统挂载，
-    /// Linux/Docker 下 ISO 由自定义 ffprobe 直读 UDF（见 <c>Common/IsoMounter.cs</c>、<c>Common/LibraryApi.cs</c>），
-    /// 因此两者必须同组呈现，避免用户在页面两端分别配置。
+    /// Linux/Docker 下用进程内 UDF 选片、把正片样本交给 ffprobe（见 <c>Common/IsoMounter.cs</c>、
+    /// <c>Common/LibraryApi.cs</c>），因此两者必须同组呈现，避免用户在页面两端分别配置。
     /// </para>
     /// <para>
     /// <c>CustomEncoderPath</c> 用于图像捕获与视频缩略图的 ffmpeg 编码（如带 libplacebo 的构建可修复 DV P5 绿屏），

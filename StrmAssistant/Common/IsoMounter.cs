@@ -16,10 +16,10 @@ namespace StrmAssistant.Common
     ///
     /// - **Windows**：调用 PowerShell 的 <c>Mount-DiskImage</c> 把 .iso 挂成虚拟光驱，
     ///   再由 <see cref="UdfTitleResolver.ResolveFromMount"/> 在挂载卷上按 playlist 选出正片
-    ///   （失败回退「最大 .m2ts / VTS_01_1.VOB」），交给 ffprobe 探测。
-    /// - **Linux / Docker**：无法挂载，改由 <see cref="UdfTitleResolver.Resolve"/> 进程内读 UDF
-    ///   选出正片（仅用于发现与日志校验），.iso 本身仍交由 <c>CustomProbePath</c> 指定的
-    ///   带 ISO 支持的自定义 ffprobe 直读。
+    ///   （失败回退「最大 .m2ts / VTS_01_1.VOB」），交给 ffprobe 探测；挂载不可用时走本地采样。
+    /// - **Linux / Docker**：无法挂载，先用 <see cref="UdfTitleResolver.Resolve"/> 进程内读 UDF
+    ///   选出正片，再把正片头尾样本写成临时 .ts 交给 ffprobe（见 <see cref="GetLocalProbePath"/>）。
+    ///   不依赖 libbluray 的 libudfread，也不会像 raw ISO 直扫那样读到错误的 m2ts。
     ///
     /// 生命周期：按 ISO 路径缓存挂载结果（含最后使用时间），后台清扫器在空闲超过
     /// <see cref="IdleTimeout"/> 后自动卸载；插件卸载时全部卸载。
@@ -64,8 +64,23 @@ namespace StrmAssistant.Common
             public DateTime LastUsedUtc;
         }
 
+        private sealed class LocalSampleEntry
+        {
+            public string TempFile;
+            public DateTime LastUsedUtc;
+            public long SourceLength;
+            public long SourceLastWriteTicks;
+        }
+
+        private const long LocalProbeSampleMaxBytes = 64L * 1024 * 1024;
+
         private static readonly ConcurrentDictionary<string, RemoteEntry> RemoteIsos =
             new ConcurrentDictionary<string, RemoteEntry>(StringComparer.Ordinal);
+
+        private static readonly ConcurrentDictionary<string, LocalSampleEntry> LocalSamples =
+            new ConcurrentDictionary<string, LocalSampleEntry>(StringComparer.Ordinal);
+
+        private static readonly object LocalSampleLock = new object();
 
         private static readonly ConcurrentDictionary<string, MountEntry> Mounts =
             new ConcurrentDictionary<string, MountEntry>(StringComparer.OrdinalIgnoreCase);
@@ -489,7 +504,8 @@ namespace StrmAssistant.Common
         /// 返回可用于 ffprobe 的「正片」路径；无可用真实路径时返回 null（调用方保持原路径）。
         ///
         /// Windows 挂载成功 → 返回挂载卷上的正片路径；
-        /// 非 Windows 或挂载失败 → 返回 null，仅做一次进程内 UDF 选片记录（Linux/Docker 由自定义 ffprobe 直读 .iso）。
+        /// 非 Windows / 挂载失败 → 用进程内 UDF 选片，把正片头尾样本写成临时 .ts 再交给 ffprobe。
+        /// 这样不依赖 libbluray 的 libudfread，也能选中正确的 m2ts（多标题原盘的 raw ISO 直扫会读错片）。
         /// </summary>
         public static string GetProbePath(string isoPath)
         {
@@ -524,11 +540,11 @@ namespace StrmAssistant.Common
                     else
                     {
                         // 挂载没成功（Failed 或拿不到盘符）：下面会退回进程内 UDF，
-                        // 但**不会**把章节注入探测结果。必须明说，否则表现为「章节静默丢失」。
+                        // 用 UDF 解析出的 playlist 信息补写章节/语言。
                         Plugin.Instance?.Logger?.Info(
                             $"IsoExtraction - mount unavailable for {isoPath} " +
                             $"(failed={entry.Failed}, drive='{entry.DriveRoot}'); " +
-                            "falling back to in-process UDF, playlist chapters will NOT be injected this round");
+                            "falling back to in-process UDF, playlist hints will be injected from UDF");
                     }
                 }
                 catch (Exception e)
@@ -539,14 +555,118 @@ namespace StrmAssistant.Common
             else
             {
                 // IsSupported 为 false（非 Windows，或 PowerShell 探测失败/超时）。
-                // 明确记录：否则用户只看到「没有章节」而日志毫无线索。
+                // 明确记录：Linux/Docker 走进程内 UDF 选片，并由调用方补写 playlist 章节/语言。
                 Plugin.Instance?.Logger?.Info(
                     "IsoExtraction - native mount not supported on this host; " +
-                    $"falling back to in-process UDF for {isoPath} (playlist chapters will NOT be injected)");
+                    $"falling back to in-process UDF for {isoPath} (playlist hints will be injected from UDF)");
+            }
+
+            var samplePath = GetLocalProbePath(isoPath);
+            if (!string.IsNullOrEmpty(samplePath))
+            {
+                Plugin.Instance?.Logger?.Info(
+                    $"IsoExtraction - probing local title sample for {isoPath} -> {samplePath}");
+                return samplePath;
             }
 
             ResolveInProcessTitle(isoPath);
             return null;
+        }
+
+        /// <summary>
+        /// 本地 ISO 的探测样本：用进程内 UDF 选中正片，把正片头尾（受总预算限制）写成临时 .ts，
+        /// 交给 ffprobe 读取。缓存按 ISO 长度 + 修改时间失效；超过 TTL 由 sweeper 清理。
+        ///
+        /// 这样做的好处：
+        /// - 不依赖自定义 ffprobe 是否带 libudfread（<c>bluray:image.iso</c> 缺少它时会 I/O error）；
+        /// - 多 m2ts 原盘不会像 raw ISO 直扫那样读到第一段（菜单/预告）而误判。
+        /// </summary>
+        internal static string GetLocalProbePath(string isoPath)
+        {
+            if (string.IsNullOrEmpty(isoPath)) return null;
+
+            try
+            {
+                var source = new FileInfo(isoPath);
+                if (!source.Exists) return null;
+
+                EnsureSweeper();
+
+                var length = source.Length;
+                var lastWriteTicks = source.LastWriteTimeUtc.Ticks;
+
+                if (LocalSamples.TryGetValue(isoPath, out var cached) &&
+                    File.Exists(cached.TempFile) &&
+                    cached.SourceLength == length &&
+                    cached.SourceLastWriteTicks == lastWriteTicks)
+                {
+                    cached.LastUsedUtc = DateTime.UtcNow;
+                    return cached.TempFile;
+                }
+
+                lock (LocalSampleLock)
+                {
+                    // 同一 ISO 并发探测时，后到者复用先到者生成的样本
+                    if (LocalSamples.TryGetValue(isoPath, out cached) &&
+                        File.Exists(cached.TempFile) &&
+                        cached.SourceLength == length &&
+                        cached.SourceLastWriteTicks == lastWriteTicks)
+                    {
+                        cached.LastUsedUtc = DateTime.UtcNow;
+                        return cached.TempFile;
+                    }
+
+                    // ISO 被替换或样本丢失：旧临时文件先清掉
+                    if (LocalSamples.TryRemove(isoPath, out var stale)) TryDelete(stale.TempFile);
+
+                    var tempDir = Path.Combine(Path.GetTempPath(), "strmassistant_iso");
+                    Directory.CreateDirectory(tempDir);
+                    var tempFile = Path.Combine(tempDir, "local_" + Guid.NewGuid().ToString("N") + ".ts");
+
+                    try
+                    {
+                        using var image = new FileStream(isoPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        var title = UdfTitleResolver.WriteProbeSample(image, tempFile, LocalProbeSampleMaxBytes);
+                        if (title == null)
+                            throw new InvalidDataException("No supported Blu-ray/DVD title found in ISO");
+
+                        // 样本是截取片段，时长/大小必须用 playlist 的值覆盖；
+                        // IsProbeSample 会让 IsoExtraction 在 postfix 里强制写回。
+                        TitleHints[isoPath] = new TitleHint
+                        {
+                            Chapters = title.Chapters ?? new List<double>(),
+                            AudioStreams = title.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
+                            SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
+                            DurationSeconds = title.DurationSeconds,
+                            IsProbeSample = true,
+                            SourceSize = length
+                        };
+
+                        LocalSamples[isoPath] = new LocalSampleEntry
+                        {
+                            TempFile = tempFile,
+                            LastUsedUtc = DateTime.UtcNow,
+                            SourceLength = length,
+                            SourceLastWriteTicks = lastWriteTicks
+                        };
+
+                        Plugin.Instance?.Logger?.Info(
+                            $"IsoExtraction - local title sample saved: {new FileInfo(tempFile).Length} bytes, " +
+                            $"playlist={title.SourceName}, duration={title.DurationSeconds:F1}s for {isoPath}");
+                        return tempFile;
+                    }
+                    catch
+                    {
+                        TryDelete(tempFile);
+                        throw;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance?.Logger?.Warn("IsoExtraction - local title sample failed: " + e.Message);
+                return null;
+            }
         }
 
         /// <summary>
@@ -971,6 +1091,15 @@ namespace StrmAssistant.Common
                     if (DateTime.UtcNow - kv.Value.LastUsedUtc < RemoteCacheTtl) continue;
                     RemoteHints.TryRemove(kv.Key, out _);
                 }
+
+                // 本地 ISO 探测样本：超过 TTL 清理
+                foreach (var kv in LocalSamples.ToArray())
+                {
+                    if (DateTime.UtcNow - kv.Value.LastUsedUtc < RemoteCacheTtl) continue;
+
+                    TryDelete(kv.Value.TempFile);
+                    LocalSamples.TryRemove(kv.Key, out _);
+                }
             }
             catch
             {
@@ -1000,6 +1129,13 @@ namespace StrmAssistant.Common
             {
                 TryDelete(kv.Value.TempFile);
                 RemoteIsos.TryRemove(kv.Key, out _);
+            }
+
+            // 清理全部本地 ISO 探测样本
+            foreach (var kv in LocalSamples.ToArray())
+            {
+                TryDelete(kv.Value.TempFile);
+                LocalSamples.TryRemove(kv.Key, out _);
             }
         }
 

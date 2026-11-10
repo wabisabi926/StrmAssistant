@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace StrmAssistant.Common
 {
@@ -20,13 +22,20 @@ namespace StrmAssistant.Common
         private static ILogger _logger;
         private static bool _initialized;
 
+        private static readonly object ApplySync = new object();
+        private static string _pendingProbePath;
+        private static string _pendingEncoderPath;
+        private static int _applyVersion;
+        private static int _ensureAttemptVersion = -1;
+
         /// <summary>
         /// 自定义 ffprobe 是否具备 bluray 输入协议能力（<c>--enable-libbluray</c>）。
-        /// 由 <see cref="SelfCheck"/> 在应用 CustomProbePath 时探测并缓存；
-        /// <c>IsoExtraction</c> 据此决定是否把探测输入改写为 <c>bluray:"{0}"</c>。
+        /// 由 <see cref="SelfCheck"/> 在应用 CustomProbePath 时探测并缓存，用于日志与诊断。
+        ///
+        /// 注意：ISO 提取已改为「进程内 UDF 选片 + 正片采样」，不再依赖
+        /// <c>bluray:"{0}"</c>（该协议读 ISO 还需要 libudfread）。此能力位保留用于排查外部二进制差异。
         ///
         /// 语义：<c>null</c>=尚未探测（未知）；<c>true</c>=支持；<c>false</c>=不支持。
-        /// 未配置自定义 ffprobe 或探测失败时保持 <c>null</c>，调用方应保守回退（不改写输入）。
         /// </summary>
         public static bool? ProbeSupportsBluray { get; private set; }
 
@@ -61,6 +70,10 @@ namespace StrmAssistant.Common
 
         /// <summary>
         /// 按当前配置应用路径覆盖。空值或文件不存在时跳过对应项，不回滚已生效的覆盖。
+        ///
+        /// Emby 启动时 <see cref="IFfmpegManager.FfmpegConfiguration"/> 可能尚未创建（实测为 null），
+        /// 此时不能直接放弃，否则自定义 ffprobe 永远不会生效，直到用户手动重新保存设置。
+        /// 这里把待应用路径记下来，后台每 2 秒重试，最多 3 分钟；更晚保存的设置会通过版本号复用同一个重试。
         /// </summary>
         public static void Apply(string customProbePath, string customEncoderPath)
         {
@@ -73,14 +86,126 @@ namespace StrmAssistant.Common
                     _ffmpegManager?.FfmpegConfiguration == null ? "null" : _ffmpegManager.FfmpegConfiguration.GetType().Name);
             }
 
-            if (!_initialized || _ffmpegManager?.FfmpegConfiguration == null) return;
+            if (!_initialized) return;
+
+            int version;
+            lock (ApplySync)
+            {
+                _pendingProbePath = customProbePath;
+                _pendingEncoderPath = customEncoderPath;
+                version = ++_applyVersion;
+            }
+
+            // 两项都为空时没有可应用的内容，不需要后台重试（默认配置就是这种情况）。
+            if (string.IsNullOrWhiteSpace(customProbePath) && string.IsNullOrWhiteSpace(customEncoderPath))
+            {
+                if (_ffmpegManager?.FfmpegConfiguration != null) ApplyCore(null, null);
+                return;
+            }
+
+            if (_ffmpegManager?.FfmpegConfiguration == null)
+            {
+                _logger?.Info(
+                    "FfmpegPathOverride - FfmpegConfiguration not ready; deferring apply (retry every 2s, up to 3 min)");
+                DeferApply(version);
+                return;
+            }
+
+            ApplyCore(customProbePath, customEncoderPath);
+        }
+
+        /// <summary>
+        /// 探测前兜底：如果 FfmpegConfiguration 已就绪但自定义路径仍未写入（例如启动重试还没到），
+        /// 在这里立即应用一次。相同配置只尝试一次，避免每次探测重复刷日志。
+        /// </summary>
+        public static void EnsureApplied()
+        {
+            if (!_initialized) return;
+
+            var configuration = _ffmpegManager?.FfmpegConfiguration;
+            if (configuration == null) return;
+
+            string probe, encoder;
+            lock (ApplySync)
+            {
+                if (_ensureAttemptVersion == _applyVersion) return;
+                _ensureAttemptVersion = _applyVersion;
+                probe = _pendingProbePath;
+                encoder = _pendingEncoderPath;
+            }
+
+            if (PathsMatch(configuration.ProbePath, probe) && PathsMatch(configuration.EncoderPath, encoder)) return;
+
+            _logger?.Info("FfmpegPathOverride - ensuring deferred paths before probe");
+            ApplyCore(probe, encoder);
+        }
+
+        private static bool PathsMatch(string configured, string pending)
+        {
+            if (string.IsNullOrWhiteSpace(pending)) return true;
+
+            try
+            {
+                return string.Equals(configured, Path.GetFullPath(pending), StringComparison.Ordinal);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static void ApplyCore(string customProbePath, string customEncoderPath)
+        {
+            var configuration = _ffmpegManager?.FfmpegConfiguration;
+            if (configuration == null) return;
 
             // 每次重新应用先复位能力位，避免旧值残留导致误判
             if (string.IsNullOrWhiteSpace(customProbePath)) ProbeSupportsBluray = null;
             if (string.IsNullOrWhiteSpace(customEncoderPath)) EncoderSupportsBluray = null;
 
-            TryOverride(_ffmpegManager.FfmpegConfiguration, "ProbePath", customProbePath);
-            TryOverride(_ffmpegManager.FfmpegConfiguration, "EncoderPath", customEncoderPath);
+            TryOverride(configuration, "ProbePath", customProbePath);
+            TryOverride(configuration, "EncoderPath", customEncoderPath);
+        }
+
+        private static void DeferApply(int version)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    for (var attempt = 0; attempt < 90; attempt++)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+
+                        // 期间有更新的 Apply（用户改设置）→ 让新调用负责
+                        if (version != Volatile.Read(ref _applyVersion)) return;
+
+                        if (_ffmpegManager?.FfmpegConfiguration == null) continue;
+
+                        string probe, encoder;
+                        lock (ApplySync)
+                        {
+                            probe = _pendingProbePath;
+                            encoder = _pendingEncoderPath;
+                        }
+
+                        _logger?.Info(
+                            "FfmpegPathOverride - FfmpegConfiguration ready; applying deferred paths");
+                        ApplyCore(probe, encoder);
+                        return;
+                    }
+
+                    if (version == Volatile.Read(ref _applyVersion))
+                    {
+                        _logger?.Warn(
+                            "FfmpegPathOverride - FfmpegConfiguration not ready after 3 minutes; custom paths were not applied");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Warn("FfmpegPathOverride - deferred apply failed: " + ex.Message);
+                }
+            });
         }
 
         private static void TryOverride(IFfmpegConfiguration configuration, string propertyName, string customPath)

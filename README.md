@@ -81,7 +81,7 @@
 - 多版本显示/排序中文下拉框
 
 ✅ **ISO 提取全链路**
-- 远程 ISO（strm → http）补写 MPLS 章节；自定义 ffprobe 直读 UDF 镜像
+- 远程/本地 ISO 采样正片并补写 MPLS 章节；Linux/Docker 无需挂载、无需 libudfread
 - 挂载清单持久化 + 启动对账 + 关闭期释放钩子
 - ISO 截图/章节图抽帧改写，修复抽帧花屏
 
@@ -126,7 +126,7 @@
 
 - **预提取媒体信息**：入库前/后自动探测，播放时无需等待 ffprobe，显著提升起播速度
 - **独占提取模式**：接管 Emby 原生 ffprobe 与截图，可自定义 ffprobe（支持 rffmpeg 分布式提取）
-- **ISO 直读**：Linux/Docker 下由自定义 ffprobe 直接读取 UDF 镜像，支持 MPLS 播放列表语言与章节解析
+- **ISO 采样提取**：Linux/Docker 下进程内 UDF 选片、把正片样本交给 ffprobe，支持 MPLS 播放列表语言与章节解析（无需挂载或 libudfread）
 - **信息持久化**：媒体信息落盘为 `*-mediainfo.json`，支持备份/恢复/清理后重新提取
 - **图像捕获**：视频截图、预览缩略图、背景图生成（含多选后处理）
 - **HDR 标注**：识别 CUVA 动态元数据，把画质标签显示为 `HDR Vivid`；双层杜比视界按增强层标注 Profile 7
@@ -220,6 +220,8 @@
 |---|---|---|
 | x86-64 / x64 | ✅ 完全支持 | 所有功能可用 |
 | ARM64 / aarch64 | ✅ 完全支持 | 需 Harmony 2.4.2+，含中文搜索增强 |
+
+> ISO 提取：Emby 的第三方 `IsoMounter` 插件与 4.10 不兼容，会阻塞 ISO 探测，请禁用或移除；本插件不依赖它。Linux/Docker 下本地 ISO 无需挂载，Windows 挂载失败时也会回退正片采样。
 
 ## 构建说明
 

@@ -25,8 +25,11 @@ namespace StrmAssistant.Options.Store
         {
             _logger = logger;
 
-            NetworkProxyOptionsMigration.MigrateIfNeeded(OptionsFilePath,
-                applicationHost.Resolve<MediaBrowser.Model.Serialization.IJsonSerializer>(), logger);
+            if (OptionsSchema.ShouldRunMigrations)
+            {
+                NetworkProxyOptionsMigration.MigrateIfNeeded(OptionsFilePath,
+                    applicationHost.Resolve<MediaBrowser.Model.Serialization.IJsonSerializer>(), logger);
+            }
 
             FileSaving += OnFileSaving;
         }

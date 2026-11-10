@@ -23,8 +23,11 @@ namespace StrmAssistant.Options.Store
 
             // 3.0.0.55：设置项由平铺改为 9 个分组嵌套。先把旧配置就地迁移为嵌套结构，
             // 否则旧键会被反序列化忽略、用户设置静默回退为默认值。
-            MetadataEnhanceOptionsMigration.MigrateIfNeeded(OptionsFilePath,
-                applicationHost.Resolve<IJsonSerializer>(), logger);
+            if (OptionsSchema.ShouldRunMigrations)
+            {
+                MetadataEnhanceOptionsMigration.MigrateIfNeeded(OptionsFilePath,
+                    applicationHost.Resolve<IJsonSerializer>(), logger);
+            }
 
             FileSaved += OnFileSaved;
             FileSaving += OnFileSaving;

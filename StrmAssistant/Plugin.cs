@@ -167,6 +167,9 @@ namespace StrmAssistant
             HttpClient = httpClient;
             JsonSerializer = jsonSerializer;
 
+            // 配置 schema 版本门：必须在任何 Store 构造之前初始化，Store 构造里会读 ShouldRunMigrations
+            OptionsSchema.Initialize(ApplicationPaths.PluginConfigurationsPath, Logger);
+
             MainOptionsStore = new PluginOptionsStore(applicationHost, Logger, ConfigName);
             MediaInfoExtractStore =
                 new MediaInfoExtractOptionsStore(applicationHost, Logger, ConfigName + "_" + nameof(MediaInfoExtractOptions));
@@ -179,10 +182,16 @@ namespace StrmAssistant
             NetworkProxyStore = new NetworkProxyOptionsStore(applicationHost, Logger,
                 ConfigName + "_" + nameof(NetworkProxyOptions));
 
-            MigrateLegacyOptionGroups();
-            MigrateChineseSearchOptions();
+            if (OptionsSchema.ShouldRunMigrations)
+            {
+                MigrateLegacyOptionGroups();
+                MigrateChineseSearchOptions();
+            }
+
             EnsureChineseSearchUsable();
             InitializeOptionCache();
+
+            OptionsSchema.MarkCurrent(Logger);
 
             // 方案 4A：对账并释放上一次进程遗留的 ISO 孤儿挂载（跨 Emby 重启泄漏的兜底）
             try

@@ -1158,19 +1158,19 @@
     <value>IntroDb API Key</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Optional_TheIntroDB_API_key_sent_via_Bearer_auth_to_raise_the_daily_request_limit__Default_is_empty_" xml:space="preserve">
-    <value>提高每日请求限额。默认留空。</value>
+    <value>introdb.app 的 Key，按 IMDb ID 查询；留空使用公共限额。</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_TIDB_API_Key" xml:space="preserve">
     <value>TIDB API Key</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_API_key_increases_daily_usage_limits__Default_is_empty_" xml:space="preserve">
-    <value>提高每日请求限额。默认留空。</value>
+    <value>TheIntroDB 的 Key，按 TMDB ID 查询；留空使用公共限额。</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Unified_IntroDb_Providers" xml:space="preserve">
     <value>数据源顺序</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Tried_in_order_until_one_succeeds__Default_is_IntroDb_Tidb_" xml:space="preserve">
-    <value>按顺序尝试，逗号分隔。默认 IntroDb,Tidb。</value>
+    <value>按顺序尝试；默认 IntroDb,Tidb，两者始终都会尝试，此项只调整顺序。</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
     <value>从 IntroDb 刮削片头片尾</value>

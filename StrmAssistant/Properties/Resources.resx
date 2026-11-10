@@ -1245,19 +1245,19 @@
     <value>IntroDb API Key</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Optional_TheIntroDB_API_key_sent_via_Bearer_auth_to_raise_the_daily_request_limit__Default_is_empty_" xml:space="preserve">
-    <value>Raises the daily request limit. Default is empty.</value>
+    <value>IntroDb (introdb.app) API key. Lookups use IMDb ID; leave empty for the public limit.</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_TIDB_API_Key" xml:space="preserve">
     <value>TIDB API Key</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_API_key_increases_daily_usage_limits__Default_is_empty_" xml:space="preserve">
-    <value>Raises the daily request limit. Default is empty.</value>
+    <value>TheIntroDB API key. Lookups use TMDB ID; leave empty for the public limit.</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Unified_IntroDb_Providers" xml:space="preserve">
     <value>Provider Order</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Tried_in_order_until_one_succeeds__Default_is_IntroDb_Tidb_" xml:space="preserve">
-    <value>Tried in order, comma-separated. Default is IntroDb,Tidb.</value>
+    <value>Tried in order; default is IntroDb,Tidb. Both are always tried, so this only changes the order.</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
     <value>Scrape Intro/Credits from IntroDb</value>

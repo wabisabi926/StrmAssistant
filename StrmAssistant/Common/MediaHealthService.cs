@@ -1,5 +1,6 @@
 using StrmAssistant.Properties;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,7 @@ namespace StrmAssistant.Common
 
             try
             {
+                ApplyComparison(report, Load());
                 var json = JsonSerializer.Serialize(report, JsonOptions);
                 File.WriteAllText(ReportPath, json, new UTF8Encoding(false));
                 File.WriteAllText(MarkdownPath, BuildMarkdown(report), new UTF8Encoding(false));
@@ -50,6 +52,37 @@ namespace StrmAssistant.Common
                 return false;
             }
         }
+
+        /// <summary>
+        /// 与上一份报告按「规则 + 条目 + 文件」做差集，得到新增/已修复。
+        /// 明细文本会随探测结果变化（如长边数值），不参与身份判定。
+        /// </summary>
+        public static void ApplyComparison(MediaHealthReport report, MediaHealthReport previous)
+        {
+            if (report == null) return;
+
+            report.NewIssues = 0;
+            report.ResolvedIssues = 0;
+            report.PreviousGeneratedAt = null;
+
+            if (previous == null) return;
+
+            report.PreviousGeneratedAt = previous.GeneratedAt;
+
+            // 旧版报告曾把提示级明细也写进 Issues，对比时跳过，避免首轮误报「已修复」
+            var current = new HashSet<(string Code, string Item, string File)>(
+                report.Issues.Where(i => i.Severity != MediaHealthSeverity.Info).Select(IssueKey));
+            var before = new HashSet<(string Code, string Item, string File)>(
+                previous.Issues.Where(i => i.Severity != MediaHealthSeverity.Info).Select(IssueKey));
+
+            report.NewIssues = report.Issues
+                .Count(i => i.Severity != MediaHealthSeverity.Info && !before.Contains(IssueKey(i)));
+            report.ResolvedIssues = previous.Issues
+                .Count(i => i.Severity != MediaHealthSeverity.Info && !current.Contains(IssueKey(i)));
+        }
+
+        private static (string Code, string Item, string File) IssueKey(MediaHealthIssue issue) =>
+            (issue.Code ?? string.Empty, issue.ItemName ?? string.Empty, issue.FileName ?? string.Empty);
 
         public static MediaHealthReport Load()
         {
@@ -85,11 +118,20 @@ namespace StrmAssistant.Common
             sb.AppendLine();
             sb.AppendLine(string.Format(Resources.Health_Markdown_Meta,
                 report.GeneratedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
-                report.ItemsChecked, report.ItemsWithIssues));
+                report.ItemsChecked, report.SkippedItems, report.ItemsWithIssues));
             sb.AppendLine();
             sb.AppendLine(string.Format(Resources.Health_Status_Summary,
                 report.GeneratedAt.ToLocalTime().ToString("MM-dd HH:mm"),
                 report.Critical, report.Warning, report.Info));
+
+            if (report.PreviousGeneratedAt.HasValue)
+            {
+                sb.AppendLine();
+                sb.AppendLine(string.Format(Resources.Health_Markdown_Diff,
+                    report.PreviousGeneratedAt.Value.ToLocalTime().ToString("MM-dd HH:mm"),
+                    report.NewIssues, report.ResolvedIssues));
+            }
+
             sb.AppendLine();
             sb.AppendLine("| " + Resources.Health_Markdown_Header + " |");
             sb.AppendLine("|---|---|---|---|");
@@ -104,6 +146,12 @@ namespace StrmAssistant.Common
             if (report.Issues.Count == 0)
             {
                 sb.AppendLine("| - | - | - | " + Resources.Health_Status_Empty + " |");
+            }
+
+            if (report.Info > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine(Resources.Health_Markdown_InfoNote);
             }
 
             return sb.ToString();

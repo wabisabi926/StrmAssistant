@@ -1008,7 +1008,7 @@
     <value>提示</value>
   </data>
   <data name="Health_Notify_Completed" xml:space="preserve">
-    <value>體檢完成：嚴重 {0} / 警告 {1} / 提示 {2}，報告：{3}</value>
+    <value>體檢完成：嚴重 {0} / 警告 {1} / 提示 {2}，跳過 {3} 個無媒體資訊，報告：{4}</value>
   </data>
   <data name="Health_Notify_NoData" xml:space="preserve">
     <value>沒有可用的媒體資訊，請先執行「提取媒體資訊」</value>
@@ -1020,10 +1020,16 @@
     <value>報告：{0}</value>
   </data>
   <data name="Health_Markdown_Meta" xml:space="preserve">
-    <value>產生時間 {0} · 檢查 {1} 個項目 · {2} 個有問題</value>
+    <value>產生時間 {0} · 檢查 {1} 個項目 · 跳過 {2} 個（無媒體資訊） · {3} 個有問題</value>
   </data>
   <data name="Health_Markdown_Header" xml:space="preserve">
     <value>嚴重度 | 項目 | 檔案 | 問題</value>
+  </data>
+  <data name="Health_Markdown_Diff" xml:space="preserve">
+    <value>較上次（{0}）：新增 {1} · 已修復 {2}</value>
+  </data>
+  <data name="Health_Markdown_InfoNote" xml:space="preserve">
+    <value>提示項僅統計數量，不列出明細。</value>
   </data>
   <data name="Health_Issue_Fake4K" xml:space="preserve">
     <value>檔名標 4K，實際長邊僅 {0}</value>

@@ -59,6 +59,7 @@ namespace StrmAssistant.ScheduledTask
             var directoryService = new DirectoryService(_logger, _fileSystem);
             var report = new MediaHealthReport { GeneratedAt = DateTimeOffset.Now };
             var itemsWithIssues = 0;
+            var infoIssues = 0;
 
             var index = 0;
             foreach (var item in items)
@@ -74,16 +75,24 @@ namespace StrmAssistant.ScheduledTask
                 try
                 {
                     var jsonPath = MediaInfoApi.GetMediaInfoJsonReadPath(item, directoryService);
-                    if (string.IsNullOrEmpty(jsonPath) || !File.Exists(jsonPath)) continue;
+                    if (string.IsNullOrEmpty(jsonPath) || !File.Exists(jsonPath))
+                    {
+                        report.SkippedItems++;
+                        continue;
+                    }
 
                     var input = ParseInput(item.Name, item.Path, jsonPath);
                     report.ItemsChecked++;
 
                     var issues = MediaHealthChecker.Check(input);
-                    if (issues.Count == 0) continue;
+                    infoIssues += issues.Count(i => i.Severity == MediaHealthSeverity.Info);
+
+                    // 提示级只汇总计数：全库「无字幕」若逐条列出会把报告刷爆
+                    var reportable = issues.Where(i => i.Severity != MediaHealthSeverity.Info).ToList();
+                    if (reportable.Count == 0) continue;
 
                     itemsWithIssues++;
-                    report.Issues.AddRange(issues);
+                    report.Issues.AddRange(reportable);
                 }
                 catch (OperationCanceledException)
                 {
@@ -98,19 +107,24 @@ namespace StrmAssistant.ScheduledTask
             report.ItemsWithIssues = itemsWithIssues;
             report.Critical = report.Issues.Count(i => i.Severity == MediaHealthSeverity.Critical);
             report.Warning = report.Issues.Count(i => i.Severity == MediaHealthSeverity.Warning);
-            report.Info = report.Issues.Count(i => i.Severity == MediaHealthSeverity.Info);
+            report.Info = infoIssues;
 
             progress.Report(100);
 
-            var saved = MediaHealthService.Save(report);
-            var message = saved
-                ? string.Format(Resources.Health_Notify_Completed,
-                    report.Critical, report.Warning, report.Info, MediaHealthService.MarkdownPath)
-                : Resources.Health_Notify_WriteFailed;
-
+            string message;
             if (report.ItemsChecked == 0)
             {
+                // 空跑不覆盖上一份有效报告，否则下次对比会丢掉基线
                 message = Resources.Health_Notify_NoData;
+            }
+            else
+            {
+                var saved = MediaHealthService.Save(report);
+                message = saved
+                    ? string.Format(Resources.Health_Notify_Completed,
+                        report.Critical, report.Warning, report.Info, report.SkippedItems,
+                        MediaHealthService.MarkdownPath)
+                    : Resources.Health_Notify_WriteFailed;
             }
 
             _logger.Info("MediaHealth - " + message);

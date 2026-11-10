@@ -53,9 +53,13 @@ namespace StrmAssistant.Common
         public DateTimeOffset GeneratedAt { get; set; }
         public int ItemsChecked { get; set; }
         public int ItemsWithIssues { get; set; }
+        public int SkippedItems { get; set; }
         public int Critical { get; set; }
         public int Warning { get; set; }
         public int Info { get; set; }
+        public int NewIssues { get; set; }
+        public int ResolvedIssues { get; set; }
+        public DateTimeOffset? PreviousGeneratedAt { get; set; }
         public List<MediaHealthIssue> Issues { get; set; } = new List<MediaHealthIssue>();
     }
 

@@ -5619,9 +5619,27 @@ namespace StrmAssistant.Properties {
         /// <summary>
         ///   Looks up a localized string.
         /// </summary>
+        public static string Health_Markdown_Diff {
+            get {
+                return ResourceManager.GetString("Health_Markdown_Diff", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
         public static string Health_Markdown_Header {
             get {
                 return ResourceManager.GetString("Health_Markdown_Header", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Markdown_InfoNote {
+            get {
+                return ResourceManager.GetString("Health_Markdown_InfoNote", resourceCulture);
             }
         }
 

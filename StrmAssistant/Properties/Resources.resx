@@ -1095,7 +1095,7 @@
     <value>Info</value>
   </data>
   <data name="Health_Notify_Completed" xml:space="preserve">
-    <value>Health check complete: {0} critical / {1} warning / {2} info. Report: {3}</value>
+    <value>Health check complete: {0} critical / {1} warning / {2} info, {3} skipped (no media info). Report: {4}</value>
   </data>
   <data name="Health_Notify_NoData" xml:space="preserve">
     <value>No media info found. Run "Extract Media Info" first.</value>
@@ -1107,10 +1107,16 @@
     <value>Report: {0}</value>
   </data>
   <data name="Health_Markdown_Meta" xml:space="preserve">
-    <value>Generated {0} · {1} item(s) checked · {2} with issues</value>
+    <value>Generated {0} · {1} item(s) checked · {2} skipped (no media info) · {3} with issues</value>
   </data>
   <data name="Health_Markdown_Header" xml:space="preserve">
     <value>Severity | Item | File | Issue</value>
+  </data>
+  <data name="Health_Markdown_Diff" xml:space="preserve">
+    <value>Since last check ({0}): {1} new · {2} resolved</value>
+  </data>
+  <data name="Health_Markdown_InfoNote" xml:space="preserve">
+    <value>Info items are counted only and not listed in detail.</value>
   </data>
   <data name="Health_Issue_Fake4K" xml:space="preserve">
     <value>File name claims 4K, long edge is only {0}</value>

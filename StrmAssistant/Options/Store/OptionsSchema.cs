@@ -6,11 +6,11 @@ using System.Text.Json;
 namespace StrmAssistant.Options.Store
 {
     /// <summary>
-    /// 配置 schema 版本门：只决定「要不要跑迁移」，不执行迁移本身。
-    /// 版本只在配置结构变化时递增，与插件版本无关。
+    /// 配置 schema 版本记录。4.0 起不再内置旧布局迁移，只记录当前结构版本；
+    /// 升级自旧布局的配置由 <see cref="LegacyConfigGuard"/> 拦截，要求先安装 3.0.0.78 完成迁移。
     ///
-    /// 缺失或损坏的版本文件按 v0 处理（迁移幂等，最坏情况是空跑一次）；
-    /// 版本高于当前插件（降级）时跳过迁移，且不回写版本。
+    /// 缺失/损坏的版本文件不代表旧布局：3.0.0.78 用户没有该文件，视为当前结构。
+    /// 版本高于当前插件（降级）时不回写、不降版本。
     /// </summary>
     internal static class OptionsSchema
     {
@@ -27,7 +27,7 @@ namespace StrmAssistant.Options.Store
         private static int _storedVersion;
         private static string _directory;
 
-        public static bool ShouldRunMigrations { get; private set; }
+        public static bool HasRecordedVersion { get; private set; }
 
         internal static int StoredVersion
         {
@@ -43,20 +43,26 @@ namespace StrmAssistant.Options.Store
             {
                 _initialized = true;
                 _directory = configDirectory;
-                _storedVersion = ReadVersion(configDirectory, logger);
-                ShouldRunMigrations = _storedVersion < CurrentVersion;
 
-                if (_storedVersion > CurrentVersion)
+                var read = Read(configDirectory, logger);
+                HasRecordedVersion = read.Found;
+                _storedVersion = read.Version;
+
+                if (!read.Found)
                 {
-                    logger?.Warn($"OptionsSchema - stored schema v{_storedVersion} is newer than plugin v{CurrentVersion}; skip migrations");
+                    logger?.Info($"OptionsSchema - schema file missing; assume current v{CurrentVersion}");
                 }
-                else if (ShouldRunMigrations)
+                else if (_storedVersion > CurrentVersion)
                 {
-                    logger?.Info($"OptionsSchema - schema v{_storedVersion} -> v{CurrentVersion}; migrations enabled");
+                    logger?.Warn($"OptionsSchema - stored schema v{_storedVersion} is newer than plugin v{CurrentVersion}; keep as-is");
+                }
+                else if (_storedVersion < CurrentVersion)
+                {
+                    logger?.Warn($"OptionsSchema - stored schema v{_storedVersion} is older than v{CurrentVersion}; no migrations registered");
                 }
                 else
                 {
-                    logger?.Info($"OptionsSchema - schema v{CurrentVersion} is current; migrations skipped");
+                    logger?.Info($"OptionsSchema - schema v{CurrentVersion} is current");
                 }
             }
         }
@@ -65,7 +71,7 @@ namespace StrmAssistant.Options.Store
         {
             lock (Sync)
             {
-                if (!_initialized || !ShouldRunMigrations || _storedVersion >= CurrentVersion) return;
+                if (!_initialized || _storedVersion >= CurrentVersion) return;
 
                 if (string.IsNullOrEmpty(_directory))
                 {
@@ -85,8 +91,8 @@ namespace StrmAssistant.Options.Store
                     File.WriteAllText(Path.Combine(_directory, FileName),
                         JsonSerializer.Serialize(record, new JsonSerializerOptions { WriteIndented = true }));
                     _storedVersion = CurrentVersion;
-                    ShouldRunMigrations = false;
-                    logger?.Info($"OptionsSchema - schema updated to v{CurrentVersion}");
+                    HasRecordedVersion = true;
+                    logger?.Info($"OptionsSchema - schema recorded as v{CurrentVersion}");
                 }
                 catch (Exception e)
                 {
@@ -95,22 +101,22 @@ namespace StrmAssistant.Options.Store
             }
         }
 
-        internal static int ReadVersion(string configDirectory, ILogger logger)
+        internal static (bool Found, int Version) Read(string configDirectory, ILogger logger)
         {
-            if (string.IsNullOrEmpty(configDirectory)) return 0;
+            if (string.IsNullOrEmpty(configDirectory)) return (false, 0);
 
             var path = Path.Combine(configDirectory, FileName);
             try
             {
-                if (!File.Exists(path)) return 0;
+                if (!File.Exists(path)) return (false, 0);
 
                 var record = JsonSerializer.Deserialize<SchemaRecord>(File.ReadAllText(path), ReadOptions);
-                return record?.Version > 0 ? record.Version : 0;
+                return (true, record?.Version > 0 ? record.Version : 0);
             }
             catch (Exception e)
             {
                 logger?.Warn("OptionsSchema - failed to read schema file: " + e.Message);
-                return 0;
+                return (false, 0);
             }
         }
 
@@ -121,7 +127,7 @@ namespace StrmAssistant.Options.Store
                 _initialized = false;
                 _storedVersion = 0;
                 _directory = null;
-                ShouldRunMigrations = false;
+                HasRecordedVersion = false;
             }
         }
 

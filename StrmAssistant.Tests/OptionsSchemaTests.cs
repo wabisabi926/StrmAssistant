@@ -9,7 +9,7 @@ using Xunit;
 namespace StrmAssistant.Tests
 {
     /// <summary>
-    /// 配置 schema 版本门：只验证「是否运行迁移」和版本文件读写，不触发真实迁移。
+    /// 配置 schema 版本记录：4.0 起只记录版本，不再执行旧布局迁移。
     /// </summary>
     public class OptionsSchemaTests : IDisposable
     {
@@ -44,60 +44,63 @@ namespace StrmAssistant.Tests
             JsonDocument.Parse(File.ReadAllText(SchemaPath)).RootElement.GetProperty("Version").GetInt32();
 
         [Fact]
-        public void MissingFile_RunsMigrations()
+        public void MissingFile_IsNotRecorded_AndCanBeMarked()
         {
             OptionsSchema.Initialize(_configDir, _logger);
 
-            Assert.True(OptionsSchema.ShouldRunMigrations);
+            Assert.False(OptionsSchema.HasRecordedVersion);
             Assert.Equal(0, OptionsSchema.StoredVersion);
+
+            OptionsSchema.MarkCurrent(_logger);
+
+            Assert.True(OptionsSchema.HasRecordedVersion);
+            Assert.Equal(1, ReadSchemaVersion());
         }
 
         [Fact]
-        public void CurrentVersion_SkipsMigrations()
+        public void CurrentVersion_IsRecorded()
         {
             WriteSchema("{\"Version\":1}");
 
             OptionsSchema.Initialize(_configDir, _logger);
 
-            Assert.False(OptionsSchema.ShouldRunMigrations);
+            Assert.True(OptionsSchema.HasRecordedVersion);
             Assert.Equal(1, OptionsSchema.StoredVersion);
         }
 
         [Fact]
-        public void OlderVersion_RunsMigrationsAndMarksCurrent()
+        public void OlderVersion_IsMarkedCurrent()
         {
             WriteSchema("{\"Version\":0}");
 
             OptionsSchema.Initialize(_configDir, _logger);
-            Assert.True(OptionsSchema.ShouldRunMigrations);
+            Assert.Equal(0, OptionsSchema.StoredVersion);
 
             OptionsSchema.MarkCurrent(_logger);
 
-            Assert.False(OptionsSchema.ShouldRunMigrations);
             Assert.Equal(1, ReadSchemaVersion());
         }
 
         [Fact]
-        public void NewerVersion_SkipsMigrationsAndDoesNotDowngradeFile()
+        public void NewerVersion_DoesNotDowngradeFile()
         {
             WriteSchema("{\"Version\":2}");
 
             OptionsSchema.Initialize(_configDir, _logger);
-            Assert.False(OptionsSchema.ShouldRunMigrations);
+            Assert.True(OptionsSchema.HasRecordedVersion);
 
             OptionsSchema.MarkCurrent(_logger);
 
-            Assert.False(OptionsSchema.ShouldRunMigrations);
             Assert.Equal(2, ReadSchemaVersion());
         }
 
         [Fact]
-        public void CorruptFile_TreatedAsOldAndRewritten()
+        public void CorruptFile_IsNotRecorded_AndCanBeMarked()
         {
             WriteSchema("not-json");
 
             OptionsSchema.Initialize(_configDir, _logger);
-            Assert.True(OptionsSchema.ShouldRunMigrations);
+            Assert.False(OptionsSchema.HasRecordedVersion);
 
             OptionsSchema.MarkCurrent(_logger);
 

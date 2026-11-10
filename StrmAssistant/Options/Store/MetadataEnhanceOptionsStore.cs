@@ -21,14 +21,6 @@ namespace StrmAssistant.Options.Store
         {
             _logger= logger;
 
-            // 3.0.0.55：设置项由平铺改为 9 个分组嵌套。先把旧配置就地迁移为嵌套结构，
-            // 否则旧键会被反序列化忽略、用户设置静默回退为默认值。
-            if (OptionsSchema.ShouldRunMigrations)
-            {
-                MetadataEnhanceOptionsMigration.MigrateIfNeeded(OptionsFilePath,
-                    applicationHost.Resolve<IJsonSerializer>(), logger);
-            }
-
             FileSaved += OnFileSaved;
             FileSaving += OnFileSaving;
         }
@@ -68,9 +60,6 @@ namespace StrmAssistant.Options.Store
                 {
                     options.MetadataRefresh.EpisodeRefreshScope = EpisodeRefreshOption.NoOverview.ToString();
                 }
-
-                // 旧配置兼容由 MetadataEnhanceOptionsMigration 在启动时完成：
-                // 「使用豆瓣评分覆盖」已删除，true 会迁移为「来源=豆瓣」。
 
                 var changes = PropertyChangeDetector.DetectObjectPropertyChanges(MetadataEnhanceOptions, options);
                 var changedProperties = new HashSet<string>(changes.Select(c => c.PropertyName));

@@ -167,8 +167,20 @@ namespace StrmAssistant
             HttpClient = httpClient;
             JsonSerializer = jsonSerializer;
 
-            // 配置 schema 版本门：必须在任何 Store 构造之前初始化，Store 构造里会读 ShouldRunMigrations
+            // 配置 schema 版本：4.0 起不再迁移旧布局，旧配置在 Store 构造前直接拦截
             OptionsSchema.Initialize(ApplicationPaths.PluginConfigurationsPath, Logger);
+
+            if (!OptionsSchema.HasRecordedVersion || OptionsSchema.StoredVersion < OptionsSchema.CurrentVersion)
+            {
+                var legacy = LegacyConfigGuard.Detect(ApplicationPaths.PluginConfigurationsPath);
+                if (!string.IsNullOrEmpty(legacy))
+                {
+                    var message = "检测到旧版配置（" + legacy +
+                                  "）。4.0 起不再内置旧配置迁移，请先安装 3.0.0.78 完成一次启动迁移，再升级 4.0。";
+                    Logger.Error(message);
+                    throw new NotSupportedException(message);
+                }
+            }
 
             MainOptionsStore = new PluginOptionsStore(applicationHost, Logger, ConfigName);
             MediaInfoExtractStore =
@@ -178,15 +190,11 @@ namespace StrmAssistant
             IntroSkipStore = new IntroSkipOptionsStore(applicationHost, Logger, ConfigName + "_" + nameof(IntroSkipOptions));
             ExperienceEnhanceStore = new ExperienceEnhanceOptionsStore(applicationHost, Logger,
                 ConfigName + "_" + nameof(ExperienceEnhanceOptions));
-            // 网络与直链：新建 Tab，迁移时从主配置与元数据配置各取一块（见 NetworkProxyOptionsMigration）
             NetworkProxyStore = new NetworkProxyOptionsStore(applicationHost, Logger,
                 ConfigName + "_" + nameof(NetworkProxyOptions));
 
-            if (OptionsSchema.ShouldRunMigrations)
-            {
-                MigrateLegacyOptionGroups();
-                MigrateChineseSearchOptions();
-            }
+            // 中文搜索索引方案升级检查：与配置结构迁移无关，每次启动都要执行
+            MigrateChineseSearchOptions();
 
             EnsureChineseSearchUsable();
             InitializeOptionCache();
@@ -389,7 +397,6 @@ namespace StrmAssistant
                 MainOptionsStore.GetOptions().Memory.EnableMemoryAutoRestart,
                 MainOptionsStore.GetOptions().Memory.MemoryAutoRestartThresholdMB);
 
-            MigrateImageCaptureExcludeContainers();
 
             _libraryManager.ItemAdded += OnItemAdded;
             _libraryManager.ItemUpdated += OnItemUpdated;
@@ -404,89 +411,7 @@ namespace StrmAssistant
             CollectionFolder.LibraryOptionsUpdated += OnLibraryOptionsUpdated;
         }
 
-        /// <summary>
-        /// Restore persisted legacy groups before any cache or background feature reads the options.
-        /// </summary>
-        private void MigrateLegacyOptionGroups()
-        {
-            // 拍平旧版容器：TaskConcurrency / Memory 原本包在 GeneralOptions 里、
-            // ChineseSearch 包在 ModOptions 里，页面上会多出一层只有标题的容器（任务与内存 / 搜索）。
-            // 这里把已有配置提到顶层并落盘，之后 JSON 里不再有这两个节点。
-            var flattened = false;
-
-            if (MainOptionsStore.GetOptions().GeneralOptions != null)
-            {
-                var legacyGeneral = MainOptionsStore.GetOptions().GeneralOptions;
-                MainOptionsStore.GetOptions().TaskConcurrency =
-                    legacyGeneral.TaskConcurrency ?? new TaskConcurrencyOptions();
-                MainOptionsStore.GetOptions().Memory = legacyGeneral.Memory ?? new MemoryOptions();
-                MainOptionsStore.GetOptions().GeneralOptions = null;
-                flattened = true;
-            }
-
-            if (MainOptionsStore.GetOptions().ModOptions != null)
-            {
-                MainOptionsStore.GetOptions().ChineseSearch =
-                    MainOptionsStore.GetOptions().ModOptions.ChineseSearch ?? new ChineseSearchOptions();
-                MainOptionsStore.GetOptions().ModOptions = null;
-                flattened = true;
-            }
-
-            if (flattened)
-            {
-                MainOptionsStore.SavePluginOptionsSuppress();
-                Logger.Info("PluginOptions - flattened GeneralOptions/ModOptions containers into top-level groups");
-            }
-
-            // 旧版分钟级「追更最小等待」→ 秒级（一次性换算并落盘，避免两份值长期并存）。
-            // 注意：选项的 Initialize() 只在设置页加载时调用，启动阶段必须自己处理。
-            var taskConcurrency = MainOptionsStore.GetOptions().TaskConcurrency;
-            if (taskConcurrency.CatchupMinWaitSeconds <= 0 && taskConcurrency.CatchupMinWaitMinutes > 0)
-            {
-                taskConcurrency.CatchupMinWaitSeconds = Math.Min(7200, taskConcurrency.CatchupMinWaitMinutes * 60);
-                taskConcurrency.CatchupMinWaitMinutes = 0;
-                MainOptionsStore.SavePluginOptionsSuppress();
-
-                Logger.Info(
-                    $"TaskConcurrency - migrated CatchupMinWaitMinutes to CatchupMinWaitSeconds ({taskConcurrency.CatchupMinWaitSeconds} s)");
-            }
-
-            // 配置迁移目录从 RuntimeStatus 拆到独立分组：旧配置里存在的值搬到新位置。
-            var configTransfer = MainOptionsStore.GetOptions().ConfigTransfer;
-            var legacyConfigTransferFolder = MainOptionsStore.GetOptions().RuntimeStatus?.ConfigTransferFolder;
-            if (configTransfer != null &&
-                string.IsNullOrWhiteSpace(configTransfer.ConfigTransferFolder) &&
-                !string.IsNullOrWhiteSpace(legacyConfigTransferFolder))
-            {
-                configTransfer.ConfigTransferFolder = legacyConfigTransferFolder;
-                MainOptionsStore.GetOptions().RuntimeStatus.ConfigTransferFolder = string.Empty;
-                MainOptionsStore.SavePluginOptionsSuppress();
-                Logger.Info("PluginOptions - migrated ConfigTransferFolder to ConfigTransfer group");
-            }
-        }
-
-        private void MigrateImageCaptureExcludeContainers()
-        {
-            try
-            {
-                const string legacyDefault = "MpegTs,Ts,M2Ts";
-                var mediaInfoOptions = MediaInfoExtractStore.GetOptions();
-
-                if (!string.Equals(mediaInfoOptions.ImageCapture.ImageCaptureExcludeMediaContainers, legacyDefault,
-                        StringComparison.Ordinal)) return;
-
-                mediaInfoOptions.ImageCapture.ImageCaptureExcludeMediaContainers = string.Empty;
-                MediaInfoExtractStore.SetOptions(mediaInfoOptions);
-
-                Logger.Info("MediaInfoExtract - Migrated ImageCaptureExcludeMediaContainers: ts/m2ts no longer excluded by default");
-            }
-            catch (Exception e)
-            {
-                Logger.Warn("MediaInfoExtract - Exclude containers migration failed: " + e.Message);
-            }
-        }
-
-        private void OnRefreshCompleted(object sender, GenericEventArgs<RefreshProgressInfo> e)
+                private void OnRefreshCompleted(object sender, GenericEventArgs<RefreshProgressInfo> e)
         {
             if (_libraryManager.IsScanRunning) return;
 

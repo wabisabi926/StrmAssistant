@@ -28,14 +28,6 @@ namespace StrmAssistant.Options.Store
         {
             _logger = logger;
 
-            // 分组化改造：GeneralOptions / ModOptions 由平铺改为分组嵌套。先把旧配置就地迁移，
-            // 否则旧键会被反序列化忽略、用户设置静默回退为默认值。
-            if (OptionsSchema.ShouldRunMigrations)
-            {
-                PluginOptionsMigration.MigrateIfNeeded(OptionsFilePath,
-                    applicationHost.Resolve<MediaBrowser.Model.Serialization.IJsonSerializer>(), logger);
-            }
-
             FileSaved += OnFileSaved;
             FileSaving += OnFileSaving;
         }

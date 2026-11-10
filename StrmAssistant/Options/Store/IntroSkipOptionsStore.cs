@@ -23,14 +23,6 @@ namespace StrmAssistant.Options.Store
         {
             _logger = logger;
 
-            // 分组化改造：设置项由平铺改为 3 个分组嵌套。先把旧配置就地迁移为嵌套结构，
-            // 否则旧键会被反序列化忽略、用户设置静默回退为默认值。
-            if (OptionsSchema.ShouldRunMigrations)
-            {
-                IntroSkipOptionsMigration.MigrateIfNeeded(OptionsFilePath,
-                    applicationHost.Resolve<MediaBrowser.Model.Serialization.IJsonSerializer>(), logger);
-            }
-
             FileSaved += OnFileSaved;
             FileSaving += OnFileSaving;
         }

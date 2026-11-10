@@ -67,8 +67,8 @@
   </ItemGroup>
   <PropertyGroup>
     <!-- 可通过 /p:StrmAssistantPluginOutputDir=... 覆盖部署目录 -->
-    <!-- 默认指向**实际运行**的 4.10.1.0 实例（旧的 4.9.1 实例在 D:\Downloads\embyserver，需显式覆盖） -->
-    <StrmAssistantPluginOutputDir Condition="'$(StrmAssistantPluginOutputDir)'=='' and '$(OS)'=='Windows_NT'">D:\下载\embyserver-win-x64-4.10.1.0\programdata\plugins</StrmAssistantPluginOutputDir>
+    <!-- 默认指向**当前实际运行**的 4.10.2.0 实例；其他实例需显式覆盖 -->
+    <StrmAssistantPluginOutputDir Condition="'$(StrmAssistantPluginOutputDir)'=='' and '$(OS)'=='Windows_NT'">D:\下载\embyserver-win-x64\programdata\plugins</StrmAssistantPluginOutputDir>
 
     <!-- 显式拼接输出目录，避免 Build 目标里 TargetPath/TargetDir 为空 -->
     <StrmAssistantBuildOutputDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\</StrmAssistantBuildOutputDir>

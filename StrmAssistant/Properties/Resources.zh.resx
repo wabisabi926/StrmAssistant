@@ -1173,10 +1173,10 @@
     <value>按顺序尝试；默认 IntroDb,Tidb，两者始终都会尝试，此项只调整顺序。</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
-    <value>从 IntroDb 刮削片头片尾</value>
+    <value>从 IntroDb / TheIntroDB 刮削片头片尾</value>
   </data>
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
-    <value>从 TheIntroDB 为缺失片头片尾标记的剧集和电影填充标记。建议先在网站确认有数据再执行。</value>
+    <value>从 IntroDb 与 TheIntroDB 为缺失片头片尾标记的剧集和电影填充标记；按设置的来源顺序尝试。建议先在网站确认有数据再执行。</value>
   </data>
   <data name="MediaInfoExtractOptions_ForcePortraitPoster_Force_Portrait_Poster" xml:space="preserve">
     <value>强制海报为竖图</value>

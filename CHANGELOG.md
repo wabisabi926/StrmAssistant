@@ -4,6 +4,7 @@
 
 ### 改进
 - **片头片尾 Key 说明**：明确 IntroDb（introdb.app，按 IMDb ID）与 TIDB（TheIntroDB，按 TMDB ID）是两个不同数据源的 Key；数据源顺序仅调整尝试顺序，两者始终都会尝试。
+- **计划任务文案**：「从 IntroDb 刮削片头片尾」实际同时查询 IntroDb 与 TheIntroDB，名称与说明改为双源表述。
 
 ## [3.0.0.76] - 2026-11-10
 

@@ -16,6 +16,8 @@ memory/
 .tools/
 .tmp_probe/
 .workbuddy-ai/
+.workbuddy/
+.vscode/
 TestResults/
 
 # 本地内部文档（不发布到仓库）

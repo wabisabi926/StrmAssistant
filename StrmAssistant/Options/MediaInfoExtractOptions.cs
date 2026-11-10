@@ -105,7 +105,7 @@ namespace StrmAssistant.Options
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_StorageCapture,
                         "StorageCapture", "MediaInfoPersist", "ImageCapture"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_IsoHdr,
-                        "IsoHdr", "IsoTool", "HdrTagging"),
+                        "IsoHdr", "HdrTagging", "IsoTool"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionPerformance,
                         "ExtractionPerformance", "ExtractionPerformance"));
             }

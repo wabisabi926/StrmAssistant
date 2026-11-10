@@ -135,12 +135,15 @@ namespace StrmAssistant.Tests
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
             Assert.Equal(
-                new[] { "MultipleVersions", "ItemDisplay", "LibraryOrder", "Playback", "NotificationsLogs" },
+                new[] { "MultipleVersions", "Playback", "ItemDisplay", "LibraryOrder", "NotificationsLogs" },
                 groups.Select(g => g.Name).ToArray());
 
             var playback = groups.First(g => NameOrId(g, "Playback"));
-            Assert.Contains(playback.EditorItems, i => NameOrId(i, "DryRun"));
-            Assert.Contains(playback.EditorItems, i => NameOrId(i, "EnableDeepDelete"));
+            var playbackItems = playback.EditorItems.ToList();
+            Assert.Contains(playbackItems, i => NameOrId(i, "DryRun"));
+            Assert.Contains(playbackItems, i => NameOrId(i, "EnableDeepDelete"));
+            Assert.True(playbackItems.FindIndex(i => NameOrId(i, "DryRun")) >
+                        playbackItems.FindIndex(i => NameOrId(i, "EnableDeepDelete")));
             Assert.DoesNotContain(groups, g => NameOrId(g, "Safety"));
         }
 

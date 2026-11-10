@@ -71,12 +71,12 @@ namespace StrmAssistant.Options
                 EditorGroupHelper.Rebuild(editContainer,
                     new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_MultipleVersions,
                         "MultipleVersions", "Merge", "Display"),
+                    new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_Playback,
+                        "Playback", "Playback", "Safety"),
                     new EditorGroupSpec(Resources.ItemDisplayOptions_EditorTitle_Item_Display,
                         "ItemDisplay", "ItemDisplay"),
                     new EditorGroupSpec(Resources.LibraryOrderOptions_EditorTitle_Library_and_Order,
                         "LibraryOrder", "LibraryOrder"),
-                    new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_Playback,
-                        "Playback", "Safety", "Playback"),
                     new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_NotificationAndLogs,
                         "NotificationsLogs", "Notification", "SearchLog"));
             }

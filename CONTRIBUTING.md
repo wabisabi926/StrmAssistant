@@ -32,8 +32,9 @@ dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj -c Release
 
 ## 配置迁移
 
-改设置结构（分组、键名、默认值、跨文件搬迁）前先读 [MIGRATIONS.md](MIGRATIONS.md)：
-新增迁移必须登记清单；3.0.x 期间不删除旧迁移，删除只在 major 版本按策略执行。
+改设置结构（分组、键名、默认值、跨文件搬迁）前先读 [MIGRATIONS.md](MIGRATIONS.md)。
+4.0 起不再内置旧布局迁移，直接升级最低版本为 **3.0.0.78**；新增结构变更必须递增
+`OptionsSchema.CurrentVersion`、补迁移并登记清单。
 
 ## 版本号与标签
 

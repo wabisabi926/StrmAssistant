@@ -27,7 +27,23 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > **Before upgrading to 4.0**: legacy config migrations are no longer bundled. Direct upgrade is supported only from **3.0.0.78 or later**. If you are on an older version, install 3.0.0.78 and start Emby once to complete the migration, then upgrade to 4.0.
 
-## Latest Optimizations (v3.0.0.66 ~ v3.0.0.74)
+## Latest Optimizations (v3.0.0.66 ~ v4.0.0.0)
+
+✅ **Config migration cleanup (4.0.0.0)**
+- Removed legacy config migrations from 3.0.0.55–62 (about 1,600 lines); the minimum direct-upgrade version is now 3.0.0.78
+- Legacy flat config is rejected with a clear message instead of silently falling back to defaults; added config schema versioning (v1)
+
+✅ **Settings page order (3.0.0.78)**
+- "Advanced" now shows Playback & Cleanup before display/order groups, with dry-run moved to the end; "Media Info" shows HDR tagging before ISO tools; storage paths unchanged
+
+✅ **Intro markers and media health (3.0.0.77)**
+- Renamed the task to "Scrape Intro/Credits (External Intro DB)"; aligned Chinese/English task names
+- Info-level health findings are counted only, not listed per item; report and notification include skipped count, and the report shows new/resolved versus the previous run
+- Removed 64 unused resource keys across three languages and Designer
+
+✅ **Fixes and rating enhancements (3.0.0.75 ~ 3.0.0.76)**
+- Fixed Linux/Docker local ISO extraction, custom ffprobe startup timing, and ISO chapter/language backfill
+- MdbList key relocation, Douban rating snapshot source marker, Douban group copy and sync-task trigger notes
 
 ✅ **Community rating sync (3.0.0.74)**
 - Community rating source selector: Do not interfere / TMDb / IMDb / Douban, mutually exclusive; choosing Douban takes over the community rating directly, and the legacy Douban override switch migrates automatically

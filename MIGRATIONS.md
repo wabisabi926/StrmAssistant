@@ -3,7 +3,7 @@
 本文约束设置结构变更与旧配置迁移代码的**新增、保留和退场**。目标是：用户升级不丢设置，迁移代码不无限累积。
 
 - 适用对象：`StrmAssistant/Options/Store/*Migration.cs` 以及任何读取旧 JSON 布局、键名或默认值的兼容代码。
-- 当前版本线：3.0.x（2026-11-10 为 3.0.0.77）。
+- 当前版本线：3.0.x（2026-11-10 为 3.0.0.78）。
 - 当前决定：**3.0.x 期间不删除任何迁移**；退场规则从下一个 major（4.0）开始执行。
 
 ## 现行机制
@@ -17,6 +17,8 @@
 5. 迁移失败不阻断插件启动，缺失的键回退默认值。
 
 flag 示例：`StrmAssistant_MetadataEnhanceOptions_migrated_3_0_0_55.flag`、`StrmAssistant_IntroSkipOptions_grouped_v1.flag`。
+
+启动顺序：`OptionsSchema.Initialize` 读取 schema 版本 → 各 Store 构造（迁移受版本门控制）→ 插件级迁移 → `OptionsSchema.MarkCurrent` 写回版本。
 
 ## 当前迁移清单
 
@@ -46,27 +48,32 @@ flag 示例：`StrmAssistant_MetadataEnhanceOptions_migrated_3_0_0_55.flag`、`S
 4. 旧文件备份与回滚路径可用（`*.legacy.bak`）。
 5. 同步更新本文件清单、CHANGELOG 和测试样本。
 
-## 集中式配置版本门（退场前必须补齐）
+## 集中式配置版本门（已实现 v1）
 
-当前没有全局 schema 版本，各迁移靠 flag 自检。删除旧迁移前应补齐：
-
-- 在插件配置目录记录一个 `OptionsSchemaVersion`（文件或主配置字段）；
-- 启动时先比对版本：相同则跳过全部迁移；较低则按顺序执行迁移，成功后写入新版本；
-- 日志明确输出「schema 已是最新，跳过迁移」或「从 vN 迁移到 vM」。
-
-这是 4.0 删除旧迁移的前置工程项，当前未实现。
+- 文件：`PluginConfigurationsPath/StrmAssistant_options_schema.json`，内容为 `{ Version, UpdatedAt, PluginVersion }`。
+- 当前版本：`OptionsSchema.CurrentVersion = 1`（对应 3.0.0.78 的配置结构）。
+- 行为：
+  - 文件缺失或损坏 → 按 v0 处理，执行迁移后写回 v1；
+  - 低于当前版本 → 执行迁移，成功后写回；
+  - 等于当前版本 → 跳过全部迁移；
+  - 高于当前版本（降级）→ 跳过迁移并告警，不回写、不降版本；
+  - 写文件失败只告警，下次启动重跑迁移（现有迁移幂等）。
+- 日志关键字：`OptionsSchema -`，记录 stored/current 与是否执行迁移。
+- **手工覆盖旧 JSON 文件时，必须删除 schema 文件或把 `Version` 改为 0**，否则版本门会认为配置已是当前结构而跳过迁移。通过插件「配置导入」恢复设置不受影响，因为它按当前属性路径写值，不替换文件布局。
+- 未来结构变更：`CurrentVersion` +1，新增迁移并登记到本文件清单；普通发版不递增。
 
 ## 新增迁移的硬性要求
 
 1. 一次结构变更对应一个迁移类，幂等，必须有 flag 与 `*.legacy.bak`。
 2. 缺失源文件、部分键缺失时安全降级，不阻断插件启动；日志记录迁移键数量。
-3. 在本文件清单中登记：范围、结构变化、引入时间、预计退役版本。
+3. 同步把 `OptionsSchema.CurrentVersion` +1。
+4. 在本文件清单中登记：范围、结构变化、引入时间、预计退役版本。
 4. 涉及非平凡映射时补一份配置样本或单元测试；发版前用真实旧配置手工升级一次。
 5. 不允许在迁移里顺手改默认值或业务行为——迁移只做结构搬运。
 
 ## 发版检查清单
 
-- [ ] 本次是否新增/修改设置结构？是则补迁移并登记本文件。
+- [ ] 本次是否新增/修改设置结构？是则补迁移、递增 `OptionsSchemaVersion` 并登记本文件。
 - [ ] 现有迁移是否仍覆盖对外承诺的最低升级版本？
 - [ ] 最低升级版本是否与 README / Release Notes 一致？
 - [ ] 到达退役版本时：删除过期迁移、更新清单、用最低版本配置实测升级。

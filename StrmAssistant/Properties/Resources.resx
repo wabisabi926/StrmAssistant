@@ -510,7 +510,7 @@
     <value>Restore media info, chapters and thumbnails from JSON for items missing DB media info; never overwrite existing media info.</value>
   </data>
   <data name="RefreshPersonTask_Name_Refresh_Chinese_Actor" xml:space="preserve">
-    <value>Refresh Chinese Actor</value>
+    <value>Refresh Chinese Actors</value>
   </data>
   <data name="RefreshPersonTask_Description_Refreshes_and_repairs_Chinese_actors" xml:space="preserve">
     <value>Refreshes and repairs Chinese actors</value>
@@ -639,7 +639,7 @@
     <value>Douban ratings come from matched subjects first, then fall back to a third-party lookup by IMDb ID. Existing ratings are kept if the lookup fails. Continue?</value>
   </data>
   <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
-    <value>Sync community rating</value>
+    <value>Sync Community Rating</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
     <value>Syncs community ratings for all movies and series to the selected source. No trigger by default; enable one in Scheduled Tasks if needed.</value>
@@ -1260,10 +1260,10 @@
     <value>Tried in order; default is IntroDb,Tidb. Both are always tried, so this only changes the order.</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
-    <value>Scrape Intro/Credits from IntroDb / TheIntroDB</value>
+    <value>Scrape Intro/Credits (External Intro DB)</value>
   </data>
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
-    <value>Fills missing intro/credits markers for episodes and movies from IntroDb and TheIntroDB, trying sources in the configured order. Confirm coverage on the websites before running.</value>
+    <value>Fills missing intro/credits markers for episodes and movies from IntroDb / TheIntroDB in the configured source order, without overwriting markers from other sources. Confirm coverage on the websites before running.</value>
   </data>
   <data name="MediaInfoExtractOptions_ForcePortraitPoster_Force_Portrait_Poster" xml:space="preserve">
     <value>Force Portrait Poster</value>
@@ -1419,7 +1419,7 @@
     <value>Series merge across libraries (same series in different libraries) only takes effect when scope is GlobalScope.</value>
   </data>
   <data name="ExtractVideoThumbnailTask_Description_Extract_video_thumbnail_preview" xml:space="preserve">
-    <value>Extract video thumbnail preview and chatper images</value>
+    <value>Extract video thumbnail preview and chapter images</value>
   </data>
   <data name="EpisodeRefreshTask_Description_Refresh_metadata_for_episodes_missing_overview" xml:space="preserve">
     <value>Refresh missing metadata and images for episodes by preference</value>
@@ -1617,7 +1617,7 @@
     <value>Syncs Douban data for movies, series and seasons: matches Douban IDs, caches subjects, and applies ratings, overview, cast, poster and critic rating as configured. Writes the community rating when the source is Douban.</value>
   </data>
   <data name="RefreshEpisodeTask_Name_Refresh_Episode" xml:space="preserve">
-    <value>Refresh Episode</value>
+    <value>Refresh Episodes</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionScope" xml:space="preserve">
     <value>Extraction Scope</value>

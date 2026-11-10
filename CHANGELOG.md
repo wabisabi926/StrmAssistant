@@ -4,7 +4,8 @@
 
 ### 改进
 - **片头片尾 Key 说明**：明确 IntroDb（introdb.app，按 IMDb ID）与 TIDB（TheIntroDB，按 TMDB ID）是两个不同数据源的 Key；数据源顺序仅调整尝试顺序，两者始终都会尝试。
-- **计划任务文案**：「从 IntroDb 刮削片头片尾」实际同时查询 IntroDb 与 TheIntroDB，名称与说明改为双源表述。
+- **计划任务文案**：「从 IntroDb / TheIntroDB 刮削片头片尾」过长，改名为「刮削片头片尾（外部片头库）」；说明注明双源、按来源顺序尝试且只补缺失、不覆盖其他来源的标记。
+- **计划任务名称中英对齐**：刷新人物英文名改为 Refresh Chinese Actors，社区评分与剧集刷新统一大小写/复数；README 人物任务名与任务实际名称对齐；修正缩略图任务英文描述的拼写（chatper → chapter）。
 
 ## [3.0.0.76] - 2026-11-10
 

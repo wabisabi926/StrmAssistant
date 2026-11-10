@@ -187,12 +187,12 @@ An **option search box** at the top-left of the settings page filters options by
 | Restore Media Info | Restore media info from JSON backups |
 | Extract Video Thumbnails | Generate chapter preview thumbnails (enable "Generate video preview thumbnails" in the library settings first) |
 | Extract Intro Fingerprints | Generate audio fingerprints for intro detection |
-| Scrape IntroDb | Sync intro/credits markers online |
+| Scrape Intro/Credits (External Intro DB) | Sync intro/credits markers online |
 | Merge Multi Versions | Scan and merge multiple versions of the same title |
 | Sync Douban Data | Sync Douban IDs, cache, badge/Kodi ratings, overview, cast, poster and critic ratings for the whole library |
 | Populate Douban IDs | Incrementally fill missing Douban IDs (with retry queue) |
 | Refresh Episodes | Refresh episodes by scope and lookback days |
-| Refresh / Delete Persons | Person metadata maintenance |
+| Refresh Chinese Actors / Delete Persons | Person metadata maintenance |
 | Scan External Subtitles | Independent external subtitle scanning |
 
 ## Install

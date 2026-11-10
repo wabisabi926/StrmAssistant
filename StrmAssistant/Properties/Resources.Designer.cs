@@ -839,7 +839,7 @@ namespace StrmAssistant.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Scrape Intro/Credits from IntroDb.
+        ///   Looks up a localized string similar to Scrape Intro/Credits (External Intro DB).
         /// </summary>
         public static string ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb {
             get {
@@ -848,7 +848,7 @@ namespace StrmAssistant.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Fills missing intro/credits markers for episodes and movies from TheIntroDB. Confirm coverage on the website before running..
+        ///   Looks up a localized string similar to Fills missing intro/credits markers for episodes and movies from IntroDb / TheIntroDB in the configured source order, without overwriting markers from other sources. Confirm coverage on the websites before running..
         /// </summary>
         public static string ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB {
             get {
@@ -1081,7 +1081,7 @@ namespace StrmAssistant.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Extract video thumbnail preview and chatper images.
+        ///   Looks up a localized string similar to Extract video thumbnail preview and chapter images.
         /// </summary>
         public static string ExtractVideoThumbnailTask_Description_Extract_video_thumbnail_preview {
             get {
@@ -4112,7 +4112,7 @@ namespace StrmAssistant.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Refresh Episode.
+        ///   Looks up a localized string similar to Refresh Episodes.
         /// </summary>
         public static string RefreshEpisodeTask_Name_Refresh_Episode {
             get {
@@ -4130,7 +4130,7 @@ namespace StrmAssistant.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Refresh Chinese Actor.
+        ///   Looks up a localized string similar to Refresh Chinese Actors.
         /// </summary>
         public static string RefreshPersonTask_Name_Refresh_Chinese_Actor {
             get {

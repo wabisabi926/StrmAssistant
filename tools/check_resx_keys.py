@@ -17,6 +17,7 @@
   python tools/check_resx_keys.py            # 有差异时返回码 1
   python tools/check_resx_keys.py --quiet    # 仅打印问题
   python tools/check_resx_keys.py --fix      # 自动把缺失的属性补进 Designer（构建时默认启用）
+  python tools/check_resx_keys.py --unused   # 额外报告未被代码引用的资源键（仅告警，不影响返回码）
 
 `--fix` 只做一件事：把「代码引用、resx 有、但 Designer 缺」的属性按 VS 生成器格式追加进去。
 它不会新增 resx 键、也不会编造译文 —— 那两类问题仍然报错。
@@ -38,9 +39,10 @@ RESX_FILES = {
 DESIGNER = os.path.join(PROPS, 'Resources.Designer.cs')
 
 KEY_ATTR = re.compile(r'(?:DisplayNameL|DescriptionL|NameL)\(\s*"([^"]+)"')
-KEY_GET = re.compile(r'Resources?\.ResourceManager\.GetString\(\s*"([^"]+)"')
+# 允许 Resources / 点号 / 方法名之间换行，避免把跨行引用误判成未使用
+KEY_GET = re.compile(r'Resources?\s*\.\s*ResourceManager\s*\.\s*GetString\(\s*"([^"]+)"')
 # 直接属性访问 Resources.Xxx：编译期就会报 CS0117，但 --fix 也该能把它补上
-KEY_PROP = re.compile(r'\bResources\.([A-Za-z_][A-Za-z0-9_]*)')
+KEY_PROP = re.compile(r'\bResources\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)')
 # Resources 类里除资源键之外的成员（生成器自带），不能当成资源键
 NON_RESOURCE_MEMBERS = {'Culture', 'ResourceManager'}
 DESIGNER_PROP = re.compile(r'public\s+static\s+string\s+(\w+)\s*\{')
@@ -142,6 +144,17 @@ def main():
             missing_props = sorted(used - props)
 
     problems = []
+    unused = sorted(base - used)
+
+    # 4) resx 有、代码未引用：多为已删除功能的残留，仅告警不阻断
+    if unused and not quiet:
+        if '--unused' in sys.argv:
+            print('\n[WARN] %d resource key(s) not referenced by code:' % len(unused))
+            for key in unused:
+                print('  ' + key)
+        else:
+            print('\n[WARN] %d resource key(s) not referenced by code (run with --unused to list).'
+                  % len(unused))
 
     # 1) 代码引用但 resx 缺失（运行时会回退成键名，页面上直接看到乱码键）
     for tag, keys in (('base', base), ('zh', zh), ('zh-hant', hant)):

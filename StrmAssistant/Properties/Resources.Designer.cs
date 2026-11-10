@@ -125,15 +125,6 @@ namespace StrmAssistant.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Clear Episode Intros.
-        /// </summary>
-        public static string ClearChapterMarkersTask_Name_Clear_Episode_Intros {
-            get {
-                return ResourceManager.GetString("ClearChapterMarkersTask_Name_Clear_Episode_Intros", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Deletes all persons.
         /// </summary>
         public static string DeletePersonTask_Description_Deletes_all_persons {
@@ -560,24 +551,6 @@ namespace StrmAssistant.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Min Wait After Library Insert.
-        /// </summary>
-        public static string PluginOptions_CatchupMinWaitMinutes_Min_Wait_After_Library_Insert {
-            get {
-                return ResourceManager.GetString("PluginOptions_CatchupMinWaitMinutes_Min_Wait_After_Library_Insert", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Minutes to wait after an item enters the library before catch-up processes it, letting initial scraping finish. Default is 0..
-        /// </summary>
-        public static string PluginOptions_CatchupMinWaitMinutes_Minutes_to_wait_after_an_item_enters_the_library_before_catch_up_processes_it__letting_initial_scraping_finish__Default_is_0_ {
-            get {
-                return ResourceManager.GetString("PluginOptions_CatchupMinWaitMinutes_Minutes_to_wait_after_an_item_enters_the_library_before_catch_up_processes_it__letting_initial_scraping_finish__Default_is_0_", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Auto Restart On Memory Limit.
         /// </summary>
         public static string PluginOptions_EnableMemoryAutoRestart_Auto_Restart_On_Memory_Limit {
@@ -610,15 +583,6 @@ namespace StrmAssistant.Properties {
         public static string PluginOptions_MemoryAutoRestartThresholdMB_Working_set_limit_in_MB_before_restart_countdown_starts__Default_is_4096_ {
             get {
                 return ResourceManager.GetString("PluginOptions_MemoryAutoRestartThresholdMB_Working_set_limit_in_MB_before_restart_countdown_starts__Default_is_4096_", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Runtime Status.
-        /// </summary>
-        public static string GeneralOptions_RuntimeStatus_Runtime_Status {
-            get {
-                return ResourceManager.GetString("GeneralOptions_RuntimeStatus_Runtime_Status", resourceCulture);
             }
         }
 
@@ -673,69 +637,6 @@ namespace StrmAssistant.Properties {
         public static string GeneralOptions_RestartServer_Restart_Server {
             get {
                 return ResourceManager.GetString("GeneralOptions_RestartServer_Restart_Server", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Memory working set: {0} MB (GC heap {1} MB).
-        /// </summary>
-        public static string RuntimeStatus_Memory {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_Memory", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Running tasks: {0} ({1}).
-        /// </summary>
-        public static string RuntimeStatus_RunningTasks {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_RunningTasks", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Active sessions: {0} (playing {1}): {2}.
-        /// </summary>
-        public static string RuntimeStatus_Sessions {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_Sessions", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Search index: {0}.
-        /// </summary>
-        public static string RuntimeStatus_SearchIndex {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_SearchIndex", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Processing: {0}.
-        /// </summary>
-        public static string RuntimeStatus_ProcessingTasks {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_ProcessingTasks", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Pending queue: {0}.
-        /// </summary>
-        public static string RuntimeStatus_PendingQueue {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_PendingQueue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Conflict plugin detected: {0}.
-        /// </summary>
-        public static string RuntimeStatus_ConflictPlugin {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_ConflictPlugin", resourceCulture);
             }
         }
 
@@ -857,42 +758,6 @@ namespace StrmAssistant.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Force Portrait Poster.
-        /// </summary>
-        public static string MediaInfoExtractOptions_ForcePortraitPoster_Force_Portrait_Poster {
-            get {
-                return ResourceManager.GetString("MediaInfoExtractOptions_ForcePortraitPoster_Force_Portrait_Poster", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Crop the captured primary image to 2:3 portrait after refresh. Server-generated images only. Default is OFF..
-        /// </summary>
-        public static string MediaInfoExtractOptions_ForcePortraitPoster_Crop_the_captured_primary_image_to_2_3_portrait_after_refresh__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MediaInfoExtractOptions_ForcePortraitPoster_Crop_the_captured_primary_image_to_2_3_portrait_after_refresh__Default_is_OFF_", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Ensure Episode Image 16:9.
-        /// </summary>
-        public static string MediaInfoExtractOptions_EnsureEpisode16x9_Ensure_Episode_Image_16x9 {
-            get {
-                return ResourceManager.GetString("MediaInfoExtractOptions_EnsureEpisode16x9_Ensure_Episode_Image_16x9", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Crop episode stills to 16:9 when the source ratio differs. Server-generated images only. Default is OFF..
-        /// </summary>
-        public static string MediaInfoExtractOptions_EnsureEpisode16x9_Crop_episode_stills_to_16_9_when_the_source_ratio_differs__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MediaInfoExtractOptions_EnsureEpisode16x9_Crop_episode_stills_to_16_9_when_the_source_ratio_differs__Default_is_OFF_", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Ensure 16:9.
         /// </summary>
         public static string ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9 {
@@ -934,24 +799,6 @@ namespace StrmAssistant.Properties {
         public static string MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_ {
             get {
                 return ResourceManager.GetString("MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Douban Assist Scraping.
-        /// </summary>
-        public static string MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to After movie refresh, fill missing Chinese overview, genres and production locations from Douban (Chinese libraries only). Default is OFF..
-        /// </summary>
-        public static string MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_", resourceCulture);
             }
         }
 
@@ -1456,42 +1303,6 @@ namespace StrmAssistant.Properties {
             }
         }
         /// <summary>
-        ///   Looks up a localized string similar to Rating.
-        /// </summary>
-        public static string DoubanAssistScrapeOption_Rating_Rating {
-            get {
-                return ResourceManager.GetString("DoubanAssistScrapeOption_Rating_Rating", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Cast.
-        /// </summary>
-        public static string DoubanAssistScrapeOption_Cast_Cast {
-            get {
-                return ResourceManager.GetString("DoubanAssistScrapeOption_Cast_Cast", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Name &amp; Overview.
-        /// </summary>
-        public static string DoubanAssistScrapeOption_NameOverview_NameOverview {
-            get {
-                return ResourceManager.GetString("DoubanAssistScrapeOption_NameOverview_NameOverview", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Poster.
-        /// </summary>
-        public static string DoubanAssistScrapeOption_Poster_Poster {
-            get {
-                return ResourceManager.GetString("DoubanAssistScrapeOption_Poster_Poster", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Clear Tagline
         /// </summary>
         public static string MetadataEnhanceOptions_ClearTagline_Clear_Tagline {
@@ -1894,15 +1705,6 @@ namespace StrmAssistant.Properties {
         public static string MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days {
             get {
                 return ResourceManager.GetString("MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Douban rating update lookback days based on premiere date (0 disables the limit). Default is 365 days..
-        /// </summary>
-        public static string MetadataEnhanceOptions_RatingUpdateLookbackDays_Douban_rating_update_lookback_days_based_on_premiere_date__0_disables_the_limit__Default_is_365_days_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_RatingUpdateLookbackDays_Douban_rating_update_lookback_days_based_on_premiere_date__0_disables_the_limit__Default_is_365_days_", resourceCulture);
             }
         }
 
@@ -3059,15 +2861,6 @@ namespace StrmAssistant.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to MediaInfo Persistence and Performance.
-        /// </summary>
-        public static string MediaInfoExtractOptions_Group_MediaInfoStoragePerformance {
-            get {
-                return ResourceManager.GetString("MediaInfoExtractOptions_Group_MediaInfoStoragePerformance", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Detection and Fingerprint.
         /// </summary>
         public static string IntroSkipOptions_Group_Fingerprint {
@@ -3648,15 +3441,6 @@ namespace StrmAssistant.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Update.
-        /// </summary>
-        public static string No_Update_Message {
-            get {
-                return ResourceManager.GetString("No_Update_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Catch-up mode update - {0}\n\n{1}&apos;s favorite.
         /// </summary>
         public static string Notification_CatchupUpdate_EventDescription {
@@ -4076,24 +3860,6 @@ namespace StrmAssistant.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Include Strm only. Turn off to support all. Default is ON..
-        /// </summary>
-        public static string PluginOptions_StrmOnly_Extract_media_info_of_Strm_only__Default_is_True_ {
-            get {
-                return ResourceManager.GetString("PluginOptions_StrmOnly_Extract_media_info_of_Strm_only__Default_is_True_", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Strm Only.
-        /// </summary>
-        public static string PluginOptions_StrmOnly_Strm_Only {
-            get {
-                return ResourceManager.GetString("PluginOptions_StrmOnly_Strm_Only", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Available.
         /// </summary>
         public static string ProxyServer_Available {
@@ -4190,15 +3956,6 @@ namespace StrmAssistant.Properties {
             get {
                 return ResourceManager.GetString("UIFunctionOptions_BeautifyMissingMetadata_Beautify_missing_metadata_for_episode_d" +
                         "isplay__Default_is_OFF_", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to UI Functions.
-        /// </summary>
-        public static string UIFunctionOptions_EditorTitle_UI_Functions {
-            get {
-                return ResourceManager.GetString("UIFunctionOptions_EditorTitle_UI_Functions", resourceCulture);
             }
         }
         
@@ -4302,33 +4059,6 @@ namespace StrmAssistant.Properties {
         public static string Uninstall_Warning {
             get {
                 return ResourceManager.GetString("Uninstall_Warning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Update failed. Check error details in admin dashboard..
-        /// </summary>
-        public static string Update_Failed_Message {
-            get {
-                return ResourceManager.GetString("Update_Failed_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Updates plugin to the latest version.
-        /// </summary>
-        public static string UpdatePluginTask_Description_Updates_plugin_to_the_latest_version {
-            get {
-                return ResourceManager.GetString("UpdatePluginTask_Description_Updates_plugin_to_the_latest_version", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Update Plugin.
-        /// </summary>
-        public static string UpdatePluginTask_Name_Update_Plugin {
-            get {
-                return ResourceManager.GetString("UpdatePluginTask_Name_Update_Plugin", resourceCulture);
             }
         }
         
@@ -4638,15 +4368,6 @@ namespace StrmAssistant.Properties {
         /// <summary>
         ///   Looks up a localized string.
         /// </summary>
-        public static string MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_ {
-            get {
-                return ResourceManager.GetString("MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
         public static string ExperienceEnhanceOptions_LibraryScopePlayProgress_Description {
             get {
                 return ResourceManager.GetString("ExperienceEnhanceOptions_LibraryScopePlayProgress_Description", resourceCulture);
@@ -4710,72 +4431,9 @@ namespace StrmAssistant.Properties {
         /// <summary>
         ///   Looks up a localized string.
         /// </summary>
-        public static string ScheduledTasks_Duration_Hours {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Duration_Hours", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Duration_Minutes {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Duration_Minutes", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Duration_Seconds {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Duration_Seconds", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
         public static string ScheduledTasks_EditorTitle_Scheduled_Tasks {
             get {
                 return ResourceManager.GetString("ScheduledTasks_EditorTitle_Scheduled_Tasks", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_LastRun {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_LastRun", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_List_Task_List {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_List_Task_List", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_NeverRun {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_NeverRun", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_None {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_None", resourceCulture);
             }
         }
 
@@ -4791,180 +4449,9 @@ namespace StrmAssistant.Properties {
         /// <summary>
         ///   Looks up a localized string.
         /// </summary>
-        public static string ScheduledTasks_Run_Run {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Run_Run", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
         public static string ScheduledTasks_Started {
             get {
                 return ResourceManager.GetString("ScheduledTasks_Started", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Status_Aborted {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Status_Aborted", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Status_Cancelled {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Status_Cancelled", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Status_Completed {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Status_Completed", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Status_Failed {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Status_Failed", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_Status_Running {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_Status_Running", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string RuntimeStatus_RestartCountdown {
-            get {
-                return ResourceManager.GetString("RuntimeStatus_RestartCountdown", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string ScheduledTasks_List_Task_List_Description {
-            get {
-                return ResourceManager.GetString("ScheduledTasks_List_Task_List_Description", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_EditorTitle_Active_Sessions {
-            get {
-                return ResourceManager.GetString("Sessions_EditorTitle_Active_Sessions", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_Idle {
-            get {
-                return ResourceManager.GetString("Sessions_Idle", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_List_Session_List {
-            get {
-                return ResourceManager.GetString("Sessions_List_Session_List", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_List_Session_List_Description {
-            get {
-                return ResourceManager.GetString("Sessions_List_Session_List_Description", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_None {
-            get {
-                return ResourceManager.GetString("Sessions_None", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_NotFound {
-            get {
-                return ResourceManager.GetString("Sessions_NotFound", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_NotPlaying {
-            get {
-                return ResourceManager.GetString("Sessions_NotPlaying", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_Paused {
-            get {
-                return ResourceManager.GetString("Sessions_Paused", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_Playing {
-            get {
-                return ResourceManager.GetString("Sessions_Playing", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_Stop_Stop_Playback {
-            get {
-                return ResourceManager.GetString("Sessions_Stop_Stop_Playback", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Sessions_Stopped {
-            get {
-                return ResourceManager.GetString("Sessions_Stopped", resourceCulture);
             }
         }
 
@@ -4992,60 +4479,6 @@ namespace StrmAssistant.Properties {
         public static string GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache {
             get {
                 return ResourceManager.GetString("GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Overview_EditorTitle_Runtime_Overview {
-            get {
-                return ResourceManager.GetString("Overview_EditorTitle_Runtime_Overview", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Overview_List_Overview {
-            get {
-                return ResourceManager.GetString("Overview_List_Overview", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Overview_Memory_Threshold {
-            get {
-                return ResourceManager.GetString("Overview_Memory_Threshold", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Overview_Refresh_Refresh {
-            get {
-                return ResourceManager.GetString("Overview_Refresh_Refresh", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Overview_Tasks_Queue {
-            get {
-                return ResourceManager.GetString("Overview_Tasks_Queue", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string Overview_Tasks_Queue_Detail {
-            get {
-                return ResourceManager.GetString("Overview_Tasks_Queue_Detail", resourceCulture);
             }
         }
 
@@ -5370,15 +4803,6 @@ namespace StrmAssistant.Properties {
         public static string ExperienceEnhanceOptions_Group_NotificationAndLogs {
             get {
                 return ResourceManager.GetString("ExperienceEnhanceOptions_Group_NotificationAndLogs", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string.
-        /// </summary>
-        public static string IntroSkipOptions_Group_PlaybackScrape {
-            get {
-                return ResourceManager.GetString("IntroSkipOptions_Group_PlaybackScrape", resourceCulture);
             }
         }
 

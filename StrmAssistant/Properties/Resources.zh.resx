@@ -23,12 +23,6 @@
   <data name="PluginOptions_IncludeExtra_Include_media_extras_to_extract__Default_is_False_" xml:space="preserve">
     <value>同时提取分集与附加内容。默认关闭。</value>
   </data>
-  <data name="PluginOptions_StrmOnly_Strm_Only" xml:space="preserve">
-    <value>仅支持 STRM</value>
-  </data>
-  <data name="PluginOptions_StrmOnly_Extract_media_info_of_Strm_only__Default_is_True_" xml:space="preserve">
-    <value>仅支持 STRM，关闭后支持所有，默认开启。</value>
-  </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count" xml:space="preserve">
     <value>主最大并发线程数</value>
   </data>
@@ -290,9 +284,6 @@
   <data name="ItemType_MusicArtist_MusicArtist" xml:space="preserve">
     <value>艺术家</value>
   </data>
-  <data name="UIFunctionOptions_EditorTitle_UI_Functions" xml:space="preserve">
-    <value>UI 功能</value>
-  </data>
   <data name="ItemDisplayOptions_EditorTitle_Item_Display" xml:space="preserve">
     <value>条目显示</value>
   </data>
@@ -392,9 +383,6 @@
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
     <value>提取、备份、恢复共用；留空与媒体文件同目录。</value>
   </data>
-  <data name="ClearChapterMarkersTask_Name_Clear_Episode_Intros" xml:space="preserve">
-    <value>清除片头片尾标记</value>
-  </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
     <value>清除行为标记</value>
   </data>
@@ -434,17 +422,8 @@
   <data name="ScanExternalSubtitleTask_Description_Scans_external_subtitles_for_videos" xml:space="preserve">
     <value>单独扫描视频的外挂字幕更新至媒体信息</value>
   </data>
-  <data name="UpdatePluginTask_Name_Update_Plugin" xml:space="preserve">
-    <value>更新本插件</value>
-  </data>
-  <data name="UpdatePluginTask_Description_Updates_plugin_to_the_latest_version" xml:space="preserve">
-    <value>更新本插件至最新版</value>
-  </data>
   <data name="Uninstall_Warning" xml:space="preserve">
     <value>警告：中文搜索增强未正常关闭，Emby 将无法工作。</value>
-  </data>
-  <data name="No_Update_Message" xml:space="preserve">
-    <value>无更新</value>
   </data>
   <data name="InvalidProxyServer" xml:space="preserve">
     <value>代理服务器无效，格式为 http[s]://[&lt;username&gt;:&lt;password&gt;@]&lt;host&gt;:&lt;port&gt;</value>
@@ -1067,12 +1046,6 @@
   <data name="ExperienceEnhanceOptions_FolderVideoGroupingLimit_Maximum_number_of_videos_in_the_same_folder_eligible_for_multi_version_merge__8_is_the_Emby_default__Default_is_8_" xml:space="preserve">
     <value>同一文件夹内可参与多版本合并的视频数量上限。Emby 默认为 8。默认为 8。</value>
   </data>
-  <data name="PluginOptions_CatchupMinWaitMinutes_Min_Wait_After_Library_Insert" xml:space="preserve">
-    <value>入库最小等待时间</value>
-  </data>
-  <data name="PluginOptions_CatchupMinWaitMinutes_Minutes_to_wait_after_an_item_enters_the_library_before_catch_up_processes_it__letting_initial_scraping_finish__Default_is_0_" xml:space="preserve">
-    <value>媒体入库后等待指定分钟再进行追更处理，让初始刮削先完成。默认 0。</value>
-  </data>
   <data name="PluginOptions_CatchupMinWaitSeconds_Min_Wait_After_Library_Insert__Seconds_" xml:space="preserve">
     <value>入库后最小等待（秒）</value>
   </data>
@@ -1091,9 +1064,6 @@
   <data name="PluginOptions_MemoryAutoRestartThresholdMB_Working_set_limit_in_MB_before_restart_countdown_starts__Default_is_4096_" xml:space="preserve">
     <value>工作集超过该 MB 数后开始重启倒计时。默认 4096。</value>
   </data>
-  <data name="GeneralOptions_RuntimeStatus_Runtime_Status" xml:space="preserve">
-    <value>运行状态</value>
-  </data>
   <data name="GeneralOptions_CleanMemoryNow_Clean_Memory_Now" xml:space="preserve">
     <value>立即清理内存</value>
   </data>
@@ -1111,27 +1081,6 @@
   </data>
   <data name="GeneralOptions_RestartServer_Restart_Server" xml:space="preserve">
     <value>重启服务器</value>
-  </data>
-  <data name="RuntimeStatus_Memory" xml:space="preserve">
-    <value>内存工作集：{0} MB（GC 堆 {1} MB）</value>
-  </data>
-  <data name="RuntimeStatus_RunningTasks" xml:space="preserve">
-    <value>运行中任务：{0}（{1}）</value>
-  </data>
-  <data name="RuntimeStatus_Sessions" xml:space="preserve">
-    <value>活动会话：{0}（播放中 {1}）：{2}</value>
-  </data>
-  <data name="RuntimeStatus_SearchIndex" xml:space="preserve">
-    <value>搜索索引：{0}</value>
-  </data>
-  <data name="RuntimeStatus_ProcessingTasks" xml:space="preserve">
-    <value>处理中：{0}</value>
-  </data>
-  <data name="RuntimeStatus_PendingQueue" xml:space="preserve">
-    <value>待处理队列：{0}（媒体信息 {1}、指纹 {2}、片头 {3}、剧集刷新 {4}）</value>
-  </data>
-  <data name="RuntimeStatus_ConflictPlugin" xml:space="preserve">
-    <value>检测到冲突插件：{0}</value>
   </data>
   <data name="RuntimeStatus_ServerRestarting" xml:space="preserve">
     <value>服务器正在从插件选项页触发重启</value>
@@ -1184,18 +1133,6 @@
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
     <value>从 IntroDb / TheIntroDB 为缺失片头片尾标记的剧集和电影补全标记，按设置的来源顺序尝试，不覆盖其他来源的标记。建议先在网站确认有数据再执行。</value>
   </data>
-  <data name="MediaInfoExtractOptions_ForcePortraitPoster_Force_Portrait_Poster" xml:space="preserve">
-    <value>强制海报为竖图</value>
-  </data>
-  <data name="MediaInfoExtractOptions_ForcePortraitPoster_Crop_the_captured_primary_image_to_2_3_portrait_after_refresh__Default_is_OFF_" xml:space="preserve">
-    <value>刷新后将截图生成的海报裁剪为 2:3 竖图。仅处理服务器生成的图片。默认关闭。</value>
-  </data>
-  <data name="MediaInfoExtractOptions_EnsureEpisode16x9_Ensure_Episode_Image_16x9" xml:space="preserve">
-    <value>确保集图像比例为 16:9</value>
-  </data>
-  <data name="MediaInfoExtractOptions_EnsureEpisode16x9_Crop_episode_stills_to_16_9_when_the_source_ratio_differs__Default_is_OFF_" xml:space="preserve">
-    <value>来源比例不符时将剧集截图裁剪为 16:9。仅处理服务器生成的图片。默认关闭。</value>
-  </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
     <value>裁剪为 16:9</value>
   </data>
@@ -1210,12 +1147,6 @@
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_" xml:space="preserve">
     <value>裁剪为 16:9 或 2:3，或生成背景图；留空不处理。</value>
-  </data>
-  <data name="MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping" xml:space="preserve">
-    <value>豆瓣辅助刮削</value>
-  </data>
-  <data name="MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_" xml:space="preserve">
-    <value>电影/剧集/季刷新后从豆瓣补全缺失的中文简介、类型和制片地区（仅中文媒体库）。只影响元数据，不决定社区评分。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
     <value>抓取豆瓣评分</value>
@@ -1274,29 +1205,11 @@
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>按需刷新间隔（天）</value>
   </data>
-  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_" xml:space="preserve">
-    <value>条目被查看或播放时，距上次检查超过该天数才刷新豆瓣评分；0 表示关闭自动刷新。默认 7 天。</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_Rating_Rating" xml:space="preserve">
-    <value>评分</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_Cast_Cast" xml:space="preserve">
-    <value>演员中文名</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_NameOverview_NameOverview" xml:space="preserve">
-    <value>名称与简介</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_Poster_Poster" xml:space="preserve">
-    <value>海报</value>
-  </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_MdbList_Api_Key" xml:space="preserve">
     <value>MdbList API Key</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days" xml:space="preserve">
     <value>评分更新回看天数</value>
-  </data>
-  <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Douban_rating_update_lookback_days_based_on_premiere_date__0_disables_the_limit__Default_is_365_days_" xml:space="preserve">
-    <value>豆瓣评分更新仅作用于首播日期在回看期内的条目（0 为不限制）。默认 365 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearTagline_Clear_Tagline" xml:space="preserve">
     <value>清除标语</value>
@@ -1348,9 +1261,6 @@
   </data>
   <data name="ItemType_Video_Video" xml:space="preserve">
     <value>视频</value>
-  </data>
-  <data name="Update_Failed_Message" xml:space="preserve">
-    <value>更新失败，请至控制台查看详细错误信息。</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_Only_restore_media_info__chapters__and_video_thumbnails_from_JSON_or_BIF__skipping_extraction__Default_is_OFF_" xml:space="preserve">
     <value>只从 JSON/BIF 恢复，不探测。</value>
@@ -1679,9 +1589,6 @@
   <data name="ExperienceEnhanceOptions_Group_MultipleVersions" xml:space="preserve">
     <value>多版本</value>
   </data>
-  <data name="MediaInfoExtractOptions_Group_MediaInfoStoragePerformance" xml:space="preserve">
-    <value>持久化与性能</value>
-  </data>
   <data name="DisclaimerDialog_EditorTitle_Disclaimer" xml:space="preserve">
     <value>声明</value>
   </data>
@@ -1757,45 +1664,6 @@
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
     <value>计划任务</value>
   </data>
-  <data name="ScheduledTasks_List_Task_List" xml:space="preserve">
-    <value>任务列表</value>
-  </data>
-  <data name="ScheduledTasks_Run_Run" xml:space="preserve">
-    <value>执行</value>
-  </data>
-  <data name="ScheduledTasks_None" xml:space="preserve">
-    <value>没有可执行的任务</value>
-  </data>
-  <data name="ScheduledTasks_NeverRun" xml:space="preserve">
-    <value>从未运行</value>
-  </data>
-  <data name="ScheduledTasks_LastRun" xml:space="preserve">
-    <value>上次：{0} · 耗时 {1} · {2}</value>
-  </data>
-  <data name="ScheduledTasks_Status_Completed" xml:space="preserve">
-    <value>成功</value>
-  </data>
-  <data name="ScheduledTasks_Status_Failed" xml:space="preserve">
-    <value>失败</value>
-  </data>
-  <data name="ScheduledTasks_Status_Cancelled" xml:space="preserve">
-    <value>已取消</value>
-  </data>
-  <data name="ScheduledTasks_Status_Aborted" xml:space="preserve">
-    <value>已中止</value>
-  </data>
-  <data name="ScheduledTasks_Status_Running" xml:space="preserve">
-    <value>运行中 {0}%</value>
-  </data>
-  <data name="ScheduledTasks_Duration_Seconds" xml:space="preserve">
-    <value>{0} 秒</value>
-  </data>
-  <data name="ScheduledTasks_Duration_Minutes" xml:space="preserve">
-    <value>{0} 分 {1} 秒</value>
-  </data>
-  <data name="ScheduledTasks_Duration_Hours" xml:space="preserve">
-    <value>{0} 小时 {1} 分</value>
-  </data>
   <data name="ScheduledTasks_Started" xml:space="preserve">
     <value>已开始执行：{0}</value>
   </data>
@@ -1804,45 +1672,6 @@
   </data>
   <data name="ScheduledTasks_NotFound" xml:space="preserve">
     <value>任务不存在：{0}</value>
-  </data>
-  <data name="RuntimeStatus_RestartCountdown" xml:space="preserve">
-    <value>内存已超过上限 {0} MB，服务器将在 {1} 秒后自动重启。</value>
-  </data>
-  <data name="ScheduledTasks_List_Task_List_Description" xml:space="preserve">
-    <value>点「执行」会立即开始任务，页面上未保存的改动可能丢失；需要保留时请先保存。</value>
-  </data>
-  <data name="Sessions_EditorTitle_Active_Sessions" xml:space="preserve">
-    <value>活动会话</value>
-  </data>
-  <data name="Sessions_List_Session_List" xml:space="preserve">
-    <value>会话列表</value>
-  </data>
-  <data name="Sessions_List_Session_List_Description" xml:space="preserve">
-    <value>播放中的会话带「停止播放」按钮；停止后客户端会立即中断当前播放。</value>
-  </data>
-  <data name="Sessions_Playing" xml:space="preserve">
-    <value>正在播放：{0}</value>
-  </data>
-  <data name="Sessions_Paused" xml:space="preserve">
-    <value>已暂停：{0}</value>
-  </data>
-  <data name="Sessions_Idle" xml:space="preserve">
-    <value>空闲 · 最后活动 {0}</value>
-  </data>
-  <data name="Sessions_Stop_Stop_Playback" xml:space="preserve">
-    <value>停止播放</value>
-  </data>
-  <data name="Sessions_NotPlaying" xml:space="preserve">
-    <value>该会话当前未在播放</value>
-  </data>
-  <data name="Sessions_NotFound" xml:space="preserve">
-    <value>会话不存在或已结束</value>
-  </data>
-  <data name="Sessions_Stopped" xml:space="preserve">
-    <value>已停止播放：{0}</value>
-  </data>
-  <data name="Sessions_None" xml:space="preserve">
-    <value>当前没有连接的会话</value>
   </data>
   <data name="GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder" xml:space="preserve">
     <value>配置导出/导入目录</value>
@@ -1889,18 +1718,6 @@
   <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
     <value>元数据缓存目录未初始化，未执行清理。</value>
   </data>
-  <data name="Overview_EditorTitle_Runtime_Overview" xml:space="preserve">
-    <value>运行概览</value>
-  </data>
-  <data name="Overview_List_Overview" xml:space="preserve">
-    <value>实时状态</value>
-  </data>
-  <data name="Overview_Refresh_Refresh" xml:space="preserve">
-    <value>刷新</value>
-  </data>
-  <data name="Overview_Memory_Threshold" xml:space="preserve">
-    <value>上限 {0} MB · 已用 {1}%</value>
-  </data>
   <data name="ScheduledTasks_EditorTitle_Common_Tasks" xml:space="preserve">
     <value>常用任务</value>
   </data>
@@ -1915,12 +1732,6 @@
   </data>
   <data name="ScheduledTasks_Button_Refresh_Episodes" xml:space="preserve">
     <value>刷新剧集元数据</value>
-  </data>
-  <data name="Overview_Tasks_Queue" xml:space="preserve">
-    <value>运行中任务 {0} · 待处理队列 {1}</value>
-  </data>
-  <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
-    <value>任务：{0} ｜ 处理中：{1} ｜ 队列：媒体信息 {2} · 指纹 {3} · 片头 {4} · 剧集刷新 {5}</value>
   </data>
   <data name="Overview_Status_Caption" xml:space="preserve">
     <value>运行概览</value>
@@ -1972,9 +1783,6 @@
   </data>
   <data name="MetadataEnhanceOptions_Group_RefreshCache" xml:space="preserve">
     <value>刷新与缓存</value>
-  </data>
-  <data name="IntroSkipOptions_Group_PlaybackScrape" xml:space="preserve">
-    <value>播放与外部标记</value>
   </data>
   <data name="NetworkProxyOptions_Group_NetworkDirectLink" xml:space="preserve">
     <value>网络与直链</value>

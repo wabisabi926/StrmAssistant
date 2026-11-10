@@ -110,12 +110,6 @@
   <data name="PluginOptions_IncludeExtra_Include_media_extras_to_extract__Default_is_False_" xml:space="preserve">
     <value>Include parts and extras. Default is OFF.</value>
   </data>
-  <data name="PluginOptions_StrmOnly_Strm_Only" xml:space="preserve">
-    <value>Strm Only</value>
-  </data>
-  <data name="PluginOptions_StrmOnly_Extract_media_info_of_Strm_only__Default_is_True_" xml:space="preserve">
-    <value>Include Strm only. Turn off to support all. Default is ON.</value>
-  </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count" xml:space="preserve">
     <value>Master Max Concurrent Thread Count</value>
   </data>
@@ -377,9 +371,6 @@
   <data name="ItemType_MusicArtist_MusicArtist" xml:space="preserve">
     <value>Music Artist</value>
   </data>
-  <data name="UIFunctionOptions_EditorTitle_UI_Functions" xml:space="preserve">
-    <value>UI Functions</value>
-  </data>
   <data name="ItemDisplayOptions_EditorTitle_Item_Display" xml:space="preserve">
     <value>Item Display</value>
   </data>
@@ -479,9 +470,6 @@
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
     <value>Shared by extraction, backup and restore; blank uses the media folder.</value>
   </data>
-  <data name="ClearChapterMarkersTask_Name_Clear_Episode_Intros" xml:space="preserve">
-    <value>Clear Episode Intros</value>
-  </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
     <value>Clear behavior markers</value>
   </data>
@@ -521,17 +509,8 @@
   <data name="ScanExternalSubtitleTask_Description_Scans_external_subtitles_for_videos" xml:space="preserve">
     <value>Scans external subtitles for videos</value>
   </data>
-  <data name="UpdatePluginTask_Name_Update_Plugin" xml:space="preserve">
-    <value>Update Plugin</value>
-  </data>
-  <data name="UpdatePluginTask_Description_Updates_plugin_to_the_latest_version" xml:space="preserve">
-    <value>Updates plugin to the latest version</value>
-  </data>
   <data name="Uninstall_Warning" xml:space="preserve">
     <value>Warning: Emby won't work without turning off Chinese Search Enhanced properly.</value>
-  </data>
-  <data name="No_Update_Message" xml:space="preserve">
-    <value>No Update</value>
   </data>
   <data name="InvalidProxyServer" xml:space="preserve">
     <value>Proxy Server is invalid. Format is http[s]://[&lt;username&gt;:&lt;password&gt;@]&lt;host&gt;:&lt;port&gt;</value>
@@ -1154,12 +1133,6 @@
   <data name="ExperienceEnhanceOptions_FolderVideoGroupingLimit_Maximum_number_of_videos_in_the_same_folder_eligible_for_multi_version_merge__8_is_the_Emby_default__Default_is_8_" xml:space="preserve">
     <value>Maximum number of videos in the same folder eligible for multi-version merge. 8 is the Emby default. Default is 8.</value>
   </data>
-  <data name="PluginOptions_CatchupMinWaitMinutes_Min_Wait_After_Library_Insert" xml:space="preserve">
-    <value>Min Wait After Library Insert</value>
-  </data>
-  <data name="PluginOptions_CatchupMinWaitMinutes_Minutes_to_wait_after_an_item_enters_the_library_before_catch_up_processes_it__letting_initial_scraping_finish__Default_is_0_" xml:space="preserve">
-    <value>Minutes to wait after an item enters the library before catch-up processes it, letting initial scraping finish. Default is 0.</value>
-  </data>
   <data name="PluginOptions_CatchupMinWaitSeconds_Min_Wait_After_Library_Insert__Seconds_" xml:space="preserve">
     <value>Min Wait After Library Insert (Seconds)</value>
   </data>
@@ -1178,9 +1151,6 @@
   <data name="PluginOptions_MemoryAutoRestartThresholdMB_Working_set_limit_in_MB_before_restart_countdown_starts__Default_is_4096_" xml:space="preserve">
     <value>Working set limit in MB before restart countdown starts. Default is 4096.</value>
   </data>
-  <data name="GeneralOptions_RuntimeStatus_Runtime_Status" xml:space="preserve">
-    <value>Runtime Status</value>
-  </data>
   <data name="GeneralOptions_CleanMemoryNow_Clean_Memory_Now" xml:space="preserve">
     <value>Clean Memory Now</value>
   </data>
@@ -1198,27 +1168,6 @@
   </data>
   <data name="GeneralOptions_RestartServer_Restart_Server" xml:space="preserve">
     <value>Restart Server</value>
-  </data>
-  <data name="RuntimeStatus_Memory" xml:space="preserve">
-    <value>Memory working set: {0} MB (GC heap {1} MB)</value>
-  </data>
-  <data name="RuntimeStatus_RunningTasks" xml:space="preserve">
-    <value>Running tasks: {0} ({1})</value>
-  </data>
-  <data name="RuntimeStatus_Sessions" xml:space="preserve">
-    <value>Active sessions: {0} (playing {1}): {2}</value>
-  </data>
-  <data name="RuntimeStatus_SearchIndex" xml:space="preserve">
-    <value>Search index: {0}</value>
-  </data>
-  <data name="RuntimeStatus_ProcessingTasks" xml:space="preserve">
-    <value>Processing: {0}</value>
-  </data>
-  <data name="RuntimeStatus_PendingQueue" xml:space="preserve">
-    <value>Pending queue: {0} (MediaInfo {1}, Fingerprint {2}, Intro {3}, EpisodeRefresh {4})</value>
-  </data>
-  <data name="RuntimeStatus_ConflictPlugin" xml:space="preserve">
-    <value>Conflict plugin detected: {0}</value>
   </data>
   <data name="RuntimeStatus_ServerRestarting" xml:space="preserve">
     <value>Server is restarting from the plugin options page</value>
@@ -1271,18 +1220,6 @@
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
     <value>Fills missing intro/credits markers for episodes and movies from IntroDb / TheIntroDB in the configured source order, without overwriting markers from other sources. Confirm coverage on the websites before running.</value>
   </data>
-  <data name="MediaInfoExtractOptions_ForcePortraitPoster_Force_Portrait_Poster" xml:space="preserve">
-    <value>Force Portrait Poster</value>
-  </data>
-  <data name="MediaInfoExtractOptions_ForcePortraitPoster_Crop_the_captured_primary_image_to_2_3_portrait_after_refresh__Default_is_OFF_" xml:space="preserve">
-    <value>Crop the captured primary image to 2:3 portrait after refresh. Server-generated images only. Default is OFF.</value>
-  </data>
-  <data name="MediaInfoExtractOptions_EnsureEpisode16x9_Ensure_Episode_Image_16x9" xml:space="preserve">
-    <value>Ensure Episode Image 16:9</value>
-  </data>
-  <data name="MediaInfoExtractOptions_EnsureEpisode16x9_Crop_episode_stills_to_16_9_when_the_source_ratio_differs__Default_is_OFF_" xml:space="preserve">
-    <value>Crop episode stills to 16:9 when the source ratio differs. Server-generated images only. Default is OFF.</value>
-  </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
     <value>Crop to 16:9</value>
   </data>
@@ -1297,12 +1234,6 @@
   </data>
   <data name="MediaInfoExtractOptions_ImageCapturePostProcessMode_Generate_additional_images_after_capture__Default_is_OFF_" xml:space="preserve">
     <value>Crop to 16:9 or 2:3, or generate a backdrop; leave blank for none.</value>
-  </data>
-  <data name="MetadataEnhanceOptions_EnableDoubanAssist_Douban_Assist_Scraping" xml:space="preserve">
-    <value>Douban Assist Scraping</value>
-  </data>
-  <data name="MetadataEnhanceOptions_EnableDoubanAssist_After_movie_refresh_fill_missing_Chinese_overview_genres_locations_from_Douban__Default_is_OFF_" xml:space="preserve">
-    <value>After movie, series or season refresh, fill missing Chinese overview, genres and production locations from Douban (Chinese libraries only). Metadata only; it does not decide the community rating. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
     <value>Fetch Douban Rating</value>
@@ -1361,29 +1292,11 @@
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>On-Demand Refresh Interval (Days)</value>
   </data>
-  <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Refresh_the_Douban_rating_when_an_item_is_viewed_or_played_and_the_last_check_is_older_than_this_many_days__0_disables_automatic_refresh__Default_is_7_days_" xml:space="preserve">
-    <value>Refresh the Douban rating when an item is viewed or played and the last check is older than this many days; 0 disables automatic refresh. Default is 7 days.</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_Rating_Rating" xml:space="preserve">
-    <value>Rating</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_Cast_Cast" xml:space="preserve">
-    <value>Cast</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_NameOverview_NameOverview" xml:space="preserve">
-    <value>Name &amp; Overview</value>
-  </data>
-  <data name="DoubanAssistScrapeOption_Poster_Poster" xml:space="preserve">
-    <value>Poster</value>
-  </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_MdbList_Api_Key" xml:space="preserve">
     <value>MdbList API Key</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Rating_Update_Lookback_Days" xml:space="preserve">
     <value>Rating Update Lookback Days</value>
-  </data>
-  <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Douban_rating_update_lookback_days_based_on_premiere_date__0_disables_the_limit__Default_is_365_days_" xml:space="preserve">
-    <value>Douban rating update lookback days based on premiere date (0 disables the limit). Default is 365 days.</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearTagline_Clear_Tagline" xml:space="preserve">
     <value>Clear Tagline</value>
@@ -1435,9 +1348,6 @@
   </data>
   <data name="ItemType_Video_Video" xml:space="preserve">
     <value>Video</value>
-  </data>
-  <data name="Update_Failed_Message" xml:space="preserve">
-    <value>Update failed. Check error details in admin dashboard.</value>
   </data>
   <data name="MediaInfoExtractOptions_MediaInfoRestoreMode_Only_restore_media_info__chapters__and_video_thumbnails_from_JSON_or_BIF__skipping_extraction__Default_is_OFF_" xml:space="preserve">
     <value>Restore only from JSON/BIF; no probing.</value>
@@ -1766,9 +1676,6 @@
   <data name="ExperienceEnhanceOptions_Group_MultipleVersions" xml:space="preserve">
     <value>Multiple Versions</value>
   </data>
-  <data name="MediaInfoExtractOptions_Group_MediaInfoStoragePerformance" xml:space="preserve">
-    <value>Persistence &amp; Performance</value>
-  </data>
   <data name="DisclaimerDialog_EditorTitle_Disclaimer" xml:space="preserve">
     <value>Disclaimer</value>
   </data>
@@ -1844,45 +1751,6 @@
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
     <value>Scheduled Tasks</value>
   </data>
-  <data name="ScheduledTasks_List_Task_List" xml:space="preserve">
-    <value>Task List</value>
-  </data>
-  <data name="ScheduledTasks_Run_Run" xml:space="preserve">
-    <value>Run</value>
-  </data>
-  <data name="ScheduledTasks_None" xml:space="preserve">
-    <value>No tasks available</value>
-  </data>
-  <data name="ScheduledTasks_NeverRun" xml:space="preserve">
-    <value>Never run</value>
-  </data>
-  <data name="ScheduledTasks_LastRun" xml:space="preserve">
-    <value>Last: {0} · {1} · {2}</value>
-  </data>
-  <data name="ScheduledTasks_Status_Completed" xml:space="preserve">
-    <value>Completed</value>
-  </data>
-  <data name="ScheduledTasks_Status_Failed" xml:space="preserve">
-    <value>Failed</value>
-  </data>
-  <data name="ScheduledTasks_Status_Cancelled" xml:space="preserve">
-    <value>Cancelled</value>
-  </data>
-  <data name="ScheduledTasks_Status_Aborted" xml:space="preserve">
-    <value>Aborted</value>
-  </data>
-  <data name="ScheduledTasks_Status_Running" xml:space="preserve">
-    <value>Running {0}%</value>
-  </data>
-  <data name="ScheduledTasks_Duration_Seconds" xml:space="preserve">
-    <value>{0}s</value>
-  </data>
-  <data name="ScheduledTasks_Duration_Minutes" xml:space="preserve">
-    <value>{0}m {1}s</value>
-  </data>
-  <data name="ScheduledTasks_Duration_Hours" xml:space="preserve">
-    <value>{0}h {1}m</value>
-  </data>
   <data name="ScheduledTasks_Started" xml:space="preserve">
     <value>Started: {0}</value>
   </data>
@@ -1891,45 +1759,6 @@
   </data>
   <data name="ScheduledTasks_NotFound" xml:space="preserve">
     <value>Task not found: {0}</value>
-  </data>
-  <data name="RuntimeStatus_RestartCountdown" xml:space="preserve">
-    <value>Memory limit exceeded ({0} MB). The server will restart automatically in {1} seconds.</value>
-  </data>
-  <data name="ScheduledTasks_List_Task_List_Description" xml:space="preserve">
-    <value>Clicking Run starts the task immediately and may discard unsaved setting changes. Save first if you need to keep them.</value>
-  </data>
-  <data name="Sessions_EditorTitle_Active_Sessions" xml:space="preserve">
-    <value>Active Sessions</value>
-  </data>
-  <data name="Sessions_List_Session_List" xml:space="preserve">
-    <value>Session List</value>
-  </data>
-  <data name="Sessions_List_Session_List_Description" xml:space="preserve">
-    <value>Sessions that are playing have a Stop button; stopping interrupts playback immediately on the client.</value>
-  </data>
-  <data name="Sessions_Playing" xml:space="preserve">
-    <value>Now playing: {0}</value>
-  </data>
-  <data name="Sessions_Paused" xml:space="preserve">
-    <value>Paused: {0}</value>
-  </data>
-  <data name="Sessions_Idle" xml:space="preserve">
-    <value>Idle · last active {0}</value>
-  </data>
-  <data name="Sessions_Stop_Stop_Playback" xml:space="preserve">
-    <value>Stop Playback</value>
-  </data>
-  <data name="Sessions_NotPlaying" xml:space="preserve">
-    <value>This session is not playing anything</value>
-  </data>
-  <data name="Sessions_NotFound" xml:space="preserve">
-    <value>Session not found</value>
-  </data>
-  <data name="Sessions_Stopped" xml:space="preserve">
-    <value>Playback stopped: {0}</value>
-  </data>
-  <data name="Sessions_None" xml:space="preserve">
-    <value>No active sessions</value>
   </data>
   <data name="GeneralOptions_ConfigTransferFolder_Config_Transfer_Folder" xml:space="preserve">
     <value>Config Transfer Folder</value>
@@ -1976,18 +1805,6 @@
   <data name="GeneralOptions_ClearMetadataCacheResult_NotInitialized" xml:space="preserve">
     <value>Metadata cache root is not initialized; nothing was cleared.</value>
   </data>
-  <data name="Overview_EditorTitle_Runtime_Overview" xml:space="preserve">
-    <value>Runtime Overview</value>
-  </data>
-  <data name="Overview_List_Overview" xml:space="preserve">
-    <value>Live Status</value>
-  </data>
-  <data name="Overview_Refresh_Refresh" xml:space="preserve">
-    <value>Refresh</value>
-  </data>
-  <data name="Overview_Memory_Threshold" xml:space="preserve">
-    <value>Limit {0} MB · {1}% used</value>
-  </data>
   <data name="ScheduledTasks_EditorTitle_Common_Tasks" xml:space="preserve">
     <value>Common Tasks</value>
   </data>
@@ -2002,12 +1819,6 @@
   </data>
   <data name="ScheduledTasks_Button_Refresh_Episodes" xml:space="preserve">
     <value>Refresh Episode Metadata</value>
-  </data>
-  <data name="Overview_Tasks_Queue" xml:space="preserve">
-    <value>Running tasks {0} · Pending queue {1}</value>
-  </data>
-  <data name="Overview_Tasks_Queue_Detail" xml:space="preserve">
-    <value>Tasks: {0} | Processing: {1} | Queue: media info {2} · fingerprint {3} · intro {4} · episode refresh {5}</value>
   </data>
   <data name="Overview_Status_Caption" xml:space="preserve">
     <value>Runtime Overview</value>
@@ -2059,9 +1870,6 @@
   </data>
   <data name="MetadataEnhanceOptions_Group_RefreshCache" xml:space="preserve">
     <value>Refresh &amp; Cache</value>
-  </data>
-  <data name="IntroSkipOptions_Group_PlaybackScrape" xml:space="preserve">
-    <value>Playback &amp; External Markers</value>
   </data>
   <data name="NetworkProxyOptions_Group_NetworkDirectLink" xml:space="preserve">
     <value>Network &amp; Direct Link</value>

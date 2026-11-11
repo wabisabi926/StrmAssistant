@@ -1919,4 +1919,76 @@
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds_Description" xml:space="preserve">
     <value>Range 30–120, default 60.</value>
   </data>
+  <data name="PluginUpdateOptions_EditorTitle_Plugin_Update" xml:space="preserve">
+    <value>Plugin Update</value>
+  </data>
+  <data name="PluginUpdateOptions_CheckUpdate_Check_for_Updates" xml:space="preserve">
+    <value>Check for Updates</value>
+  </data>
+  <data name="PluginUpdateOptions_AutoDownloadUpdate_Auto_Download_Updates" xml:space="preserve">
+    <value>Auto Download Updates</value>
+  </data>
+  <data name="PluginUpdateOptions_AutoDownloadUpdate_Description" xml:space="preserve">
+    <value>Download and replace the plugin when a newer version is available. A server restart is still required. Default is OFF.</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubToken_GitHub_Token" xml:space="preserve">
+    <value>GitHub Token</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubToken_Description" xml:space="preserve">
+    <value>Optional. Raises the GitHub API rate limit and allows private repositories. Leave blank for public releases.</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubProxy_GitHub_Proxy" xml:space="preserve">
+    <value>GitHub Proxy</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubProxy_Description" xml:space="preserve">
+    <value>Optional URL prefix for GitHub access, such as a mirror. Leave blank to connect directly.</value>
+  </data>
+  <data name="PluginUpdateTask_Name_Check_Plugin_Updates" xml:space="preserve">
+    <value>Check Plugin Updates</value>
+  </data>
+  <data name="PluginUpdateTask_Description_Checks_GitHub_Releases_and_optionally_updates" xml:space="preserve">
+    <value>Checks the official GitHub Releases and optionally downloads the latest version. Restart Emby after an update.</value>
+  </data>
+  <data name="PluginUpdate_Status_NeverChecked" xml:space="preserve">
+    <value>Not checked yet</value>
+  </data>
+  <data name="PluginUpdate_Status_Summary" xml:space="preserve">
+    <value>Current {0} · Latest {1} · Checked {2}</value>
+  </data>
+  <data name="PluginUpdate_Status_UpToDate" xml:space="preserve">
+    <value>Up to date</value>
+  </data>
+  <data name="PluginUpdate_Status_UpdateAvailable" xml:space="preserve">
+    <value>Update {0} available</value>
+  </data>
+  <data name="PluginUpdate_Status_Updated" xml:space="preserve">
+    <value>Updated to {0}; restart to apply</value>
+  </data>
+  <data name="PluginUpdate_Status_MajorAvailable" xml:space="preserve">
+    <value>New major {0} available; update manually</value>
+  </data>
+  <data name="PluginUpdate_Status_Failed" xml:space="preserve">
+    <value>Update check failed</value>
+  </data>
+  <data name="PluginUpdate_Notify_UpdateAvailable" xml:space="preserve">
+    <value>Plugin update {0} is available.</value>
+  </data>
+  <data name="PluginUpdate_Notify_Updated" xml:space="preserve">
+    <value>Plugin updated to {0}. Restart Emby to apply.</value>
+  </data>
+  <data name="PluginUpdate_Notify_MajorAvailable" xml:space="preserve">
+    <value>A new major version {0} is available. Review the release notes and update manually.</value>
+  </data>
+  <data name="PluginUpdate_Notify_Failed" xml:space="preserve">
+    <value>Plugin update failed: {0}</value>
+  </data>
+  <data name="PluginUpdate_Activity_UpdateAvailable" xml:space="preserve">
+    <value>Plugin update available</value>
+  </data>
+  <data name="PluginUpdate_Activity_Updated" xml:space="preserve">
+    <value>Plugin updated</value>
+  </data>
+  <data name="PluginUpdate_Activity_Failed" xml:space="preserve">
+    <value>Plugin update failed</value>
+  </data>
 </root>

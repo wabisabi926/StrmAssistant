@@ -1832,4 +1832,76 @@
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds_Description" xml:space="preserve">
     <value>范围 30–120，默认 60。</value>
   </data>
+  <data name="PluginUpdateOptions_EditorTitle_Plugin_Update" xml:space="preserve">
+    <value>插件更新</value>
+  </data>
+  <data name="PluginUpdateOptions_CheckUpdate_Check_for_Updates" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="PluginUpdateOptions_AutoDownloadUpdate_Auto_Download_Updates" xml:space="preserve">
+    <value>自动下载更新</value>
+  </data>
+  <data name="PluginUpdateOptions_AutoDownloadUpdate_Description" xml:space="preserve">
+    <value>发现新版本时下载并替换当前插件；仍需重启 Emby 生效。默认关闭。</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubToken_GitHub_Token" xml:space="preserve">
+    <value>GitHub Token</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubToken_Description" xml:space="preserve">
+    <value>可选。提高 GitHub API 限额；私有仓库需要。公开仓库留空即可。</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubProxy_GitHub_Proxy" xml:space="preserve">
+    <value>GitHub 代理</value>
+  </data>
+  <data name="PluginUpdateOptions_GitHubProxy_Description" xml:space="preserve">
+    <value>可选。GitHub 访问加速前缀（如镜像地址），留空直连。</value>
+  </data>
+  <data name="PluginUpdateTask_Name_Check_Plugin_Updates" xml:space="preserve">
+    <value>检查插件更新</value>
+  </data>
+  <data name="PluginUpdateTask_Description_Checks_GitHub_Releases_and_optionally_updates" xml:space="preserve">
+    <value>检查官方 GitHub Release，发现新版本时可自动下载。更新后需重启 Emby。</value>
+  </data>
+  <data name="PluginUpdate_Status_NeverChecked" xml:space="preserve">
+    <value>尚未检查</value>
+  </data>
+  <data name="PluginUpdate_Status_Summary" xml:space="preserve">
+    <value>当前 {0} · 最新 {1} · 检查于 {2}</value>
+  </data>
+  <data name="PluginUpdate_Status_UpToDate" xml:space="preserve">
+    <value>已是最新</value>
+  </data>
+  <data name="PluginUpdate_Status_UpdateAvailable" xml:space="preserve">
+    <value>可更新到 {0}</value>
+  </data>
+  <data name="PluginUpdate_Status_Updated" xml:space="preserve">
+    <value>已更新到 {0}，重启后生效</value>
+  </data>
+  <data name="PluginUpdate_Status_MajorAvailable" xml:space="preserve">
+    <value>发现新 major {0}，请手动升级</value>
+  </data>
+  <data name="PluginUpdate_Status_Failed" xml:space="preserve">
+    <value>检查失败</value>
+  </data>
+  <data name="PluginUpdate_Notify_UpdateAvailable" xml:space="preserve">
+    <value>发现插件更新 {0}。</value>
+  </data>
+  <data name="PluginUpdate_Notify_Updated" xml:space="preserve">
+    <value>插件已更新到 {0}，请重启 Emby 生效。</value>
+  </data>
+  <data name="PluginUpdate_Notify_MajorAvailable" xml:space="preserve">
+    <value>发现新 major {0}，请阅读更新说明后手动升级。</value>
+  </data>
+  <data name="PluginUpdate_Notify_Failed" xml:space="preserve">
+    <value>插件更新失败：{0}</value>
+  </data>
+  <data name="PluginUpdate_Activity_UpdateAvailable" xml:space="preserve">
+    <value>发现插件更新</value>
+  </data>
+  <data name="PluginUpdate_Activity_Updated" xml:space="preserve">
+    <value>插件已更新</value>
+  </data>
+  <data name="PluginUpdate_Activity_Failed" xml:space="preserve">
+    <value>插件更新失败</value>
+  </data>
 </root>

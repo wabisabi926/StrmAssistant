@@ -103,6 +103,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("GeneralOptions_Group_ConfigTransfer", typeof(Resources))]
         public ConfigTransferOptions ConfigTransfer { get; set; } = new ConfigTransferOptions();
 
+        /// <summary>插件更新：检查 GitHub Release，可选自动下载；放在关于之前。</summary>
+        [DisplayNameL("PluginUpdateOptions_EditorTitle_Plugin_Update", typeof(Resources))]
+        public PluginUpdateOptions PluginUpdate { get; set; } = new PluginUpdateOptions();
+
         [DisplayNameL("AboutOptions_EditorTitle_About", typeof(Resources))]
         public AboutOptions AboutOptions { get; set; } = new AboutOptions();
 

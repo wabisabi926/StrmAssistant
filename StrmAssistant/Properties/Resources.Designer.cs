@@ -5580,5 +5580,221 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_AutoDownloadUpdate_Auto_Download_Updates {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_AutoDownloadUpdate_Auto_Download_Updates", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_AutoDownloadUpdate_Description {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_AutoDownloadUpdate_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_CheckUpdate_Check_for_Updates {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_CheckUpdate_Check_for_Updates", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_EditorTitle_Plugin_Update {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_EditorTitle_Plugin_Update", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_GitHubProxy_Description {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_GitHubProxy_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_GitHubProxy_GitHub_Proxy {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_GitHubProxy_GitHub_Proxy", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_GitHubToken_Description {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_GitHubToken_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateOptions_GitHubToken_GitHub_Token {
+            get {
+                return ResourceManager.GetString("PluginUpdateOptions_GitHubToken_GitHub_Token", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateTask_Description_Checks_GitHub_Releases_and_optionally_updates {
+            get {
+                return ResourceManager.GetString("PluginUpdateTask_Description_Checks_GitHub_Releases_and_optionally_updates", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdateTask_Name_Check_Plugin_Updates {
+            get {
+                return ResourceManager.GetString("PluginUpdateTask_Name_Check_Plugin_Updates", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Activity_Failed {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Activity_Failed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Activity_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Activity_UpdateAvailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Activity_Updated {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Activity_Updated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Notify_Failed {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Notify_Failed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Notify_MajorAvailable {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Notify_MajorAvailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Notify_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Notify_UpdateAvailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Notify_Updated {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Notify_Updated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_Failed {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_Failed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_MajorAvailable {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_MajorAvailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_NeverChecked {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_NeverChecked", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_Summary {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_Summary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_UpToDate {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_UpToDate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_UpdateAvailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Status_Updated {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Status_Updated", resourceCulture);
+            }
+        }
+
     }
 }

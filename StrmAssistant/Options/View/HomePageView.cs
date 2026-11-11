@@ -215,6 +215,31 @@ namespace StrmAssistant.Options.View
             {
                 // ignored
             }
+
+            PopulatePluginUpdate();
+        }
+
+        private void PopulatePluginUpdate()
+        {
+            try
+            {
+                var update = PluginUpdateService.Load();
+                var itemStatus = update?.State == PluginUpdateState.Failed
+                    ? ItemStatus.Failed
+                    : update?.State == PluginUpdateState.UpdateAvailable ||
+                      update?.State == PluginUpdateState.Updated ||
+                      update?.State == PluginUpdateState.MajorAvailable
+                        ? ItemStatus.Warning
+                        : ItemStatus.Succeeded;
+
+                PluginOptions.PluginUpdate.UpdateStatus = new StatusItem(
+                    Resources.PluginUpdateOptions_EditorTitle_Plugin_Update,
+                    PluginUpdateService.Summarize(update), itemStatus);
+            }
+            catch
+            {
+                // 状态读取失败不影响设置页
+            }
         }
 
         private static string FormatCount(long count) =>

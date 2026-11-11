@@ -32,6 +32,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 ✅ **Intro/credits marker protection (4.0.0.3)**
 - Media info prefetch, extraction and JSON restore no longer clear existing intro/credits markers
 - Markers are removed only when the user clears them explicitly
+- Fixed online updates failing to locate the current DLL when Emby loads the plugin from memory
 
 ✅ **Online plugin updates (4.0.0.2)**
 - New "Plugin Update" settings group: current/latest version, manual check and auto-download toggle

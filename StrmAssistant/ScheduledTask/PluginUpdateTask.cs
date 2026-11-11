@@ -125,8 +125,8 @@ namespace StrmAssistant.ScheduledTask
                     throw new InvalidOperationException($"Release {latestVersion} 中没有匹配的 DLL 资产");
                 }
 
-                var localDll = Assembly.GetExecutingAssembly().Location;
-                if (string.IsNullOrEmpty(localDll) || !File.Exists(localDll))
+                var localDll = ResolveLocalDll();
+                if (string.IsNullOrEmpty(localDll))
                 {
                     throw new InvalidOperationException("无法定位当前插件 DLL");
                 }
@@ -308,6 +308,43 @@ namespace StrmAssistant.ScheduledTask
             {
                 throw new InvalidOperationException("下载文件版本与 Release 不一致");
             }
+        }
+
+        /// <summary>
+        /// Emby 可能从内存加载插件，Assembly.Location 为空；此时按程序集名在 plugins 目录查找。
+        /// </summary>
+        private static string ResolveLocalDll()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            if (!string.IsNullOrEmpty(assembly.Location) && File.Exists(assembly.Location))
+            {
+                return assembly.Location;
+            }
+
+            var pluginsPath = Plugin.Instance?.ApplicationPaths?.PluginsPath;
+            if (string.IsNullOrEmpty(pluginsPath) || !Directory.Exists(pluginsPath)) return null;
+
+            var assemblyName = assembly.GetName().Name;
+            var preferred = Path.Combine(pluginsPath, assemblyName + ".dll");
+            if (File.Exists(preferred)) return preferred;
+
+            foreach (var file in Directory.EnumerateFiles(pluginsPath, "*.dll"))
+            {
+                try
+                {
+                    if (string.Equals(AssemblyName.GetAssemblyName(file).Name, assemblyName,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return file;
+                    }
+                }
+                catch
+                {
+                    // 非 .NET DLL 或损坏文件，跳过
+                }
+            }
+
+            return null;
         }
 
         private static string WithProxy(string url, string proxy)

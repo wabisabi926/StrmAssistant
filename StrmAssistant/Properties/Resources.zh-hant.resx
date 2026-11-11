@@ -384,34 +384,34 @@
     <value>擷取、備份、恢復共用；留空與媒體檔案同目錄。</value>
   </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
-    <value>清除行為標記</value>
+    <value>清除片頭片尾標記</value>
   </data>
   <data name="ExtractIntroFingerprintTask_Name_Extract_Intro_Fingerprint" xml:space="preserve">
-    <value>擷取片頭聲紋</value>
+    <value>偵測片頭指紋</value>
   </data>
   <data name="ExtractIntroFingerprintTask_Description_Extracts_intro_fingerprint_from_episodes" xml:space="preserve">
-    <value>預先擷取劇集片頭聲紋供片頭偵測後處理</value>
+    <value>擷取劇集聲紋並偵測片頭，寫入片頭標記；不處理片尾；依“指紋偵測媒體庫”範圍執行。</value>
   </data>
   <data name="ExtractMediaInfoTask_Name_Extract_MediaInfo" xml:space="preserve">
-    <value>擷取媒體訊息</value>
+    <value>擷取媒體資訊</value>
   </data>
   <data name="ExtractMediaInfoTask_Description_Extracts_media_info_from_videos_and_audios" xml:space="preserve">
     <value>提取視訊和音訊的媒體訊息，以及視訊截圖</value>
   </data>
   <data name="PersistMediaInfoTask_Name_Persist_MediaInfo" xml:space="preserve">
-    <value>備份媒體訊息</value>
+    <value>備份媒體資訊</value>
   </data>
   <data name="PersistMediaInfoTask_Description_Persists_media_info_to_json_file" xml:space="preserve">
     <value>全庫匯出/刷新已有媒體訊息的 JSON（不含媒體檔案），不探測媒體。</value>
   </data>
   <data name="RestoreMediaInfoTask_Name_Restore_MediaInfo" xml:space="preserve">
-    <value>恢復媒體訊息</value>
+    <value>恢復媒體資訊</value>
   </data>
   <data name="RestoreMediaInfoTask_Description_Restores_media_info_from_JSON_file" xml:space="preserve">
     <value>從 JSON 恢復 DB 缺失的媒體訊息、章節和縮圖；不覆蓋已有媒體訊息。</value>
   </data>
   <data name="RefreshPersonTask_Name_Refresh_Chinese_Actor" xml:space="preserve">
-    <value>刷新演員訊息</value>
+    <value>刷新演員資訊</value>
   </data>
   <data name="RefreshPersonTask_Description_Refreshes_and_repairs_Chinese_actors" xml:space="preserve">
     <value>刷新和修復演員訊息，盡可能獲取中文及頭像</value>
@@ -522,19 +522,19 @@
     <value>所選來源無可用評分時清空原有社群評分，條目將顯示為無評分。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now" xml:space="preserve">
-    <value>立即同步社群評分</value>
+    <value>立即統一社群評分</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
-    <value>依目前來源同步全庫 CommunityRating。請先儲存設定；可在「計畫任務」中設定定期觸發器。</value>
+    <value>依目前來源統一全庫社群評分。請先儲存設定；可在“計畫任務”中設定定期觸發器。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
     <value>豆瓣評分優先取自已比對的豆瓣條目，缺失時依 IMDb ID 查詢第三方介面。查詢失敗時保持原評分。繼續？</value>
   </data>
   <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
-    <value>同步社群評分</value>
+    <value>統一社群評分</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
-    <value>依所選來源同步全庫電影與劇集的社群評分。預設無觸發器，可在計畫任務中依需啟用。</value>
+    <value>依所選來源統一全庫電影與劇集的社群評分。預設無觸發器，可在計畫任務中依需啟用。</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
     <value>豆瓣增強</value>
@@ -954,7 +954,7 @@
     <value>修正外掛音軌與字幕上無法辨識的語言標記，讓 Emby 內建的語言偏好能正確比對；簡體與繁體顯示在軌道標題中。預設關閉。</value>
   </data>
   <data name="NormalizeTrackLanguageTask_Name_Normalize_Track_Language" xml:space="preserve">
-    <value>規範化音軌字幕語言</value>
+    <value>規範音軌字幕語言</value>
   </data>
   <data name="NormalizeTrackLanguageTask_Description_Fix_language_tags_on_external_audio_and_subtitles" xml:space="preserve">
     <value>修正外掛音軌與字幕的語言標記</value>
@@ -963,19 +963,19 @@
     <value>語言標記規範化完成：檢查 {0} 個項目，修正 {1} 個項目 / {2} 條軌道</value>
   </data>
   <data name="Health_Button_Run" xml:space="preserve">
-    <value>立即體檢</value>
+    <value>立即檢查片源</value>
   </data>
   <data name="Health_Button_Export" xml:space="preserve">
-    <value>匯出體檢報告</value>
+    <value>匯出檢查報告</value>
   </data>
   <data name="Health_Status_Caption" xml:space="preserve">
-    <value>片源體檢</value>
+    <value>片源檢查</value>
   </data>
   <data name="Health_Status_Empty" xml:space="preserve">
-    <value>尚未體檢</value>
+    <value>尚未檢查</value>
   </data>
   <data name="Health_Status_Summary" xml:space="preserve">
-    <value>上次體檢 {0} · 嚴重 {1} / 警告 {2} / 提示 {3}</value>
+    <value>上次檢查 {0} · 嚴重 {1} / 警告 {2} / 提示 {3}</value>
   </data>
   <data name="Health_Severity_Critical" xml:space="preserve">
     <value>嚴重</value>
@@ -987,13 +987,13 @@
     <value>提示</value>
   </data>
   <data name="Health_Notify_Completed" xml:space="preserve">
-    <value>體檢完成：嚴重 {0} / 警告 {1} / 提示 {2}，跳過 {3} 個無媒體資訊，報告：{4}</value>
+    <value>檢查完成：嚴重 {0} / 警告 {1} / 提示 {2}，跳過 {3} 個無媒體資訊，報告：{4}</value>
   </data>
   <data name="Health_Notify_NoData" xml:space="preserve">
-    <value>沒有可用的媒體資訊，請先執行「提取媒體資訊」</value>
+    <value>沒有可用的媒體資訊，請先執行“提取媒體資訊”</value>
   </data>
   <data name="Health_Notify_WriteFailed" xml:space="preserve">
-    <value>體檢報告寫入失敗，詳見日誌</value>
+    <value>檢查報告寫入失敗，詳見日誌</value>
   </data>
   <data name="Health_Notify_Exported" xml:space="preserve">
     <value>報告：{0}</value>
@@ -1032,7 +1032,7 @@
     <value>有 {0} 條外掛字幕語言未辨識</value>
   </data>
   <data name="MediaHealthCheckTask_Name_Media_Health_Check" xml:space="preserve">
-    <value>片源體檢</value>
+    <value>檢查片源</value>
   </data>
   <data name="MediaHealthCheckTask_Description_Scan_media_info_for_declaration_mismatches" xml:space="preserve">
     <value>交叉比對檔名宣稱與已提取的媒體資訊（唯讀）</value>
@@ -1128,10 +1128,10 @@
     <value>依序嘗試；預設 IntroDb,Tidb，兩者始終都會嘗試，此項只調整順序。</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
-    <value>刮削片頭片尾（外部片頭庫）</value>
+    <value>刮削片頭片尾</value>
   </data>
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
-    <value>從 IntroDb / TheIntroDB 為缺失片頭片尾標記的劇集和電影補全標記，依設定的資料源順序嘗試，不覆蓋其他來源的標記。建議先在網站確認有資料再執行。</value>
+    <value>依“刮削媒體庫”範圍為缺失片頭片尾標記的劇集補齊標記，依來源順序嘗試，不覆蓋其他來源；可選包含電影。建議先在網站確認有資料再執行。</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
     <value>裁剪為 16:9</value>
@@ -1434,7 +1434,7 @@
     <value>刪除人員資料</value>
   </data>
   <data name="ExtractVideoThumbnailTask_Name_Extract_Video_Thumbnail" xml:space="preserve">
-    <value>提取影片預覽縮圖</value>
+    <value>擷取影片縮圖</value>
   </data>
   <data name="MergeMultiVersionTask_Name_Merge_Multi_Versions" xml:space="preserve">
     <value>合併多版本</value>
@@ -1446,7 +1446,7 @@
     <value>同步電影、劇集與季的豆瓣資料：比對豆瓣 ID、快取條目，並依勾選套用評分、簡介、演員、海報與影評人評分。來源為豆瓣時同步寫入主評分。</value>
   </data>
   <data name="RefreshEpisodeTask_Name_Refresh_Episode" xml:space="preserve">
-    <value>重新整理劇集中繼資料</value>
+    <value>刷新劇集中繼資料</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionScope" xml:space="preserve">
     <value>擷取範圍</value>
@@ -1641,16 +1641,16 @@
     <value>各媒體庫內記錄播放進度</value>
   </data>
   <data name="ExperienceEnhanceOptions_LibraryScopePlayProgress_Description" xml:space="preserve">
-    <value>多庫重複條目分別記錄進度與收藏。切換後需重啟並執行「重建按庫播放進度索引」；各模式進度互不可見。預設關閉。</value>
+    <value>多庫重複條目分別記錄進度與收藏。切換後需重啟並執行“重建播放進度索引”；各模式進度互不可見。預設關閉。</value>
   </data>
   <data name="RebuildUserDataKeysTask_Name_Rebuild_Play_Progress_Keys" xml:space="preserve">
-    <value>重建按庫播放進度索引</value>
+    <value>重建播放進度索引</value>
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
-    <value>按目前開關重算並落庫每個電影、劇集、季與單集的按庫播放進度索引。切換「各媒體庫內記錄播放進度」並重啟 Emby 後執行一次；關閉開關後執行可還原原狀態。</value>
+    <value>按目前開關重算並落庫每個電影、劇集、季與單集的按庫播放進度索引。切換“各媒體庫內記錄播放進度”並重啟 Emby 後執行一次；關閉開關後執行可還原原狀態。</value>
   </data>
   <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
-    <value>清理過期中繼資料快取</value>
+    <value>清理中繼資料快取</value>
   </data>
   <data name="CleanupMetadataCacheTask_Description_Delete_expired_passive_cache_files__override_and_patches_are_kept" xml:space="preserve">
     <value>刪除超過有效期的被動快取檔案，保留 override 與 patches。快取有效期設為 0 時不執行。</value>
@@ -1722,7 +1722,7 @@
     <value>常用任務</value>
   </data>
   <data name="ScheduledTasks_Button_Rebuild_Keys" xml:space="preserve">
-    <value>重建按庫播放進度索引</value>
+    <value>重建播放進度索引</value>
   </data>
   <data name="ScheduledTasks_Button_Extract_MediaInfo" xml:space="preserve">
     <value>擷取媒體資訊</value>
@@ -1731,7 +1731,7 @@
     <value>合併多版本</value>
   </data>
   <data name="ScheduledTasks_Button_Refresh_Episodes" xml:space="preserve">
-    <value>重新整理劇集中繼資料</value>
+    <value>刷新劇集中繼資料</value>
   </data>
   <data name="Overview_Status_Caption" xml:space="preserve">
     <value>執行概覽</value>

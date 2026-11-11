@@ -108,6 +108,7 @@ namespace StrmAssistant.Common
                 chapters.Sort((c1, c2) => c1.StartPositionTicks.CompareTo(c2.StartPositionTicks));
 
                 _itemRepository.SaveChapters(episode.InternalId, chapters);
+                IntroMarkerNotifier.Notify(episode);
             }
 
             _logger.Info("Intro marker updated by " + session.UserName + " for " +
@@ -143,6 +144,7 @@ namespace StrmAssistant.Common
                         chapters.Sort((c1, c2) => c1.StartPositionTicks.CompareTo(c2.StartPositionTicks));
 
                         _itemRepository.SaveChapters(episode.InternalId, chapters);
+                        IntroMarkerNotifier.Notify(episode);
                     }
                 }
             }
@@ -261,6 +263,7 @@ namespace StrmAssistant.Common
             {
                 chapters.Sort((c1, c2) => c1.StartPositionTicks.CompareTo(c2.StartPositionTicks));
                 _itemRepository.SaveChapters(item.InternalId, chapters);
+                IntroMarkerNotifier.Notify(item);
             }
 
             return changed;
@@ -389,6 +392,8 @@ namespace StrmAssistant.Common
             {
                 StrmAssistant.Mod.ChapterChangeTracker.ClearBypass();
             }
+
+            IntroMarkerNotifier.Notify(item);
         }
 
         public void ClearChapterImages(BaseItem item)
@@ -734,6 +739,7 @@ namespace StrmAssistant.Common
                             chapters.Add(introEnd);
                             chapters.Sort((c1, c2) => c1.StartPositionTicks.CompareTo(c2.StartPositionTicks));
                             _itemRepository.SaveChapters(episode.InternalId, chapters);
+                            IntroMarkerNotifier.Notify(episode);
                             _logger.Info("Intro marker updated for " + episode.Path);
                         }
                     }
@@ -767,6 +773,7 @@ namespace StrmAssistant.Common
                                         chapters.Add(creditsStart);
                                         chapters.Sort((c1, c2) => c1.StartPositionTicks.CompareTo(c2.StartPositionTicks));
                                         _itemRepository.SaveChapters(episode.InternalId, chapters);
+                                        IntroMarkerNotifier.Notify(episode);
                                         _logger.Info("Credits marker updated for " + episode.Path);
                                     }
                                 }

@@ -670,6 +670,9 @@ namespace StrmAssistant
 
         private void OnItemUpdated(object sender, ItemChangeEventArgs e)
         {
+            // 标记写入后的内部条目更新只用于通知客户端，不触发插件的元数据更新通知
+            if (IntroMarkerNotifier.IsMarkerUpdate) return;
+
             if (MetadataEnhanceStore.GetOptions().PersonEnhance.EnhanceMovieDbPerson &&
                 (e.UpdateReason & (ItemUpdateType.MetadataDownload | ItemUpdateType.MetadataImport)) != 0)
             {

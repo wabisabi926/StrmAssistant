@@ -182,6 +182,22 @@ namespace StrmAssistant.Common
         }
 
         /// <summary>
+        /// 把 IntroDb 的毫秒时间换算为 Emby ticks；缺少结束时间时用片长补足，并限制不超过片长。
+        /// </summary>
+        internal static (long StartTicks, long EndTicks) GetIntroMarkerTicks(
+            IntroDbApi.IntroDbSegment segment, long? runtimeTicks)
+        {
+            var startTicks = (segment.start_ms ?? 0) * TimeSpan.TicksPerMillisecond;
+            var endTicks = segment.end_ms.HasValue
+                ? segment.end_ms.Value * TimeSpan.TicksPerMillisecond
+                : runtimeTicks ?? startTicks;
+
+            if (runtimeTicks.HasValue && endTicks > runtimeTicks.Value) endTicks = runtimeTicks.Value;
+
+            return (startTicks, endTicks);
+        }
+
+        /// <summary>
         /// 写入 IntroDb 刮削的片头/片尾标记：仅填充缺失（不覆盖探测或其他来源），
         /// 自身上一轮的 #DB 标记允许更新。返回是否发生写入。
         /// </summary>
@@ -203,10 +219,7 @@ namespace StrmAssistant.Common
 
                 if (!hasExternalIntro)
                 {
-                    var introStartTicks = (introSegment.start_ms ?? 0) * TimeSpan.TicksPerMillisecond;
-                    var introEndTicks = (introSegment.end_ms ?? runtime) ?? introStartTicks;
-
-                    if (runtime.HasValue && introEndTicks > runtime.Value) introEndTicks = runtime.Value;
+                    var (introStartTicks, introEndTicks) = GetIntroMarkerTicks(introSegment, runtime);
 
                     if (introEndTicks > introStartTicks)
                     {

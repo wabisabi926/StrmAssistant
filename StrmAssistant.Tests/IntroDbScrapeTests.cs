@@ -62,5 +62,48 @@ namespace StrmAssistant.Tests
 
             Assert.Null(ChapterApi.PickLongestSegment(segments));
         }
+
+        [Fact]
+        public void GetIntroMarkerTicks_ConvertsStartAndEndMilliseconds()
+        {
+            var segment = new IntroDbApi.IntroDbSegment { start_ms = 0, end_ms = 51849 };
+
+            var (start, end) = ChapterApi.GetIntroMarkerTicks(segment, null);
+
+            Assert.Equal(0, start);
+            Assert.Equal(518_490_000, end);
+        }
+
+        [Fact]
+        public void GetIntroMarkerTicks_UsesRuntimeWhenEndMissing()
+        {
+            var segment = new IntroDbApi.IntroDbSegment { start_ms = 1000, end_ms = null };
+
+            var (start, end) = ChapterApi.GetIntroMarkerTicks(segment, 1_000_000_000);
+
+            Assert.Equal(10_000_000, start);
+            Assert.Equal(1_000_000_000, end);
+        }
+
+        [Fact]
+        public void GetIntroMarkerTicks_ClampsEndToRuntime()
+        {
+            var segment = new IntroDbApi.IntroDbSegment { start_ms = 0, end_ms = 60000 };
+
+            var (_, end) = ChapterApi.GetIntroMarkerTicks(segment, 50_000_000);
+
+            Assert.Equal(50_000_000, end);
+        }
+
+        [Fact]
+        public void GetIntroMarkerTicks_MovieEndOnlyStartsAtZero()
+        {
+            var segment = new IntroDbApi.IntroDbSegment { start_ms = null, end_ms = 90000 };
+
+            var (start, end) = ChapterApi.GetIntroMarkerTicks(segment, null);
+
+            Assert.Equal(0, start);
+            Assert.Equal(900_000_000, end);
+        }
     }
 }

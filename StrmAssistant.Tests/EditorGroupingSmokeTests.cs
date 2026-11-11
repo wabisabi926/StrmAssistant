@@ -81,10 +81,10 @@ namespace StrmAssistant.Tests
 
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
-            // 顺序：提取范围 → 提取时机 → 存储与截图 → ISO 与 HDR → 提取优化
+            // 顺序：提取范围 → 提取时机 → 提取优化 → 存储与截图 → ISO 与 HDR
             Assert.Equal(
-                new[] { "ExtractionScope", "AutoOnDemand", "StorageCapture",
-                        "IsoHdr", "ExtractionPerformance" },
+                new[] { "ExtractionScope", "AutoOnDemand", "ExtractionPerformance",
+                        "StorageCapture", "IsoHdr" },
                 groups.Select(g => g.Name).ToArray());
 
             // 不再有运行时合并组

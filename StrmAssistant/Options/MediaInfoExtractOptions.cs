@@ -102,12 +102,12 @@ namespace StrmAssistant.Options
                         "ExtractionScope", "ExtractionScope"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_AutoOnDemand,
                         "AutoOnDemand", "AutoCatchup", "OnDemand"),
+                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionPerformance,
+                        "ExtractionPerformance", "ExtractionPerformance"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_StorageCapture,
                         "StorageCapture", "MediaInfoPersist", "ImageCapture"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_IsoHdr,
-                        "IsoHdr", "HdrTagging", "IsoTool"),
-                    new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_ExtractionPerformance,
-                        "ExtractionPerformance", "ExtractionPerformance"));
+                        "IsoHdr", "HdrTagging", "IsoTool"));
             }
 
             return container;

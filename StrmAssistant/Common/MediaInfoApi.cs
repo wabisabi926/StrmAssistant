@@ -716,15 +716,7 @@ namespace StrmAssistant.Common
                         chapters.Sort((c1, c2) => c1.StartPositionTicks.CompareTo(c2.StartPositionTicks));
 
                         ChapterChangeTracker.BypassInstance(item);
-                        IntroMarkerProtector.BypassInstance(item);
-                        try
-                        {
-                            _itemRepository.SaveChapters(item.InternalId, chapters);
-                        }
-                        finally
-                        {
-                            IntroMarkerProtector.ClearBypass();
-                        }
+                        _itemRepository.SaveChapters(item.InternalId, chapters);
 
                         _logger.Info("ChapterInfoPersist - Deserialization Success (" + source + "): " + mediaInfoJsonPath);
 
@@ -775,15 +767,7 @@ namespace StrmAssistant.Common
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            IntroMarkerProtector.BypassInstance(item);
-            try
-            {
-                _itemRepository.SaveChapters(item.InternalId, true, chapters);
-            }
-            finally
-            {
-                IntroMarkerProtector.ClearBypass();
-            }
+            _itemRepository.SaveChapters(item.InternalId, true, chapters);
 
             return thumbnailResult;
         }

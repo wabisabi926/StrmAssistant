@@ -1584,7 +1584,7 @@
     <value>記憶體管理</value>
   </data>
   <data name="GeneralOptions_Group_ConfigTransfer" xml:space="preserve">
-    <value>配置備份與恢復</value>
+    <value>備份與恢復</value>
   </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
     <value>維護工具</value>
@@ -1756,6 +1756,18 @@
   </data>
   <data name="Overview_Status_Caption" xml:space="preserve">
     <value>執行概覽</value>
+  </data>
+  <data name="Health_Status_Normal" xml:space="preserve">
+    <value>正常</value>
+  </data>
+  <data name="Overview_Status_Health" xml:space="preserve">
+    <value>　· 片源：{0}</value>
+  </data>
+  <data name="Overview_Status_HealthCritical" xml:space="preserve">
+    <value>{0} 嚴重</value>
+  </data>
+  <data name="Overview_Status_HealthWarning" xml:space="preserve">
+    <value>{0} 警告</value>
   </data>
   <data name="Overview_Status_Text" xml:space="preserve">
     <value>記憶體 {0}/{1} MB（{2}%）· 任務 {3} · 佇列 {4} · 索引 {5} · 最近掃描 {6}</value>

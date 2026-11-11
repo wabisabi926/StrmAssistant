@@ -61,14 +61,6 @@ namespace StrmAssistant.Options
         [DisplayNameL("ModOptions_Group_ChineseSearch", typeof(Resources))]
         public ChineseSearchOptions ChineseSearch { get; set; } = new ChineseSearchOptions();
 
-        /// <summary>
-        /// 计划任务：插件自己的任务清单，每行可直接执行（含上次耗时/状态）。
-        /// 放在日常设置之后、性能参数之前。
-        /// </summary>
-        [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
-        public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
-
-
         // ---- 分组直接挂在页面根上（不再套 GeneralOptions / ModOptions 两层容器）----
         // 之前的结构是「任务与内存 → 任务并发 → 6 项」，三层嵌套只为一个标题；
         // 拍平后变成「任务并发 → 6 项」，页面层级从 3 层降到 2 层。
@@ -79,9 +71,12 @@ namespace StrmAssistant.Options
         [DisplayNameL("GeneralOptions_Group_Memory", typeof(Resources))]
         public MemoryOptions Memory { get; set; } = new MemoryOptions();
 
-        /// <summary>配置迁移：导出/导入与维护操作分离。</summary>
-        [DisplayNameL("GeneralOptions_Group_ConfigTransfer", typeof(Resources))]
-        public ConfigTransferOptions ConfigTransfer { get; set; } = new ConfigTransferOptions();
+        /// <summary>
+        /// 常用任务：插件自己的任务快捷入口，每行可直接执行（含上次耗时/状态）。
+        /// 放在日常设置之后、维护与备份之前。
+        /// </summary>
+        [DisplayNameL("ScheduledTasks_EditorTitle_Scheduled_Tasks", typeof(Resources))]
+        public ScheduledTasksOptions ScheduledTasks { get; set; } = new ScheduledTasksOptions();
 
         /// <summary>
         /// 旧版容器，仅用于把已存在的配置读进来后拍平（见 <c>Plugin.Initialize</c> 的 FlattenOptions）。
@@ -97,12 +92,16 @@ namespace StrmAssistant.Options
 
 
         /// <summary>
-        /// 运行状态与维护（只读状态 + 清内存/重建索引/优化索引/重启）。
-        /// 挂在页面末尾：按「危险操作居末」的约定，重启服务器这类按钮不应夹在配置项中间。
+        /// 运行状态与维护（清内存/重建索引/优化索引/重启）。
+        /// 放在常用任务之后、备份与恢复之前；重启服务器等危险操作保持在组内末尾。
         /// 该组没有用户配置（列表是运行时生成的），所以搬家不需要配置迁移。
         /// </summary>
         [DisplayNameL("GeneralOptions_Group_RuntimeStatus", typeof(Resources))]
         public RuntimeStatusOptions RuntimeStatus { get; set; } = new RuntimeStatusOptions();
+
+        /// <summary>备份与恢复：配置导出/导入，放在维护工具之后、关于之前。</summary>
+        [DisplayNameL("GeneralOptions_Group_ConfigTransfer", typeof(Resources))]
+        public ConfigTransferOptions ConfigTransfer { get; set; } = new ConfigTransferOptions();
 
         [DisplayNameL("AboutOptions_EditorTitle_About", typeof(Resources))]
         public AboutOptions AboutOptions { get; set; } = new AboutOptions();

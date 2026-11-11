@@ -29,11 +29,19 @@ namespace StrmAssistant.Tests
             Assert.True(NameOrId(items[enableIndex + 1], "CatchupMode"));
 
             var chineseIndex = items.FindIndex(i => NameOrId(i, "ChineseSearch"));
-            var tasksIndex = items.FindIndex(i => NameOrId(i, "ScheduledTasks"));
             var concurrencyIndex = items.FindIndex(i => NameOrId(i, "TaskConcurrency"));
+            var memoryIndex = items.FindIndex(i => NameOrId(i, "Memory"));
+            var tasksIndex = items.FindIndex(i => NameOrId(i, "ScheduledTasks"));
+            var runtimeIndex = items.FindIndex(i => NameOrId(i, "RuntimeStatus"));
+            var configIndex = items.FindIndex(i => NameOrId(i, "ConfigTransfer"));
+            var aboutIndex = items.FindIndex(i => NameOrId(i, "AboutOptions"));
             Assert.True(chineseIndex > enableIndex);
-            Assert.True(tasksIndex > chineseIndex);
-            Assert.True(concurrencyIndex > tasksIndex);
+            Assert.True(concurrencyIndex > chineseIndex);
+            Assert.True(memoryIndex > concurrencyIndex);
+            Assert.True(tasksIndex > memoryIndex);
+            Assert.True(runtimeIndex > tasksIndex);
+            Assert.True(configIndex > runtimeIndex);
+            Assert.True(aboutIndex > configIndex);
 
             var concurrency = items.OfType<EditorGroup>()
                 .FirstOrDefault(g => NameOrId(g, "TaskConcurrency"));
@@ -148,25 +156,21 @@ namespace StrmAssistant.Tests
         }
 
         [Fact]
-        public void RuntimeStatus_ContainsHealthStatusAndButtons()
+        public void RuntimeStatus_ContainsHealthActionButtons()
         {
-            // 片源体检的摘要行是项目里第一次把 StatusItem 放进子组。
-            // Emby 的 IsCompoundEditorType(StatusItem)=true，会走 CreateEditorStatusItem 生成
-            // EditorStatusItem（EditorBase），因此与根级状态行走同一条渲染路径。
+            // 片源体检摘要已并入根级「运行概览」，维护工具组只保留操作按钮。
             var container = (EditObjectContainer)new PluginOptions().CreateEditContainer();
             var runtime = container.EditorRoot.EditorItems.OfType<EditorGroup>()
                 .FirstOrDefault(g => NameOrId(g, "RuntimeStatus"));
 
             Assert.NotNull(runtime);
+            Assert.Empty(runtime.EditorItems.OfType<EditorStatusItem>());
 
-            // 状态项：Emby 会把子组里的 StatusItem 转成 EditorStatusItem（与根级同一路径）
-            Assert.Single(runtime.EditorItems.OfType<EditorStatusItem>());
-
-            // 按钮：连续的 ButtonItem 会被合并进同一个 EditorButtonGroup，
-            // 组内应包含「校验元数据缓存」+「立即体检」+「导出体检报告」三个
+            // 连续的 ButtonItem 会被合并进同一个 EditorButtonGroup：
+            // 校验元数据缓存 + 立即体检 + 导出体检报告 + 清内存 + 重建索引 + 清缓存 + 优化索引 + 重启
             var buttonGroup = runtime.EditorItems.OfType<EditorButtonGroup>().FirstOrDefault();
             Assert.NotNull(buttonGroup);
-            Assert.Equal(3, buttonGroup.EditorItems.Count());
+            Assert.Equal(8, buttonGroup.EditorItems.Count());
         }
 
         private static bool NameOrId(EditorBase editor, string name)

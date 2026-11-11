@@ -44,9 +44,6 @@ namespace StrmAssistant.Options
                 Icon = IconNames.queue, Data1 = "ExportMediaHealth"
             };
 
-        /// <summary>上次体检摘要（只读），由 HomePageView.PopulateOverview 填充。</summary>
-        public StatusItem MediaHealthStatus { get; set; } = new StatusItem();
-
         public ButtonItem CleanMemoryNowButton =>
             new ButtonItem(Resources.GeneralOptions_CleanMemoryNow_Clean_Memory_Now)
             {

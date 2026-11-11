@@ -1671,7 +1671,7 @@
     <value>Memory</value>
   </data>
   <data name="GeneralOptions_Group_ConfigTransfer" xml:space="preserve">
-    <value>Config Backup &amp; Restore</value>
+    <value>Backup &amp; Restore</value>
   </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
     <value>Maintenance</value>
@@ -1843,6 +1843,18 @@
   </data>
   <data name="Overview_Status_Caption" xml:space="preserve">
     <value>Runtime Overview</value>
+  </data>
+  <data name="Health_Status_Normal" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Overview_Status_Health" xml:space="preserve">
+    <value> · Media: {0}</value>
+  </data>
+  <data name="Overview_Status_HealthCritical" xml:space="preserve">
+    <value>{0} critical</value>
+  </data>
+  <data name="Overview_Status_HealthWarning" xml:space="preserve">
+    <value>{0} warning</value>
   </data>
   <data name="Overview_Status_Text" xml:space="preserve">
     <value>Memory {0}/{1} MB ({2}%) · tasks {3} · queue {4} · index {5} · last scan {6}</value>

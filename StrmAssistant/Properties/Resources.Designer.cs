@@ -5544,5 +5544,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Health_Status_Normal {
+            get {
+                return ResourceManager.GetString("Health_Status_Normal", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_Health {
+            get {
+                return ResourceManager.GetString("Overview_Status_Health", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_HealthCritical {
+            get {
+                return ResourceManager.GetString("Overview_Status_HealthCritical", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string Overview_Status_HealthWarning {
+            get {
+                return ResourceManager.GetString("Overview_Status_HealthWarning", resourceCulture);
+            }
+        }
+
     }
 }

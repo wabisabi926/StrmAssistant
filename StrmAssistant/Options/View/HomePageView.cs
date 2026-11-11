@@ -92,7 +92,7 @@ namespace StrmAssistant.Options.View
                 $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {message}", 8000);
 
         /// <summary>
-        /// 刷新「运行概览」状态条：内存 / 任务 / 队列 / 索引，异常时追加冲突插件与重启倒计时。
+        /// 刷新「运行概览」状态条：内存 / 任务 / 队列 / 索引 / 片源检查，异常时追加冲突插件与重启倒计时。
         /// 只占一行，放在品牌之下、总开关之上。
         /// </summary>
         private void PopulateOverview()
@@ -151,10 +151,29 @@ namespace StrmAssistant.Options.View
                     ? FormatLastScan(lastScan.Value)
                     : Resources.Overview_Status_None;
 
+                MediaHealthReport healthReport = null;
+                try
+                {
+                    healthReport = MediaHealthService.Load();
+                }
+                catch
+                {
+                    // 状态摘要读取失败不影响运行概览
+                }
+
+                var healthText = healthReport == null
+                    ? Resources.Health_Status_Empty
+                    : healthReport.Critical > 0
+                        ? string.Format(Resources.Overview_Status_HealthCritical, healthReport.Critical)
+                        : healthReport.Warning > 0
+                            ? string.Format(Resources.Overview_Status_HealthWarning, healthReport.Warning)
+                            : Resources.Health_Status_Normal;
+
                 var conflicts = ConflictDetector.GetConflictingAssemblies();
 
                 var text = string.Format(Resources.Overview_Status_Text,
                     workingSetMb, threshold, percent, runningTasks, queueText, indexText, lastScanText);
+                text += string.Format(Resources.Overview_Status_Health, healthText);
 
                 if (conflicts.Length > 0)
                 {
@@ -180,41 +199,21 @@ namespace StrmAssistant.Options.View
                         ? ItemStatus.Warning
                         : ItemStatus.Succeeded;
 
+                if (healthReport?.Critical > 0)
+                {
+                    status = ItemStatus.Failed;
+                }
+                else if (healthReport?.Warning > 0 && status != ItemStatus.Failed)
+                {
+                    status = ItemStatus.Warning;
+                }
+
                 PluginOptions.OverviewStatus = new StatusItem(
                     Resources.Overview_Status_Caption, text, status);
             }
             catch (Exception)
             {
                 // ignored
-            }
-
-            PopulateMediaHealth();
-        }
-
-        /// <summary>
-        /// 片源体检摘要：只读上次报告文件，不触发任何扫描。
-        /// 任务在后台跑完后不会自动刷新页面，管理员点「刷新状态」或重开设置页即可看到最新结果。
-        /// </summary>
-        private void PopulateMediaHealth()
-        {
-            try
-            {
-                var report = MediaHealthService.Load();
-
-                var status = report == null
-                    ? ItemStatus.Succeeded
-                    : report.Critical > 0
-                        ? ItemStatus.Failed
-                        : report.Warning > 0
-                            ? ItemStatus.Warning
-                            : ItemStatus.Succeeded;
-
-                PluginOptions.RuntimeStatus.MediaHealthStatus = new StatusItem(
-                    Resources.Health_Status_Caption, MediaHealthService.BuildSummary(report), status);
-            }
-            catch
-            {
-                // 状态行失败不得影响设置页
             }
         }
 

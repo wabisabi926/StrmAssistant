@@ -167,13 +167,15 @@ namespace StrmAssistant.Common
         /// <summary>
         /// 多人提交时取时长最长的片段（社区数据里最长的通常是完整片头/片尾）。
         /// </summary>
-        private static IntroDbApi.IntroDbSegment PickLongestSegment(List<IntroDbApi.IntroDbSegment> segments)
+        internal static IntroDbApi.IntroDbSegment PickLongestSegment(List<IntroDbApi.IntroDbSegment> segments)
         {
             if (segments == null || segments.Count == 0) return null;
 
+            // TheIntroDB 的电影 intro 常只给 end_ms（start_ms=null），按起点 0 处理；
+            // 两端都缺的片段无法定位，直接丢弃。
             return segments
-                .Where(s => s.start_ms.HasValue)
-                .OrderByDescending(s => ((s.end_ms ?? s.start_ms) ?? 0) - s.start_ms.Value)
+                .Where(s => s.start_ms.HasValue || s.end_ms.HasValue)
+                .OrderByDescending(s => (s.end_ms ?? 0) - (s.start_ms ?? 0))
                 .FirstOrDefault();
         }
 

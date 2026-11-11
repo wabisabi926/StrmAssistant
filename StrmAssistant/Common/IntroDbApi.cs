@@ -46,6 +46,11 @@ namespace StrmAssistant.Common
         {
             public List<IntroDbSegment> intro { get; set; }
             public List<IntroDbSegment> credits { get; set; }
+
+            /// <summary>IntroDb（introdb.app）的片尾字段名是 outro；TheIntroDB 用 credits。</summary>
+            public List<IntroDbSegment> outro { get; set; }
+
+            public List<IntroDbSegment> EffectiveCredits => credits ?? outro;
         }
 
         private readonly IHttpClient _httpClient;
@@ -123,19 +128,25 @@ namespace StrmAssistant.Common
             var providers = ParseUnifiedProviders(
                 Plugin.Instance.IntroSkipStore.GetOptions().Scrape.UnifiedIntroDbProviders);
 
+            IntroDbMedia merged = null;
+
             foreach (var provider in providers)
             {
                 var data = await QueryProviderAsync(provider, tmdbId, imdbId, durationMs, season, episode,
                     cancellationToken).ConfigureAwait(false);
 
-                if (data != null &&
-                    ((data.intro?.Count ?? 0) > 0 || (data.credits?.Count ?? 0) > 0))
-                {
-                    return data;
-                }
+                var hasIntro = (data?.intro?.Count ?? 0) > 0;
+                var hasCredits = (data?.EffectiveCredits?.Count ?? 0) > 0;
+                if (!hasIntro && !hasCredits) continue;
+
+                merged ??= new IntroDbMedia();
+                if ((merged.intro?.Count ?? 0) == 0 && hasIntro) merged.intro = data.intro;
+                if ((merged.EffectiveCredits?.Count ?? 0) == 0 && hasCredits) merged.credits = data.EffectiveCredits;
+
+                if ((merged.intro?.Count ?? 0) > 0 && (merged.EffectiveCredits?.Count ?? 0) > 0) break;
             }
 
-            return null;
+            return merged;
         }
 
         private static List<string> ParseUnifiedProviders(string raw)
@@ -172,7 +183,7 @@ namespace StrmAssistant.Common
                 apiKey = Plugin.Instance.IntroSkipStore.GetOptions().Scrape.IntroDbApiKey;
                 url = season.HasValue && episode.HasValue
                     ? $"{IntroDbAppBaseUrl}/segments?imdb_id={Uri.EscapeDataString(imdbId)}&season={season.Value}&episode={episode.Value}"
-                    : $"{IntroDbAppBaseUrl}/segments?imdb_id={Uri.EscapeDataString(imdbId)}";
+                    : $"{IntroDbAppBaseUrl}/segments?imdb_id={Uri.EscapeDataString(imdbId)}&is_movie=true";
             }
             else
             {
@@ -365,7 +376,7 @@ namespace StrmAssistant.Common
 
                     consecutiveNotFound = 0;
 
-                    if (Plugin.ChapterApi.UpdateIntroDbMarkers(episode, data.intro, data.credits))
+                    if (Plugin.ChapterApi.UpdateIntroDbMarkers(episode, data.intro, data.EffectiveCredits))
                     {
                         marked++;
                     }
@@ -419,7 +430,7 @@ namespace StrmAssistant.Common
 
                 if (data == null) return false;
 
-                return Plugin.ChapterApi.UpdateIntroDbMarkers(movie, data.intro, data.credits);
+                return Plugin.ChapterApi.UpdateIntroDbMarkers(movie, data.intro, data.EffectiveCredits);
             }
             finally
             {

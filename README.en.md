@@ -33,6 +33,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - Playback detection, fingerprint detection and online scraping can each select TV/mixed libraries; blank includes all
 - Online scraping gets its own library scope; movies are off by default and require "Include Movies"
 - Metadata refresh no longer clears intro/credits markers; Emby for Kodi refreshes immediately after marker writes
+- Media info group order: Extraction Optimization moved to third, giving Scope → Timing → Optimization → Storage & Capture → ISO & HDR
 - Fixed IntroDb credits and movie data; unified scheduled task and settings button wording
 
 ✅ **Config migration cleanup (4.0.0.0)**

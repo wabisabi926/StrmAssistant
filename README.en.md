@@ -10,6 +10,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 - **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Public API (Douban ratings / Kodi integrations)**: [API.md](API.md)
 - **Install & usage**: [Wiki](https://github.com/sjtuross/StrmAssistant/wiki)
 
 ## Version Info

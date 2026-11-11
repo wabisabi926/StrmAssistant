@@ -10,6 +10,7 @@
 
 - **更新日志**：[CHANGELOG.md](CHANGELOG.md)
 - **贡献指南**：[CONTRIBUTING.md](CONTRIBUTING.md)
+- **对外接口（豆瓣评分 / Kodi 集成）**：[API.md](API.md)
 - **安装与使用说明**：[Wiki](https://github.com/sjtuross/StrmAssistant/wiki)
 
 ## 版本信息

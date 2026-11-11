@@ -1,7 +1,12 @@
 using Emby.Web.GenericEdit;
+using Emby.Web.GenericEdit.Common;
+using Emby.Web.GenericEdit.Elements;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Attributes;
+using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.LocalizationAttributes;
 using StrmAssistant.Properties;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace StrmAssistant.Options
@@ -27,6 +32,22 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
         public bool EnableAutomaticIntroScraping { get; set; } = false;
 
+        [Browsable(false)]
+        public List<EditorSelectOption> LibraryList { get; set; } = new List<EditorSelectOption>();
+
+        [DisplayNameL("IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_", typeof(Resources))]
+        [EditMultilSelect]
+        [SelectItemsSource(nameof(LibraryList))]
+        [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
+        public string LibraryScope { get; set; } = string.Empty;
+
+        [DisplayNameL("IntroSkipOptions_IncludeMovies_Include_Movies", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_", typeof(Resources))]
+        [Required]
+        [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
+        public bool IncludeMovies { get; set; } = false;
+
         [DisplayNameL("IntroSkipOptions_IntroDbApiKey_Api_Key", typeof(Resources))]
         [DescriptionL("IntroSkipOptions_IntroDbApiKey_Optional_TheIntroDB_API_key_sent_via_Bearer_auth_to_raise_the_daily_request_limit__Default_is_empty_", typeof(Resources))]
         [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
@@ -41,5 +62,23 @@ namespace StrmAssistant.Options
         [DescriptionL("IntroSkipOptions_UnifiedIntroDbProviders_Tried_in_order_until_one_succeeds__Default_is_IntroDb_Tidb_", typeof(Resources))]
         [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
         public string UnifiedIntroDbProviders { get; set; } = "IntroDb,Tidb";
+
+        public void Initialize(ILibraryManager libraryManager)
+        {
+            LibraryList.Clear();
+
+            foreach (var item in libraryManager.GetVirtualFolders())
+            {
+                if (item.CollectionType == CollectionType.TvShows.ToString() || item.CollectionType is null)
+                {
+                    LibraryList.Add(new EditorSelectOption
+                    {
+                        Value = item.ItemId,
+                        Name = item.Name,
+                        IsEnabled = true,
+                    });
+                }
+            }
+        }
     }
 }

@@ -348,7 +348,7 @@ namespace StrmAssistant
             MediaInfoApi = new MediaInfoApi(libraryManager, fileSystem, providerManager, mediaSourceManager,
                 itemRepository, jsonSerializer, libraryMonitor);
             ChapterApi = new ChapterApi(libraryManager, itemRepository);
-            IntroDbApi = new IntroDbApi(httpClient, jsonSerializer);
+            IntroDbApi = new IntroDbApi(httpClient, jsonSerializer, libraryManager);
             ImagePostProcessor = new ImagePostProcessor(ffmpegManager, providerManager, fileSystem);
             DoubanAssist = new global::StrmAssistant.Provider.Douban.DoubanAssist(httpClient, jsonSerializer,
                 providerManager, fileSystem);
@@ -421,11 +421,11 @@ namespace StrmAssistant
 
             if (introSkipOptions.Scrape.EnableIntroDbScrape && introSkipOptions.Scrape.EnableAutomaticIntroScraping)
             {
-                if (e.Argument.Item is Series refreshedSeries)
+                if (e.Argument.Item is Series refreshedSeries && IntroDbApi.IsLibraryInScope(refreshedSeries))
                 {
                     _ = BackgroundTaskRunner.Run("IntroDb.ScrapeSeries", () => IntroDbApi.ScrapeSeriesAsync(refreshedSeries, CancellationToken.None));
                 }
-                else if (e.Argument.Item is Movie refreshedMovie)
+                else if (e.Argument.Item is Movie refreshedMovie && introSkipOptions.Scrape.IncludeMovies)
                 {
                     _ = BackgroundTaskRunner.Run("IntroDb.ScrapeMovie", () => IntroDbApi.ScrapeMovieAsync(refreshedMovie, CancellationToken.None));
                 }
@@ -543,6 +543,7 @@ namespace StrmAssistant
                 {
                     PlaySessionMonitor.UpdateLibraryPathsInScope();
                     FingerprintApi.UpdateLibraryPathsInScope();
+                    IntroDbApi?.UpdateLibraryPathsInScope();
 
                     if (IntroSkipStore.GetOptions().Fingerprint.UnlockIntroSkip)
                         FingerprintApi.UpdateLibraryIntroDetectionFingerprintLength();
@@ -785,6 +786,7 @@ namespace StrmAssistant
                     {
                         PlaySessionMonitor.UpdateLibraryPathsInScope();
                         FingerprintApi.UpdateLibraryPathsInScope();
+                        IntroDbApi?.UpdateLibraryPathsInScope();
                     }
                 }
             }

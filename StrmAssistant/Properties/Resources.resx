@@ -147,7 +147,7 @@
     <value>Playback Detection</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_intro_skip_and_credits_skip_for_episodes__Default_is_False_" xml:space="preserve">
-    <value>Detect intro and credits from playback behavior. Default is OFF.</value>
+    <value>Detect intro and credits from actual playback behavior; runs on playback events, with no separate scheduled task. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_MaxIntroDurationSeconds" xml:space="preserve">
     <value>Max Intro Duration (Seconds)</value>
@@ -159,10 +159,10 @@
     <value>Intro &amp; Credits</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_Library_Scope" xml:space="preserve">
-    <value>Detection Libraries</value>
+    <value>Playback Detection Libraries</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_TV_shows_library_scope_to_detect__Blank_includes_all_" xml:space="preserve">
-    <value>Leave blank to include all TV libraries.</value>
+    <value>TV and mixed libraries for playback detection; leave blank to include all.</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Assistant" xml:space="preserve">
     <value>StrmAssistant Plus</value>
@@ -408,10 +408,10 @@
     <value>Fingerprint Duration (Minutes)</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Library_Scope" xml:space="preserve">
-    <value>Extraction Libraries</value>
+    <value>Fingerprint Detection Libraries</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Intro_detection_enabled_library_scope__Blank_includes_all_" xml:space="preserve">
-    <value>Leave blank to include all libraries with intro detection. Favorites supports single selection only.</value>
+    <value>TV and mixed libraries for fingerprint detection; only libraries with intro detection enabled are listed; leave blank to include all.</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableAltMovieDbUrl" xml:space="preserve">
     <value>Use Alternative MovieDb Config</value>
@@ -1196,6 +1196,18 @@
   <data name="IntroSkipOptions_EnableIntroDbScrape_Scrape_intro_credits_markers_from_TheIntroDB_when_refreshing_series_or_movies__fill_missing_only__Default_is_OFF_" xml:space="preserve">
     <value>Fill missing intro/credits markers on refresh. Default is OFF.</value>
   </data>
+  <data name="IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope" xml:space="preserve">
+    <value>Scrape Libraries</value>
+  </data>
+  <data name="IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_" xml:space="preserve">
+    <value>TV and mixed libraries to scrape; leave blank to include all.</value>
+  </data>
+  <data name="IntroSkipOptions_IncludeMovies_Include_Movies" xml:space="preserve">
+    <value>Include Movies</value>
+  </data>
+  <data name="IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_" xml:space="preserve">
+    <value>Also scrape movies. Movie markers only add chapters and do not participate in skip. Default is OFF.</value>
+  </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Api_Key" xml:space="preserve">
     <value>IntroDb API Key</value>
   </data>
@@ -1617,10 +1629,10 @@
     <value>Fingerprint Detection</value>
   </data>
   <data name="IntroSkipOptions_Group_Scrape" xml:space="preserve">
-    <value>External Intro Library</value>
+    <value>Online Scraping</value>
   </data>
   <data name="IntroSkipOptions_Group_Playback" xml:space="preserve">
-    <value>Behavior Markers</value>
+    <value>Playback Detection</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_VersionMerge" xml:space="preserve">
     <value>Merge</value>

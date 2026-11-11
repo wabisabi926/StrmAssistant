@@ -38,26 +38,43 @@ namespace StrmAssistant.ScheduledTask
                 return;
             }
 
-            var series = _libraryManager.GetItemList(new InternalItemsQuery
-                {
-                    IncludeItemTypes = new[] { nameof(Series) }
-                })
+            var scrapeOptions = Plugin.Instance.IntroSkipStore.GetOptions().Scrape;
+            var scrapePaths = Plugin.IntroDbApi.ScrapeLibraryPaths;
+
+            // 选了范围但解析不到任何有效库时，宁可什么都不刮，也不能退化成全库。
+            if (!string.IsNullOrWhiteSpace(scrapeOptions.LibraryScope) && scrapePaths.Count == 0)
+            {
+                _logger.Warn("IntroDbScrape - Scrape library scope resolved to no libraries; task skipped");
+                return;
+            }
+
+            var seriesQuery = new InternalItemsQuery
+            {
+                IncludeItemTypes = new[] { nameof(Series) }
+            };
+            if (scrapePaths.Count > 0) seriesQuery.PathStartsWithAny = scrapePaths.ToArray();
+
+            var series = _libraryManager.GetItemList(seriesQuery)
                 .OfType<Series>()
                 .Where(s => !string.IsNullOrEmpty(s.GetProviderId(MetadataProviders.Tmdb)))
                 .ToList();
 
-            var movies = _libraryManager.GetItemList(new InternalItemsQuery
-                {
-                    IncludeItemTypes = new[] { nameof(Movie) }
-                })
-                .OfType<Movie>()
-                .Where(m => !string.IsNullOrEmpty(m.GetProviderId(MetadataProviders.Tmdb)) &&
-                            !Plugin.ChapterApi.HasIntro(m))
-                .ToList();
+            var movies = new List<Movie>();
+            if (scrapeOptions.IncludeMovies)
+            {
+                movies = _libraryManager.GetItemList(new InternalItemsQuery
+                    {
+                        IncludeItemTypes = new[] { nameof(Movie) }
+                    })
+                    .OfType<Movie>()
+                    .Where(m => !string.IsNullOrEmpty(m.GetProviderId(MetadataProviders.Tmdb)) &&
+                                !Plugin.ChapterApi.HasIntro(m))
+                    .ToList();
+            }
 
             var targets = series.Concat<BaseItem>(movies).ToList();
-            _logger.Info("IntroDbScrape - Scheduled Task Start: {0} series, {1} movies",
-                series.Count, movies.Count);
+            _logger.Info("IntroDbScrape - Scheduled Task Start: {0} series, {1} movies, IncludeMovies={2}",
+                series.Count, movies.Count, scrapeOptions.IncludeMovies);
 
             var completed = 0;
             var marked = 0;

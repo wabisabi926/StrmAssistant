@@ -5481,5 +5481,41 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_ {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_IncludeMovies_Include_Movies {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_IncludeMovies_Include_Movies", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_ {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_", resourceCulture);
+            }
+        }
+
     }
 }

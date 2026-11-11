@@ -60,7 +60,7 @@
     <value>播放行為偵測</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_intro_skip_and_credits_skip_for_episodes__Default_is_False_" xml:space="preserve">
-    <value>依播放行為辨識片頭片尾。預設關閉。</value>
+    <value>依實際播放行為辨識片頭片尾，依播放事件即時偵測，無獨立計畫任務。預設關閉。</value>
   </data>
   <data name="IntroSkipOptions_MaxCreditsDurationSeconds" xml:space="preserve">
     <value>最大片尾時長（秒）</value>
@@ -72,10 +72,10 @@
     <value>片頭片尾</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_Library_Scope" xml:space="preserve">
-    <value>偵測媒體庫</value>
+    <value>播放偵測媒體庫</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_TV_shows_library_scope_to_detect__Blank_includes_all_" xml:space="preserve">
-    <value>留空包含全部劇集媒體庫。</value>
+    <value>播放偵測生效的劇集/混合庫；留空包含全部。</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Assistant" xml:space="preserve">
     <value>神醫助手 Plus</value>
@@ -321,10 +321,10 @@
     <value>聲紋偵測時長（分鐘）</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Library_Scope" xml:space="preserve">
-    <value>擷取媒體庫</value>
+    <value>片頭指紋偵測媒體庫</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Intro_detection_enabled_library_scope__Blank_includes_all_" xml:space="preserve">
-    <value>留空包含全部啟用片頭偵測的媒體庫；最愛僅能單選。</value>
+    <value>片頭指紋偵測生效的劇集/混合庫；僅列出已開啟片頭偵測的庫；留空包含全部。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableAltMovieDbUrl" xml:space="preserve">
     <value>使用替代 TMDB 配置</value>
@@ -1109,6 +1109,18 @@
   <data name="IntroSkipOptions_EnableIntroDbScrape_Scrape_intro_credits_markers_from_TheIntroDB_when_refreshing_series_or_movies__fill_missing_only__Default_is_OFF_" xml:space="preserve">
     <value>重新整理時補全缺失的片頭片尾標記。預設關閉。</value>
   </data>
+  <data name="IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope" xml:space="preserve">
+    <value>刮削媒體庫</value>
+  </data>
+  <data name="IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_" xml:space="preserve">
+    <value>選擇要刮削的劇集/混合庫；留空包含全部。</value>
+  </data>
+  <data name="IntroSkipOptions_IncludeMovies_Include_Movies" xml:space="preserve">
+    <value>包含電影</value>
+  </data>
+  <data name="IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_" xml:space="preserve">
+    <value>同時刮削電影。電影只寫章節標記，不參與跳過。預設關閉。</value>
+  </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Api_Key" xml:space="preserve">
     <value>IntroDb API Key</value>
   </data>
@@ -1527,13 +1539,13 @@
     <value>提取效能</value>
   </data>
   <data name="IntroSkipOptions_Group_Fingerprint" xml:space="preserve">
-    <value>聲紋探測</value>
+    <value>片頭指紋偵測</value>
   </data>
   <data name="IntroSkipOptions_Group_Scrape" xml:space="preserve">
-    <value>外部片頭庫</value>
+    <value>線上刮削</value>
   </data>
   <data name="IntroSkipOptions_Group_Playback" xml:space="preserve">
-    <value>行為標記</value>
+    <value>播放偵測</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_VersionMerge" xml:space="preserve">
     <value>合併</value>

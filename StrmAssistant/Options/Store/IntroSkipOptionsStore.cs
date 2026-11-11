@@ -62,6 +62,9 @@ namespace StrmAssistant.Options.Store
                 options.Playback.UserScope = FilterScope(options.Playback.UserScope, options.Playback.UserList,
                     nameof(IntroSkipPlaybackOptions.UserScope));
 
+                options.Scrape.LibraryScope = FilterScope(options.Scrape.LibraryScope, options.Scrape.LibraryList,
+                    nameof(IntroSkipScrapeOptions.LibraryScope));
+
                 var isModSupported = options.IsModSupported;
                 options.Fingerprint.MarkerEnabledLibraryScope = isModSupported
                     ? options.Fingerprint.MarkerEnabledLibraryScope
@@ -176,6 +179,12 @@ namespace StrmAssistant.Options.Store
                 {
                     Plugin.FingerprintApi.UpdateLibraryIntroDetectionFingerprintLength(options.Fingerprint.IntroDetectionFingerprintMinutes);
                 }
+
+                if (changedProperties.Contains(nameof(IntroSkipScrapeOptions.LibraryScope)) ||
+                    changedProperties.Contains(nameof(IntroSkipScrapeOptions.EnableIntroDbScrape)))
+                {
+                    Plugin.IntroDbApi?.UpdateLibraryPathsInScope();
+                }
             }
         }
 
@@ -232,6 +241,16 @@ namespace StrmAssistant.Options.Store
                 _logger.Info("EnableIntroDbScrape is set to {0}", options.Scrape.EnableIntroDbScrape);
                 _logger.Info("EnableAutomaticIntroScraping is set to {0}",
                     options.Scrape.EnableAutomaticIntroScraping);
+
+                var scrapeLibraryScope = string.Join(", ",
+                    options.Scrape.LibraryScope?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(v => options.Scrape.LibraryList
+                            .FirstOrDefault(option => option.Value == v)
+                            ?.Name) ?? Enumerable.Empty<string>());
+                _logger.Info("IntroSkipScrape - LibraryScope is set to {0}",
+                    string.IsNullOrEmpty(scrapeLibraryScope) ? "ALL" : scrapeLibraryScope);
+                _logger.Info("IntroSkipScrape - IncludeMovies is set to {0}", options.Scrape.IncludeMovies);
+
                 _logger.Info("IntroDbApiKey is set to {0}",
                     !string.IsNullOrEmpty(options.Scrape.IntroDbApiKey) ? "CONFIGURED" : "EMPTY");
                 _logger.Info("FingerprintBlacklistKeywords is set to {0}",
@@ -242,9 +261,11 @@ namespace StrmAssistant.Options.Store
                 {
                     var hasMarkerEnabledLibs = options.Fingerprint.MarkerEnabledLibraryList.Any(o => o.Value != "-1");
                     _logger.Warn(hasMarkerEnabledLibs
-                        ? "UnlockIntroSkip 已开启但「声纹提取媒体库范围」为空：指纹提取将覆盖所有启用 marker 检测的剧集媒体库。若需限定范围，请在「声纹提取媒体库范围」中设置。"
+                        ? "UnlockIntroSkip 已开启但“片头指纹检测媒体库”为空：指纹提取将覆盖所有启用 marker 检测的剧集媒体库。若需限定范围，请在“片头指纹检测媒体库”中设置。"
                         : "UnlockIntroSkip 已开启但没有任何启用 marker 检测的剧集媒体库，指纹提取将无可用媒体库。请先在媒体库选项中开启片头检测。");
                 }
+
+                Plugin.IntroDbApi?.UpdateLibraryPathsInScope();
             }
         }
     }

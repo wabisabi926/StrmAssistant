@@ -2,12 +2,15 @@ using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
+using StrmAssistant.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -48,6 +51,11 @@ namespace StrmAssistant.Common
         private readonly IHttpClient _httpClient;
         private readonly IJsonSerializer _jsonSerializer;
         private readonly ILogger _logger;
+        private readonly ILibraryManager _libraryManager;
+        private List<string> _scrapeLibraryPaths = new List<string>();
+
+        private static readonly StringComparison PathComparison =
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
         private readonly ConcurrentDictionary<string, (DateTime Expiry, IntroDbMedia Data)> _cache =
             new ConcurrentDictionary<string, (DateTime, IntroDbMedia)>();
@@ -64,11 +72,44 @@ namespace StrmAssistant.Common
 
         private DateTime _lastRequestTime = DateTime.MinValue;
 
-        public IntroDbApi(IHttpClient httpClient, IJsonSerializer jsonSerializer)
+        public IntroDbApi(IHttpClient httpClient, IJsonSerializer jsonSerializer, ILibraryManager libraryManager)
         {
             _logger = Plugin.Instance.Logger;
             _httpClient = httpClient;
             _jsonSerializer = jsonSerializer;
+            _libraryManager = libraryManager;
+
+            UpdateLibraryPathsInScope();
+        }
+
+        public IReadOnlyList<string> ScrapeLibraryPaths => _scrapeLibraryPaths;
+
+        /// <summary>
+        /// 刷新刮削范围的媒体库路径。空范围 = 全部剧集/混合库；电影库不参与范围。
+        /// </summary>
+        public void UpdateLibraryPathsInScope()
+        {
+            if (_libraryManager == null) return;
+
+            var scope = Plugin.Instance?.IntroSkipStore?.GetOptions()?.Scrape?.LibraryScope;
+            var validLibraryIds = Utility.GetValidLibraryIds(scope);
+
+            var libraries = _libraryManager.GetVirtualFolders()
+                .Where(f => (f.CollectionType == CollectionType.TvShows.ToString() || f.CollectionType is null) &&
+                            (!validLibraryIds.Any() || validLibraryIds.Contains(f.Id)))
+                .ToList();
+
+            _scrapeLibraryPaths = libraries.SelectMany(l => l.Locations)
+                .Select(ls => ls.EndsWith(Path.DirectorySeparatorChar.ToString())
+                    ? ls
+                    : ls + Path.DirectorySeparatorChar)
+                .ToList();
+        }
+
+        public bool IsLibraryInScope(BaseItem item)
+        {
+            return !string.IsNullOrEmpty(item?.Path) &&
+                   _scrapeLibraryPaths.Any(p => item.Path.StartsWith(p, PathComparison));
         }
 
         /// <summary>

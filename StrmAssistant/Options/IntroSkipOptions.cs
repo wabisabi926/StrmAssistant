@@ -58,6 +58,7 @@ namespace StrmAssistant.Options
         {
             Fingerprint.Initialize(libraryManager);
             Playback.Initialize(libraryManager);
+            Scrape.Initialize(libraryManager);
         }
     }
 }

@@ -446,6 +446,60 @@ namespace StrmAssistant.Common
             }
         }
 
+        /// <summary>
+        /// 清除动作覆盖三种行为的并集：播放探测、片头指纹检测、在线刮削。
+        /// 任一范围留空即视为全部剧集/混合库；电影库不参与。
+        /// </summary>
+        private List<string> GetClearLibraryPaths()
+        {
+            var options = Plugin.Instance.IntroSkipStore.GetOptions();
+            var scopes = new[]
+            {
+                options.Playback.LibraryScope,
+                options.Fingerprint.MarkerEnabledLibraryScope,
+                options.Scrape.LibraryScope
+            };
+
+            var selectedIds = new HashSet<string>(StringComparer.Ordinal);
+            var includeAll = false;
+
+            foreach (var scope in scopes)
+            {
+                if (string.IsNullOrWhiteSpace(scope))
+                {
+                    includeAll = true;
+                    break;
+                }
+
+                var ids = GetValidLibraryIds(scope);
+
+                if (ids.Length == 0)
+                {
+                    // 收藏(-1)没有媒体库路径；无效/已删除的库也不扩大清除范围
+                    continue;
+                }
+
+                foreach (var id in ids)
+                {
+                    if (id != "-1") selectedIds.Add(id);
+                }
+            }
+
+            var libraries = _libraryManager.GetVirtualFolders()
+                .Where(f => (f.CollectionType == CollectionType.TvShows.ToString() || f.CollectionType is null) &&
+                            (includeAll || selectedIds.Contains(f.Id)))
+                .ToList();
+
+            _logger.Info("IntroSkipClear - LibraryScope: " +
+                         (includeAll ? "ALL" : libraries.Any() ? string.Join(", ", libraries.Select(l => l.Name)) : "EMPTY"));
+
+            return libraries.SelectMany(l => l.Locations)
+                .Select(ls => ls.EndsWith(Path.DirectorySeparatorChar.ToString())
+                    ? ls
+                    : ls + Path.DirectorySeparatorChar)
+                .ToList();
+        }
+
         public List<BaseItem> FetchClearTaskItems(List<BaseItem> clearItems)
         {
             var itemsIntroSkipQuery = new InternalItemsQuery
@@ -460,17 +514,10 @@ namespace StrmAssistant.Common
 
             if (clearAll)
             {
-                var currentScope = Plugin.Instance.IntroSkipStore.GetOptions().Playback.LibraryScope;
-                var validLibraryIds = GetValidLibraryIds(currentScope);
-                var libraries = _libraryManager.GetVirtualFolders()
-                    .Where(f => (f.CollectionType == CollectionType.TvShows.ToString() || f.CollectionType is null) &&
-                                (!validLibraryIds.Any() || validLibraryIds.Contains(f.Id)))
-                    .ToList();
+                var clearLibraryPaths = GetClearLibraryPaths();
+                if (clearLibraryPaths.Count == 0) return new List<BaseItem>();
 
-                _logger.Info("IntroSkipClear - LibraryScope: " +
-                             (validLibraryIds.Any() ? string.Join(", ", libraries.Select(l => l.Name)) : "ALL"));
-
-                itemsIntroSkipQuery.PathStartsWithAny = PlaySessionMonitor.LibraryPathsInScope.ToArray();
+                itemsIntroSkipQuery.PathStartsWithAny = clearLibraryPaths.ToArray();
 
                 results = _libraryManager.GetItemList(itemsIntroSkipQuery).ToList();
             }

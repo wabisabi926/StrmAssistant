@@ -61,6 +61,16 @@ namespace StrmAssistant.Mod
             BypassItem.Value = item.InternalId;
         }
 
+        internal static bool IsBypassed(long itemId)
+        {
+            return BypassItem.Value != 0 && BypassItem.Value == itemId;
+        }
+
+        internal static void ClearBypass()
+        {
+            BypassItem.Value = 0;
+        }
+
         [HarmonyPostfix]
         private static void SaveChaptersPostfix(long itemId, bool clearExtractionFailureResult,
             List<ChapterInfo> chapters)

@@ -378,7 +378,17 @@ namespace StrmAssistant.Common
             chapters.RemoveAll(c =>
                 c.MarkerType == MarkerType.IntroStart || c.MarkerType == MarkerType.IntroEnd ||
                 c.MarkerType == MarkerType.CreditsStart);
-            _itemRepository.SaveChapters(item.InternalId, chapters);
+
+            // 用户主动清除：让 IntroMarkerProtector 放行，避免标记被合并回来
+            StrmAssistant.Mod.ChapterChangeTracker.BypassInstance(item);
+            try
+            {
+                _itemRepository.SaveChapters(item.InternalId, chapters);
+            }
+            finally
+            {
+                StrmAssistant.Mod.ChapterChangeTracker.ClearBypass();
+            }
         }
 
         public void ClearChapterImages(BaseItem item)

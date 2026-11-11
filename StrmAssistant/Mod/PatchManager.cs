@@ -39,6 +39,7 @@ namespace StrmAssistant.Mod
         public static BeautifyMissingMetadata BeautifyMissingMetadata;
         public static EnhanceMissingEpisodes EnhanceMissingEpisodes;
         public static ChapterChangeTracker ChapterChangeTracker;
+        public static IntroMarkerProtector IntroMarkerProtector;
         public static MovieDbEpisodeGroup MovieDbEpisodeGroup;
         public static OptimizeMovieDbEpisodeScraping OptimizeMovieDbEpisodeScraping;
         public static NoBoxsetsAutoCreation NoBoxsetsAutoCreation;
@@ -114,6 +115,7 @@ namespace StrmAssistant.Mod
             BeautifyMissingMetadata = new BeautifyMissingMetadata();
             EnhanceMissingEpisodes = new EnhanceMissingEpisodes();
             ChapterChangeTracker = new ChapterChangeTracker();
+            IntroMarkerProtector = new IntroMarkerProtector();
             NoBoxsetsAutoCreation = new NoBoxsetsAutoCreation();
             EnhanceNotificationSystem = new EnhanceNotificationSystem();
             EnableDeepDelete = new EnableDeepDelete();

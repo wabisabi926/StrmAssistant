@@ -16,7 +16,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **4.0.0.0** |
+| Plugin Version | **4.0.0.1** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -27,7 +27,13 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > **Before upgrading to 4.0**: legacy config migrations are no longer bundled. Direct upgrade is supported only from **3.0.0.78 or later**. If you are on an older version, install 3.0.0.78 and start Emby once to complete the migration, then upgrade to 4.0.
 
-## Latest Optimizations (v3.0.0.66 ~ v4.0.0.0)
+## Latest Optimizations (v3.0.0.66 ~ v4.0.0.1)
+
+✅ **Intro scope and marker protection (4.0.0.1)**
+- Playback detection, fingerprint detection and online scraping can each select TV/mixed libraries; blank includes all
+- Online scraping gets its own library scope; movies are off by default and require "Include Movies"
+- Metadata refresh no longer clears intro/credits markers; Emby for Kodi refreshes immediately after marker writes
+- Fixed IntroDb credits and movie data; unified scheduled task and settings button wording
 
 ✅ **Config migration cleanup (4.0.0.0)**
 - Removed legacy config migrations from 3.0.0.55–62 (about 1,600 lines); the minimum direct-upgrade version is now 3.0.0.78
@@ -173,7 +179,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 - **Poster & sorting**: original-language poster priority, Pinyin initial sorting, NFO enhancement, tagline clearing
 - **Local metadata cache**: two-layer `override/` + `cache/` structure, enables offline library rebuild
 - **Scraping optimization**: season-level episode metadata fetch, optional skip of per-episode fallback and episode images
-- **Sync tasks**: new items update automatically after scraping; "Sync Community Ratings" and "Sync Douban Data" ship without triggers — add a weekly or monthly trigger in Emby's Scheduled Tasks if needed
+- **Sync tasks**: new items update automatically after scraping; "Unify Community Rating" and "Sync Douban Data" ship without triggers — add a weekly or monthly trigger in Emby's Scheduled Tasks if needed
 
 ### Search & Network
 
@@ -204,8 +210,8 @@ An **option search box** at the top-left of the settings page filters options by
 | Persist Media Info | Write media info to JSON backups |
 | Restore Media Info | Restore media info from JSON backups |
 | Extract Video Thumbnails | Generate chapter preview thumbnails (enable "Generate video preview thumbnails" in the library settings first) |
-| Extract Intro Fingerprints | Generate audio fingerprints for intro detection |
-| Scrape Intro/Credits (External Intro DB) | Sync intro/credits markers online |
+| Detect Intro Fingerprints | Extract fingerprints, detect intros and write intro markers (intro only) |
+| Scrape Intro & Credits | Sync intro/credits markers online |
 | Merge Multi Versions | Scan and merge multiple versions of the same title |
 | Sync Douban Data | Sync Douban IDs, cache, badge/Kodi ratings, overview, cast, poster and critic ratings for the whole library |
 | Populate Douban IDs | Incrementally fill missing Douban IDs (with retry queue) |

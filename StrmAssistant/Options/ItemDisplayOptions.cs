@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 体验增强 · 条目显示分组：详情页人物列表、分集标题、缺集视图、剧集卡片上的显示效果。
+    /// 体验增强 · 显示优化分组：详情页人物列表、分集标题、缺集视图、剧集卡片上的显示效果。
     /// 作用面是「打开一个条目时看到什么」。
     /// 注意：<see cref="VisibleConditionAttribute"/> / <see cref="EnabledConditionAttribute"/> 的目标属性
     /// 按**同级路径**解析，<c>IsModSupported</c> 必须留在本类内。

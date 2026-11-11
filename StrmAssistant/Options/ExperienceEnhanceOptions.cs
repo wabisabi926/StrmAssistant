@@ -43,7 +43,7 @@ namespace StrmAssistant.Options
         public ExperienceNotificationOptions Notification { get; set; } = new ExperienceNotificationOptions();
 
         /// <summary>
-        /// 条目显示：详情页人物列表、分集标题、缺集视图、剧集卡片上的显示效果。
+        /// 显示优化：详情页人物列表、分集标题、缺集视图、剧集卡片上的显示效果。
         /// 顺序按「由内到外」：条目 → 媒体库 → 搜索与日志。
         /// </summary>
         [DisplayNameL("ItemDisplayOptions_EditorTitle_Item_Display", typeof(Resources))]

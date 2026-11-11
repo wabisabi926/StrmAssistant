@@ -375,7 +375,7 @@
     <value>Music Artist</value>
   </data>
   <data name="ItemDisplayOptions_EditorTitle_Item_Display" xml:space="preserve">
-    <value>Item Display</value>
+    <value>Display Enhancements</value>
   </data>
   <data name="LibraryOrderOptions_EditorTitle_Library_and_Order" xml:space="preserve">
     <value>Libraries &amp; Ordering</value>
@@ -1632,7 +1632,7 @@
     <value>Extract the next episode's media info in the background during playback. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
-    <value>Extraction Performance</value>
+    <value>Extraction Optimization</value>
   </data>
   <data name="IntroSkipOptions_Group_Fingerprint" xml:space="preserve">
     <value>Fingerprint Detection</value>
@@ -1665,7 +1665,7 @@
     <value>Notification</value>
   </data>
   <data name="GeneralOptions_Group_TaskConcurrency" xml:space="preserve">
-    <value>Concurrency Control</value>
+    <value>Task Concurrency</value>
   </data>
   <data name="GeneralOptions_Group_Memory" xml:space="preserve">
     <value>Memory</value>
@@ -1887,7 +1887,7 @@
     <value>  · memory over limit, restarting in {0}s</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_AutoOnDemand" xml:space="preserve">
-    <value>Automatic &amp; On-Demand</value>
+    <value>Extraction Timing</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_StorageCapture" xml:space="preserve">
     <value>Storage &amp; Capture</value>
@@ -1899,7 +1899,7 @@
     <value>Posters &amp; People</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_ScrapeEpisodeGroup" xml:space="preserve">
-    <value>Scraping &amp; Episode Groups</value>
+    <value>Episode Scraping</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_RefreshCache" xml:space="preserve">
     <value>Refresh &amp; Cache</value>

@@ -288,7 +288,7 @@
     <value>艺术家</value>
   </data>
   <data name="ItemDisplayOptions_EditorTitle_Item_Display" xml:space="preserve">
-    <value>条目显示</value>
+    <value>显示优化</value>
   </data>
   <data name="LibraryOrderOptions_EditorTitle_Library_and_Order" xml:space="preserve">
     <value>媒体库与排序</value>
@@ -1545,7 +1545,7 @@
     <value>播放时后台提取下一集媒体信息。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_ExtractionPerformance" xml:space="preserve">
-    <value>提取性能</value>
+    <value>提取优化</value>
   </data>
   <data name="IntroSkipOptions_Group_Fingerprint" xml:space="preserve">
     <value>片头指纹检测</value>
@@ -1578,7 +1578,7 @@
     <value>通知</value>
   </data>
   <data name="GeneralOptions_Group_TaskConcurrency" xml:space="preserve">
-    <value>并发控制</value>
+    <value>任务并发</value>
   </data>
   <data name="GeneralOptions_Group_Memory" xml:space="preserve">
     <value>内存管理</value>
@@ -1800,7 +1800,7 @@
     <value>　· 内存超限，{0} 秒后重启</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_AutoOnDemand" xml:space="preserve">
-    <value>自动与按需</value>
+    <value>提取时机</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_StorageCapture" xml:space="preserve">
     <value>存储与截图</value>
@@ -1812,7 +1812,7 @@
     <value>海报与人物</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_ScrapeEpisodeGroup" xml:space="preserve">
-    <value>刮削与剧集组</value>
+    <value>剧集刮削</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_RefreshCache" xml:space="preserve">
     <value>刷新与缓存</value>

@@ -111,10 +111,10 @@
     <value>Include parts and extras. Default is OFF.</value>
   </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count" xml:space="preserve">
-    <value>Master Max Concurrent Thread Count</value>
+    <value>Primary Task Concurrency</value>
   </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count_must_be_between_1_to_10__Default_is_1_" xml:space="preserve">
-    <value>Shared by mediainfo extract, image capture, video thumbnail and fingerprint extract tasks. It must be between 1 to 20. Default is 1.</value>
+    <value>Shared by media info, screenshots, thumbnails, and fingerprint tasks; range 1–20, default 1.</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Extract" xml:space="preserve">
     <value>Media Info</value>
@@ -123,7 +123,7 @@
     <value>Library Scope</value>
   </data>
   <data name="PluginOptions_LibraryScope_Library_scope_to_extract__Blank_includes_all_" xml:space="preserve">
-    <value>Leave blank to include all libraries. Enable scheduled thumbnail generation in the Emby library settings.</value>
+    <value>Leave blank to include all libraries. Video thumbnails require "Generate video preview thumbnails" in the Emby library settings.</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_Probe_Path" xml:space="preserve">
     <value>Custom ffprobe</value>
@@ -144,10 +144,10 @@
     <value>Capture images for videos without a primary image; supports STRM and BIF previews. Default is OFF.</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
-    <value>Playback Detection</value>
+    <value>Enable Playback Detection</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_intro_skip_and_credits_skip_for_episodes__Default_is_False_" xml:space="preserve">
-    <value>Detect intro and credits from actual playback behavior; runs on playback events, with no separate scheduled task. Default is OFF.</value>
+    <value>Detect intro and credits in real time from playback behavior; there is no separate scheduled task. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_MaxIntroDurationSeconds" xml:space="preserve">
     <value>Max Intro Duration (Seconds)</value>
@@ -162,7 +162,7 @@
     <value>Playback Detection Libraries</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_TV_shows_library_scope_to_detect__Blank_includes_all_" xml:space="preserve">
-    <value>TV and mixed libraries for playback detection; leave blank to include all.</value>
+    <value>TV and mixed libraries; leave blank to include all.</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Assistant" xml:space="preserve">
     <value>StrmAssistant Plus</value>
@@ -209,11 +209,14 @@
   <data name="ModOptions_ChineseMovieDb_Optimize_MovieDb_for_Chinese_metadata__Default_is_OFF_" xml:space="preserve">
     <value>Try to get Chinese or Japanese metadata from MovieDb. Default is OFF.</value>
   </data>
+  <data name="ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages" xml:space="preserve">
+    <value>TVDB Fallback Languages</value>
+  </data>
   <data name="ModOptions_FallbackLanguages_Fallback_Languages" xml:space="preserve">
-    <value>Fallback Languages</value>
+    <value>TMDB Fallback Languages</value>
   </data>
   <data name="ModOptions_FallbackLanguages_Fallback_languages__Default_is_zh_SG_" xml:space="preserve">
-    <value>Fallback metadata languages, prioritized from left to right.</value>
+    <value>Fallback metadata languages, in priority order.</value>
   </data>
   <data name="Favorites" xml:space="preserve">
     <value>❤️Favorites</value>
@@ -234,7 +237,7 @@
     <value>About</value>
   </data>
   <data name="IntroSkipOptions_UserScope_User_Scope" xml:space="preserve">
-    <value>Allowed Users</value>
+    <value>User Scope</value>
   </data>
   <data name="IntroSkipOptions_UserScope_Users_allowed_to_detect__Blank_includes_all" xml:space="preserve">
     <value>Leave blank to include all users.</value>
@@ -246,10 +249,10 @@
     <value>Prefer original poster based on the original language. Support TMDB, TVDB and FANART. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Built_in_Intro_Skip_Enhanced" xml:space="preserve">
-    <value>Native Intro Detection</value>
+    <value>Enable Native Intro Detection</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Unlock_Strm_support_for_built_in_intro_skip_detection" xml:space="preserve">
-    <value>Enable native intro detection with STRM support. Default is OFF.</value>
+    <value>Enable Emby native intro detection with STRM support. Default is OFF.</value>
   </data>
   <data name="ModOptions_EnhanceChineseSearch_Enhance_Chinese_Search" xml:space="preserve">
     <value>Chinese Search Enhanced</value>
@@ -318,22 +321,22 @@
     <value>Direct Link</value>
   </data>
   <data name="ModOptions_EnableStrmDirectRedirect_Strm_302_Direct_Link" xml:space="preserve">
-    <value>Strm 302 Direct Link</value>
+    <value>STRM 302 Direct Link</value>
   </data>
   <data name="ModOptions_EnableStrmDirectRedirect_Smart_direct_link_for_video_and_music_Strm_urls_without_server_relay__Default_is_OFF_" xml:space="preserve">
-    <value>Smart direct link for video and music Strm urls without server relay. Default is OFF.</value>
+    <value>Smartly redirect video and music STRM URLs without server relay. Default is OFF.</value>
   </data>
   <data name="ModOptions_EnableLiveTvDirectRedirect_LiveTV_Direct_Link" xml:space="preserve">
-    <value>LiveTV Direct Link</value>
+    <value>Live TV Direct Link</value>
   </data>
   <data name="ModOptions_EnableLiveTvDirectRedirect_Smart_direct_link_for_LiveTV_source_urls_without_server_relay__Default_is_OFF_" xml:space="preserve">
-    <value>Smart direct link for LiveTV source urls without server relay. Default is OFF.</value>
+    <value>Smartly redirect Live TV source URLs without server relay. Default is OFF.</value>
   </data>
   <data name="ModOptions_StrmDirectRedirectFollow302_Follow_302_Redirect" xml:space="preserve">
     <value>Follow 302 Redirect</value>
   </data>
   <data name="ModOptions_StrmDirectRedirectFollow302_Auto_resolve_the_real_302_url_of_cloud_drives__OFF_uses_the_original_url_in_the_strm_file__Default_is_OFF_" xml:space="preserve">
-    <value>Auto resolve the real 302 url of cloud drives; OFF uses the original url in the strm file. Default is OFF.</value>
+    <value>Automatically follow real 302 direct links from cloud drives; when off, use the original URL in the STRM file. Default is OFF.</value>
   </data>
   <data name="ModOptions_StrmVideoDirectRedirectClientBlacklist_Video_Direct_Link_Client_Blacklist" xml:space="preserve">
     <value>Video Direct Link Client Blacklist</value>
@@ -366,7 +369,7 @@
     <value>Hide Cast and Crew by Preference</value>
   </data>
   <data name="ModOptions_HidePersonNoImage_Hide_person_without_image__Default_is_OFF_" xml:space="preserve">
-    <value>Hide cast and crew based on your preferences. Default is OFF.</value>
+    <value>Hide cast/crew on movie and series pages by preference; hidden only, not deleted, still searchable. Default is OFF.</value>
   </data>
   <data name="ItemType_MusicArtist_MusicArtist" xml:space="preserve">
     <value>Music Artist</value>
@@ -405,22 +408,22 @@
     <value>Which of the first admin's preferences are enforced for all users. Default is Library order.</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_Intro_Detection_Fingerprint_Minutes" xml:space="preserve">
-    <value>Fingerprint Duration (Minutes)</value>
+    <value>Fingerprint Detection Duration (Minutes)</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Library_Scope" xml:space="preserve">
     <value>Fingerprint Detection Libraries</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Intro_detection_enabled_library_scope__Blank_includes_all_" xml:space="preserve">
-    <value>TV and mixed libraries for fingerprint detection; only libraries with intro detection enabled are listed; leave blank to include all.</value>
+    <value>TV and mixed libraries; only libraries with intro detection enabled are listed; leave blank to include all.</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableAltMovieDbUrl" xml:space="preserve">
     <value>Use Alternative MovieDb Config</value>
   </data>
   <data name="MetadataEnhanceOptions_EnhanceMovieDbPerson_Enhance_MovieDb_Person" xml:space="preserve">
-    <value>Enhance MovieDb Person</value>
+    <value>Enhance People with TMDB</value>
   </data>
   <data name="MetadataEnhanceOptions_EnhanceMovieDbPerson_Import_season_cast_and_update_series_people__Default_is_OFF_" xml:space="preserve">
-    <value>Extract also_known_as while running refresh person scheduled task, import season cast, update series cast. Default is OFF.</value>
+    <value>Extract aliases during actor refresh, import season cast, and merge series people across seasons. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds" xml:space="preserve">
     <value>Min Opening Plot (Seconds)</value>
@@ -470,6 +473,9 @@
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
     <value>Shared by extraction, backup and restore; blank uses the media folder.</value>
   </data>
+  <data name="IntroSkipOptions_ClearIntro_Confirmation" xml:space="preserve">
+    <value>Clear intro/credits markers for episodes in scope? Movie markers are not cleared. Continue?</value>
+  </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
     <value>Clear Intro &amp; Credits Markers</value>
   </data>
@@ -477,13 +483,13 @@
     <value>Detect Intro Fingerprints</value>
   </data>
   <data name="ExtractIntroFingerprintTask_Description_Extracts_intro_fingerprint_from_episodes" xml:space="preserve">
-    <value>Extracts episode fingerprints and writes intro markers within the fingerprint library scope; credits are not detected.</value>
+    <value>Extract audio fingerprints, detect intros, and write intro markers within the fingerprint library scope; credits are not detected.</value>
   </data>
   <data name="ExtractMediaInfoTask_Name_Extract_MediaInfo" xml:space="preserve">
     <value>Extract Media Info</value>
   </data>
   <data name="ExtractMediaInfoTask_Description_Extracts_media_info_from_videos_and_audios" xml:space="preserve">
-    <value>Extracts media info from videos and audios, and image capture</value>
+    <value>Extract media info from videos and audio, and generate video screenshots.</value>
   </data>
   <data name="PersistMediaInfoTask_Name_Persist_MediaInfo" xml:space="preserve">
     <value>Backup Media Info</value>
@@ -495,7 +501,7 @@
     <value>Restore Media Info</value>
   </data>
   <data name="RestoreMediaInfoTask_Description_Restores_media_info_from_JSON_file" xml:space="preserve">
-    <value>Restore media info, chapters and thumbnails from JSON for items missing DB media info; never overwrite existing media info.</value>
+    <value>Restore media info, chapters and thumbnails from JSON for items missing database media info; never overwrite existing media info.</value>
   </data>
   <data name="RefreshPersonTask_Name_Refresh_Chinese_Actor" xml:space="preserve">
     <value>Refresh Actors</value>
@@ -645,7 +651,7 @@
     <value>Scrape Optimization</value>
   </data>
   <data name="MetadataEnhanceOptions_MovieDbEpisodeGroup_Support_MovieDb_Episode_Group" xml:space="preserve">
-    <value>Support MovieDb Episode Group</value>
+    <value>Support TMDB Episode Groups</value>
   </data>
   <data name="MetadataEnhanceOptions_MovieDbEpisodeGroup_Support_MovieDb_episode_group_scrapping_for_TV_shows__Default_is_OFF_" xml:space="preserve">
     <value>Scrape TV show by specified episode group. Support external source. Default is OFF.</value>
@@ -663,7 +669,7 @@
     <value>Exclusive Feature Control</value>
   </data>
   <data name="MetadataEnhanceOptions_LocalEpisodeGroup_Store_or_load_episode_group_info_to_from_JSON_file__Default_is_OFF_" xml:space="preserve">
-    <value>Store or load episode group info to/from JSON file. Default is OFF.</value>
+    <value>Save episode groups to JSON or load them from JSON. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMovieDbEpisodeGroupExtendedInfo_Episode_Group_Extended_Info" xml:space="preserve">
     <value>Episode Group Extended Info</value>
@@ -672,7 +678,7 @@
     <value>Apply custom season overview and air_date fields from the episode group json. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_LocalEpisodeGroup_Local_Episode_Group" xml:space="preserve">
-    <value>Enable Local Episode Group</value>
+    <value>Enable Local Episode Groups</value>
   </data>
   <data name="MetadataEnhanceOptions_OptimizeMovieDbEpisodeScraping_Optimize_MovieDb_Episode_Scraping" xml:space="preserve">
     <value>Optimize MovieDb Episode Scraping</value>
@@ -684,7 +690,7 @@
     <value>Disable Per-Episode Fallback</value>
   </data>
   <data name="MetadataEnhanceOptions_DisableMovieDbEpisodeScrapingFallback_Skip_per_episode_requests_when_season_data_is_empty__Default_is_OFF_" xml:space="preserve">
-    <value>Skip per-episode requests when season data is fetched but the episode is missing or empty. Default is OFF.</value>
+    <value>Skip per-episode fallback when season data was fetched successfully but the episode is missing or empty. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DisableEpisodeImageScraping_Disable_Episode_Image_Scraping" xml:space="preserve">
     <value>Disable Episode Image Scraping</value>
@@ -708,13 +714,13 @@
     <value>Catchup Task Scope</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Client_Scope" xml:space="preserve">
-    <value>Allowed Clients</value>
+    <value>Client Scope</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Allowed_clients__Default_is_Emby_Infuse_SenPlayer" xml:space="preserve">
-    <value>Client name keywords, comma-separated. Third-party clients may not detect reliably.</value>
+    <value>Client name keywords, comma-separated; default Emby, Infuse, SenPlayer. Third-party clients may not detect reliably.</value>
   </data>
   <data name="GeneralOptions_CooldownSeconds_Cooldown_Time__Seconds___Default_is_0" xml:space="preserve">
-    <value>Master Cooldown Duration (Seconds)</value>
+    <value>Primary Task Cooldown (Seconds)</value>
   </data>
   <data name="InvalidShowSeasonIds" xml:space="preserve">
     <value>TV show or season ID is invalid: {0}</value>
@@ -729,10 +735,10 @@
     <value>Skip episodes whose name contains a keyword (e.g. NCOP, Menu). Default is empty.</value>
   </data>
   <data name="GeneralOptions_Tier2MaxConcurrentCount_Tier_2_Max_Concurrent_Count" xml:space="preserve">
-    <value>Tier 2 Max Concurrent Thread Count</value>
+    <value>Secondary Task Concurrency</value>
   </data>
   <data name="GeneralOptions_Tier2MaxConcurrentCount_Refresh_metadata__subtitle__local_tasks__Default_is_1_" xml:space="preserve">
-    <value>Shared by refreshing persons, episodes, external subtitles, local processing tasks, etc. It must be between 1 to 20. Default is 1.</value>
+    <value>Shared by actor refresh, episode metadata, subtitle scans, and local tasks; range 1–20, default 1.</value>
   </data>
   <data name="GeneralOptions_EnableMemoryCleanup_Title" xml:space="preserve">
     <value>Enable Periodic Memory Cleanup</value>
@@ -747,7 +753,7 @@
     <value>Memory cleanup interval. Must be between 1 and 120. Default is 5.</value>
   </data>
   <data name="GeneralOptions_CooldownDurationSeconds_Applicable_to_single_thread_mode__Default_is_0_" xml:space="preserve">
-    <value>Applicable to single thread mode. It must be between 0 and 60. Default is 0.</value>
+    <value>Only applies in single-thread mode; range 0–60, default 0.</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_It_must_be_between_2_and_20__Default_is_10_" xml:space="preserve">
     <value>Range 2–20. Default is 10.</value>
@@ -756,7 +762,7 @@
     <value>Per-Library Fingerprint Duration</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Overrides_for_specific_libraries_in_libraryId_minutes_format_separated_by_comma__falls_back_to_the_global_value__Default_is_EMPTY_" xml:space="preserve">
-    <value>Format: libraryId:minutes, comma-separated; falls back to the global value.</value>
+    <value>Format: libraryId:minutes, comma-separated; leave blank to use the global value.</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Parallel_Marker_Computation" xml:space="preserve">
     <value>Parallel Fingerprint Computation</value>
@@ -810,7 +816,7 @@
     <value>Server Preferred Metadata Language is not set to Chinese. RefreshPerson Task Aborted.</value>
   </data>
   <data name="IntroDetectionEnhancedNotEnabled" xml:space="preserve">
-    <value>Built-in Intro Detection Enhanced is not enabled. IntroFingerprintExtract task aborted.</value>
+    <value>Built-in intro detection is not enabled. Intro fingerprint detection task aborted.</value>
   </data>
   <data name="ExclusiveControl_IgnoreExtSubChange_IgnoreExtSubChange" xml:space="preserve">
     <value>Ignore External Subtitle Change</value>
@@ -822,7 +828,7 @@
     <value>Reset overwrites native markers on later episodes</value>
   </data>
   <data name="IntroSkipOptions_IntroSkipPreferences_IntroSkip_Preferences" xml:space="preserve">
-    <value>Detection Preferences (Optional)</value>
+    <value>Detection Preferences</value>
   </data>
   <data name="IntroSkipOptions_IntroSkipPreferences_Description" xml:space="preserve">
     <value>Leave blank for default behavior; multiple selections allowed.</value>
@@ -909,7 +915,7 @@
     <value>ISO Extraction</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>Include local/remote ISOs; Windows mounts natively, Linux/Docker uses in-process UDF title sampling; no remote capture. Default is OFF.</value>
+    <value>Include local/remote ISOs. Windows mounts natively; Linux/Docker samples the selected title in-process. Remote ISOs do not support screenshots. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>Clear Embedded Metadata</value>
@@ -969,10 +975,13 @@
     <value>Global Scope</value>
   </data>
   <data name="MergeMovieTask_Description_Merge_movies_per_library_or_across_libraries_per_preference" xml:space="preserve">
-    <value>Merge movies and series per library or across libraries, triggered post library scan</value>
+    <value>Merge movies and series per library or across libraries; run manually or after library scans.</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_SplitMovieButton_Confirmation" xml:space="preserve">
+    <value>Split multi-version movies in all libraries? Scan the library first to split TV series. Continue?</value>
   </data>
   <data name="ExperienceEnhanceOptions_SplitMovieButton_Split_multi_version_movies_in_all_libraries" xml:space="preserve">
-    <value>Split multi-version movies in all libraries (scan library for TV Series split)</value>
+    <value>Split Multi-Version Movies</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableDeepDelete_Enable_Deep_Delete" xml:space="preserve">
     <value>Enable Deep Delete</value>
@@ -996,7 +1005,7 @@
     <value>Version Display Option</value>
   </data>
   <data name="ExperienceEnhanceOptions_MultiVersionDisplayOption_Version_label_source__SystemDefault_MediaInfo_or_FileNameWithoutExtension__Default_is_MediaInfo_" xml:space="preserve">
-    <value>Version label source: Default / Quality / Quality + Size / File Name. Default is Quality.</value>
+    <value>Version label source: Default / Quality / Quality + Size / File name. Default is "Quality".</value>
   </data>
   <data name="ExperienceEnhanceOptions_MultiVersionSortOption_Version_Sort_Option" xml:space="preserve">
     <value>Version Sort Option</value>
@@ -1122,7 +1131,7 @@
     <value>Check Media Info</value>
   </data>
   <data name="MediaHealthCheckTask_Description_Scan_media_info_for_declaration_mismatches" xml:space="preserve">
-    <value>Cross-check file-name claims against extracted media info (read-only)</value>
+    <value>Cross-check file-name labels against extracted media info (read-only).</value>
   </data>
   <data name="ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_" xml:space="preserve">
     <value>Resolve strm paths to local mounts for Open Subtitles hash and filename search (plugin required). Default is OFF.</value>
@@ -1185,28 +1194,28 @@
     <value>Favorite episodes will not be automatically marked as watched. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Enable_Automatic_Scraping" xml:space="preserve">
-    <value>Automatic Fill</value>
+    <value>Automatic Scraping</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Scrape_intro_credits_markers_for_new_content__May_slow_down_library_scans__Default_is_OFF_" xml:space="preserve">
-    <value>Fill markers automatically after refresh; may slow library scans. Default is OFF.</value>
+    <value>Automatically scrape missing markers after refresh; may slow library scans. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_IntroDb_Intro_Credits_Scraper" xml:space="preserve">
-    <value>IntroDb Marker Fill</value>
+    <value>Enable Online Scraping</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_Scrape_intro_credits_markers_from_TheIntroDB_when_refreshing_series_or_movies__fill_missing_only__Default_is_OFF_" xml:space="preserve">
-    <value>Fill missing intro/credits markers on refresh. Default is OFF.</value>
+    <value>Fill missing intro/credits markers from IntroDb / TheIntroDB. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope" xml:space="preserve">
     <value>Scrape Libraries</value>
   </data>
   <data name="IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_" xml:space="preserve">
-    <value>TV and mixed libraries to scrape; leave blank to include all.</value>
+    <value>TV and mixed libraries; leave blank to include all.</value>
   </data>
   <data name="IntroSkipOptions_IncludeMovies_Include_Movies" xml:space="preserve">
     <value>Include Movies</value>
   </data>
   <data name="IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_" xml:space="preserve">
-    <value>Also scrape movies. Movie markers only add chapters and do not participate in skip. Default is OFF.</value>
+    <value>Also scrape movies; movie markers only add chapters and do not participate in skip. Default is OFF.</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Api_Key" xml:space="preserve">
     <value>IntroDb API Key</value>
@@ -1215,10 +1224,10 @@
     <value>IntroDb (introdb.app) API key. Lookups use IMDb ID; leave empty for the public limit.</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_TIDB_API_Key" xml:space="preserve">
-    <value>TIDB API Key</value>
+    <value>TheIntroDB API Key</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_API_key_increases_daily_usage_limits__Default_is_empty_" xml:space="preserve">
-    <value>TheIntroDB API key. Lookups use TMDB ID; leave empty for the public limit.</value>
+    <value>TheIntroDB (TIDB) API key. Lookups use TMDB ID; leave empty for the public limit.</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Unified_IntroDb_Providers" xml:space="preserve">
     <value>Provider Order</value>
@@ -1230,7 +1239,7 @@
     <value>Scrape Intro &amp; Credits</value>
   </data>
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
-    <value>Fills missing intro/credits markers for episodes in the scrape library scope, trying sources in the configured order without overwriting other sources; movies are optional. Confirm coverage on the websites before running.</value>
+    <value>Fill missing intro/credits markers for episodes in the scrape library scope, trying sources in the configured order without overwriting other sources; movies are excluded by default. Confirm coverage on the websites before running.</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
     <value>Crop to 16:9</value>
@@ -1344,13 +1353,13 @@
     <value>Movie Merge Preference</value>
   </data>
   <data name="ExperienceEnhanceOptions_MergeSeriesPreferences_Series_Merge_Preference" xml:space="preserve">
-    <value>TV Series Merge Preference</value>
+    <value>Series Merge Preference</value>
   </data>
   <data name="ExperienceEnhanceOptions_MergeSeriesPreferences_Series_merge_works_across_libraries_only_in_GlobalScope" xml:space="preserve">
-    <value>Series merge across libraries (same series in different libraries) only takes effect when scope is GlobalScope.</value>
+    <value>Merging the same series across libraries works only in Global Scope.</value>
   </data>
   <data name="ExtractVideoThumbnailTask_Description_Extract_video_thumbnail_preview" xml:space="preserve">
-    <value>Extract video thumbnail preview and chapter images</value>
+    <value>Extract video thumbnails and chapter images.</value>
   </data>
   <data name="EpisodeRefreshTask_Description_Refresh_metadata_for_episodes_missing_overview" xml:space="preserve">
     <value>Refresh missing metadata and images for episodes by preference</value>
@@ -1371,7 +1380,7 @@
     <value>Click to view the disclaimer. Do not send logs to the official team before uninstalling the plugin. Please remember this!</value>
   </data>
   <data name="IntroSkipOptions_BlacklistShows_List_of_Series_Id_or_Season_Id_separated_by_comma_or_semicolon__Default_is_EMPTY" xml:space="preserve">
-    <value>Series or season IDs, comma-separated. Default is empty.</value>
+    <value>Series/season IDs, comma-separated. Default is empty.</value>
   </data>
   <data name="Notification_DeepDelete_EventName" xml:space="preserve">
     <value>Media Deep Delete</value>
@@ -1563,7 +1572,7 @@
     <value>HDR Tagging</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
-    <value>Tag HDR Vivid and dual-layer Dolby Vision; restart required. Default is OFF.</value>
+    <value>Add quality labels for HDR Vivid and dual-layer Dolby Vision; restart required. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
     <value>Tag dual-layer Dolby Vision as Profile 7</value>
@@ -1578,7 +1587,7 @@
     <value>Capture HDR Static Metadata</value>
   </data>
   <data name="MediaInfoExtractOptions_CaptureHdrStaticMetadata_Read_MaxCLL_MaxFALL_and_mastering_display_from_probe_side_data_and_write_them_to_the_video_track_title__Default_is_OFF_" xml:space="preserve">
-    <value>Read MaxCLL / MaxFALL and mastering display from probe side data and write them to the video track title. Information only - playback and video range are unchanged. Default is OFF.</value>
+    <value>Read HDR static metadata (MaxCLL / MaxFALL and mastering display info) and write it to the video track title; informational only, does not affect playback or quality decisions. Default is OFF.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
     <value>Detect CUVA metadata; HDR sources read one extra frame. Default is ON.</value>
@@ -1650,7 +1659,7 @@
     <value>Dry Run</value>
   </data>
   <data name="ExperienceEnhanceOptions_DryRun_Description" xml:space="preserve">
-    <value>Destructive actions such as clearing intros, media info or versions are logged only; nothing is written or deleted. Default is OFF.</value>
+    <value>Destructive operations such as clearing intro/credits markers, clearing media info, or deleting versions only write logs; nothing is saved or deleted. Default is OFF.</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_Notification" xml:space="preserve">
     <value>Notification</value>
@@ -1662,7 +1671,7 @@
     <value>Memory</value>
   </data>
   <data name="GeneralOptions_Group_ConfigTransfer" xml:space="preserve">
-    <value>Config Transfer</value>
+    <value>Config Backup &amp; Restore</value>
   </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
     <value>Maintenance</value>
@@ -1746,7 +1755,7 @@
     <value>Rebuild Progress Index</value>
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
-    <value>Recompute and persist the per-library progress index for every movie, series, season and episode. Run once after toggling Track Play Progress per Library and restarting Emby; run again with the option off to restore the original state.</value>
+    <value>Recompute and write the per-library progress index for every movie, series, season and episode. Run once after toggling Track Play Progress per Library and restarting Emby; run again with the option off to restore the original state.</value>
   </data>
   <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
     <value>Clean Metadata Cache</value>
@@ -1761,7 +1770,7 @@
     <value>Show quality, HDR and audio tags in the version selector on clients that support it (e.g. Kodi); multiple versions only. Default is OFF.</value>
   </data>
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
-    <value>Scheduled Tasks</value>
+    <value>Common Tasks</value>
   </data>
   <data name="ScheduledTasks_Started" xml:space="preserve">
     <value>Started: {0}</value>
@@ -1890,12 +1899,12 @@
     <value>Notifications &amp; Logs</value>
   </data>
   <data name="IntroSkipOptions_MaxIntroDurationSeconds_Description" xml:space="preserve">
-    <value>Default is 150 seconds; range 10–600.</value>
+    <value>Range 10–600, default 150.</value>
   </data>
   <data name="IntroSkipOptions_MaxCreditsDurationSeconds_Description" xml:space="preserve">
-    <value>Default is 360 seconds; range 10–600.</value>
+    <value>Range 10–600, default 360.</value>
   </data>
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds_Description" xml:space="preserve">
-    <value>Default is 60 seconds; range 30–120.</value>
+    <value>Range 30–120, default 60.</value>
   </data>
 </root>

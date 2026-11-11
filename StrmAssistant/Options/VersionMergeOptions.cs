@@ -65,7 +65,8 @@ namespace StrmAssistant.Options
             new ButtonItem(
                 Resources.ExperienceEnhanceOptions_SplitMovieButton_Split_multi_version_movies_in_all_libraries)
             {
-                Icon = IconNames.clear_all, Data1 = "SplitMovies", ConfirmationPrompt = Resources.AreYouSureToContinue
+                Icon = IconNames.clear_all, Data1 = "SplitMovies",
+                ConfirmationPrompt = Resources.ExperienceEnhanceOptions_SplitMovieButton_Confirmation
             };
 
         [VisibleCondition(nameof(MergeMultiVersion), SimpleCondition.IsTrue)]

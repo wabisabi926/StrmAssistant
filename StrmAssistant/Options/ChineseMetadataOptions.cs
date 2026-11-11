@@ -48,7 +48,7 @@ namespace StrmAssistant.Options
         [Browsable(false)]
         public List<EditorSelectOption> TvdbLanguageList { get; set; } = new List<EditorSelectOption>();
 
-        [DisplayNameL("ModOptions_FallbackLanguages_Fallback_Languages", typeof(Resources))]
+        [DisplayNameL("ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages", typeof(Resources))]
         [DescriptionL("ModOptions_FallbackLanguages_Fallback_languages__Default_is_zh_SG_", typeof(Resources))]
         [EditMultilSelect]
         [SelectItemsSource(nameof(TvdbLanguageList))]

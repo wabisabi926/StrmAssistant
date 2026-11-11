@@ -5517,5 +5517,32 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ExperienceEnhanceOptions_SplitMovieButton_Confirmation {
+            get {
+                return ResourceManager.GetString("ExperienceEnhanceOptions_SplitMovieButton_Confirmation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string IntroSkipOptions_ClearIntro_Confirmation {
+            get {
+                return ResourceManager.GetString("IntroSkipOptions_ClearIntro_Confirmation", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages {
+            get {
+                return ResourceManager.GetString("ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages", resourceCulture);
+            }
+        }
+
     }
 }

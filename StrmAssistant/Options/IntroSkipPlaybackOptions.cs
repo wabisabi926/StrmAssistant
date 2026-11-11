@@ -101,7 +101,7 @@ namespace StrmAssistant.Options
                 Resources.ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers)
             {
                 Icon = IconNames.clear_all, Data1 = "ClearIntroCreditsMarkers",
-                ConfirmationPrompt = Resources.AreYouSureToContinue
+                ConfirmationPrompt = Resources.IntroSkipOptions_ClearIntro_Confirmation
             };
 
         [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]

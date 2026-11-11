@@ -24,10 +24,10 @@
     <value>同时提取分集与附加内容。默认关闭。</value>
   </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count" xml:space="preserve">
-    <value>主最大并发线程数</value>
+    <value>主任务最大并发</value>
   </data>
   <data name="PluginOptions_MaxConcurrentCount_Max_Concurrent_Count_must_be_between_1_to_10__Default_is_1_" xml:space="preserve">
-    <value>媒体信息提取，视频截图，预览缩略图，声纹提取任务共享，必须在 1 至 20 之间，默认为 1。</value>
+    <value>媒体信息、截图、缩略图、指纹任务共享；范围 1–20，默认 1。</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Extract" xml:space="preserve">
     <value>媒体信息</value>
@@ -36,7 +36,7 @@
     <value>媒体库范围</value>
   </data>
   <data name="PluginOptions_LibraryScope_Library_scope_to_extract__Blank_includes_all_" xml:space="preserve">
-    <value>留空包含全部媒体库；视频缩略图需在 Emby 媒体库设置中启用计划任务。</value>
+    <value>留空包含全部媒体库；视频缩略图需在 Emby 媒体库设置中开启“生成视频预览缩略图”。</value>
   </data>
   <data name="MediaInfoExtractOptions_CustomProbePath_Custom_Probe_Path" xml:space="preserve">
     <value>自定义 ffprobe</value>
@@ -57,10 +57,10 @@
     <value>为无主图视频截图，支持 STRM 与 BIF 预览。默认关闭。</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_Intro_Skip__Experimental_" xml:space="preserve">
-    <value>播放行为探测</value>
+    <value>启用播放探测</value>
   </data>
   <data name="PluginOptions_EnableIntroSkip_Enable_intro_skip_and_credits_skip_for_episodes__Default_is_False_" xml:space="preserve">
-    <value>根据实际播放行为识别片头片尾，依赖播放事件实时探测，无独立计划任务。默认关闭。</value>
+    <value>根据实际播放行为实时识别片头片尾；无独立计划任务。默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_MaxCreditsDurationSeconds" xml:space="preserve">
     <value>最大片尾时长（秒）</value>
@@ -75,7 +75,7 @@
     <value>播放探测媒体库</value>
   </data>
   <data name="IntroSkipOptions_LibraryScope_TV_shows_library_scope_to_detect__Blank_includes_all_" xml:space="preserve">
-    <value>播放探测生效的剧集/混合库；留空包含全部。</value>
+    <value>剧集/混合库；留空包含全部。</value>
   </data>
   <data name="PluginOptions_EditorTitle_Strm_Assistant" xml:space="preserve">
     <value>神医助手 Plus</value>
@@ -122,11 +122,14 @@
   <data name="ModOptions_ChineseMovieDb_Optimize_MovieDb_for_Chinese_metadata__Default_is_OFF_" xml:space="preserve">
     <value>尽可能从 TMDB 获取中文或日文元数据，默认关闭。</value>
   </data>
+  <data name="ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages" xml:space="preserve">
+    <value>TVDB 备选语言</value>
+  </data>
   <data name="ModOptions_FallbackLanguages_Fallback_Languages" xml:space="preserve">
-    <value>备选语言</value>
+    <value>TMDB 备选语言</value>
   </data>
   <data name="ModOptions_FallbackLanguages_Fallback_languages__Default_is_zh_SG_" xml:space="preserve">
-    <value>备选元数据语言，优先级为从左至右。</value>
+    <value>备选元数据语言，优先级从左至右。</value>
   </data>
   <data name="Favorites" xml:space="preserve">
     <value>❤️最爱</value>
@@ -147,7 +150,7 @@
     <value>关于</value>
   </data>
   <data name="IntroSkipOptions_UserScope_User_Scope" xml:space="preserve">
-    <value>允许的用户</value>
+    <value>用户范围</value>
   </data>
   <data name="IntroSkipOptions_UserScope_Users_allowed_to_detect__Blank_includes_all" xml:space="preserve">
     <value>留空包含全部用户。</value>
@@ -159,10 +162,10 @@
     <value>优先使用原语言海报，支持 TMDB, TVDB, Fanart，默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Built_in_Intro_Skip_Enhanced" xml:space="preserve">
-    <value>原生片头探测</value>
+    <value>启用原生片头探测</value>
   </data>
   <data name="IntroSkipOptions_UnlockIntroSkip_Unlock_Strm_support_for_built_in_intro_skip_detection" xml:space="preserve">
-    <value>解锁原生片头检测，支持 STRM。默认关闭。</value>
+    <value>启用 Emby 原生片头检测，支持 STRM。默认关闭。</value>
   </data>
   <data name="ModOptions_EnhanceChineseSearch_Enhance_Chinese_Search" xml:space="preserve">
     <value>中文搜索增强</value>
@@ -231,22 +234,22 @@
     <value>影音直链</value>
   </data>
   <data name="ModOptions_EnableStrmDirectRedirect_Strm_302_Direct_Link" xml:space="preserve">
-    <value>Strm 302 直链</value>
+    <value>STRM 302 直链</value>
   </data>
   <data name="ModOptions_EnableStrmDirectRedirect_Smart_direct_link_for_video_and_music_Strm_urls_without_server_relay__Default_is_OFF_" xml:space="preserve">
-    <value>智能直链视频和音乐 Strm Url 地址，无需服务端转发，默认关闭。</value>
+    <value>智能重定向视频和音乐 STRM 地址，无需服务端转发。默认关闭。</value>
   </data>
   <data name="ModOptions_EnableLiveTvDirectRedirect_LiveTV_Direct_Link" xml:space="preserve">
-    <value>LiveTV 直链</value>
+    <value>Live TV 直链</value>
   </data>
   <data name="ModOptions_EnableLiveTvDirectRedirect_Smart_direct_link_for_LiveTV_source_urls_without_server_relay__Default_is_OFF_" xml:space="preserve">
-    <value>智能直链电视源 Url 地址，无需服务端转发，默认关闭。</value>
+    <value>智能重定向电视源地址，无需服务端转发。默认关闭。</value>
   </data>
   <data name="ModOptions_StrmDirectRedirectFollow302_Follow_302_Redirect" xml:space="preserve">
-    <value>重定向 302 配置</value>
+    <value>跟随 302 重定向</value>
   </data>
   <data name="ModOptions_StrmDirectRedirectFollow302_Auto_resolve_the_real_302_url_of_cloud_drives__OFF_uses_the_original_url_in_the_strm_file__Default_is_OFF_" xml:space="preserve">
-    <value>自动重定向网盘 302 真实直链地址；关闭则使用 strm 文件内原始 Url 地址，默认关闭。</value>
+    <value>自动跟随网盘 302 真实直链；关闭时使用 STRM 文件内的原始地址。默认关闭。</value>
   </data>
   <data name="ModOptions_StrmVideoDirectRedirectClientBlacklist_Video_Direct_Link_Client_Blacklist" xml:space="preserve">
     <value>视频直链客户端黑名单</value>
@@ -279,7 +282,7 @@
     <value>按偏好隐藏演职人员</value>
   </data>
   <data name="ModOptions_HidePersonNoImage_Hide_person_without_image__Default_is_OFF_" xml:space="preserve">
-    <value>按偏好隐藏电影剧集页面的演职人员，非删除，仍可搜索，默认关闭。</value>
+    <value>按偏好隐藏电影/剧集页面的演职人员；仅隐藏，不删除，仍可搜索。默认关闭。</value>
   </data>
   <data name="ItemType_MusicArtist_MusicArtist" xml:space="preserve">
     <value>艺术家</value>
@@ -318,22 +321,22 @@
     <value>首位管理员的哪些偏好强制作用于所有用户。默认媒体库排序。</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_Intro_Detection_Fingerprint_Minutes" xml:space="preserve">
-    <value>声纹探测时长（分钟）</value>
+    <value>指纹检测时长（分钟）</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Library_Scope" xml:space="preserve">
     <value>片头指纹检测媒体库</value>
   </data>
   <data name="IntroSkipOptions_MarkerEnabledLibraryScope_Intro_detection_enabled_library_scope__Blank_includes_all_" xml:space="preserve">
-    <value>片头指纹检测生效的剧集/混合库；仅列出已开启片头检测的库；留空包含全部。</value>
+    <value>剧集/混合库；仅列出已开启片头检测的库；留空包含全部。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableAltMovieDbUrl" xml:space="preserve">
     <value>使用替代 TMDB 配置</value>
   </data>
   <data name="MetadataEnhanceOptions_EnhanceMovieDbPerson_Enhance_MovieDb_Person" xml:space="preserve">
-    <value>演职人员增强 TMDB</value>
+    <value>TMDB 演职人员增强</value>
   </data>
   <data name="MetadataEnhanceOptions_EnhanceMovieDbPerson_Import_season_cast_and_update_series_people__Default_is_OFF_" xml:space="preserve">
-    <value>计划任务刷新演员时提取别名，导入季的演职人员，更新节目系列的演职人员为各季合并，默认关闭。</value>
+    <value>刷新演员时提取别名，导入季的演职人员，合并剧集各季的演职人员。默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds" xml:space="preserve">
     <value>最小正片开场（秒）</value>
@@ -383,6 +386,9 @@
   <data name="MediaInfoExtractOptions_MediaInfoJsonRootFolder_Store_or_load_media_info_JSON_files_under_this_root_folder__Default_is_EMPTY_" xml:space="preserve">
     <value>提取、备份、恢复共用；留空与媒体文件同目录。</value>
   </data>
+  <data name="IntroSkipOptions_ClearIntro_Confirmation" xml:space="preserve">
+    <value>将清除所选范围内剧集的片头片尾标记；电影标记不处理。继续？</value>
+  </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
     <value>清除片头片尾标记</value>
   </data>
@@ -390,13 +396,13 @@
     <value>检测片头指纹</value>
   </data>
   <data name="ExtractIntroFingerprintTask_Description_Extracts_intro_fingerprint_from_episodes" xml:space="preserve">
-    <value>提取剧集声纹并检测片头，写入片头标记；不处理片尾；按“片头指纹检测媒体库”范围执行。</value>
+    <value>提取音频指纹并检测片头，写入片头标记；不处理片尾；按“片头指纹检测媒体库”范围执行。</value>
   </data>
   <data name="ExtractMediaInfoTask_Name_Extract_MediaInfo" xml:space="preserve">
     <value>提取媒体信息</value>
   </data>
   <data name="ExtractMediaInfoTask_Description_Extracts_media_info_from_videos_and_audios" xml:space="preserve">
-    <value>提取视频和音频的媒体信息，以及视频截图</value>
+    <value>提取视频/音频的媒体信息，并生成视频截图。</value>
   </data>
   <data name="PersistMediaInfoTask_Name_Persist_MediaInfo" xml:space="preserve">
     <value>备份媒体信息</value>
@@ -408,7 +414,7 @@
     <value>恢复媒体信息</value>
   </data>
   <data name="RestoreMediaInfoTask_Description_Restores_media_info_from_JSON_file" xml:space="preserve">
-    <value>从 JSON 恢复 DB 缺失的媒体信息、章节和缩略图；不覆盖已有媒体信息。</value>
+    <value>从 JSON 恢复数据库中缺失的媒体信息、章节和缩略图；不覆盖已有媒体信息。</value>
   </data>
   <data name="RefreshPersonTask_Name_Refresh_Chinese_Actor" xml:space="preserve">
     <value>刷新演员信息</value>
@@ -558,7 +564,7 @@
     <value>刮削优化</value>
   </data>
   <data name="MetadataEnhanceOptions_MovieDbEpisodeGroup_Support_MovieDb_Episode_Group" xml:space="preserve">
-    <value>支持剧集组刮削 TMDB</value>
+    <value>支持 TMDB 剧集组刮削</value>
   </data>
   <data name="MetadataEnhanceOptions_MovieDbEpisodeGroup_Support_MovieDb_episode_group_scrapping_for_TV_shows__Default_is_OFF_" xml:space="preserve">
     <value>用指定的剧集组刮削剧集，支持外部源，默认关闭。</value>
@@ -576,7 +582,7 @@
     <value>独占功能控制</value>
   </data>
   <data name="MetadataEnhanceOptions_LocalEpisodeGroup_Store_or_load_episode_group_info_to_from_JSON_file__Default_is_OFF_" xml:space="preserve">
-    <value>保存或加载剧集组至/自 JSON 文件，默认关闭。</value>
+    <value>保存到 JSON 文件或从 JSON 读取剧集组。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMovieDbEpisodeGroupExtendedInfo_Episode_Group_Extended_Info" xml:space="preserve">
     <value>剧集组扩展信息</value>
@@ -585,7 +591,7 @@
     <value>应用剧集组 json 中自定义的季简介（overview）与首播日期（air_date）字段。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_LocalEpisodeGroup_Local_Episode_Group" xml:space="preserve">
-    <value>启用本地剧集组 TMDB</value>
+    <value>启用本地剧集组</value>
   </data>
   <data name="MetadataEnhanceOptions_OptimizeMovieDbEpisodeScraping_Optimize_MovieDb_Episode_Scraping" xml:space="preserve">
     <value>优化 MovieDb 单集刮削</value>
@@ -594,10 +600,10 @@
     <value>按季获取单集元数据以减少 TMDB 请求，默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DisableMovieDbEpisodeScrapingFallback_Disable_Per_Episode_Fallback" xml:space="preserve">
-    <value>禁用逐集兑底请求</value>
+    <value>禁用逐集兜底请求</value>
   </data>
   <data name="MetadataEnhanceOptions_DisableMovieDbEpisodeScrapingFallback_Skip_per_episode_requests_when_season_data_is_empty__Default_is_OFF_" xml:space="preserve">
-    <value>当按季获取已成功但该集数据缺失或为空时，跳过逐集兑底请求，默认关闭。</value>
+    <value>当按季获取成功但该集数据缺失或为空时，跳过逐集兜底请求。默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DisableEpisodeImageScraping_Disable_Episode_Image_Scraping" xml:space="preserve">
     <value>禁用集图片刮削</value>
@@ -621,13 +627,13 @@
     <value>追更任务范围</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Client_Scope" xml:space="preserve">
-    <value>允许的客户端</value>
+    <value>客户端范围</value>
   </data>
   <data name="IntroSkipOptions_ClientScope_Allowed_clients__Default_is_Emby_Infuse_SenPlayer" xml:space="preserve">
-    <value>客户端名关键字，逗号分隔；第三方客户端可能探测不准。</value>
+    <value>客户端名关键字，逗号分隔；默认 Emby, Infuse, SenPlayer；第三方客户端可能探测不准。</value>
   </data>
   <data name="GeneralOptions_CooldownSeconds_Cooldown_Time__Seconds___Default_is_0" xml:space="preserve">
-    <value>主线程冷却时间 (秒)</value>
+    <value>主任务冷却时间（秒）</value>
   </data>
   <data name="InvalidShowSeasonIds" xml:space="preserve">
     <value>电视节目或播出季 ID 无效: {0}</value>
@@ -642,10 +648,10 @@
     <value>跳过名称含关键字的剧集（NCOP、Menu、特典）。默认留空。</value>
   </data>
   <data name="GeneralOptions_Tier2MaxConcurrentCount_Tier_2_Max_Concurrent_Count" xml:space="preserve">
-    <value>次最大并发线程数</value>
+    <value>次级任务最大并发</value>
   </data>
   <data name="GeneralOptions_Tier2MaxConcurrentCount_Refresh_metadata__subtitle__local_tasks__Default_is_1_" xml:space="preserve">
-    <value>刷新演员，剧集，扫外挂字幕，处理本地任务等共享，必须在 1 至 20 之间，默认为 1。</value>
+    <value>刷新演员、剧集元数据、扫描外挂字幕和本地任务等共享；范围 1–20，默认 1。</value>
   </data>
   <data name="GeneralOptions_EnableMemoryCleanup_Title" xml:space="preserve">
     <value>启用定期内存清理</value>
@@ -660,22 +666,22 @@
     <value>内存清理间隔，必须在 1 至 120 之间，默认为 5。</value>
   </data>
   <data name="GeneralOptions_CooldownDurationSeconds_Applicable_to_single_thread_mode__Default_is_0_" xml:space="preserve">
-    <value>单线程模式有效，必须在 0 至 60 之间，默认为 0。</value>
+    <value>仅单线程模式生效；范围 0–60，默认 0。</value>
   </data>
   <data name="IntroSkipOptions_IntroDetectionFingerprintMinutes_It_must_be_between_2_and_20__Default_is_10_" xml:space="preserve">
     <value>范围 2–20，默认 10。</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Per_Library_Fingerprint_Minutes" xml:space="preserve">
-    <value>分库声纹时长</value>
+    <value>分库指纹时长</value>
   </data>
   <data name="IntroSkipOptions_LibraryFingerprintMinutes_Overrides_for_specific_libraries_in_libraryId_minutes_format_separated_by_comma__falls_back_to_the_global_value__Default_is_EMPTY_" xml:space="preserve">
-    <value>格式「媒体库ID:分钟」，逗号分隔；未设置时使用全局值。</value>
+    <value>格式“媒体库ID:分钟”，逗号分隔；留空使用全局值。</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Parallel_Marker_Computation" xml:space="preserve">
-    <value>并行声纹计算</value>
+    <value>并行指纹计算</value>
   </data>
   <data name="IntroSkipOptions_ParallelMarkerComputation_Bypass_the_master_concurrency_limit_for_fingerprint_extraction_and_parallelize_across_all_CPU_cores__Default_is_OFF_" xml:space="preserve">
-    <value>按 CPU 核心并行提取声纹。默认关闭。</value>
+    <value>按 CPU 核心并行提取指纹。默认关闭。</value>
   </data>
   <data name="UIFunctionOptions_NoBoxsetsAutoCreation_Prevent_Boxsets_Auto_Creation" xml:space="preserve">
     <value>隐藏合集媒体库</value>
@@ -723,7 +729,7 @@
     <value>服务器首选元数据语言未设置为中文，刷新演员任务已中止。</value>
   </data>
   <data name="IntroDetectionEnhancedNotEnabled" xml:space="preserve">
-    <value>原生片头探测增强未启用，提取声纹任务已中止。</value>
+    <value>原生片头探测增强未启用，检测片头指纹任务已中止。</value>
   </data>
   <data name="ExclusiveControl_IgnoreExtSubChange_IgnoreExtSubChange" xml:space="preserve">
     <value>忽略外挂字幕变更</value>
@@ -735,7 +741,7 @@
     <value>重置时覆盖后续原生标记</value>
   </data>
   <data name="IntroSkipOptions_IntroSkipPreferences_IntroSkip_Preferences" xml:space="preserve">
-    <value>探测偏好（可选）</value>
+    <value>探测偏好</value>
   </data>
   <data name="IntroSkipOptions_IntroSkipPreferences_Description" xml:space="preserve">
     <value>留空使用默认行为；可多选。</value>
@@ -822,7 +828,7 @@
     <value>ISO 提取</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableIsoExtraction_Include_ISO_images_in_media_info_extraction__Windows_native_OS_mount__Linux_Docker_in_process_UDF_read_with_custom_ffprobe__Default_is_OFF_" xml:space="preserve">
-    <value>本地/远程 ISO 纳入提取；Windows 自动挂载，Linux/Docker 用进程内 UDF 选片采样；远程不支持截图。默认关闭。</value>
+    <value>本地/远程 ISO 纳入提取；Windows 自动挂载，Linux/Docker 用进程内选片采样；远程不支持截图。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_ClearEmbeddedMetadata_Clear_Embedded_Metadata" xml:space="preserve">
     <value>清除内嵌元数据</value>
@@ -882,10 +888,13 @@
     <value>跨媒体库合并</value>
   </data>
   <data name="MergeMovieTask_Description_Merge_movies_per_library_or_across_libraries_per_preference" xml:space="preserve">
-    <value>按偏好库内或跨库合并电影和电视节目，扫库后自动运行</value>
+    <value>按偏好库内或跨库合并电影与剧集；可手动或扫库后运行。</value>
+  </data>
+  <data name="ExperienceEnhanceOptions_SplitMovieButton_Confirmation" xml:space="preserve">
+    <value>将拆分所有库中的多版本电影；电视节目请先扫库。继续？</value>
   </data>
   <data name="ExperienceEnhanceOptions_SplitMovieButton_Split_multi_version_movies_in_all_libraries" xml:space="preserve">
-    <value>在所有库中拆分多版本电影（电视节目请扫库）</value>
+    <value>拆分多版本电影</value>
   </data>
   <data name="ExperienceEnhanceOptions_EnableDeepDelete_Enable_Deep_Delete" xml:space="preserve">
     <value>启用深度删除</value>
@@ -909,7 +918,7 @@
     <value>版本显示方式</value>
   </data>
   <data name="ExperienceEnhanceOptions_MultiVersionDisplayOption_Version_label_source__SystemDefault_MediaInfo_or_FileNameWithoutExtension__Default_is_MediaInfo_" xml:space="preserve">
-    <value>版本标签来源：默认 / 画质 / 画质+体积 / 文件名。默认「画质」。</value>
+    <value>版本标签来源：默认 / 画质 / 画质+体积 / 文件名。默认“画质”。</value>
   </data>
   <data name="ExperienceEnhanceOptions_MultiVersionSortOption_Version_Sort_Option" xml:space="preserve">
     <value>版本排序方式</value>
@@ -948,7 +957,7 @@
     <value>优化字幕下载</value>
   </data>
   <data name="ExperienceEnhanceOptions_NormalizeTrackLanguage_Normalize_Track_Language" xml:space="preserve">
-    <value>规范化音轨字幕语言</value>
+    <value>规范音轨字幕语言</value>
   </data>
   <data name="ExperienceEnhanceOptions_NormalizeTrackLanguage_Fix_undetermined_language_tags_on_external_audio_and_subtitles__Simplified_and_Traditional_Chinese_are_shown_in_titles__Default_is_OFF_" xml:space="preserve">
     <value>修正外挂音轨与字幕上无法识别的语言标记，让 Emby 自带的语言偏好能正确匹配；简体与繁体体现在轨道标题中。默认关闭。</value>
@@ -960,7 +969,7 @@
     <value>修正外挂音轨与字幕的语言标签</value>
   </data>
   <data name="NormalizeTrackLanguageTask_Notify_Completed" xml:space="preserve">
-    <value>语言标签规范化完成：检查 {0} 个条目，修正 {1} 个条目 / {2} 条轨道</value>
+    <value>语言标签规范完成：检查 {0} 个条目，修正 {1} 个条目 / {2} 条轨道</value>
   </data>
   <data name="Health_Button_Run" xml:space="preserve">
     <value>立即检查片源</value>
@@ -1035,7 +1044,7 @@
     <value>检查片源</value>
   </data>
   <data name="MediaHealthCheckTask_Description_Scan_media_info_for_declaration_mismatches" xml:space="preserve">
-    <value>交叉比对文件名宣称与已提取的媒体信息（只读）</value>
+    <value>交叉比对文件名标注与已提取的媒体信息（只读）。</value>
   </data>
   <data name="ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_" xml:space="preserve">
     <value>strm 路径解析为本地挂载，供 Open Subtitles 计算哈希与按文件名搜索（需该插件）。默认关闭。</value>
@@ -1068,7 +1077,7 @@
     <value>立即清理内存</value>
   </data>
   <data name="GeneralOptions_ScheduleIndexRebuild_Schedule_Search_Index_Rebuild" xml:space="preserve">
-    <value>排程重建搜索索引</value>
+    <value>计划重建搜索索引</value>
   </data>
   <data name="GeneralOptions_OptimizeSearchIndex_Optimize_Search_Index" xml:space="preserve">
     <value>优化搜索索引</value>
@@ -1098,28 +1107,28 @@
     <value>收藏的集不会被自动标记为已看。默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Enable_Automatic_Scraping" xml:space="preserve">
-    <value>自动补全</value>
+    <value>自动刮削</value>
   </data>
   <data name="IntroSkipOptions_EnableAutomaticIntroScraping_Scrape_intro_credits_markers_for_new_content__May_slow_down_library_scans__Default_is_OFF_" xml:space="preserve">
-    <value>刷新后自动补全标记；可能拖慢扫库。默认关闭。</value>
+    <value>刷新后自动刮削缺失标记；可能拖慢扫库。默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_IntroDb_Intro_Credits_Scraper" xml:space="preserve">
-    <value>IntroDb 标记补全</value>
+    <value>启用在线刮削</value>
   </data>
   <data name="IntroSkipOptions_EnableIntroDbScrape_Scrape_intro_credits_markers_from_TheIntroDB_when_refreshing_series_or_movies__fill_missing_only__Default_is_OFF_" xml:space="preserve">
-    <value>刷新时补全缺失的片头片尾标记。默认关闭。</value>
+    <value>从 IntroDb / TheIntroDB 补全缺失的片头片尾标记。默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope" xml:space="preserve">
     <value>刮削媒体库</value>
   </data>
   <data name="IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_" xml:space="preserve">
-    <value>选择要刮削的剧集/混合库；留空包含全部。</value>
+    <value>剧集/混合库；留空包含全部。</value>
   </data>
   <data name="IntroSkipOptions_IncludeMovies_Include_Movies" xml:space="preserve">
     <value>包含电影</value>
   </data>
   <data name="IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_" xml:space="preserve">
-    <value>同时刮削电影。电影只写章节标记，不参与跳过。默认关闭。</value>
+    <value>同时刮削电影；仅写章节标记，不参与跳过。默认关闭。</value>
   </data>
   <data name="IntroSkipOptions_IntroDbApiKey_Api_Key" xml:space="preserve">
     <value>IntroDb API Key</value>
@@ -1128,10 +1137,10 @@
     <value>introdb.app 的 Key，按 IMDb ID 查询；留空使用公共限额。</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_TIDB_API_Key" xml:space="preserve">
-    <value>TIDB API Key</value>
+    <value>TheIntroDB API Key</value>
   </data>
   <data name="IntroSkipOptions_TidbApiKey_API_key_increases_daily_usage_limits__Default_is_empty_" xml:space="preserve">
-    <value>TheIntroDB 的 Key，按 TMDB ID 查询；留空使用公共限额。</value>
+    <value>TheIntroDB（TIDB）的 Key，按 TMDB ID 查询；留空使用公共限额。</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Unified_IntroDb_Providers" xml:space="preserve">
     <value>数据源顺序</value>
@@ -1143,7 +1152,7 @@
     <value>刮削片头片尾</value>
   </data>
   <data name="ScrapeIntroDbTask_Description_Fills_missing_intro_credits_markers_from_TheIntroDB" xml:space="preserve">
-    <value>按“刮削媒体库”范围为缺失片头片尾标记的剧集补齐标记，按来源顺序尝试，不覆盖其他来源；可选包含电影。建议先在网站确认有数据再执行。</value>
+    <value>按“刮削媒体库”范围为剧集补齐缺失的片头片尾标记，按数据源顺序尝试，不覆盖其他来源；默认不包含电影。建议先在网站确认有数据再执行。</value>
   </data>
   <data name="ImageCapturePostProcess_EnsureAspect16By9_Ensure_Aspect_16x9" xml:space="preserve">
     <value>裁剪为 16:9</value>
@@ -1245,7 +1254,7 @@
     <value>演员中文名</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanPosterFallback_Douban_Poster_Fallback" xml:space="preserve">
-    <value>海报兜底</value>
+    <value>海报备用来源</value>
   </data>
   <data name="AreYouSureToContinue" xml:space="preserve">
     <value>您确定要继续吗？</value>
@@ -1257,13 +1266,13 @@
     <value>电影合并偏好</value>
   </data>
   <data name="ExperienceEnhanceOptions_MergeSeriesPreferences_Series_Merge_Preference" xml:space="preserve">
-    <value>电视节目合并偏好</value>
+    <value>剧集合并偏好</value>
   </data>
   <data name="ExperienceEnhanceOptions_MergeSeriesPreferences_Series_merge_works_across_libraries_only_in_GlobalScope" xml:space="preserve">
-    <value>跨媒体库的同一系列版本合并仅在全局范围(GlobalScope)下生效。</value>
+    <value>跨库的同一剧集版本合并仅在“全局范围”下生效。</value>
   </data>
   <data name="ExtractVideoThumbnailTask_Description_Extract_video_thumbnail_preview" xml:space="preserve">
-    <value>提取视频预览缩略图和章节图</value>
+    <value>提取视频缩略图与章节图。</value>
   </data>
   <data name="EpisodeRefreshTask_Description_Refresh_metadata_for_episodes_missing_overview" xml:space="preserve">
     <value>按偏好刷新剧集缺失的元数据和图片</value>
@@ -1284,7 +1293,7 @@
     <value>点击查看免责声明。未删除插件前，请勿发送日志至官方。请务必牢记！</value>
   </data>
   <data name="IntroSkipOptions_BlacklistShows_List_of_Series_Id_or_Season_Id_separated_by_comma_or_semicolon__Default_is_EMPTY" xml:space="preserve">
-    <value>系列或季 ID，逗号分隔。默认留空。</value>
+    <value>剧集/季 ID，逗号分隔。默认留空。</value>
   </data>
   <data name="Notification_DeepDelete_EventName" xml:space="preserve">
     <value>媒体深度删除</value>
@@ -1476,7 +1485,7 @@
     <value>HDR 标注</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrTagging_Tag_HDR_Vivid_and_dual_layer_Dolby_Vision_Profile_7__Requires_a_server_restart__Default_is_OFF_" xml:space="preserve">
-    <value>为 HDR Vivid 与双层杜比视界打画质标签；修改后需重启。默认关闭。</value>
+    <value>为 HDR Vivid 与双层杜比视界添加画质标签；修改后需重启。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Tag_dual_layer_Dolby_Vision_as_Profile_7" xml:space="preserve">
     <value>标注双层杜比视界为 Profile 7</value>
@@ -1491,7 +1500,7 @@
     <value>补采 HDR 静态元数据</value>
   </data>
   <data name="MediaInfoExtractOptions_CaptureHdrStaticMetadata_Read_MaxCLL_MaxFALL_and_mastering_display_from_probe_side_data_and_write_them_to_the_video_track_title__Default_is_OFF_" xml:space="preserve">
-    <value>从探测结果的 side_data 读取 MaxCLL / MaxFALL 与母版显示信息，写入视频轨标题；仅补充信息，不改变播放与画质判定。默认关闭。</value>
+    <value>读取 HDR 静态元数据（MaxCLL / MaxFALL 与母版显示信息），写入视频轨标题；仅补充信息，不改变播放与画质判定。默认关闭。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Detects_CUVA_dynamic_metadata_and_shows_the_video_range_label_as_HDR_Vivid_" xml:space="preserve">
     <value>检测 CUVA 元数据；HDR 片源会额外读一帧。默认开启。</value>
@@ -1563,7 +1572,7 @@
     <value>演练模式</value>
   </data>
   <data name="ExperienceEnhanceOptions_DryRun_Description" xml:space="preserve">
-    <value>清除片头、清理媒体信息、删除版本等破坏性操作仅记录日志，不写库、不删文件。默认关闭。</value>
+    <value>清除片头片尾标记、清理媒体信息、删除版本等破坏性操作仅记录日志，不写库、不删文件。默认关闭。</value>
   </data>
   <data name="ExperienceEnhanceOptions_Group_Notification" xml:space="preserve">
     <value>通知</value>
@@ -1575,7 +1584,7 @@
     <value>内存管理</value>
   </data>
   <data name="GeneralOptions_Group_ConfigTransfer" xml:space="preserve">
-    <value>配置迁移</value>
+    <value>配置备份与恢复</value>
   </data>
   <data name="GeneralOptions_Group_RuntimeStatus" xml:space="preserve">
     <value>维护工具</value>
@@ -1659,7 +1668,7 @@
     <value>重建播放进度索引</value>
   </data>
   <data name="RebuildUserDataKeysTask_Description_Recompute_and_persist_the_per_library_user_data_key_for_every_movie_and_episode__Run_once_after_toggling_Track_Play_Progress_per_Library_and_restarting" xml:space="preserve">
-    <value>按当前开关重算并落库每个电影、剧集、季与单集的按库播放进度索引。切换“各媒体库内记录播放进度”并重启 Emby 后运行一次；关闭开关后运行可恢复原状态。</value>
+    <value>按当前开关重算并写入每个电影、剧集、季与单集的按库播放进度索引。切换“各媒体库内记录播放进度”并重启 Emby 后运行一次；关闭开关后运行可恢复原状态。</value>
   </data>
   <data name="CleanupMetadataCacheTask_Name_Cleanup_Metadata_Cache" xml:space="preserve">
     <value>清理元数据缓存</value>
@@ -1674,7 +1683,7 @@
     <value>让支持版本选择的客户端（如 Kodi）在版本下拉显示画质、HDR 与音轨标签；仅多版本条目生效。默认关闭。</value>
   </data>
   <data name="ScheduledTasks_EditorTitle_Scheduled_Tasks" xml:space="preserve">
-    <value>计划任务</value>
+    <value>常用任务</value>
   </data>
   <data name="ScheduledTasks_Started" xml:space="preserve">
     <value>已开始执行：{0}</value>
@@ -1803,12 +1812,12 @@
     <value>通知与日志</value>
   </data>
   <data name="IntroSkipOptions_MaxIntroDurationSeconds_Description" xml:space="preserve">
-    <value>默认 150 秒；范围 10–600。</value>
+    <value>范围 10–600，默认 150。</value>
   </data>
   <data name="IntroSkipOptions_MaxCreditsDurationSeconds_Description" xml:space="preserve">
-    <value>默认 360 秒；范围 10–600。</value>
+    <value>范围 10–600，默认 360。</value>
   </data>
   <data name="IntroSkipOptions_MinOpeningPlotDurationSeconds_Description" xml:space="preserve">
-    <value>默认 60 秒；范围 30–120。</value>
+    <value>范围 30–120，默认 60。</value>
   </data>
 </root>

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using static StrmAssistant.Mod.PatchManager;
 
 namespace StrmAssistant.Mod
@@ -21,6 +22,7 @@ namespace StrmAssistant.Mod
     public class IntroMarkerProtector : PatchBase<IntroMarkerProtector>
     {
         private static MethodInfo _saveChapters;
+        private static readonly AsyncLocal<long> BypassItem = new AsyncLocal<long>();
 
         private static readonly MarkerType[] ProtectedMarkerTypes =
         {
@@ -56,11 +58,30 @@ namespace StrmAssistant.Mod
             PatchUnpatch(PatchTracker, apply, _saveChapters, prefix: nameof(SaveChaptersPrefix));
         }
 
+        /// <summary>
+        /// 仅用于「用户主动清除」和「从 JSON 恢复章节」这类需要覆盖标记的写入。
+        /// 媒体信息提取/预取只 bypass ChapterChangeTracker，不再连带关闭标记保护。
+        /// </summary>
+        public static void BypassInstance(BaseItem item)
+        {
+            BypassItem.Value = item?.InternalId ?? 0;
+        }
+
+        internal static bool IsBypassed(long itemId)
+        {
+            return BypassItem.Value != 0 && BypassItem.Value == itemId;
+        }
+
+        internal static void ClearBypass()
+        {
+            BypassItem.Value = 0;
+        }
+
         [HarmonyPrefix]
         private static void SaveChaptersPrefix(long itemId, List<ChapterInfo> chapters)
         {
             if (itemId <= 0 || chapters == null) return;
-            if (ChapterChangeTracker.IsBypassed(itemId)) return;
+            if (IsBypassed(itemId)) return;
 
             // 三种标记都已存在时不需要再查旧章节
             if (ProtectedMarkerTypes.All(t => chapters.Any(c => c.MarkerType == t))) return;

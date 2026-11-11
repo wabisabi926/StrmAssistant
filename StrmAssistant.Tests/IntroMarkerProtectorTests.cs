@@ -1,3 +1,4 @@
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Model.Entities;
 using StrmAssistant.Mod;
 using System.Collections.Generic;
@@ -94,6 +95,28 @@ namespace StrmAssistant.Tests
             Assert.Equal(3, merged.Count);
             Assert.Contains(merged, c => c.StartPositionTicks == 10);
             Assert.DoesNotContain(merged, c => c.StartPositionTicks == 1);
+        }
+
+        [Fact]
+        public void ChapterChangeTrackerBypass_DoesNotBypassMarkerProtection()
+        {
+            var item = new Movie { InternalId = 42 };
+
+            ChapterChangeTracker.BypassInstance(item);
+            try
+            {
+                Assert.True(ChapterChangeTracker.IsBypassed(42));
+                Assert.False(IntroMarkerProtector.IsBypassed(42));
+            }
+            finally
+            {
+                ChapterChangeTracker.ClearBypass();
+            }
+
+            IntroMarkerProtector.BypassInstance(item);
+            Assert.True(IntroMarkerProtector.IsBypassed(42));
+            IntroMarkerProtector.ClearBypass();
+            Assert.False(IntroMarkerProtector.IsBypassed(42));
         }
 
         [Fact]

@@ -395,14 +395,16 @@ namespace StrmAssistant.Common
                 c.MarkerType == MarkerType.IntroStart || c.MarkerType == MarkerType.IntroEnd ||
                 c.MarkerType == MarkerType.CreditsStart);
 
-            // 用户主动清除：让 IntroMarkerProtector 放行，避免标记被合并回来
+            // 用户主动清除：两个 bypass 都要放行，否则标记会被保护逻辑合并回来
             StrmAssistant.Mod.ChapterChangeTracker.BypassInstance(item);
+            StrmAssistant.Mod.IntroMarkerProtector.BypassInstance(item);
             try
             {
                 _itemRepository.SaveChapters(item.InternalId, chapters);
             }
             finally
             {
+                StrmAssistant.Mod.IntroMarkerProtector.ClearBypass();
                 StrmAssistant.Mod.ChapterChangeTracker.ClearBypass();
             }
 

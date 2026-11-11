@@ -291,7 +291,7 @@
     <value>显示优化</value>
   </data>
   <data name="LibraryOrderOptions_EditorTitle_Library_and_Order" xml:space="preserve">
-    <value>媒体库与排序</value>
+    <value>媒体库排序</value>
   </data>
   <data name="SearchLogOptions_EditorTitle_Search_and_Logs" xml:space="preserve">
     <value>搜索与日志</value>

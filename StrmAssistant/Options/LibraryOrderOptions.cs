@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 namespace StrmAssistant.Options
 {
     /// <summary>
-    /// 体验增强 · 媒体库与排序分组：首页库卡片角标、合集库、条目自然排序、库顺序强制。
+    /// 体验增强 · 媒体库排序分组：首页库卡片角标、合集库、条目自然排序、库顺序强制。
     /// 作用面是「媒体库与列表怎么组织」——比显示优化更外围，故排在它之后。
     /// 注意：<see cref="VisibleConditionAttribute"/> / <see cref="EnabledConditionAttribute"/> 的目标属性
     /// 按**同级路径**解析，<c>IsModSupported</c> 必须留在本类内。

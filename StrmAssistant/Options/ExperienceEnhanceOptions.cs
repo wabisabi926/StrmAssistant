@@ -49,7 +49,7 @@ namespace StrmAssistant.Options
         [DisplayNameL("ItemDisplayOptions_EditorTitle_Item_Display", typeof(Resources))]
         public ItemDisplayOptions ItemDisplay { get; set; } = new ItemDisplayOptions();
 
-        /// <summary>媒体库与排序：首页库卡片角标、合集库、条目自然排序、库顺序强制。</summary>
+        /// <summary>媒体库排序：首页库卡片角标、合集库、条目自然排序、库顺序强制。</summary>
         [DisplayNameL("LibraryOrderOptions_EditorTitle_Library_and_Order", typeof(Resources))]
         public LibraryOrderOptions LibraryOrder { get; set; } = new LibraryOrderOptions();
 

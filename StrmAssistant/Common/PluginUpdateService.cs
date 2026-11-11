@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -45,8 +46,12 @@ namespace StrmAssistant.Common
     {
         public const string RepoOwner = "wabisabi926";
         public const string RepoName = "StrmAssistant";
+        public const string RepoWebUrl = "https://github.com/" + RepoOwner + "/" + RepoName;
         public const string LatestReleaseUrl =
             "https://api.github.com/repos/" + RepoOwner + "/" + RepoName + "/releases/latest";
+        public const string LatestReleasePageUrl = RepoWebUrl + "/releases/latest";
+
+        private const string ReleaseTagPathMarker = "/releases/tag/";
 
         private const string StatusFileName = "StrmAssistant_plugin_update_status.json";
         private static readonly Regex AssetPattern = new Regex(
@@ -132,6 +137,58 @@ namespace StrmAssistant.Common
                 return assetVersion != null && assetVersion == version &&
                        Uri.IsWellFormedUriString(asset.DownloadUrl, UriKind.Absolute);
             });
+        }
+
+        /// <summary>
+        /// 从 releases/tag/&lt;tag&gt; 的最终 URL 解析版本标签；releases/latest 的 302 不占 API 额度。
+        /// </summary>
+        internal static bool TryParseTagFromReleaseUrl(string url, out string tag)
+        {
+            tag = null;
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return false;
+
+            var path = uri.AbsolutePath;
+            var markerIndex = path.IndexOf(ReleaseTagPathMarker, StringComparison.OrdinalIgnoreCase);
+            if (markerIndex < 0) return false;
+
+            var candidate = Uri.UnescapeDataString(
+                path.Substring(markerIndex + ReleaseTagPathMarker.Length).Trim('/'));
+            if (string.IsNullOrWhiteSpace(candidate) || ParseVersion(candidate) == null) return false;
+
+            tag = candidate;
+            return true;
+        }
+
+        internal static string BuildReleaseAssetUrl(string tag, Version version)
+        {
+            if (string.IsNullOrWhiteSpace(tag) || version == null) return null;
+
+            return RepoWebUrl + "/releases/download/" + Uri.EscapeDataString(tag) +
+                   "/StrmAssistantPlus_v" + version + ".dll";
+        }
+
+        /// <summary>把 GitHub/网络失败翻译成可直接展示的说明；403 区分检查与下载两个阶段。</summary>
+        internal static string DescribeGitHubHttpError(HttpStatusCode? status, bool downloading)
+        {
+            switch (status)
+            {
+                case HttpStatusCode.Unauthorized:
+                    return Resources.PluginUpdate_Error_Unauthorized;
+                case HttpStatusCode.Forbidden:
+                case HttpStatusCode.TooManyRequests:
+                    return downloading
+                        ? Resources.PluginUpdate_Error_DownloadForbidden
+                        : Resources.PluginUpdate_Error_ApiForbidden;
+                case HttpStatusCode.NotFound:
+                    return downloading
+                        ? Resources.PluginUpdate_Error_DownloadNotFound
+                        : Resources.PluginUpdate_Error_ApiNotFound;
+                case null:
+                    return Resources.PluginUpdate_Error_Network;
+                default:
+                    return string.Format(Resources.PluginUpdate_Error_HttpStatus, (int)status.Value);
+            }
         }
 
         internal static string Summarize(PluginUpdateStatus status)

@@ -5796,5 +5796,86 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_ApiForbidden {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_ApiForbidden", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_ApiNotFound {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_ApiNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_DownloadForbidden {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_DownloadForbidden", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_DownloadNotFound {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_DownloadNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_FallbackFailed {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_FallbackFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_HttpStatus {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_HttpStatus", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_Network {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_Network", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_Unauthorized {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_Unauthorized", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string PluginUpdate_Error_FallbackParse {
+            get {
+                return ResourceManager.GetString("PluginUpdate_Error_FallbackParse", resourceCulture);
+            }
+        }
+
     }
 }

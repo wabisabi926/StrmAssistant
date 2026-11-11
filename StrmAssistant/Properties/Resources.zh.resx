@@ -1848,13 +1848,13 @@
     <value>GitHub Token</value>
   </data>
   <data name="PluginUpdateOptions_GitHubToken_Description" xml:space="preserve">
-    <value>可选。提高 GitHub API 限额；私有仓库需要。公开仓库留空即可。</value>
+    <value>可选。提高 GitHub API 限额（未登录 60 次/小时/IP，登录后 5000 次/小时）。仅在直连时发送，不经过代理。</value>
   </data>
   <data name="PluginUpdateOptions_GitHubProxy_GitHub_Proxy" xml:space="preserve">
     <value>GitHub 代理</value>
   </data>
   <data name="PluginUpdateOptions_GitHubProxy_Description" xml:space="preserve">
-    <value>可选。GitHub 访问加速前缀（如镜像地址），留空直连。</value>
+    <value>可选。GitHub 访问加速前缀（如镜像地址），留空直连。API 限额用尽时会尝试 Releases 页面回退。</value>
   </data>
   <data name="PluginUpdateTask_Name_Check_Plugin_Updates" xml:space="preserve">
     <value>检查插件更新</value>
@@ -1894,6 +1894,33 @@
   </data>
   <data name="PluginUpdate_Notify_Failed" xml:space="preserve">
     <value>插件更新失败：{0}</value>
+  </data>
+  <data name="PluginUpdate_Error_ApiForbidden" xml:space="preserve">
+    <value>GitHub API 拒绝访问（403）：匿名请求限额已用尽（60 次/小时/IP），或代理拦截。可填写 GitHub Token 提升额度（5000 次/小时），或稍后重试。</value>
+  </data>
+  <data name="PluginUpdate_Error_DownloadForbidden" xml:space="preserve">
+    <value>下载插件失败（403）：Release 资产不可用，或代理拦截。请检查 GitHubProxy，或稍后重试。</value>
+  </data>
+  <data name="PluginUpdate_Error_Unauthorized" xml:space="preserve">
+    <value>GitHub 认证失败（401）：Token 无效或已过期。</value>
+  </data>
+  <data name="PluginUpdate_Error_ApiNotFound" xml:space="preserve">
+    <value>GitHub 仓库或 Release 不存在（404）。</value>
+  </data>
+  <data name="PluginUpdate_Error_DownloadNotFound" xml:space="preserve">
+    <value>下载地址不存在（404）：Release 资产可能已被删除。</value>
+  </data>
+  <data name="PluginUpdate_Error_HttpStatus" xml:space="preserve">
+    <value>GitHub 返回 HTTP {0}。</value>
+  </data>
+  <data name="PluginUpdate_Error_Network" xml:space="preserve">
+    <value>无法连接 GitHub：网络超时或被拦截。</value>
+  </data>
+  <data name="PluginUpdate_Error_FallbackFailed" xml:space="preserve">
+    <value>GitHub API 不可用，Releases 页面回退也失败：{0}</value>
+  </data>
+  <data name="PluginUpdate_Error_FallbackParse" xml:space="preserve">
+    <value>Releases 页面未返回可识别的版本标签。</value>
   </data>
   <data name="PluginUpdate_Activity_UpdateAvailable" xml:space="preserve">
     <value>发现插件更新</value>

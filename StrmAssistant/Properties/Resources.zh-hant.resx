@@ -1848,13 +1848,13 @@
     <value>GitHub Token</value>
   </data>
   <data name="PluginUpdateOptions_GitHubToken_Description" xml:space="preserve">
-    <value>可選。提高 GitHub API 限額；私有倉庫需要。公開倉庫留空即可。</value>
+    <value>可選。提高 GitHub API 限額（未登入 60 次/小時/IP，登入後 5000 次/小時）。僅在直連時傳送，不經過代理。</value>
   </data>
   <data name="PluginUpdateOptions_GitHubProxy_GitHub_Proxy" xml:space="preserve">
     <value>GitHub 代理</value>
   </data>
   <data name="PluginUpdateOptions_GitHubProxy_Description" xml:space="preserve">
-    <value>可選。GitHub 存取加速前綴（如鏡像位址），留空直連。</value>
+    <value>可選。GitHub 存取加速前綴（如鏡像位址），留空直連。API 限額用盡時會嘗試 Releases 頁面回退。</value>
   </data>
   <data name="PluginUpdateTask_Name_Check_Plugin_Updates" xml:space="preserve">
     <value>檢查外掛更新</value>
@@ -1894,6 +1894,33 @@
   </data>
   <data name="PluginUpdate_Notify_Failed" xml:space="preserve">
     <value>外掛更新失敗：{0}</value>
+  </data>
+  <data name="PluginUpdate_Error_ApiForbidden" xml:space="preserve">
+    <value>GitHub API 拒絕存取（403）：匿名請求限額已用盡（60 次/小時/IP），或代理攔截。可填寫 GitHub Token 提升額度（5000 次/小時），或稍後重試。</value>
+  </data>
+  <data name="PluginUpdate_Error_DownloadForbidden" xml:space="preserve">
+    <value>下載外掛失敗（403）：Release 資產不可用，或代理攔截。請檢查 GitHubProxy，或稍後重試。</value>
+  </data>
+  <data name="PluginUpdate_Error_Unauthorized" xml:space="preserve">
+    <value>GitHub 認證失敗（401）：Token 無效或已過期。</value>
+  </data>
+  <data name="PluginUpdate_Error_ApiNotFound" xml:space="preserve">
+    <value>GitHub 倉庫或 Release 不存在（404）。</value>
+  </data>
+  <data name="PluginUpdate_Error_DownloadNotFound" xml:space="preserve">
+    <value>下載位址不存在（404）：Release 資產可能已被刪除。</value>
+  </data>
+  <data name="PluginUpdate_Error_HttpStatus" xml:space="preserve">
+    <value>GitHub 傳回 HTTP {0}。</value>
+  </data>
+  <data name="PluginUpdate_Error_Network" xml:space="preserve">
+    <value>無法連線 GitHub：網路逾時或被攔截。</value>
+  </data>
+  <data name="PluginUpdate_Error_FallbackFailed" xml:space="preserve">
+    <value>GitHub API 不可用，Releases 頁面回退也失敗：{0}</value>
+  </data>
+  <data name="PluginUpdate_Error_FallbackParse" xml:space="preserve">
+    <value>Releases 頁面未傳回可辨識的版本標籤。</value>
   </data>
   <data name="PluginUpdate_Activity_UpdateAvailable" xml:space="preserve">
     <value>發現外掛更新</value>

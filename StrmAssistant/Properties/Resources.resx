@@ -1935,13 +1935,13 @@
     <value>GitHub Token</value>
   </data>
   <data name="PluginUpdateOptions_GitHubToken_Description" xml:space="preserve">
-    <value>Optional. Raises the GitHub API rate limit and allows private repositories. Leave blank for public releases.</value>
+    <value>Optional. Raises the GitHub API limit (60/hour/IP unauthenticated, 5000/hour with a token). Sent only when connecting directly, never through a proxy.</value>
   </data>
   <data name="PluginUpdateOptions_GitHubProxy_GitHub_Proxy" xml:space="preserve">
     <value>GitHub Proxy</value>
   </data>
   <data name="PluginUpdateOptions_GitHubProxy_Description" xml:space="preserve">
-    <value>Optional URL prefix for GitHub access, such as a mirror. Leave blank to connect directly.</value>
+    <value>Optional URL prefix for GitHub access, such as a mirror. Leave blank to connect directly. If the API limit is exhausted, the releases page is used as a fallback.</value>
   </data>
   <data name="PluginUpdateTask_Name_Check_Plugin_Updates" xml:space="preserve">
     <value>Check Plugin Updates</value>
@@ -1981,6 +1981,33 @@
   </data>
   <data name="PluginUpdate_Notify_Failed" xml:space="preserve">
     <value>Plugin update failed: {0}</value>
+  </data>
+  <data name="PluginUpdate_Error_ApiForbidden" xml:space="preserve">
+    <value>GitHub API refused the request (403): the unauthenticated limit (60/hour/IP) is exhausted or a proxy is blocking it. Add a GitHub Token (5000/hour) or try again later.</value>
+  </data>
+  <data name="PluginUpdate_Error_DownloadForbidden" xml:space="preserve">
+    <value>Plugin download failed (403): the release asset is unavailable or a proxy is blocking it. Check GitHub Proxy or try again later.</value>
+  </data>
+  <data name="PluginUpdate_Error_Unauthorized" xml:space="preserve">
+    <value>GitHub authentication failed (401): the token is invalid or expired.</value>
+  </data>
+  <data name="PluginUpdate_Error_ApiNotFound" xml:space="preserve">
+    <value>The GitHub repository or release was not found (404).</value>
+  </data>
+  <data name="PluginUpdate_Error_DownloadNotFound" xml:space="preserve">
+    <value>Download URL not found (404): the release asset may have been deleted.</value>
+  </data>
+  <data name="PluginUpdate_Error_HttpStatus" xml:space="preserve">
+    <value>GitHub returned HTTP {0}.</value>
+  </data>
+  <data name="PluginUpdate_Error_Network" xml:space="preserve">
+    <value>Cannot reach GitHub: network timeout or blocked.</value>
+  </data>
+  <data name="PluginUpdate_Error_FallbackFailed" xml:space="preserve">
+    <value>GitHub API is unavailable and the releases page fallback also failed: {0}</value>
+  </data>
+  <data name="PluginUpdate_Error_FallbackParse" xml:space="preserve">
+    <value>The releases page did not return a recognizable version tag.</value>
   </data>
   <data name="PluginUpdate_Activity_UpdateAvailable" xml:space="preserve">
     <value>Plugin update available</value>

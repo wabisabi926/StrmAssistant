@@ -2,6 +2,7 @@ using MediaBrowser.Common;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Model.Activity;
 using MediaBrowser.Model.Logging;
+using MediaBrowser.Model.Net;
 using MediaBrowser.Model.Tasks;
 using StrmAssistant.Common;
 using StrmAssistant.Options;
@@ -208,22 +209,104 @@ namespace StrmAssistant.ScheduledTask
                 EnableDefaultUserAgent = false
             };
 
-            if (!string.IsNullOrWhiteSpace(options.GitHubToken))
+            // Token 只发给 api.github.com：配置代理时请求发往第三方前缀，不能带凭据
+            if (!string.IsNullOrWhiteSpace(options.GitHubToken) && string.IsNullOrWhiteSpace(options.GitHubProxy))
             {
                 request.RequestHeaders["Authorization"] = "Bearer " + options.GitHubToken.Trim();
             }
 
-            using var response = await Plugin.HttpClient.SendAsync(request, "GET").ConfigureAwait(false);
-            if (response.StatusCode != HttpStatusCode.OK)
+            try
+            {
+                using var response = await Plugin.HttpClient.SendAsync(request, "GET").ConfigureAwait(false);
+
+                if (response.StatusCode == HttpStatusCode.Forbidden ||
+                    response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    return await GetLatestReleaseFromPageAsync(options, cancellationToken).ConfigureAwait(false);
+                }
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new InvalidOperationException(
+                        PluginUpdateService.DescribeGitHubHttpError(response.StatusCode, false));
+                }
+
+                using var document = await JsonDocument.ParseAsync(response.Content, default, cancellationToken)
+                    .ConfigureAwait(false);
+                return ParseRelease(document.RootElement);
+            }
+            catch (HttpException e) when (e.StatusCode == HttpStatusCode.Forbidden ||
+                                          e.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                return await GetLatestReleaseFromPageAsync(options, cancellationToken).ConfigureAwait(false);
+            }
+            catch (HttpException e)
             {
                 throw new InvalidOperationException(
-                    $"GitHub API 返回 {(int)response.StatusCode} {response.StatusCode}");
+                    PluginUpdateService.DescribeGitHubHttpError(e.StatusCode, false), e);
             }
+        }
 
-            using var document = await JsonDocument.ParseAsync(response.Content, default, cancellationToken)
-                .ConfigureAwait(false);
-            var root = document.RootElement;
+        /// <summary>
+        /// API 限额用尽（403）时的回退：releases/latest 是普通页面重定向，不占用 API 额度。
+        /// 资产名由固定命名规则构造，因此不依赖 API 返回的 assets/digest。
+        /// </summary>
+        private static async Task<PluginReleaseInfo> GetLatestReleaseFromPageAsync(PluginUpdateOptions options,
+            CancellationToken cancellationToken)
+        {
+            Plugin.Instance.Logger.Warn(
+                "PluginUpdate - GitHub API rate limited, falling back to releases page");
 
+            var request = new HttpRequestOptions
+            {
+                Url = WithProxy(PluginUpdateService.LatestReleasePageUrl, options.GitHubProxy),
+                CancellationToken = cancellationToken,
+                BufferContent = true,
+                UserAgent = Plugin.Instance.UserAgent,
+                EnableDefaultUserAgent = false
+            };
+
+            try
+            {
+                using var response = await Plugin.HttpClient.SendAsync(request, "GET").ConfigureAwait(false);
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new InvalidOperationException(
+                        string.Format(Resources.PluginUpdate_Error_FallbackFailed,
+                            PluginUpdateService.DescribeGitHubHttpError(response.StatusCode, false)));
+                }
+
+                if (!PluginUpdateService.TryParseTagFromReleaseUrl(response.ResponseUrl, out var tag))
+                {
+                    throw new InvalidOperationException(Resources.PluginUpdate_Error_FallbackParse);
+                }
+
+                var version = PluginUpdateService.ParseVersion(tag);
+
+                return new PluginReleaseInfo
+                {
+                    TagName = tag,
+                    Assets =
+                    {
+                        new PluginReleaseAsset
+                        {
+                            Name = "StrmAssistantPlus_v" + version + ".dll",
+                            DownloadUrl = PluginUpdateService.BuildReleaseAssetUrl(tag, version)
+                        }
+                    }
+                };
+            }
+            catch (HttpException e)
+            {
+                throw new InvalidOperationException(
+                    string.Format(Resources.PluginUpdate_Error_FallbackFailed,
+                        PluginUpdateService.DescribeGitHubHttpError(e.StatusCode, false)), e);
+            }
+        }
+
+        private static PluginReleaseInfo ParseRelease(JsonElement root)
+        {
             if (root.TryGetProperty("draft", out var draft) && draft.ValueKind == JsonValueKind.True ||
                 root.TryGetProperty("prerelease", out var prerelease) && prerelease.ValueKind == JsonValueKind.True)
             {
@@ -267,15 +350,19 @@ namespace StrmAssistant.ScheduledTask
                 EnableDefaultUserAgent = false
             };
 
-            if (!string.IsNullOrWhiteSpace(options.GitHubToken))
+            try
             {
-                request.RequestHeaders["Authorization"] = "Bearer " + options.GitHubToken.Trim();
-            }
+                using var response = await Plugin.HttpClient.Get(request).ConfigureAwait(false);
 
-            using var response = await Plugin.HttpClient.Get(request).ConfigureAwait(false);
-            await using var file = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None,
-                81920, true);
-            await response.CopyToAsync(file, 81920, cancellationToken).ConfigureAwait(false);
+                await using var file = new FileStream(tempFile, FileMode.Create, FileAccess.Write,
+                    FileShare.None, 81920, true);
+                await response.CopyToAsync(file, 81920, cancellationToken).ConfigureAwait(false);
+            }
+            catch (HttpException e)
+            {
+                throw new InvalidOperationException(
+                    PluginUpdateService.DescribeGitHubHttpError(e.StatusCode, true), e);
+            }
         }
 
         private static void VerifyDownload(PluginReleaseAsset asset, string tempFile, Version currentVersion,

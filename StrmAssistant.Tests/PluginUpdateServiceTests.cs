@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using StrmAssistant.Common;
 using Xunit;
 
@@ -103,6 +104,57 @@ namespace StrmAssistant.Tests
         public void GetDigestHex_RejectsInvalid(string digest)
         {
             Assert.Null(PluginUpdateService.GetDigestHex(digest));
+        }
+
+        [Theory]
+        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/tag/v4.0.0.3", "v4.0.0.3")]
+        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/tag/4.0.0.3/", "4.0.0.3")]
+        [InlineData("https://ghproxy.example/https://github.com/wabisabi926/StrmAssistant/releases/tag/v4.1.0?x=1",
+            "v4.1.0")]
+        public void TryParseTagFromReleaseUrl_ParsesVersionTag(string url, string expected)
+        {
+            Assert.True(PluginUpdateService.TryParseTagFromReleaseUrl(url, out var tag));
+            Assert.Equal(expected, tag);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/latest")]
+        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/tag/latest")]
+        [InlineData("not-a-url")]
+        public void TryParseTagFromReleaseUrl_RejectsNonVersionUrl(string url)
+        {
+            Assert.False(PluginUpdateService.TryParseTagFromReleaseUrl(url, out var tag));
+            Assert.Null(tag);
+        }
+
+        [Fact]
+        public void BuildReleaseAssetUrl_UsesFixedAssetName()
+        {
+            Assert.Equal(
+                "https://github.com/wabisabi926/StrmAssistant/releases/download/v4.0.0.3/StrmAssistantPlus_v4.0.0.3.dll",
+                PluginUpdateService.BuildReleaseAssetUrl("v4.0.0.3", new Version(4, 0, 0, 3)));
+            Assert.Null(PluginUpdateService.BuildReleaseAssetUrl(null, new Version(4, 0, 0, 3)));
+            Assert.Null(PluginUpdateService.BuildReleaseAssetUrl("v4.0.0.3", null));
+        }
+
+        [Fact]
+        public void DescribeGitHubHttpError_MapsStatusCodes()
+        {
+            var checkForbidden = PluginUpdateService.DescribeGitHubHttpError(HttpStatusCode.Forbidden, false);
+            var downloadForbidden = PluginUpdateService.DescribeGitHubHttpError(HttpStatusCode.Forbidden, true);
+
+            Assert.Contains("403", checkForbidden);
+            Assert.Contains("403", downloadForbidden);
+            Assert.NotEqual(checkForbidden, downloadForbidden);
+            Assert.Contains("401",
+                PluginUpdateService.DescribeGitHubHttpError(HttpStatusCode.Unauthorized, false));
+            Assert.Contains("404", PluginUpdateService.DescribeGitHubHttpError(HttpStatusCode.NotFound, false));
+            Assert.Contains("500",
+                PluginUpdateService.DescribeGitHubHttpError(HttpStatusCode.InternalServerError, true));
+            Assert.False(string.IsNullOrWhiteSpace(
+                PluginUpdateService.DescribeGitHubHttpError(null, false)));
         }
     }
 }

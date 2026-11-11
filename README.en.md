@@ -31,14 +31,15 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 ✅ **Intro scope and marker protection (4.0.0.1)**
 - Playback detection, fingerprint detection and online scraping can each select TV/mixed libraries; blank includes all
-- Online scraping gets its own library scope; movies are off by default and require "Include Movies"
+- Online scraping supports a library scope; movies are off by default and require "Include Movies"
 - Metadata refresh no longer clears intro/credits markers; Emby for Kodi refreshes immediately after marker writes
-- Media info group order: Extraction Optimization moved to third, giving Scope → Timing → Optimization → Storage & Capture → ISO & HDR
+- Media info settings now follow Scope → Timing → Optimization → Storage & Capture → ISO & HDR
 - Fixed IntroDb credits and movie data; unified scheduled task and settings button wording
 
-✅ **Config migration cleanup (4.0.0.0)**
-- Removed legacy config migrations from 3.0.0.55–62 (about 1,600 lines); the minimum direct-upgrade version is now 3.0.0.78
-- Legacy flat config is rejected with a clear message instead of silently falling back to defaults; added config schema versioning (v1)
+✅ **Upgrade threshold and legacy config protection (4.0.0.0)**
+- Direct upgrade requires 3.0.0.78 or later; older versions must upgrade to 3.0.0.78 and start once to complete the config migration
+- Legacy config that has not been migrated is rejected with a clear message instead of silently falling back to defaults
+- The config schema version is recorded at startup and used to decide whether a future upgrade needs migration
 
 ✅ **Settings page order (3.0.0.78)**
 - "Advanced" now shows Playback & Cleanup before display/order groups, with dry-run moved to the end; "Media Info" shows HDR tagging before ISO tools; storage paths unchanged

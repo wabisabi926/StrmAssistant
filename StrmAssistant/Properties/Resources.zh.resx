@@ -1203,10 +1203,10 @@
     <value>只更新首播日期在此天数内的条目。0 表示不限制。 默认 365 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
-    <value>可选。仅豆瓣网页抓取与海报下载需要；留空时匿名访问，遇到风控再填。配置 Access Token 时优先使用官方接口。</value>
+    <value>可选。用于豆瓣网页抓取、演员表与海报搜索/下载；Access Token 不覆盖这些请求。留空时匿名访问，遇到风控再填。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
-    <value>豆瓣开放平台 V2 Token。配置后优先使用官方接口。 默认留空。</value>
+    <value>豆瓣开放平台 V2 Token。配置后优先使用官方接口，覆盖简介、评分、类型、地区、语言；演员表仍走网页、海报取自搜索建议，Cookie 仍可能需要。 默认留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
     <value>按 IMDb ID 取分：来源为 IMDb 时写入社区评分，启用影评人评分时写入烂番茄分。来源为 IMDb 或开启影评人评分时必填；来源为 TMDB/豆瓣且未开启影评人评分时可留空。</value>

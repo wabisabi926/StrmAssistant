@@ -664,9 +664,42 @@ namespace StrmAssistant.Provider.Douban
         /// <summary>没有豆瓣 ID 时，评分快照按 IMDb 外部 ID 落盘（<c>imdb:tt...</c>）。</summary>
         private static string GetImdbSnapshotKey(string imdbId)
         {
-            return string.IsNullOrWhiteSpace(imdbId)
-                ? null
-                : "imdb:" + imdbId.Trim().ToLowerInvariant();
+            return DoubanRatingResolver.GetImdbSnapshotKey(imdbId);
+        }
+
+        /// <summary>
+        /// 统一评分解析：豆瓣条目分 → IMDb 快照 → legacy 兜底；legacy 成功时按解析出的键记快照。
+        /// 刷新路径与「统一社区评分」共用，保证两条入口的取分与降级行为一致。
+        /// </summary>
+        private async Task<DoubanRatingResolution> ResolveRatingAsync(BaseItem item, string doubanId,
+            double? subjectRating, long? subjectVotes, CancellationToken cancellationToken)
+        {
+            var resolution = await DoubanRatingResolver.ResolveAsync(
+                    doubanId,
+                    item.GetProviderId(MetadataProviders.Imdb),
+                    subjectRating,
+                    subjectVotes,
+                    key => TryGetSnapshotState(key, out var rating, out var votes, out var checkedAt)
+                        ? new DoubanSnapshotView { Rating = rating, Votes = votes, CheckedAt = checkedAt }
+                        : null,
+                    (imdbId, token) => _ratingClient.GetRatingAsync(imdbId, token),
+                    ImdbRatingCacheDuration,
+                    DateTime.UtcNow,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            if (resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok)
+            {
+                if (resolution.Source == DoubanRatingSource.LegacyImdb)
+                {
+                    RecordRatingSnapshot(resolution.SnapshotKey, resolution.Rating, resolution.Votes);
+                }
+
+                _logger.Debug("DoubanAssist - Rating {0} for {1} source={2}", resolution.Rating, item.Name,
+                    resolution.Source);
+            }
+
+            return resolution;
         }
 
         /// <summary>
@@ -1533,57 +1566,32 @@ namespace StrmAssistant.Provider.Douban
                         }
 
                         var doubanId = item.GetProviderId(DoubanProviderId);
-                        var imdbId = item.GetProviderId(MetadataProviders.Imdb);
 
-                        double? rating = null;
-                        string snapshotKey = null;
+                        DoubanSubject subject = null;
 
                         // ① 条目本身已匹配豆瓣：优先用豆瓣条目分（subject 缓存命中时不发请求）。
                         if (!string.IsNullOrEmpty(doubanId))
                         {
-                            var subject = await FetchSubjectAsync(doubanId, cancellationToken)
+                            subject = await FetchSubjectAsync(doubanId, cancellationToken)
                                 .ConfigureAwait(false);
-
-                            if (subject?.Rating.HasValue == true)
-                            {
-                                rating = subject.Rating.Value;
-                                snapshotKey = doubanId;
-                            }
                         }
 
-                        // ② 没有豆瓣 ID 或豆瓣条目无评分：回退 IMDb 第三方 API。
-                        if (!rating.HasValue && !string.IsNullOrWhiteSpace(imdbId))
+                        // ② 条目无评分（或没有豆瓣 ID）：统一走 IMDb 快照 / legacy 兜底。
+                        var resolution = await ResolveRatingAsync(item, doubanId, subject?.Rating, subject?.Votes,
+                            cancellationToken).ConfigureAwait(false);
+
+                        if (resolution.Status == DoubanRatingClient.DoubanLightStatus.Failed)
                         {
-                            var imdbKey = GetImdbSnapshotKey(imdbId);
-
-                            if (TryGetSnapshotState(imdbKey, out var cachedRating, out _,
-                                    out var checkedAt) &&
-                                checkedAt.HasValue &&
-                                DateTime.UtcNow - checkedAt.Value < ImdbRatingCacheDuration)
-                            {
-                                rating = cachedRating;
-                                snapshotKey = imdbKey;
-                            }
-                            else
-                            {
-                                var result = await _ratingClient.GetRatingAsync(imdbId, cancellationToken)
-                                    .ConfigureAwait(false);
-
-                                if (result.Status == DoubanRatingClient.DoubanLightStatus.Failed)
-                                {
-                                    report.Failed++;
-                                    continue;
-                                }
-
-                                if (result.Status == DoubanRatingClient.DoubanLightStatus.Ok)
-                                {
-                                    rating = result.Rating;
-                                    // 有豆瓣 ID 时把回退分记到该 subject 名下，徽章/Kodi 仍能按条目读到分。
-                                    snapshotKey = !string.IsNullOrEmpty(doubanId) ? doubanId : imdbKey;
-                                    RecordRatingSnapshot(snapshotKey, result.Rating, result.Votes);
-                                }
-                            }
+                            report.Failed++;
+                            continue;
                         }
+
+                        var rating = resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok
+                            ? resolution.Rating
+                            : (double?)null;
+                        var snapshotKey = resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok
+                            ? resolution.SnapshotKey
+                            : null;
 
                         if (!rating.HasValue)
                         {
@@ -1592,7 +1600,7 @@ namespace StrmAssistant.Provider.Douban
                                 item.UpdateToRepository(ItemUpdateType.MetadataEdit);
                                 report.Cleared++;
                             }
-                            else if (string.IsNullOrEmpty(doubanId) && string.IsNullOrWhiteSpace(imdbId))
+                            else if (resolution.Status == DoubanRatingClient.DoubanLightStatus.NoId)
                             {
                                 report.NoId++;
                             }
@@ -1751,18 +1759,12 @@ namespace StrmAssistant.Provider.Douban
 
                 if (!doubanRating.HasValue && needDoubanRating)
                 {
-                    var imdbId = item.GetProviderId(MetadataProviders.Imdb);
+                    var resolution = await ResolveRatingAsync(item, subject.SubjectId, subject.Rating,
+                        subject.Votes, cancellationToken).ConfigureAwait(false);
 
-                    if (!string.IsNullOrWhiteSpace(imdbId))
+                    if (resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok)
                     {
-                        var result = await _ratingClient.GetRatingAsync(imdbId, cancellationToken)
-                            .ConfigureAwait(false);
-
-                        if (result.Status == DoubanRatingClient.DoubanLightStatus.Ok)
-                        {
-                            doubanRating = result.Rating;
-                            RecordRatingSnapshot(subject.SubjectId, result.Rating, result.Votes);
-                        }
+                        doubanRating = resolution.Rating;
                     }
                 }
 

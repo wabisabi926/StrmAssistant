@@ -26,6 +26,8 @@ namespace StrmAssistant.Provider.Douban
         private const int RequestIntervalMs = 1500;
         private const int JitterMaxMs = 1000;
         private const int BreakerThreshold = 5;
+        private const int CacheLimit = 5000;
+        private const int PruneWriteInterval = 256;
 
         private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(7);
         private static readonly TimeSpan MissCacheDuration = TimeSpan.FromHours(1);
@@ -41,6 +43,7 @@ namespace StrmAssistant.Provider.Douban
         private static readonly SemaphoreSlim ThrottleGate = new SemaphoreSlim(1, 1);
         private static DateTimeOffset _lastRequest = DateTimeOffset.MinValue;
         private static int _consecutiveFailures;
+        private static int _writesSincePrune;
         private static DateTimeOffset _breakerUntil = DateTimeOffset.MinValue;
         private static readonly ConcurrentDictionary<string, (double Rating, int Votes, DateTimeOffset Expiry)> Cache =
             new ConcurrentDictionary<string, (double, int, DateTimeOffset)>(StringComparer.OrdinalIgnoreCase);
@@ -104,14 +107,46 @@ namespace StrmAssistant.Provider.Douban
 
             if (result.Status == DoubanLightStatus.Ok)
             {
-                Cache[key] = (result.Rating, result.Votes, DateTimeOffset.UtcNow.Add(CacheDuration));
+                StoreCache(key, (result.Rating, result.Votes, DateTimeOffset.UtcNow.Add(CacheDuration)));
             }
             else if (result.Status == DoubanLightStatus.NoRating)
             {
-                Cache[key] = (0, 0, DateTimeOffset.UtcNow.Add(MissCacheDuration));
+                StoreCache(key, (0, 0, DateTimeOffset.UtcNow.Add(MissCacheDuration)));
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 写入缓存并按固定写入次数清理过期项；超过上限时优先淘汰最早到期项，
+        /// 避免大库长期运行后这个进程内字典只增不减。
+        /// </summary>
+        private static void StoreCache(string key, (double Rating, int Votes, DateTimeOffset Expiry) entry)
+        {
+            Cache[key] = entry;
+
+            if (Interlocked.Increment(ref _writesSincePrune) < PruneWriteInterval) return;
+
+            Interlocked.Exchange(ref _writesSincePrune, 0);
+            PruneCache();
+        }
+
+        private static void PruneCache()
+        {
+            var now = DateTimeOffset.UtcNow;
+
+            foreach (var entry in Cache)
+            {
+                if (entry.Value.Expiry <= now) Cache.TryRemove(entry.Key, out _);
+            }
+
+            var overflow = Cache.Count - CacheLimit;
+            if (overflow <= 0) return;
+
+            foreach (var entry in Cache.OrderBy(e => e.Value.Expiry).Take(overflow))
+            {
+                Cache.TryRemove(entry.Key, out _);
+            }
         }
 
         private async Task<DoubanLightRating> FetchLegacy(string imdbId, CancellationToken cancellationToken)

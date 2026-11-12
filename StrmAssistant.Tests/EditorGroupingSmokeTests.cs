@@ -105,15 +105,23 @@ namespace StrmAssistant.Tests
         }
 
         [Fact]
-        public void Metadata_Groups_AreMerged()
+        public void Metadata_Groups_AreOrdered()
         {
             var container = (EditObjectContainer)new MetadataEnhanceOptions().CreateEditContainer();
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
             Assert.Equal(
                 new[] { "ChineseMetadata", "CommunityRating", "DoubanAssist", "PosterPerson",
-                        "ScrapeEpisodeGroup", "RefreshCache" },
+                        "ScrapeEpisodeGroup", "EpisodeRefresh", "MetadataCache" },
                 groups.Select(g => g.Name).ToArray());
+
+            var refresh = groups.First(g => NameOrId(g, "EpisodeRefresh"));
+            Assert.Contains(refresh.EditorItems, i => NameOrId(i, "EpisodeRefreshScope"));
+            Assert.DoesNotContain(refresh.EditorItems, i => NameOrId(i, "MetadataCacheMode"));
+
+            var cache = groups.First(g => NameOrId(g, "MetadataCache"));
+            Assert.Contains(cache.EditorItems, i => NameOrId(i, "MetadataCacheMode"));
+            Assert.DoesNotContain(cache.EditorItems, i => NameOrId(i, "EpisodeRefreshScope"));
         }
 
         [Fact]
@@ -153,6 +161,14 @@ namespace StrmAssistant.Tests
             Assert.True(playbackItems.FindIndex(i => NameOrId(i, "DryRun")) >
                         playbackItems.FindIndex(i => NameOrId(i, "EnableDeepDelete")));
             Assert.DoesNotContain(groups, g => NameOrId(g, "Safety"));
+
+            var itemDisplay = groups.First(g => NameOrId(g, "ItemDisplay"));
+            var notifications = groups.First(g => NameOrId(g, "NotificationsLogs"));
+            Assert.Contains(itemDisplay.EditorItems, i => NameOrId(i, "ShowMediaInfo"));
+            Assert.Contains(itemDisplay.EditorItems, i => NameOrId(i, "BlockSearchRecommend"));
+            Assert.DoesNotContain(notifications.EditorItems, i => NameOrId(i, "ShowMediaInfo"));
+            Assert.DoesNotContain(notifications.EditorItems, i => NameOrId(i, "BlockSearchRecommend"));
+            Assert.Contains(notifications.EditorItems, i => NameOrId(i, "ReverseLogLines"));
         }
 
         [Fact]

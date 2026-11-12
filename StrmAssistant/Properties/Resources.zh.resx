@@ -549,7 +549,7 @@
     <value>剧集组</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_MetadataCache" xml:space="preserve">
-    <value>本地元数据缓存</value>
+    <value>元数据缓存</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_MetadataRefresh" xml:space="preserve">
     <value>元数据刷新</value>
@@ -1374,7 +1374,7 @@
     <value>剧集刷新的媒体库范围，留空表示包含全部剧集库。</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Build_Local_Metadata_Cache" xml:space="preserve">
-    <value>构建本地元数据缓存</value>
+    <value>缓存模式</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Description" xml:space="preserve">
     <value>优先读取本地 override JSON，其次读取被动缓存；可加速刮削并支持离线。默认关闭。</value>
@@ -1930,5 +1930,8 @@
   </data>
   <data name="PluginUpdate_Activity_Failed" xml:space="preserve">
     <value>插件更新失败</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_EpisodeRefresh" xml:space="preserve">
+    <value>剧集刷新</value>
   </data>
 </root>

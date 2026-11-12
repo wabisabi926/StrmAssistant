@@ -81,5 +81,28 @@ namespace StrmAssistant.Options
                    (string.Equals(id, name, StringComparison.OrdinalIgnoreCase) ||
                     id.EndsWith("." + name, StringComparison.OrdinalIgnoreCase));
         }
+
+        /// <summary>
+        /// 在已重建的 UI 分组之间移动单个编辑项，不改变字段 ID 与存储路径。
+        /// 用于把同一子对象里的少量设置归入语义更合适的分组。
+        /// </summary>
+        public static void MoveItems(EditObjectContainer container, string fromGroup, string toGroup,
+            params string[] itemNames)
+        {
+            if (container?.EditorRoot?.EditorItems == null || itemNames == null || itemNames.Length == 0) return;
+
+            var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
+            var from = groups.FirstOrDefault(g => NameOrId(g, fromGroup));
+            var to = groups.FirstOrDefault(g => NameOrId(g, toGroup));
+            if (from?.EditorItems == null || to == null) return;
+
+            var moved = from.EditorItems
+                .Where(item => itemNames.Any(name => NameOrId(item, name)))
+                .ToList();
+            if (moved.Count == 0) return;
+
+            from.EditorItems = from.EditorItems.Except(moved).ToArray();
+            to.EditorItems = (to.EditorItems ?? Array.Empty<EditorBase>()).Concat(moved).ToArray();
+        }
     }
 }

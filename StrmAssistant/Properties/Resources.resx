@@ -636,7 +636,7 @@
     <value>Episode Group</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_MetadataCache" xml:space="preserve">
-    <value>Local Metadata Cache</value>
+    <value>Metadata Cache</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_MetadataRefresh" xml:space="preserve">
     <value>Metadata Refresh</value>
@@ -1461,7 +1461,7 @@
     <value>Episode refresh library scope. Blank includes all TV show libraries.</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Build_Local_Metadata_Cache" xml:space="preserve">
-    <value>Build Local Metadata Cache</value>
+    <value>Cache Mode</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Description" xml:space="preserve">
     <value>Read local override JSON first, then the passive cache; faster scraping and offline support. Default is OFF.</value>
@@ -2017,5 +2017,8 @@
   </data>
   <data name="PluginUpdate_Activity_Failed" xml:space="preserve">
     <value>Plugin update failed</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_EpisodeRefresh" xml:space="preserve">
+    <value>Episode Refresh</value>
   </data>
 </root>

@@ -549,7 +549,7 @@
     <value>劇集組</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_MetadataCache" xml:space="preserve">
-    <value>本機中繼資料快取</value>
+    <value>元資料快取</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_MetadataRefresh" xml:space="preserve">
     <value>中繼資料重新整理</value>
@@ -1374,7 +1374,7 @@
     <value>劇集重新整理的媒體庫範圍，留空表示包含全部劇集庫。</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Build_Local_Metadata_Cache" xml:space="preserve">
-    <value>建立本機中繼資料快取</value>
+    <value>快取模式</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheMode_Description" xml:space="preserve">
     <value>優先讀取本機 override JSON，其次讀取被動快取；可加速刮削並支援離線。預設關閉。</value>
@@ -1930,5 +1930,8 @@
   </data>
   <data name="PluginUpdate_Activity_Failed" xml:space="preserve">
     <value>外掛更新失敗</value>
+  </data>
+  <data name="MetadataEnhanceOptions_Group_EpisodeRefresh" xml:space="preserve">
+    <value>劇集刷新</value>
   </data>
 </root>

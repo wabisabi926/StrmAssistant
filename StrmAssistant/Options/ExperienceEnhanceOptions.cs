@@ -79,6 +79,11 @@ namespace StrmAssistant.Options
                         "LibraryOrder", "LibraryOrder"),
                     new EditorGroupSpec(Resources.ExperienceEnhanceOptions_Group_NotificationAndLogs,
                         "NotificationsLogs", "Notification", "SearchLog"));
+
+                // 搜索结果卡片信息与搜索页推荐属于显示效果，移入显示优化分组。
+                EditorGroupHelper.MoveItems(editContainer, "NotificationsLogs", "ItemDisplay",
+                    nameof(SearchLogOptions.ShowMediaInfo),
+                    nameof(SearchLogOptions.BlockSearchRecommend));
             }
 
             return container;

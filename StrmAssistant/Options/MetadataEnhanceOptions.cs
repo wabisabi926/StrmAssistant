@@ -153,8 +153,10 @@ namespace StrmAssistant.Options
                         "PosterPerson", "PosterSort", "PersonEnhance"),
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_ScrapeEpisodeGroup,
                         "ScrapeEpisodeGroup", "ScrapeOptimize", "EpisodeGroup"),
-                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_RefreshCache,
-                        "RefreshCache", "MetadataRefresh", "MetadataCache"));
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_EpisodeRefresh,
+                        "EpisodeRefresh", "MetadataRefresh"),
+                    new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_MetadataCache,
+                        "MetadataCache", "MetadataCache"));
             }
 
             return container;
@@ -171,9 +173,7 @@ namespace StrmAssistant.Options
 
         protected override void Validate(ValidationContext context)
         {
-            // UI 上 MetadataCache 已由 EditorGroupHelper 合并进 RefreshCache 组，
-            // ValidateChildGroup 按组名查找会失败并抛
-            // "A child editor group of name 'MetadataCache' could not be found"。
+            // UI 上 MetadataCache 已独立分组，但 Emby 仍不会自动递归校验；
             // 这里直接调用子对象的校验逻辑，校验规则本身不变。
             MetadataCache.ValidateOptions(context);
         }

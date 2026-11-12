@@ -5877,5 +5877,14 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_Group_EpisodeRefresh {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_Group_EpisodeRefresh", resourceCulture);
+            }
+        }
+
     }
 }

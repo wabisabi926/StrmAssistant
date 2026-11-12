@@ -104,15 +104,15 @@ namespace StrmAssistant.Web.Service
                 return response;
             }
 
-            var imdbIds = request.Ids
+            var keys = request.Ids
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(i => i.Trim())
-                .Where(i => i.StartsWith("tt", StringComparison.OrdinalIgnoreCase) && i.Length > 2)
+                .Where(i => !string.IsNullOrEmpty(i))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Take(80)
                 .ToList();
 
-            response.Ratings = Plugin.DoubanAssist.GetRatingsByImdb(imdbIds, user);
+            response.Ratings = Plugin.DoubanAssist.GetRatingsByKeys(keys, user);
 
             // Kodi 端同理：只有需要豆瓣评分（社区评分/徽章/第三评分）时才暴露分数。
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();

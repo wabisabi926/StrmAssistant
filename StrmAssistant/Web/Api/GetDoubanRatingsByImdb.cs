@@ -7,8 +7,8 @@ namespace StrmAssistant.Web.Api
     [Authenticated]
     public class GetDoubanRatingsByImdb
     {
-        [ApiMember(Name = "Ids", Description = "Comma separated IMDb ids (tt...)", IsRequired = true,
-            DataType = "string", ParameterType = "query")]
+        [ApiMember(Name = "Ids", Description = "Comma separated keys: tt... (IMDb), tmdb:123, douban:123",
+            IsRequired = true, DataType = "string", ParameterType = "query")]
         public string Ids { get; set; }
     }
 }

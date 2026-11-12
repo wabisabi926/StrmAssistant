@@ -65,9 +65,15 @@ namespace StrmAssistant.Provider.Douban
         public double? CommunityRating { get; set; }
     }
 
-    /// <summary>按 IMDb 查分的结果：供 Kodi 侧（助手/皮肤）用外部 ID 定位条目。</summary>
+    /// <summary>按外部键查分的结果：供 Kodi 侧（助手/皮肤）用 IMDb / TMDb / 豆瓣 ID 定位条目。</summary>
     public class DoubanImdbRatingInfo
     {
+        /// <summary>规范化后的查询键：tt... / tmdb:... / douban:...</summary>
+        public string Key { get; set; }
+
+        /// <summary>查询键类型：imdb / tmdb / douban。</summary>
+        public string KeyType { get; set; }
+
         public string Imdb { get; set; }
         public string ItemId { get; set; }
         public string SubjectId { get; set; }

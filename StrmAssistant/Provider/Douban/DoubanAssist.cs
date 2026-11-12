@@ -211,6 +211,10 @@ namespace StrmAssistant.Provider.Douban
         public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds, User user) =>
             _ratingService.GetRatings(itemIds, user);
 
+        /// <summary>按 IMDb / TMDb / 豆瓣键列表解析豆瓣评分（Kodi 侧用外部 ID 定位）。</summary>
+        public List<DoubanImdbRatingInfo> GetRatingsByKeys(IEnumerable<string> keys, User user) =>
+            _ratingService.GetRatingsByKeys(keys, user);
+
         /// <summary>按 IMDb ID 列表解析豆瓣评分（Kodi 侧用外部 ID 定位）。</summary>
         public List<DoubanImdbRatingInfo> GetRatingsByImdb(IEnumerable<string> imdbIds, User user) =>
             _ratingService.GetRatingsByImdb(imdbIds, user);

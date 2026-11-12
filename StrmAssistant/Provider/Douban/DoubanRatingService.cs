@@ -25,7 +25,7 @@ namespace StrmAssistant.Provider.Douban
     public sealed class DoubanRatingService
     {
         private static readonly TimeSpan ImdbRatingCacheDuration = TimeSpan.FromDays(7);
-        private static readonly TimeSpan ImdbIndexTtl = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan ItemKeyIndexTtl = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan RatingsSaveThrottle = TimeSpan.FromSeconds(10);
 
         private readonly IJsonSerializer _jsonSerializer;
@@ -39,9 +39,9 @@ namespace StrmAssistant.Provider.Douban
         private readonly object _ratingsLock = new object();
         private readonly ConcurrentDictionary<long, byte> _refreshScheduled = new ConcurrentDictionary<long, byte>();
 
-        private Dictionary<string, long> _imdbItemIndex;
-        private DateTime _imdbIndexBuilt;
-        private readonly object _imdbIndexLock = new object();
+        private Dictionary<string, long> _itemKeyIndex;
+        private DateTime _itemKeyIndexBuilt;
+        private readonly object _itemKeyIndexLock = new object();
 
         private Dictionary<string, DoubanRatingSnapshot> _ratings;
         private DateTime _lastRatingsSave = DateTime.MinValue;
@@ -142,32 +142,37 @@ namespace StrmAssistant.Provider.Douban
         }
 
         /// <summary>
-        /// 按 IMDb ID 列表解析豆瓣评分（Kodi 侧用外部 ID 定位，无需读取 E4K 映射库）。
-        /// Emby 认识但没有豆瓣数据时也会返回该条目（<c>Rating = null</c>）。
+        /// 按外部键列表解析豆瓣评分（Kodi 侧用 IMDb / TMDb / 豆瓣 ID 定位）。
+        /// 支持 tt...、tmdb:123、douban:123；Emby 认识但没有豆瓣数据时返回 Rating=null。
         /// </summary>
-        public List<DoubanImdbRatingInfo> GetRatingsByImdb(IEnumerable<string> imdbIds, User user)
+        public List<DoubanImdbRatingInfo> GetRatingsByKeys(IEnumerable<string> keys, User user)
         {
             var result = new List<DoubanImdbRatingInfo>();
+            var wanted = new List<DoubanRatingKey>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            var wanted = (imdbIds ?? Enumerable.Empty<string>())
-                .Select(i => i?.Trim())
-                .Where(i => !string.IsNullOrEmpty(i))
-                .Select(i => i.ToLowerInvariant())
-                .Distinct()
-                .ToList();
+            foreach (var raw in keys ?? Enumerable.Empty<string>())
+            {
+                if (!DoubanRatingKeyParser.TryParse(raw, out var key)) continue;
+                if (!seen.Add(key.CanonicalKey)) continue;
+
+                wanted.Add(key);
+                if (wanted.Count >= 80) break;
+            }
 
             if (wanted.Count == 0) return result;
 
-            var index = GetImdbItemIndex();
+            var index = GetItemKeyIndex();
 
-            foreach (var imdb in wanted)
+            foreach (var key in wanted)
             {
-                if (!index.TryGetValue(imdb, out var itemId)) continue;
+                if (!index.TryGetValue(key.IndexKey, out var itemId)) continue;
 
                 var item = Plugin.LibraryManager.GetItemById(itemId);
                 if (item == null) continue;
                 if (user != null && !item.IsVisible(user)) continue;
 
+                var imdb = item.GetProviderId(MetadataProviders.Imdb)?.Trim().ToLowerInvariant();
                 var subjectId = item.GetProviderId(DoubanConstants.ProviderId);
                 var source = item.GetProviderId(CommunityRatingService.SourceProviderId);
                 double? rating = null;
@@ -187,13 +192,16 @@ namespace StrmAssistant.Provider.Douban
 
                             var ratingMatches = item.CommunityRating.HasValue &&
                                                 Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
+                            var writtenSource = snapshot.WrittenSource;
                             applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                      string.IsNullOrEmpty(source) && ratingMatches;
+                                      string.IsNullOrEmpty(source) &&
+                                      (string.Equals(writtenSource, "douban", StringComparison.OrdinalIgnoreCase) ||
+                                       string.IsNullOrEmpty(writtenSource) && ratingMatches);
                         }
                     }
                 }
 
-                // 没有豆瓣 ID 或还没有 subject 快照时，按 IMDb key 读取全库评分落下的快照。
+                // 没有豆瓣 ID 或还没有 subject 快照时，按条目 IMDb key 读取全库评分落下的快照。
                 if (rating == null)
                 {
                     var imdbKey = GetImdbSnapshotKey(imdb);
@@ -225,6 +233,8 @@ namespace StrmAssistant.Provider.Douban
 
                 result.Add(new DoubanImdbRatingInfo
                 {
+                    Key = key.CanonicalKey,
+                    KeyType = key.TypeName,
                     Imdb = imdb,
                     ItemId = itemId.ToString(),
                     SubjectId = subjectId,
@@ -239,14 +249,18 @@ namespace StrmAssistant.Provider.Douban
             return result;
         }
 
-        /// <summary>IMDb → 条目内部 ID 索引：10 分钟缓存，扫库后立即失效。</summary>
-        private Dictionary<string, long> GetImdbItemIndex()
+        /// <summary>兼容旧调用：仅按 IMDb 查询。</summary>
+        public List<DoubanImdbRatingInfo> GetRatingsByImdb(IEnumerable<string> imdbIds, User user) =>
+            GetRatingsByKeys(imdbIds, user);
+
+        /// <summary>外部键（imdb/tmdb/douban）→ 条目内部 ID 索引：10 分钟缓存，扫库后立即失效。</summary>
+        private Dictionary<string, long> GetItemKeyIndex()
         {
-            lock (_imdbIndexLock)
+            lock (_itemKeyIndexLock)
             {
-                if (_imdbItemIndex != null && DateTime.UtcNow - _imdbIndexBuilt < ImdbIndexTtl)
+                if (_itemKeyIndex != null && DateTime.UtcNow - _itemKeyIndexBuilt < ItemKeyIndexTtl)
                 {
-                    return _imdbItemIndex;
+                    return _itemKeyIndex;
                 }
 
                 var index = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
@@ -258,46 +272,65 @@ namespace StrmAssistant.Provider.Douban
                         IncludeItemTypes = new[] { nameof(Movie), nameof(Series), nameof(Episode), nameof(Season) }
                     });
 
-                    // 同一 IMDb 可能有重复条目：优先保留带豆瓣 ID 的那条。
+                    // 同一外部 ID 可能有重复条目：优先保留带豆瓣 ID 的那条。
                     var withDouban = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                    void Add(string indexKey, BaseItem item, bool hasDouban)
+                    {
+                        if (!index.ContainsKey(indexKey))
+                        {
+                            index[indexKey] = item.InternalId;
+                            if (hasDouban) withDouban.Add(indexKey);
+                        }
+                        else if (hasDouban && !withDouban.Contains(indexKey))
+                        {
+                            index[indexKey] = item.InternalId;
+                            withDouban.Add(indexKey);
+                        }
+                    }
 
                     foreach (var item in items)
                     {
-                        var imdb = item.GetProviderId(MetadataProviders.Imdb);
-                        if (string.IsNullOrWhiteSpace(imdb)) continue;
-
-                        imdb = imdb.Trim().ToLowerInvariant();
                         var hasDouban = !string.IsNullOrEmpty(item.GetProviderId(DoubanConstants.ProviderId));
 
-                        if (!index.ContainsKey(imdb))
+                        var imdb = item.GetProviderId(MetadataProviders.Imdb);
+                        if (DoubanRatingKeyParser.TryParse(imdb, out var imdbKey))
                         {
-                            index[imdb] = item.InternalId;
-                            if (hasDouban) withDouban.Add(imdb);
+                            Add(imdbKey.IndexKey, item, hasDouban);
                         }
-                        else if (hasDouban && !withDouban.Contains(imdb))
+
+                        var tmdb = item.GetProviderId(MetadataProviders.Tmdb);
+                        if (!string.IsNullOrWhiteSpace(tmdb) &&
+                            DoubanRatingKeyParser.TryParse("tmdb:" + tmdb.Trim(), out var tmdbKey))
                         {
-                            index[imdb] = item.InternalId;
-                            withDouban.Add(imdb);
+                            Add(tmdbKey.IndexKey, item, hasDouban);
+                        }
+
+                        var douban = item.GetProviderId(DoubanConstants.ProviderId);
+                        if (!string.IsNullOrWhiteSpace(douban) &&
+                            DoubanRatingKeyParser.TryParse("douban:" + douban.Trim(), out var doubanKey))
+                        {
+                            Add(doubanKey.IndexKey, item, true);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    _logger.Debug("DoubanAssist - IMDb index build failed: {0}", e.Message);
+                    _logger.Debug("DoubanAssist - Item key index build failed: {0}", e.Message);
                 }
 
-                _imdbItemIndex = index;
-                _imdbIndexBuilt = DateTime.UtcNow;
+                _itemKeyIndex = index;
+                _itemKeyIndexBuilt = DateTime.UtcNow;
                 return index;
             }
         }
 
-        /// <summary>条目/ProviderIds 变化后让 IMDb 索引下次重建。</summary>
+        /// <summary>条目/ProviderIds 变化后让外部键索引下次重建。</summary>
         public void InvalidateImdbIndex()
         {
-            lock (_imdbIndexLock)
+            lock (_itemKeyIndexLock)
             {
-                _imdbItemIndex = null;
+                _itemKeyIndex = null;
             }
         }
 

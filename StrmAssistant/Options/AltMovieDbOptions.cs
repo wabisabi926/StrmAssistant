@@ -21,6 +21,7 @@ namespace StrmAssistant.Options
         public override string EditorTitle => Resources.MetadataEnhanceOptions_Group_AltMovieDb;
 
         [DisplayNameL("MetadataEnhanceOptions_EnableAltMovieDbUrl", typeof(Resources))]
+        [DescriptionL("MetadataEnhanceOptions_AltMovieDbConfig_Description", typeof(Resources))]
         [EnabledCondition(nameof(IsMovieDbPluginLoaded), SimpleCondition.IsTrue)]
         [Required]
         public bool AltMovieDbConfig { get; set; } = false;

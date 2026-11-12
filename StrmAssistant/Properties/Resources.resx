@@ -1290,13 +1290,13 @@
     <value>Only updates items whose premiere date falls within this many days. 0 disables the limit. Default is 365 days.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
-    <value>Used to pass Douban anti-crawler checks. Leave empty for anonymous access. Default is empty.</value>
+    <value>Optional. Only needed for Douban web scraping and poster downloads. Leave empty for anonymous access; set it if you hit risk control. The official API is preferred when an Access Token is configured.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
     <value>Douban open-platform V2 token. The official API is preferred when set. Default is empty.</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>Fetches ratings by IMDb ID: the IMDb score for the community rating and the Rotten Tomatoes score for the critic rating. Default is empty; optional.</value>
+    <value>Fetches ratings by IMDb ID: the IMDb score for the community rating and the Rotten Tomatoes score for the critic rating. Required when the source is IMDb or critic ratings are enabled; optional for TMDB/Douban when critic ratings are off.</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>Clears cached season mappings so season items are matched again.</value>
@@ -2035,5 +2035,8 @@
   </data>
   <data name="MemoryGuard_Notify_Restart" xml:space="preserve">
     <value>Memory usage {0} MB exceeds the {1} MB limit; the server will restart automatically in {2} seconds.</value>
+  </data>
+  <data name="MetadataEnhanceOptions_AltMovieDbConfig_Description" xml:space="preserve">
+    <value>Optional. Replaces the MovieDb TMDB API URL, image URL, and key; this is not a network proxy. When off, MovieDb defaults are used. Does not affect IMDb, MdbList, or Douban.</value>
   </data>
 </root>

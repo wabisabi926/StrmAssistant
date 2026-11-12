@@ -1203,13 +1203,13 @@
     <value>只更新首播日期在此天數內的條目。0 表示不限制。 預設 365 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
-    <value>用於通過豆瓣反爬驗證。留空時以匿名身分存取。 預設留空。</value>
+    <value>可選。僅豆瓣網頁抓取與海報下載需要；留空時匿名存取，遇到風控再填。設定 Access Token 時優先使用官方介面。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
     <value>豆瓣開放平台 V2 Token。設定後優先使用官方介面。 預設留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>依 IMDb ID 取分：來源為 IMDb 時寫入主評分，啟用影評人評分時寫入爛番茄分。 預設留空；可選。</value>
+    <value>依 IMDb ID 取分：來源為 IMDb 時寫入主評分，啟用影評人評分時寫入爛番茄分。來源為 IMDb 或開啟影評人評分時必填；來源為 TMDB/豆瓣且未開啟影評人評分時可留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>清除已快取的季對應，讓季條目重新比對。</value>
@@ -1948,5 +1948,8 @@
   </data>
   <data name="MemoryGuard_Notify_Restart" xml:space="preserve">
     <value>記憶體 {0} MB 超過上限 {1} MB，伺服器將在 {2} 秒後自動重新啟動。</value>
+  </data>
+  <data name="MetadataEnhanceOptions_AltMovieDbConfig_Description" xml:space="preserve">
+    <value>可選。僅取代 MovieDb 的 TMDB API 位址、圖片位址與 Key，不是網路代理；關閉時使用 MovieDb 預設設定。不影響 IMDb、MdbList 與豆瓣。</value>
   </data>
 </root>

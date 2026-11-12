@@ -5931,5 +5931,14 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MetadataEnhanceOptions_AltMovieDbConfig_Description {
+            get {
+                return ResourceManager.GetString("MetadataEnhanceOptions_AltMovieDbConfig_Description", resourceCulture);
+            }
+        }
+
     }
 }

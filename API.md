@@ -46,13 +46,14 @@ GET /Douban/Ratings?Ids=27820,27821
 }
 ```
 
-## 2. 按 IMDb ID 查分（Kodi 推荐）
+## 2. 按 IMDb ID 查分（Kodi 桥接）
 
 ```http
 GET /Douban/RatingsByImdb?Ids=tt0111161,tt0068646
 ```
 
 - 适合 Kodi 皮肤/助手：用 `VideoLibrary` 里的 IMDb ID 直接查分，无需读取 Emby for Kodi 的映射库。
+- **IMDb 只是 Kodi 端可用的查找键，评分仍来自 Emby 缓存的豆瓣快照。** 没有 IMDb 的条目不会被这个接口查到（即使它有豆瓣 ID）；这类条目请改用上面的 `/Douban/Ratings?Ids=<Emby ItemId>`，或让 E4K 读取 `ProviderIds["DoubanRating"]`。
 - `Ids`：逗号分隔、以 `tt` 开头，去重后最多 **80** 个。
 
 响应：
@@ -93,6 +94,7 @@ POST /Douban/RefreshRating?Id=27820
 |---|---|
 | `Enabled` | 接口所需功能是否开启；`false` 时 `Ratings` 为空 |
 | `ItemId` | Emby 内部条目 ID |
+| `Imdb` | 仅接口 2：调用方传入的 IMDb 查找键（不是评分来源） |
 | `SubjectId` | 豆瓣条目 ID |
 | `Rating` / `Votes` | 豆瓣评分与评价人数 |
 | `Applied` | 当前 `CommunityRating` 是否确为豆瓣分（未被 TMDB/IMDb 覆盖） |
@@ -102,7 +104,7 @@ POST /Douban/RefreshRating?Id=27820
 行为说明：
 
 - `/Douban/Ratings` 的 `Enabled` 在「豆瓣数据」或「社区评分来源」任一开启时为 `true`。
-- `/Douban/RatingsByImdb` 只要求「豆瓣数据」开启。
+- `/Douban/RatingsByImdb` 只要求「豆瓣数据」开启；`Ids` 必须是 IMDb ID，接口内部再按条目的 `ProviderIds["Douban"]` 取豆瓣快照。
 - 未开启「抓取豆瓣评分」时，分数相关字段会置空（`Rating`/`Votes` 为 `null`，`Applied=false`），但 ID 映射仍会返回。
 - `/Douban/RatingsByImdb` 在开启「同步豆瓣评分到 Kodi」时仍会返回分数。
 

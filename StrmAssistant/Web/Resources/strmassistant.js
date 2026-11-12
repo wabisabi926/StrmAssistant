@@ -917,7 +917,6 @@ define([
         ui: (function () {
             let initialized = false;
             let countCache = {};
-            let logReversed = false;
 
             function cfg() { return window.__saUI || {}; }
 
@@ -927,7 +926,7 @@ define([
             function anyEnabled() {
                 const c = cfg();
                 return c.replaceUnplayedWithTotal || c.showLibraryItemCount ||
-                    c.reverseLogLines || c.blockSearchRecommend || c.showMediaInfo;
+                    c.blockSearchRecommend || c.showMediaInfo;
             }
 
             // ShowMediaInfo：搜索结果按当前 tab 追加媒体字段。
@@ -1099,18 +1098,8 @@ define([
                 });
             }
 
-            function scanLogLines() {
-                if (!cfg().reverseLogLines || logReversed) return;
-                const hash = location.hash || '';
-                if (hash.toLowerCase().indexOf('log') < 0) return;
-                const container = document.querySelector('.listItemContainer, [data-role="listview"]');
-                if (!container || container.children.length < 2) return;
-                if (container.getAttribute('data-sa-reversed')) { logReversed = true; return; }
-                container.setAttribute('data-sa-reversed', '1');
-                const items = Array.prototype.slice.call(container.children);
-                for (let i = items.length - 1; i >= 0; i--) container.appendChild(items[i]);
-                logReversed = true;
-            }
+            // 日志倒序由服务端 ReverseLogLines 补丁在 API 层完成（反向分页），
+            // 前端不再做 DOM 反转，否则会和分页顺序叠加导致错乱。
 
             function scanSearchRecs() {
                 if (!cfg().blockSearchRecommend) return;
@@ -1125,7 +1114,6 @@ define([
                 try {
                     scanTotalEpisodes();
                     scanLibraryCounts();
-                    scanLogLines();
                     scanSearchRecs();
                 } catch (e) {
                     // ignore

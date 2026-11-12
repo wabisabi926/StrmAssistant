@@ -26,6 +26,12 @@ namespace StrmAssistant.Common
 
         private const string MarkerSuffix = "#SA";
 
+        // IntroDb 源数据质量参差：过短的 intro（如 0.011s）会被客户端误判并触发跳集，
+        // 过晚的 credits 也会让“跳过片尾”行为异常。以下为写入前的合理性下限/保护。
+        private static readonly long MinIntroDurationTicks = TimeSpan.FromSeconds(10).Ticks;
+        private static readonly long MinCreditsStartTicks = TimeSpan.FromSeconds(60).Ticks;
+        private static readonly long CreditsEndGuardTicks = TimeSpan.FromSeconds(5).Ticks;
+
         public ChapterApi(ILibraryManager libraryManager, IItemRepository itemRepository)
         {
             _logger = Plugin.Instance.Logger;
@@ -198,6 +204,75 @@ namespace StrmAssistant.Common
         }
 
         /// <summary>
+        /// IntroDb 片头区间是否合理：至少 10 秒，且不超过片长的一半。
+        /// 坏数据直接丢弃，避免客户端把“0 → 0.011s”当成片头已结束而跳集。
+        /// </summary>
+        internal static bool IsValidIntroRange(long startTicks, long endTicks, long? runtimeTicks)
+        {
+            if (startTicks < 0 || endTicks - startTicks < MinIntroDurationTicks) return false;
+            if (!runtimeTicks.HasValue) return true;
+
+            return endTicks <= runtimeTicks.Value && endTicks <= runtimeTicks.Value / 2;
+        }
+
+        /// <summary>
+        /// IntroDb 片尾起点是否合理：不能早于 60 秒，也不能晚于片长的最后 5 秒。
+        /// </summary>
+        internal static bool IsValidCreditsStart(long startTicks, long? runtimeTicks)
+        {
+            if (startTicks < MinCreditsStartTicks) return false;
+
+            return !runtimeTicks.HasValue || startTicks <= runtimeTicks.Value - CreditsEndGuardTicks;
+        }
+
+        private static bool IsDbMarker(ChapterInfo chapter) =>
+            chapter?.Name != null && chapter.Name.EndsWith(DbMarkerSuffix, StringComparison.Ordinal);
+
+        /// <summary>
+        /// 移除旧版本写入的非法 #DB 片头标记；外部来源的标记不动。
+        /// 只有首尾都存在时才判断区间，避免删掉等待补全的单端标记。
+        /// </summary>
+        private static bool RemoveInvalidDbIntroMarkers(List<ChapterInfo> chapters, long? runtimeTicks)
+        {
+            if (chapters == null) return false;
+
+            var starts = chapters
+                .Where(c => c.MarkerType == MarkerType.IntroStart && IsDbMarker(c))
+                .ToList();
+            var ends = chapters
+                .Where(c => c.MarkerType == MarkerType.IntroEnd && IsDbMarker(c))
+                .ToList();
+
+            if (starts.Count == 0 || ends.Count == 0) return false;
+
+            var start = starts.Min(c => c.StartPositionTicks);
+            var end = ends.Max(c => c.StartPositionTicks);
+            if (IsValidIntroRange(start, end, runtimeTicks)) return false;
+
+            chapters.RemoveAll(c => IsDbMarker(c) &&
+                                    (c.MarkerType == MarkerType.IntroStart ||
+                                     c.MarkerType == MarkerType.IntroEnd));
+            return true;
+        }
+
+        /// <summary>移除旧版本写入的非法 #DB 片尾标记；合法标记和外部来源保留。</summary>
+        private static bool RemoveInvalidDbCreditsMarker(List<ChapterInfo> chapters, long? runtimeTicks)
+        {
+            if (chapters == null) return false;
+
+            var invalid = chapters
+                .Where(c => c.MarkerType == MarkerType.CreditsStart && IsDbMarker(c) &&
+                            !IsValidCreditsStart(c.StartPositionTicks, runtimeTicks))
+                .ToList();
+
+            if (invalid.Count == 0) return false;
+
+            chapters.RemoveAll(c => c.MarkerType == MarkerType.CreditsStart && IsDbMarker(c) &&
+                                    !IsValidCreditsStart(c.StartPositionTicks, runtimeTicks));
+            return true;
+        }
+
+        /// <summary>
         /// 写入 IntroDb 刮削的片头/片尾标记：仅填充缺失（不覆盖探测或其他来源），
         /// 自身上一轮的 #DB 标记允许更新。返回是否发生写入。
         /// </summary>
@@ -207,6 +282,20 @@ namespace StrmAssistant.Common
             var changed = false;
             var chapters = _itemRepository.GetChapters(item);
             var runtime = item.RunTimeTicks;
+
+            // 历史坏标记自愈：旧版本写入的 #DB 标记如果本身不合法，在本次刮削时移除。
+            // 只清理 #DB 自己的标记，外部来源（探测/其他插件）不动。
+            if (RemoveInvalidDbIntroMarkers(chapters, runtime))
+            {
+                changed = true;
+                _logger.Info($"IntroDbScrape - Removed invalid existing intro marker for {item.Name}");
+            }
+
+            if (RemoveInvalidDbCreditsMarker(chapters, runtime))
+            {
+                changed = true;
+                _logger.Info($"IntroDbScrape - Removed invalid existing credits marker for {item.Name}");
+            }
 
             var introSegment = PickLongestSegment(intro);
             var creditsSegment = PickLongestSegment(credits);
@@ -221,7 +310,7 @@ namespace StrmAssistant.Common
                 {
                     var (introStartTicks, introEndTicks) = GetIntroMarkerTicks(introSegment, runtime);
 
-                    if (introEndTicks > introStartTicks)
+                    if (IsValidIntroRange(introStartTicks, introEndTicks, runtime))
                     {
                         chapters.RemoveAll(c =>
                             c.MarkerType == MarkerType.IntroStart || c.MarkerType == MarkerType.IntroEnd);
@@ -244,6 +333,11 @@ namespace StrmAssistant.Common
                             new TimeSpan(introStartTicks).ToString(@"hh\:mm\:ss"),
                             new TimeSpan(introEndTicks).ToString(@"hh\:mm\:ss"), item.Name);
                     }
+                    else
+                    {
+                        _logger.Debug(
+                            $"IntroDbScrape - Discarded invalid intro marker {introStartTicks}-{introEndTicks} for {item.Name}");
+                    }
                 }
             }
 
@@ -255,7 +349,7 @@ namespace StrmAssistant.Common
 
                 var creditsStartTicks = creditsSegment.start_ms.Value * TimeSpan.TicksPerMillisecond;
 
-                if (!hasExternalCredits && (!runtime.HasValue || creditsStartTicks < runtime.Value))
+                if (!hasExternalCredits && IsValidCreditsStart(creditsStartTicks, runtime))
                 {
                     chapters.RemoveAll(c => c.MarkerType == MarkerType.CreditsStart);
 
@@ -269,6 +363,11 @@ namespace StrmAssistant.Common
                     changed = true;
                     _logger.Info("IntroDbScrape - Credits marker {0} for {1}",
                         new TimeSpan(creditsStartTicks).ToString(@"hh\:mm\:ss"), item.Name);
+                }
+                else if (!hasExternalCredits)
+                {
+                    _logger.Debug(
+                        $"IntroDbScrape - Discarded invalid credits marker {creditsStartTicks} for {item.Name}");
                 }
             }
 

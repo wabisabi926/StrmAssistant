@@ -76,12 +76,48 @@ namespace StrmAssistant.Common
             {
                 var path = StatusPath;
                 if (!File.Exists(path)) return null;
-                return JsonSerializer.Deserialize<PluginUpdateStatus>(File.ReadAllText(path), JsonOptions);
+                return Reconcile(JsonSerializer.Deserialize<PluginUpdateStatus>(File.ReadAllText(path), JsonOptions));
             }
             catch
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 状态文件只在检查/下载时写入，Emby 重启本身不会更新它。
+        /// 读取时用当前运行版本对账：已经装上（或高于）最新版本时，把「已更新，重启后生效」
+        /// 纠正为「已是最新」，避免重启后设置页仍显示旧版本。
+        /// </summary>
+        internal static PluginUpdateStatus Reconcile(PluginUpdateStatus status)
+        {
+            if (status == null) return null;
+
+            var running = ParseVersion(Plugin.Instance?.CurrentVersion);
+            if (running == null) return status;
+
+            var latest = ParseVersion(status.LatestVersion);
+            var runningText = running.ToString();
+            var changed = false;
+
+            if (!string.Equals(status.CurrentVersion, runningText, StringComparison.Ordinal))
+            {
+                status.CurrentVersion = runningText;
+                changed = true;
+            }
+
+            if (latest != null && running >= latest &&
+                (status.State == PluginUpdateState.Updated ||
+                 status.State == PluginUpdateState.UpdateAvailable ||
+                 status.State == PluginUpdateState.MajorAvailable))
+            {
+                status.State = PluginUpdateState.UpToDate;
+                status.Message = null;
+                changed = true;
+            }
+
+            if (changed) Save(status);
+            return status;
         }
 
         internal static bool Save(PluginUpdateStatus status)

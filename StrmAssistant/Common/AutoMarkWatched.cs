@@ -55,7 +55,13 @@ namespace StrmAssistant.Common
 
         private void OnPlaybackStopped(object sender, PlaybackStopEventArgs e)
         {
-            _markedSessions.TryRemove(e.PlaySessionId, out _);
+            // 部分客户端（如 AndroidTv 的「Unnamed item」会话）上报的 PlaySessionId 为空，
+            // ConcurrentDictionary 不接受 null 键，直接 TryRemove 会抛 ArgumentNullException。
+            if (!string.IsNullOrEmpty(e.PlaySessionId))
+            {
+                _markedSessions.TryRemove(e.PlaySessionId, out _);
+            }
+
             HandlePlayback(e.Item, e.PlaybackPositionTicks, e.Session, e.PlaySessionId);
         }
 

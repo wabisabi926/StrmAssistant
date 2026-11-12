@@ -59,6 +59,7 @@ namespace StrmAssistant.Mod
         public static DoubanRatingRefresh DoubanRatingRefresh;
         public static LibraryScopePlayProgress LibraryScopePlayProgress;
         public static ServerSideVersionLabel ServerSideVersionLabel;
+        public static ReverseLogLines ReverseLogLines;
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod> HarmonyMethodCache 
             = new ConcurrentDictionary<Tuple<Type, string>, HarmonyMethod>();
@@ -133,6 +134,7 @@ namespace StrmAssistant.Mod
             DoubanRatingRefresh = new DoubanRatingRefresh();
             LibraryScopePlayProgress = new LibraryScopePlayProgress();
             ServerSideVersionLabel = new ServerSideVersionLabel();
+            ReverseLogLines = new ReverseLogLines();
 
             // ★ 总览日志：遍历所有 PatchTracker，打印每个模块的最终状态（Info 级别，无需开启 DebugMode）
             try

@@ -1,9 +1,11 @@
 using HarmonyLib;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Net;
 using MediaBrowser.Model.Dto;
+using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.MediaInfo;
 using MediaBrowser.Model.Services;
 using StrmAssistant.Common;
@@ -26,10 +28,12 @@ namespace StrmAssistant.Mod
         private static MethodInfo _processRequestMethod;
         private static MethodInfo _getStateMethod;
         private static MethodInfo _disposeStateMethod;
+        private static MethodInfo _universalAudioGetStreamMethod;
 
         private static Type _videoStreamRequestType;
         private static Type _liveStreamRequestType;
         private static Type _progressiveAudioRequestType;
+        private static Type _universalAudioRequestType;
 
         private static ISessionContext _sessionContext;
 
@@ -88,6 +92,14 @@ namespace StrmAssistant.Mod
                 _videoStreamRequestType = assembly?.GetType("Emby.Server.MediaEncoding.Api.VideoStreamRequest", false);
                 _liveStreamRequestType = FindType("MediaBrowser.Model.MediaInfo.LiveStreamRequest");
                 _progressiveAudioRequestType = assembly?.GetType("Emby.Server.MediaEncoding.Api.Progressive.GetProgressiveAudioStream", false);
+                _universalAudioRequestType = assembly?.GetType("Emby.Server.MediaEncoding.Api.GetUniversalAudioStream", false);
+
+                var universalAudioType = assembly?.GetType("Emby.Server.MediaEncoding.Api.UniversalAudioService", false);
+                if (universalAudioType != null && _universalAudioRequestType != null)
+                {
+                    _universalAudioGetStreamMethod = universalAudioType.GetMethod("GetUniversalStream", flags, null,
+                        new[] { _universalAudioRequestType, typeof(bool), typeof(CancellationToken) }, null);
+                }
 
                 if (progressiveType != null && streamRequestType != null)
                 {
@@ -128,6 +140,12 @@ namespace StrmAssistant.Mod
         protected override void Prepare(bool apply)
         {
             PatchUnpatch(PatchTracker, apply, _processRequestMethod, prefix: nameof(ProcessRequestPrefix));
+
+            if (_universalAudioGetStreamMethod != null)
+            {
+                PatchUnpatch(PatchTracker, apply, _universalAudioGetStreamMethod,
+                    prefix: nameof(UniversalAudioPrefix));
+            }
         }
 
         /// <summary>
@@ -213,6 +231,14 @@ namespace StrmAssistant.Mod
                     return true;
                 }
 
+                if (isAudio && !IsAudioDirectPlayRequest(requestContext, __0, mediaSource.Path))
+                {
+                    // 客户端要的是 HLS/转码流，302 到裸音频会让它解析失败并连续跳歌，交回 Emby 中转。
+                    // 多声道源的强制转码在 UniversalAudioPrefix 里处理（更早的 DeviceProfile 阶段）。
+                    DisposeState(state);
+                    return true;
+                }
+
                 var finalUrl = ResolveRedirectUrl(mediaSource.Path, requestContext?.UserAgent);
 
                 __result = Task.FromResult(resultFactory.GetRedirectResult(finalUrl));
@@ -227,6 +253,60 @@ namespace StrmAssistant.Mod
             {
                 Plugin.Instance.Logger.Warn($"StrmDirectRedirect 预判失败，回退 Emby 中转: itemId={itemId}, error={e.Message}");
                 return true;
+            }
+        }
+
+        /// <summary>
+        /// 音乐请求在 UniversalAudioService 里会先按请求参数生成 DeviceProfile：
+        /// Container 为空时 DirectPlayProfiles 不限容器/编码，EAC3 5.1 会被判为可直出。
+        /// 客户端明确要 AAC/HLS 时，给多声道 strm 音频补上 MaxAudioChannels=2，
+        /// 让 CodecProfile 拒绝 6 声道直出，从而走 ts/aac 转码。
+        /// </summary>
+        [HarmonyPrefix]
+        private static void UniversalAudioPrefix(object __0)
+        {
+            if (!_isEnabled || __0 == null) return;
+
+            try
+            {
+                var itemId = GetPropertyValue<string>(__0, "Id");
+                if (string.IsNullOrWhiteSpace(itemId)) return;
+
+                var protocol = GetPropertyValue<string>(__0, "TranscodingProtocol");
+                var audioCodec = GetPropertyValue<string>(__0, "AudioCodec");
+
+                if (string.IsNullOrWhiteSpace(protocol) ||
+                    protocol.IndexOf("hls", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(audioCodec) ||
+                    audioCodec.IndexOf("aac", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    return;
+                }
+
+                var maxChannels = GetPropertyValue<int?>(__0, "MaxAudioChannels");
+                if (maxChannels.HasValue && maxChannels.Value <= 2) return;
+
+                var item = Plugin.LibraryManager?.GetItemById(itemId);
+                if (!(item is Audio audio) || !LibraryApi.IsFileShortcut(audio.Path)) return;
+
+                var sources = audio.GetMediaSources(false, false, null);
+                var hasMultichannel = sources != null && sources.Any(source =>
+                    source.MediaStreams != null && source.MediaStreams.Any(stream =>
+                        stream.Type == MediaStreamType.Audio && stream.Channels.GetValueOrDefault() > 2));
+
+                if (!hasMultichannel) return;
+
+                SetPropertyValue(__0, "MaxAudioChannels", 2);
+                Plugin.Instance.Logger.Info(
+                    $"StrmDirectRedirect: 多声道 strm 音频强制转码 itemId={itemId}");
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.Debug("StrmDirectRedirect: UniversalAudio prefix failed: " + e.Message);
             }
         }
 
@@ -312,6 +392,50 @@ namespace StrmAssistant.Mod
                     SetPropertyValue(request, "Container", string.IsNullOrEmpty(container) ? null : container);
                 }
             }
+        }
+
+        /// <summary>
+        /// 音乐直链只接管「客户端要原容器直出」的请求。HLS/转码请求
+        /// （TranscodingProtocol=hls、TranscodingContainer=ts 等）必须交回 Emby：
+        /// 302 到裸音频文件会让客户端按 HLS 解析失败，表现为连续跳歌。
+        /// </summary>
+        private static bool IsAudioDirectPlayRequest(IRequest requestContext, object request, string sourcePath)
+        {
+            var query = requestContext?.QueryString;
+            var protocol = query?.Get("TranscodingProtocol");
+            var requestedContainer = query?.Get("TranscodingContainer");
+
+            if (string.IsNullOrWhiteSpace(requestedContainer))
+            {
+                requestedContainer = GetPropertyValue<string>(request, "Container");
+            }
+
+            if (!string.IsNullOrWhiteSpace(protocol) &&
+                protocol.IndexOf("hls", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return false;
+            }
+
+            var sourceContainer = GetPathContainer(sourcePath);
+            if (string.IsNullOrWhiteSpace(requestedContainer) || string.IsNullOrEmpty(sourceContainer))
+            {
+                return true;
+            }
+
+            return string.Equals(requestedContainer.Trim().TrimStart('.'), sourceContainer,
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>取路径或 URL 的容器扩展名，忽略 query 与大小写。</summary>
+        private static string GetPathContainer(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return null;
+
+            var queryIndex = path.IndexOf('?');
+            if (queryIndex >= 0) path = path.Substring(0, queryIndex);
+
+            var extension = Path.GetExtension(path);
+            return string.IsNullOrEmpty(extension) ? null : extension.TrimStart('.').ToLowerInvariant();
         }
 
         private static void DisableHlsSubtitleOnly(object request)

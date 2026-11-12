@@ -30,6 +30,7 @@ namespace StrmAssistant.Options
 
         public override IEditObjectContainer CreateEditContainer()
         {
+            LocalizationHelper.PrepareForView();
             var container = base.CreateEditContainer();
             if (container is EditObjectContainer editContainer)
             {
@@ -38,6 +39,8 @@ namespace StrmAssistant.Options
                         "NetworkDirectLink", "Network", "DirectLink"),
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_AltMovieDb,
                         "TmdbReplacement", "TmdbReplacement"));
+
+                LocalizationHelper.ApplyDescriptions(editContainer, this);
             }
 
             return container;

@@ -94,6 +94,7 @@ namespace StrmAssistant.Options
 
         public override IEditObjectContainer CreateEditContainer()
         {
+            LocalizationHelper.PrepareForView();
             var container = base.CreateEditContainer();
             if (container is EditObjectContainer editContainer)
             {
@@ -112,6 +113,8 @@ namespace StrmAssistant.Options
                 // 存储与截图在前，破坏性的清除内嵌元数据放到组尾。
                 EditorGroupHelper.MoveItemsToEnd(editContainer, "StorageCapture",
                     nameof(MediaInfoPersistOptions.ClearEmbeddedMetadata));
+
+                LocalizationHelper.ApplyDescriptions(editContainer, this);
             }
 
             return container;

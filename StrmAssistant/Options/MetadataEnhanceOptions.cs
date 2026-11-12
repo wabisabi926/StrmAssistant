@@ -139,6 +139,7 @@ namespace StrmAssistant.Options
 
         public override IEditObjectContainer CreateEditContainer()
         {
+            LocalizationHelper.PrepareForView();
             var container = base.CreateEditContainer();
             if (container is EditObjectContainer editContainer)
             {
@@ -161,6 +162,8 @@ namespace StrmAssistant.Options
                 // 清除标语是破坏性开关，放在人物增强之后、演员刷新偏好之前。
                 EditorGroupHelper.MoveItemBefore(editContainer, "PosterPerson",
                     nameof(PosterSortOptions.ClearTagline), nameof(PersonEnhanceOptions.RefreshPersonMode));
+
+                LocalizationHelper.ApplyDescriptions(editContainer, this);
             }
 
             return container;

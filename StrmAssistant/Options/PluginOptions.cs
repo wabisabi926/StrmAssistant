@@ -129,6 +129,7 @@ namespace StrmAssistant.Options
 
         public override IEditObjectContainer CreateEditContainer()
         {
+            LocalizationHelper.PrepareForView();
             var container = base.CreateEditContainer();
             if (!(container is EditObjectContainer editContainer) ||
                 editContainer.EditorRoot?.EditorItems == null) return container;
@@ -172,6 +173,7 @@ namespace StrmAssistant.Options
             }
 
             root.EditorItems = newItems.ToArray();
+            LocalizationHelper.ApplyDescriptions(editContainer, this);
             return container;
         }
 

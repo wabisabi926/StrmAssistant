@@ -65,6 +65,7 @@ namespace StrmAssistant.Options
 
         public override IEditObjectContainer CreateEditContainer()
         {
+            LocalizationHelper.PrepareForView();
             var container = base.CreateEditContainer();
             if (container is EditObjectContainer editContainer)
             {
@@ -90,6 +91,8 @@ namespace StrmAssistant.Options
                     nameof(VersionMergeOptions.SplitMoviesButton),
                     nameof(VersionMergeOptions.SplitMoviesProgress),
                     nameof(VersionMergeOptions.SplitMovieProgressSeparator));
+
+                LocalizationHelper.ApplyDescriptions(editContainer, this);
             }
 
             return container;

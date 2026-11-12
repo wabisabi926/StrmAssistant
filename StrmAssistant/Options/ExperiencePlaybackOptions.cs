@@ -34,12 +34,6 @@ namespace StrmAssistant.Options
         [Required]
         public bool AutoMarkWatchedExcludeFavorites { get; set; } = false;
 
-        [DisplayNameL("ExperienceEnhanceOptions_EnableDeepDelete_Enable_Deep_Delete", typeof(Resources))]
-        [DescriptionL("ExperienceEnhanceOptions_EnableDeepDelete_Attempt_to_cascade_delete_the_underlying_file_of_strm_or_symlink__Default_is_OFF_", typeof(Resources))]
-        [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
-        [Required]
-        public bool EnableDeepDelete { get; set; } = false;
-
         [DisplayNameL("ExperienceEnhanceOptions_OptimizeSubtitle_Optimize_Subtitle", typeof(Resources))]
         [DescriptionL("ExperienceEnhanceOptions_OptimizeSubtitle_Resolve_strm_media_path_to_local_mount_for_open_subtitles_hash_and_filename_search__requires_open_subtitles_plugin__Default_is_OFF_", typeof(Resources))]
         [Required]
@@ -56,6 +50,12 @@ namespace StrmAssistant.Options
         [Required]
         [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
         public bool LibraryScopePlayProgress { get; set; } = false;
+
+        [DisplayNameL("ExperienceEnhanceOptions_EnableDeepDelete_Enable_Deep_Delete", typeof(Resources))]
+        [DescriptionL("ExperienceEnhanceOptions_EnableDeepDelete_Attempt_to_cascade_delete_the_underlying_file_of_strm_or_symlink__Default_is_OFF_", typeof(Resources))]
+        [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
+        [Required]
+        public bool EnableDeepDelete { get; set; } = false;
 
         [Browsable(false)]
         public bool IsModSupported =>

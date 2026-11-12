@@ -84,6 +84,12 @@ namespace StrmAssistant.Options
                 EditorGroupHelper.MoveItems(editContainer, "NotificationsLogs", "ItemDisplay",
                     nameof(SearchLogOptions.ShowMediaInfo),
                     nameof(SearchLogOptions.BlockSearchRecommend));
+
+                // 合并/画质设置在前，拆分电影按钮和进度作为操作放到组尾。
+                EditorGroupHelper.MoveItemsToEnd(editContainer, "MultipleVersions",
+                    nameof(VersionMergeOptions.SplitMoviesButton),
+                    nameof(VersionMergeOptions.SplitMoviesProgress),
+                    nameof(VersionMergeOptions.SplitMovieProgressSeparator));
             }
 
             return container;

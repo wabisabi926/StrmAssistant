@@ -18,16 +18,16 @@ namespace StrmAssistant.Options
         [DisplayNameL("ScheduledTasks_EditorTitle_Common_Tasks", typeof(Resources))]
         public override string EditorTitle => Resources.ScheduledTasks_EditorTitle_Common_Tasks;
 
-        public ButtonItem RebuildUserDataKeysButton =>
-            new ButtonItem(Resources.ScheduledTasks_Button_Rebuild_Keys)
-            {
-                Icon = IconNames.schedule, Data1 = "RunScheduledTask", Data2 = "RebuildUserDataKeysTask"
-            };
-
         public ButtonItem ExtractMediaInfoButton =>
             new ButtonItem(Resources.ScheduledTasks_Button_Extract_MediaInfo)
             {
                 Icon = IconNames.info, Data1 = "RunScheduledTask", Data2 = "MediaInfoExtractTask"
+            };
+
+        public ButtonItem RefreshEpisodesButton =>
+            new ButtonItem(Resources.ScheduledTasks_Button_Refresh_Episodes)
+            {
+                Icon = IconNames.autorenew, Data1 = "RunScheduledTask", Data2 = "EpisodeRefreshTask"
             };
 
         public ButtonItem MergeMultiVersionButton =>
@@ -36,10 +36,10 @@ namespace StrmAssistant.Options
                 Icon = IconNames.queue, Data1 = "RunScheduledTask", Data2 = "MergeMultiVersionTask"
             };
 
-        public ButtonItem RefreshEpisodesButton =>
-            new ButtonItem(Resources.ScheduledTasks_Button_Refresh_Episodes)
+        public ButtonItem RebuildUserDataKeysButton =>
+            new ButtonItem(Resources.ScheduledTasks_Button_Rebuild_Keys)
             {
-                Icon = IconNames.autorenew, Data1 = "RunScheduledTask", Data2 = "EpisodeRefreshTask"
+                Icon = IconNames.schedule, Data1 = "RunScheduledTask", Data2 = "RebuildUserDataKeysTask"
             };
     }
 }

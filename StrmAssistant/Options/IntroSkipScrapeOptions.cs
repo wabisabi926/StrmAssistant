@@ -35,18 +35,18 @@ namespace StrmAssistant.Options
         [Browsable(false)]
         public List<EditorSelectOption> LibraryList { get; set; } = new List<EditorSelectOption>();
 
+        [DisplayNameL("IntroSkipOptions_IncludeMovies_Include_Movies", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_", typeof(Resources))]
+        [Required]
+        [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
+        public bool IncludeMovies { get; set; } = false;
+
         [DisplayNameL("IntroSkipOptions_ScrapeLibraryScope_Scrape_Library_Scope", typeof(Resources))]
         [DescriptionL("IntroSkipOptions_ScrapeLibraryScope_TV_and_mixed_libraries_to_scrape__Blank_includes_all_", typeof(Resources))]
         [EditMultilSelect]
         [SelectItemsSource(nameof(LibraryList))]
         [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
         public string LibraryScope { get; set; } = string.Empty;
-
-        [DisplayNameL("IntroSkipOptions_IncludeMovies_Include_Movies", typeof(Resources))]
-        [DescriptionL("IntroSkipOptions_IncludeMovies_Also_scrape_movies__movies_only_get_chapter_markers_and_do_not_participate_in_skip__Default_is_OFF_", typeof(Resources))]
-        [Required]
-        [VisibleCondition(nameof(EnableIntroDbScrape), SimpleCondition.IsTrue)]
-        public bool IncludeMovies { get; set; } = false;
 
         [DisplayNameL("IntroSkipOptions_IntroDbApiKey_Api_Key", typeof(Resources))]
         [DescriptionL("IntroSkipOptions_IntroDbApiKey_Optional_TheIntroDB_API_key_sent_via_Bearer_auth_to_raise_the_daily_request_limit__Default_is_empty_", typeof(Resources))]

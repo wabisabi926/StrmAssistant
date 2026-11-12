@@ -108,6 +108,10 @@ namespace StrmAssistant.Options
                         "StorageCapture", "MediaInfoPersist", "ImageCapture"),
                     new EditorGroupSpec(Resources.MediaInfoExtractOptions_Group_IsoHdr,
                         "IsoHdr", "HdrTagging", "IsoTool"));
+
+                // 存储与截图在前，破坏性的清除内嵌元数据放到组尾。
+                EditorGroupHelper.MoveItemsToEnd(editContainer, "StorageCapture",
+                    nameof(MediaInfoPersistOptions.ClearEmbeddedMetadata));
             }
 
             return container;

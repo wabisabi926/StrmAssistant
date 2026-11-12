@@ -39,6 +39,12 @@ namespace StrmAssistant
         [VisibleCondition(nameof(EnableProxyServer), SimpleCondition.IsTrue)]
         public ProxyRoutingMode ProxyMode { get; set; } = ProxyRoutingMode.Global;
 
+        [VisibleCondition(nameof(ShowProxyServerStatus), SimpleCondition.IsTrue)]
+        public StatusItem ProxyServerStatus { get; set; } = new StatusItem();
+
+        [Browsable(false)]
+        public bool ShowProxyServerStatus { get; set; } = false;
+
         [DisplayNameL("NetworkOptions_ScrapeProxyWhitelist_Scrape_Proxy_Whitelist", typeof(Resources))]
         [DescriptionL("NetworkOptions_ScrapeProxyWhitelist_Comma_separated_host_suffixes_that_go_through_the_proxy_in_ScrapeOnly_mode__Default_covers_TMDB_and_TVDB_", typeof(Resources))]
         [VisibleCondition(nameof(ShowScrapeProxyWhitelist), SimpleCondition.IsTrue)]
@@ -47,12 +53,6 @@ namespace StrmAssistant
 
         [Browsable(false)]
         public bool ShowScrapeProxyWhitelist => EnableProxyServer && ProxyMode == ProxyRoutingMode.ScrapeOnly;
-
-        [VisibleCondition(nameof(ShowProxyServerStatus), SimpleCondition.IsTrue)]
-        public StatusItem ProxyServerStatus { get; set; } = new StatusItem();
-
-        [Browsable(false)]
-        public bool ShowProxyServerStatus { get; set; } = false;
 
         [Browsable(false)]
         public bool IgnoreCertificateValidation { get; set; } = false;

@@ -57,17 +57,17 @@ namespace StrmAssistant.Options
                 ConfirmationPrompt = Resources.AreYouSureToContinue
             };
 
+        public ButtonItem OptimizeSearchIndexButton =>
+            new ButtonItem(Resources.GeneralOptions_OptimizeSearchIndex_Optimize_Search_Index)
+            {
+                Icon = IconNames.cleaning_services, Data1 = "OptimizeSearchIndex"
+            };
+
         public ButtonItem ClearMetadataCacheButton =>
             new ButtonItem(Resources.GeneralOptions_ClearMetadataCache_Clear_Metadata_Cache)
             {
                 Icon = IconNames.delete_sweep, Data1 = "ClearMetadataCache",
                 ConfirmationPrompt = Resources.AreYouSureToContinue
-            };
-
-        public ButtonItem OptimizeSearchIndexButton =>
-            new ButtonItem(Resources.GeneralOptions_OptimizeSearchIndex_Optimize_Search_Index)
-            {
-                Icon = IconNames.cleaning_services, Data1 = "OptimizeSearchIndex"
             };
 
         public ButtonItem RestartServerButton =>

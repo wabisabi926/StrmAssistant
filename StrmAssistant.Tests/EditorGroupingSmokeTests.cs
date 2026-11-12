@@ -102,6 +102,9 @@ namespace StrmAssistant.Tests
             Assert.Contains(storage.EditorItems, i => NameOrId(i, "EnableImageCapture"));
             Assert.DoesNotContain(storage.EditorItems, i => NameOrId(i, "ExclusiveExtract"));
             Assert.DoesNotContain(storage.EditorItems, i => NameOrId(i, "MediaInfoExtractionTimeoutMs"));
+            Assert.True(NameOrId(storage.EditorItems.Last(), "ClearEmbeddedMetadata"));
+            Assert.DoesNotContain(storage.EditorItems.Take(storage.EditorItems.Length - 1),
+                i => NameOrId(i, "ClearEmbeddedMetadata"));
         }
 
         [Fact]
@@ -122,6 +125,13 @@ namespace StrmAssistant.Tests
             var cache = groups.First(g => NameOrId(g, "MetadataCache"));
             Assert.Contains(cache.EditorItems, i => NameOrId(i, "MetadataCacheMode"));
             Assert.DoesNotContain(cache.EditorItems, i => NameOrId(i, "EpisodeRefreshScope"));
+
+            var poster = groups.First(g => NameOrId(g, "PosterPerson"));
+            var posterItems = poster.EditorItems.ToList();
+            Assert.True(posterItems.FindIndex(i => NameOrId(i, "EnhanceMovieDbPerson")) <
+                        posterItems.FindIndex(i => NameOrId(i, "ClearTagline")));
+            Assert.True(posterItems.FindIndex(i => NameOrId(i, "ClearTagline")) <
+                        posterItems.FindIndex(i => NameOrId(i, "RefreshPersonMode")));
         }
 
         [Fact]
@@ -132,6 +142,16 @@ namespace StrmAssistant.Tests
 
             Assert.Equal(new[] { "Playback", "Fingerprint", "Scrape" },
                 groups.Select(g => g.Name).ToArray());
+
+            var fingerprint = groups.First(g => NameOrId(g, "Fingerprint")).EditorItems.ToList();
+            Assert.True(fingerprint.FindIndex(i => NameOrId(i, "ParallelMarkerComputation")) <
+                        fingerprint.FindIndex(i => NameOrId(i, "MarkerEnabledLibraryScope")));
+            Assert.True(fingerprint.FindIndex(i => NameOrId(i, "MarkerEnabledLibraryScope")) <
+                        fingerprint.FindIndex(i => NameOrId(i, "LibraryFingerprintMinutes")));
+
+            var scrape = groups.First(g => NameOrId(g, "Scrape")).EditorItems.ToList();
+            Assert.True(scrape.FindIndex(i => NameOrId(i, "IncludeMovies")) <
+                        scrape.FindIndex(i => NameOrId(i, "LibraryScope")));
         }
 
         [Fact]
@@ -142,6 +162,10 @@ namespace StrmAssistant.Tests
 
             Assert.Equal(new[] { "NetworkDirectLink", "TmdbReplacement" },
                 groups.Select(g => g.Name).ToArray());
+
+            var network = groups.First(g => NameOrId(g, "NetworkDirectLink")).EditorItems.ToList();
+            Assert.True(network.FindIndex(i => NameOrId(i, "ProxyServerStatus")) <
+                        network.FindIndex(i => NameOrId(i, "ScrapeProxyWhitelist")));
         }
 
         [Fact]
@@ -160,7 +184,15 @@ namespace StrmAssistant.Tests
             Assert.Contains(playbackItems, i => NameOrId(i, "EnableDeepDelete"));
             Assert.True(playbackItems.FindIndex(i => NameOrId(i, "DryRun")) >
                         playbackItems.FindIndex(i => NameOrId(i, "EnableDeepDelete")));
+            Assert.True(playbackItems.FindIndex(i => NameOrId(i, "EnableDeepDelete")) >
+                        playbackItems.FindIndex(i => NameOrId(i, "LibraryScopePlayProgress")));
             Assert.DoesNotContain(groups, g => NameOrId(g, "Safety"));
+
+            var versions = groups.First(g => NameOrId(g, "MultipleVersions")).EditorItems.ToList();
+            Assert.True(versions.FindIndex(i => NameOrId(i, "MultiVersionSortOption")) <
+                        versions.FindIndex(i => NameOrId(i, "SplitMoviesButton")));
+            Assert.True(versions.FindIndex(i => NameOrId(i, "SplitMoviesButton")) <
+                        versions.FindIndex(i => NameOrId(i, "SplitMoviesProgress")));
 
             var itemDisplay = groups.First(g => NameOrId(g, "ItemDisplay"));
             var notifications = groups.First(g => NameOrId(g, "NotificationsLogs"));
@@ -187,6 +219,29 @@ namespace StrmAssistant.Tests
             var buttonGroup = runtime.EditorItems.OfType<EditorButtonGroup>().FirstOrDefault();
             Assert.NotNull(buttonGroup);
             Assert.Equal(8, buttonGroup.EditorItems.Count());
+        }
+
+        [Fact]
+        public void Basic_ActionButtons_AreOrdered()
+        {
+            var container = (EditObjectContainer)new PluginOptions().CreateEditContainer();
+            var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
+
+            var tasks = groups.First(g => NameOrId(g, "ScheduledTasks"));
+            var taskButtons = tasks.EditorItems.OfType<EditorButtonGroup>().Single().EditorItems.ToList();
+            Assert.Equal(
+                new[] { "ExtractMediaInfoButton", "RefreshEpisodesButton", "MergeMultiVersionButton",
+                        "RebuildUserDataKeysButton" },
+                taskButtons.Select(b => b.Name).ToArray());
+
+            var maintenance = groups.First(g => NameOrId(g, "RuntimeStatus"));
+            var maintenanceButtons = maintenance.EditorItems.OfType<EditorButtonGroup>().Single()
+                .EditorItems.ToList();
+            Assert.Equal(
+                new[] { "VerifyMetadataCacheButton", "MediaHealthCheckButton", "ExportMediaHealthButton",
+                        "CleanMemoryNowButton", "ScheduleIndexRebuildButton", "OptimizeSearchIndexButton",
+                        "ClearMetadataCacheButton", "RestartServerButton" },
+                maintenanceButtons.Select(b => b.Name).ToArray());
         }
 
         private static bool NameOrId(EditorBase editor, string name)

@@ -40,12 +40,6 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(UnlockIntroSkip), SimpleCondition.IsTrue)]
         public int IntroDetectionFingerprintMinutes { get; set; } = 10;
 
-        [DisplayNameL("IntroSkipOptions_LibraryFingerprintMinutes_Per_Library_Fingerprint_Minutes", typeof(Resources))]
-        [DescriptionL("IntroSkipOptions_LibraryFingerprintMinutes_Overrides_for_specific_libraries_in_libraryId_minutes_format_separated_by_comma__falls_back_to_the_global_value__Default_is_EMPTY_", typeof(Resources))]
-        [VisibleCondition(nameof(UnlockIntroSkip), SimpleCondition.IsTrue)]
-        [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
-        public string LibraryFingerprintMinutes { get; set; } = string.Empty;
-
         [DisplayNameL("IntroSkipOptions_ParallelMarkerComputation_Parallel_Marker_Computation", typeof(Resources))]
         [DescriptionL("IntroSkipOptions_ParallelMarkerComputation_Bypass_the_master_concurrency_limit_for_fingerprint_extraction_and_parallelize_across_all_CPU_cores__Default_is_OFF_", typeof(Resources))]
         [Required]
@@ -63,6 +57,12 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(UnlockIntroSkip), SimpleCondition.IsTrue)]
         [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
         public string MarkerEnabledLibraryScope { get; set; } = string.Empty;
+
+        [DisplayNameL("IntroSkipOptions_LibraryFingerprintMinutes_Per_Library_Fingerprint_Minutes", typeof(Resources))]
+        [DescriptionL("IntroSkipOptions_LibraryFingerprintMinutes_Overrides_for_specific_libraries_in_libraryId_minutes_format_separated_by_comma__falls_back_to_the_global_value__Default_is_EMPTY_", typeof(Resources))]
+        [VisibleCondition(nameof(UnlockIntroSkip), SimpleCondition.IsTrue)]
+        [EnabledCondition(nameof(IsModSupported), SimpleCondition.IsTrue)]
+        public string LibraryFingerprintMinutes { get; set; } = string.Empty;
 
         [DisplayNameL("IntroSkipOptions_BlacklistShows_Optional_Blacklist_Shows", typeof(Resources))]
         [DescriptionL("IntroSkipOptions_BlacklistShows_List_of_Series_Id_or_Season_Id_separated_by_comma_or_semicolon__Default_is_EMPTY", typeof(Resources))]

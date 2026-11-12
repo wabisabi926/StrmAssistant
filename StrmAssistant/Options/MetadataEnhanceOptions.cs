@@ -157,6 +157,10 @@ namespace StrmAssistant.Options
                         "EpisodeRefresh", "MetadataRefresh"),
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_MetadataCache,
                         "MetadataCache", "MetadataCache"));
+
+                // 清除标语是破坏性开关，放在人物增强之后、演员刷新偏好之前。
+                EditorGroupHelper.MoveItemBefore(editContainer, "PosterPerson",
+                    nameof(PosterSortOptions.ClearTagline), nameof(PersonEnhanceOptions.RefreshPersonMode));
             }
 
             return container;

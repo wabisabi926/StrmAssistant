@@ -104,5 +104,42 @@ namespace StrmAssistant.Options
             from.EditorItems = from.EditorItems.Except(moved).ToArray();
             to.EditorItems = (to.EditorItems ?? Array.Empty<EditorBase>()).Concat(moved).ToArray();
         }
+
+        /// <summary>把指定编辑项按原相对顺序移到目标分组末尾。</summary>
+        public static void MoveItemsToEnd(EditObjectContainer container, string groupName, params string[] itemNames)
+        {
+            if (container?.EditorRoot?.EditorItems == null || itemNames == null || itemNames.Length == 0) return;
+
+            var group = container.EditorRoot.EditorItems.OfType<EditorGroup>()
+                .FirstOrDefault(g => NameOrId(g, groupName));
+            if (group?.EditorItems == null) return;
+
+            var moved = group.EditorItems
+                .Where(item => itemNames.Any(name => NameOrId(item, name)))
+                .ToList();
+            if (moved.Count == 0) return;
+
+            group.EditorItems = group.EditorItems.Except(moved).Concat(moved).ToArray();
+        }
+
+        /// <summary>把指定编辑项移动到同一分组内另一项之前。</summary>
+        public static void MoveItemBefore(EditObjectContainer container, string groupName, string itemName,
+            string beforeItemName)
+        {
+            if (container?.EditorRoot?.EditorItems == null) return;
+
+            var group = container.EditorRoot.EditorItems.OfType<EditorGroup>()
+                .FirstOrDefault(g => NameOrId(g, groupName));
+            if (group?.EditorItems == null) return;
+
+            var items = group.EditorItems.ToList();
+            var item = items.FirstOrDefault(i => NameOrId(i, itemName));
+            var before = items.FirstOrDefault(i => NameOrId(i, beforeItemName));
+            if (item == null || before == null || ReferenceEquals(item, before)) return;
+
+            items.Remove(item);
+            items.Insert(items.IndexOf(before), item);
+            group.EditorItems = items.ToArray();
+        }
     }
 }

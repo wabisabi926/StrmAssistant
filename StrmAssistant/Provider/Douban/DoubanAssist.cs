@@ -10,11 +10,9 @@ using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
 using StrmAssistant.Common;
 using StrmAssistant.Options;
-using StrmAssistant.Properties;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -34,118 +32,9 @@ namespace StrmAssistant.Provider.Douban
     {
         private const string BaseUrl = "https://movie.douban.com";
 
-        private const string MdbListBaseUrl = "https://api.mdblist.com";
-
-        /// <summary>
-        /// MdbList 评分源：按 IMDb ID 拉取烂番茄/Metacritic 等评分，
-        /// 写入 CriticRating（烂番茄 %）与 CriticRatingSummary（评分汇总）。
-        /// </summary>
-        public async Task<bool> UpdateMdbListRatingsAsync(BaseItem item, string apiKey,
-            CancellationToken cancellationToken)
-        {
-            var imdbId = item.GetProviderId(MetadataProviders.Imdb);
-            if (string.IsNullOrWhiteSpace(imdbId)) return false;
-
-            try
-            {
-                // MdbList 要求显式媒体类型：/imdb/movie/{id} 或 /imdb/show/{id}，缺类型会返回 405。
-                var mediaType = item is Movie ? "movie" : "show";
-                var url = $"{MdbListBaseUrl}/imdb/{mediaType}/{imdbId.Trim()}?apikey={Uri.EscapeDataString(apiKey.Trim())}&format=json";
-
-                var requestOptions = new HttpRequestOptions
-                {
-                    Url = url,
-                    CancellationToken = cancellationToken,
-                    AcceptHeader = "application/json",
-                    BufferContent = true,
-                    UserAgent = Plugin.Instance.UserAgent
-                };
-
-                using var response = await _httpClient.SendAsync(requestOptions, "GET").ConfigureAwait(false);
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    _logger.Debug("MdbList - Unexpected status {0} for {1}", response.StatusCode, imdbId);
-                    return false;
-                }
-
-                await using var contentStream = response.Content;
-                var payload = _jsonSerializer.DeserializeFromStream<MdbListResponse>(contentStream);
-                var ratings = payload?.ratings;
-                if (ratings == null || ratings.Count == 0) return false;
-
-                double? tomatoes = null;
-                double? imdb = null;
-                double? metacritic = null;
-
-                foreach (var rating in ratings)
-                {
-                    if (rating.value == null) continue;
-
-                    var source = rating.source ?? string.Empty;
-                    if (source.IndexOf("tomato", StringComparison.OrdinalIgnoreCase) >= 0)
-                        tomatoes = rating.value;
-                    else if (source.IndexOf("imdb", StringComparison.OrdinalIgnoreCase) >= 0)
-                        imdb = rating.value;
-                    else if (source.IndexOf("metacritic", StringComparison.OrdinalIgnoreCase) >= 0)
-                        metacritic = rating.value;
-                }
-
-                if (!tomatoes.HasValue) return false;
-
-                var changed = false;
-
-                var newCriticRating = (float)Math.Round(tomatoes.Value, 0);
-                if (Math.Abs((item.CriticRating ?? 0) - newCriticRating) > 0.01)
-                {
-                    item.CriticRating = newCriticRating;
-                    changed = true;
-                }
-
-                // 4.9 的 BaseItem 无 CriticRatingSummary，汇总仅记日志
-                var summaryParts = new List<string>();
-                if (imdb.HasValue) summaryParts.Add($"IMDb: {imdb.Value:0.0}");
-                if (metacritic.HasValue) summaryParts.Add($"Metacritic: {metacritic.Value:0}");
-                summaryParts.Add($"Rotten Tomatoes: {tomatoes.Value:0}%");
-
-                if (changed)
-                {
-                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                    _logger.Info("MdbList - Ratings updated for {0}: {1}", item.Name,
-                        string.Join(" · ", summaryParts));
-                }
-
-                return changed;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.Debug("MdbList - Request failed for {0}: {1}", imdbId, ex.Message);
-                return false;
-            }
-        }
-
-        private class MdbListResponse
-        {
-            public List<MdbListRating> ratings { get; set; }
-        }
-
-        private class MdbListRating
-        {
-            public string source { get; set; }
-            public double? value { get; set; }
-        }
         private const string SuggestUrl = BaseUrl + "/j/subject_suggest";
         private const string SparqlUrl = "https://query.wikidata.org/sparql";
-        private const string DoubanProviderId = "Douban";
-
-        /// <summary>
-        /// 豆瓣评分的第三形态载体：写入 <c>ProviderIds</c>，Emby UI 不展示，
-        /// 由 E4K 读取后落成 Kodi 的 <c>rating_type="douban"</c>。值域 0–10，保留一位小数。
-        /// </summary>
-        private const string DoubanRatingProviderId = "DoubanRating";
+        private const string DoubanProviderId = DoubanConstants.ProviderId;
 
         // 豆瓣开放平台 V2 API：配置 DoubanAccessToken 后优先走官方接口，
         // 可绕过网页端风控，且返回结构化 JSON。未配置 Token 时回退到 movie.douban.com 网页刮削。
@@ -155,12 +44,6 @@ namespace StrmAssistant.Provider.Douban
 
         private static readonly TimeSpan RequestInterval = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(7);
-
-        /// <summary>
-        /// IMDb API 快照的复用窗口：快照按 <c>imdb:tt...</c> 落盘，
-        /// 避免重启后对同一批没有豆瓣 ID 的条目重复请求第三方接口。
-        /// </summary>
-        private static readonly TimeSpan ImdbRatingCacheDuration = TimeSpan.FromDays(7);
         private static readonly TimeSpan BreakerCooldown = TimeSpan.FromHours(6);
         private const int BreakerThreshold = 5;
 
@@ -168,89 +51,6 @@ namespace StrmAssistant.Provider.Douban
         {
             public DateTime Expiry { get; set; }
             public object Value { get; set; }
-        }
-
-        /// <summary>
-        /// 评分快照（无过期）：豆瓣评分徽章数据源，条目通过 ProviderIds["Douban"] 关联。
-        /// </summary>
-        public class DoubanRatingSnapshot
-        {
-            public double Rating { get; set; }
-            public long? Votes { get; set; }
-            public DateTime Updated { get; set; }
-
-            /// <summary>
-            /// <c>CommunityRating</c> 是否由豆瓣评分写入。
-            /// 与 <see cref="Rating"/> 的取值互相独立：抓到豆瓣分就会记 <see cref="Rating"/>，
-            /// 但只有在「豆瓣评分覆盖」开关打开、字段生效范围勾选、且未超出回看期时才会写
-            /// <c>CommunityRating</c>，届时本标志置 true。前端据此决定是否把红五星换成豆瓣 logo，
-            /// 不再靠「页面数字恰好等于豆瓣分」去猜来源（那会在两站同分时误判）。
-            /// 可空：null 表示旧版快照（无此字段），此时按实测推断，避免升级瞬间全部图标回退。
-            /// </summary>
-            public bool? Applied { get; set; }
-
-            /// <summary>
-            /// 最近一次写社区评分时记录的来源：<c>douban</c> / <c>tmdb</c> / <c>imdb</c>；
-            /// 空表示旧版快照（无此字段）。读取时与 <see cref="Applied"/> 配合，
-            /// 避免仅凭「社区评分与豆瓣分相等」把别的来源误判成豆瓣。
-            /// </summary>
-            public string WrittenSource { get; set; }
-
-            /// <summary>
-            /// 最近一次成功检查豆瓣条目的时间（与评分是否变化无关），用于「按需刷新」冷却判定。
-            /// 可空：旧版快照无此字段，回退用 <see cref="Updated"/>。
-            /// </summary>
-            public DateTime? Checked { get; set; }
-        }
-
-        public class DoubanRatingInfo
-        {
-            public string ItemId { get; set; }
-            public string SubjectId { get; set; }
-            public double? Rating { get; set; }
-            public long? Votes { get; set; }
-
-            /// <summary>当前 <c>CommunityRating</c> 是否确为豆瓣评分（已扣除被外部刮削覆盖的情况）。</summary>
-            public bool Applied { get; set; }
-
-            /// <summary>
-            /// 当前 <c>CommunityRating</c> 的来源：douban / tmdb / imdb，空表示无显式来源。
-            /// 前端据此把红五星换成对应来源的图标（Emby 原生客户端不读这个字段）。
-            /// </summary>
-            public string Source { get; set; }
-
-            /// <summary>条目当前的社区评分，供前端校验「图标与数字同源」。</summary>
-            public double? CommunityRating { get; set; }
-        }
-
-        /// <summary>
-        /// 按 IMDb 查分的结果：供 Kodi 侧（助手/皮肤）用外部 ID 定位条目，无需读取 E4K 映射库。
-        /// </summary>
-        public class DoubanImdbRatingInfo
-        {
-            public string Imdb { get; set; }
-            public string ItemId { get; set; }
-            public string SubjectId { get; set; }
-            public double? Rating { get; set; }
-            public long? Votes { get; set; }
-            public bool Applied { get; set; }
-
-            /// <summary>社区评分来源：douban / tmdb / imdb，空表示无显式来源。</summary>
-            public string Source { get; set; }
-
-            /// <summary>条目当前的社区评分，供调用方校验「图标与数字同源」。</summary>
-            public double? CommunityRating { get; set; }
-        }
-
-        public class DoubanSubject
-        {
-            public string SubjectId { get; set; }
-            public double? Rating { get; set; }
-            public long? Votes { get; set; }
-            public string Summary { get; set; }
-            public List<string> Genres { get; set; } = new List<string>();
-            public List<string> Countries { get; set; } = new List<string>();
-            public List<string> Languages { get; set; } = new List<string>();
         }
 
         public class DoubanSuggest
@@ -314,28 +114,18 @@ namespace StrmAssistant.Provider.Douban
         private readonly IProviderManager _providerManager;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
-        private readonly DoubanRatingClient _ratingClient = new DoubanRatingClient();
+        private readonly DoubanRatingService _ratingService;
 
         private readonly string _cachePath;
-        private readonly string _ratingsPath;
         private readonly string _retryPath;
         private readonly string _seasonsPath;
         private readonly object _cacheLock = new object();
-        private readonly object _ratingsLock = new object();
         private readonly object _retryLock = new object();
         private readonly object _seasonsLock = new object();
         private readonly object _requestLock = new object();
         private readonly ConcurrentDictionary<long, byte> _inFlight = new ConcurrentDictionary<long, byte>();
-        private readonly ConcurrentDictionary<long, byte> _refreshScheduled = new ConcurrentDictionary<long, byte>();
-
-        /// <summary>IMDb → 条目内部 ID 的索引缓存（按需构建，扫库后失效）。</summary>
-        private Dictionary<string, long> _imdbItemIndex;
-        private DateTime _imdbIndexBuilt;
-        private static readonly TimeSpan ImdbIndexTtl = TimeSpan.FromMinutes(10);
-        private readonly object _imdbIndexLock = new object();
 
         private Dictionary<string, CacheEntry> _cache;
-        private Dictionary<string, DoubanRatingSnapshot> _ratings;
         private Dictionary<string, RetryEntry> _retry;
 
         /// <summary>
@@ -373,9 +163,6 @@ namespace StrmAssistant.Provider.Douban
         /// <summary>季映射的存活期：与豆瓣条目缓存一致（7 天）。过期后重新解析，避免季被改名/下架后长期错配。</summary>
         private static readonly TimeSpan SeasonMapTtl = TimeSpan.FromDays(7);
 
-        private DateTime _lastRatingsSave = DateTime.MinValue;
-        private static readonly TimeSpan RatingsSaveThrottle = TimeSpan.FromSeconds(10);
-
         /// <summary>
         /// 单次「扫库后填充豆瓣 ID」的统计。仅在该任务运行期间非空，
         /// 用于任务结束时输出一行分布日志，回答「为什么有些条目没有豆瓣评分」。
@@ -404,633 +191,46 @@ namespace StrmAssistant.Provider.Douban
             _fileSystem = fileSystem;
             _cachePath = Path.Combine(Plugin.Instance.ApplicationPaths.PluginConfigurationsPath,
                 "strmassistant_douban_cache.json");
-            _ratingsPath = Path.Combine(Plugin.Instance.ApplicationPaths.PluginConfigurationsPath,
-                "strmassistant_douban_ratings.json");
             _retryPath = Path.Combine(Plugin.Instance.ApplicationPaths.PluginConfigurationsPath,
                 "strmassistant_douban_retry.json");
             _seasonsPath = Path.Combine(Plugin.Instance.ApplicationPaths.PluginConfigurationsPath,
                 "strmassistant_douban_seasons.json");
+
+            _ratingService = new DoubanRatingService(jsonSerializer, FetchSubjectAsync,
+                (item, suggestType, seasonNumber, ct) => ApplyAsync(item, suggestType, seasonNumber, ct),
+                () => IsBreakerEngaged());
         }
 
         /// <summary>
         /// 按条目 ID 列表解析豆瓣评分快照（经条目上的 Douban ProviderId 关联），供徽章端点使用。
         /// </summary>
-        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds) => GetRatings(itemIds, null);
+        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds) =>
+            _ratingService.GetRatings(itemIds);
 
-        /// <summary>
-        /// 同上，但按 <paramref name="user"/> 的可见性过滤：外部端点必须传当前用户，
-        /// 否则匿名/越权请求能拿到「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系。
-        /// 内部任务（如扫库填充）传 null 表示不做可见性过滤。
-        /// </summary>
-        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds, User user)
-        {
-            var result = new List<DoubanRatingInfo>();
+        /// <summary>按当前用户可见性过滤的评分快照查询。</summary>
+        public List<DoubanRatingInfo> GetRatings(IEnumerable<string> itemIds, User user) =>
+            _ratingService.GetRatings(itemIds, user);
 
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) LoadRatings();
-
-                foreach (var itemId in itemIds)
-                {
-                    try
-                    {
-                        var item = Plugin.LibraryManager.GetItemById(long.Parse(itemId));
-                        if (item == null) continue;
-                        if (user != null && !item.IsVisible(user)) continue;
-
-                        var subjectId = item.GetProviderId(DoubanProviderId);
-                        var source = item.GetProviderId(CommunityRatingService.SourceProviderId);
-
-                        DoubanRatingSnapshot snapshot = null;
-                        if (!string.IsNullOrEmpty(subjectId))
-                        {
-                            _ratings.TryGetValue(subjectId, out snapshot);
-                        }
-
-                        // 没有豆瓣 ID 时，全库评分把结果记在 imdb:tt... 名下，这里按 IMDb 兜底查一次。
-                        if (snapshot == null)
-                        {
-                            var imdbKey = GetImdbSnapshotKey(item.GetProviderId(MetadataProviders.Imdb));
-                            if (!string.IsNullOrEmpty(imdbKey))
-                            {
-                                _ratings.TryGetValue(imdbKey, out snapshot);
-                            }
-                        }
-
-                        // 既没有豆瓣条目、也没有显式来源：不是本模块关心的数据。
-                        if (snapshot == null && string.IsNullOrEmpty(source)) continue;
-
-                        // Applied 以显式来源优先：
-                        //   来源=douban → 社区评分确由豆瓣写入，直接为真；
-                        //   无来源标记 → 退回「当前 CommunityRating 与豆瓣快照相等」的实测推断（兼容旧数据）。
-                        // 不能再把两者做 &&：实测相等只能证明数字相同，不能证明来源，
-                        // 豆瓣与 TMDB 同分时会把 TMDB 的分错标成豆瓣 logo。
-                        var ratingMatches = snapshot != null && item.CommunityRating.HasValue &&
-                                            Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
-
-                        // 有 WrittenSource 时以它为准（能区分「同分不同源」）；
-                        // 旧快照没有该字段才退回数字比对。
-                        var writtenSource = snapshot?.WrittenSource;
-                        var applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                      string.IsNullOrEmpty(source) &&
-                                      (string.Equals(writtenSource, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                       string.IsNullOrEmpty(writtenSource) && ratingMatches);
-
-                        if (string.IsNullOrEmpty(source) && applied) source = "douban";
-
-                        result.Add(new DoubanRatingInfo
-                        {
-                            ItemId = itemId,
-                            SubjectId = subjectId,
-                            Rating = snapshot?.Rating,
-                            Votes = snapshot?.Votes,
-                            Applied = applied,
-                            Source = source,
-                            CommunityRating = item.CommunityRating
-                        });
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// 按 IMDb ID 列表解析豆瓣评分（Kodi 侧用外部 ID 定位，无需读取 E4K 映射库）。
-        /// Emby 认识但没有豆瓣数据时也会返回该条目（<c>Rating = null</c>），
-        /// 便于调用方区分「Emby 里没有这条」与「有这条但没豆瓣分」。
-        /// </summary>
-        public List<DoubanImdbRatingInfo> GetRatingsByImdb(IEnumerable<string> imdbIds, User user)
-        {
-            var result = new List<DoubanImdbRatingInfo>();
-
-            var wanted = (imdbIds ?? Enumerable.Empty<string>())
-                .Select(i => i?.Trim())
-                .Where(i => !string.IsNullOrEmpty(i))
-                .Select(i => i.ToLowerInvariant())
-                .Distinct()
-                .ToList();
-
-            if (wanted.Count == 0) return result;
-
-            var index = GetImdbItemIndex();
-
-            foreach (var imdb in wanted)
-            {
-                if (!index.TryGetValue(imdb, out var itemId)) continue;
-
-                var item = Plugin.LibraryManager.GetItemById(itemId);
-                if (item == null) continue;
-                if (user != null && !item.IsVisible(user)) continue;
-
-                var subjectId = item.GetProviderId(DoubanProviderId);
-                var source = item.GetProviderId(CommunityRatingService.SourceProviderId);
-                double? rating = null;
-                long? votes = null;
-                var applied = false;
-
-                if (!string.IsNullOrEmpty(subjectId))
-                {
-                    lock (_ratingsLock)
-                    {
-                        if (_ratings == null) LoadRatings();
-
-                        if (_ratings.TryGetValue(subjectId, out var snapshot))
-                        {
-                            rating = snapshot.Rating;
-                            votes = snapshot.Votes;
-
-                            var ratingMatches = item.CommunityRating.HasValue &&
-                                                Math.Abs(item.CommunityRating.Value - snapshot.Rating) <= 0.05;
-                            applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                      string.IsNullOrEmpty(source) && ratingMatches;
-                        }
-                    }
-                }
-
-                // 没有豆瓣 ID 或还没有 subject 快照时，按 IMDb key 读取全库评分落下的快照。
-                if (rating == null)
-                {
-                    var imdbKey = GetImdbSnapshotKey(imdb);
-
-                    if (!string.IsNullOrEmpty(imdbKey))
-                    {
-                        lock (_ratingsLock)
-                        {
-                            if (_ratings == null) LoadRatings();
-
-                            if (_ratings.TryGetValue(imdbKey, out var imdbSnapshot))
-                            {
-                                rating = imdbSnapshot.Rating;
-                                votes = imdbSnapshot.Votes;
-
-                                var ratingMatches = item.CommunityRating.HasValue &&
-                                                    Math.Abs(item.CommunityRating.Value - imdbSnapshot.Rating) <= 0.05;
-                                var writtenSource = imdbSnapshot.WrittenSource;
-                                applied = string.Equals(source, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                          string.IsNullOrEmpty(source) &&
-                                          (string.Equals(writtenSource, "douban", StringComparison.OrdinalIgnoreCase) ||
-                                           string.IsNullOrEmpty(writtenSource) && ratingMatches);
-                            }
-                        }
-                    }
-                }
-
-                if (string.IsNullOrEmpty(source) && applied) source = "douban";
-
-                result.Add(new DoubanImdbRatingInfo
-                {
-                    Imdb = imdb,
-                    ItemId = itemId.ToString(),
-                    SubjectId = subjectId,
-                    Rating = rating,
-                    Votes = votes,
-                    Applied = applied,
-                    Source = source,
-                    CommunityRating = item.CommunityRating
-                });
-            }
-
-            return result;
-        }
-
-        /// <summary>IMDb → 条目内部 ID 索引：10 分钟缓存，扫库后由 <see cref="InvalidateImdbIndex"/> 立即失效。</summary>
-        private Dictionary<string, long> GetImdbItemIndex()
-        {
-            lock (_imdbIndexLock)
-            {
-                if (_imdbItemIndex != null && DateTime.UtcNow - _imdbIndexBuilt < ImdbIndexTtl)
-                {
-                    return _imdbItemIndex;
-                }
-
-                var index = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-
-                try
-                {
-                    var items = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
-                    {
-                        IncludeItemTypes = new[] { nameof(Movie), nameof(Series), nameof(Episode), nameof(Season) }
-                    });
-
-                    // 同一 IMDb 可能有重复条目（不同媒体库各一份）：优先保留带豆瓣 ID 的那条，
-                    // 否则会取到「同片但没有豆瓣数据」的副本，接口返回空。
-                    var withDouban = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                    foreach (var item in items)
-                    {
-                        var imdb = item.GetProviderId(MetadataProviders.Imdb);
-                        if (string.IsNullOrWhiteSpace(imdb)) continue;
-
-                        imdb = imdb.Trim().ToLowerInvariant();
-                        var hasDouban = !string.IsNullOrEmpty(item.GetProviderId(DoubanProviderId));
-
-                        if (!index.ContainsKey(imdb))
-                        {
-                            index[imdb] = item.InternalId;
-                            if (hasDouban) withDouban.Add(imdb);
-                        }
-                        else if (hasDouban && !withDouban.Contains(imdb))
-                        {
-                            index[imdb] = item.InternalId;
-                            withDouban.Add(imdb);
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.Debug("DoubanAssist - IMDb index build failed: {0}", e.Message);
-                }
-
-                _imdbItemIndex = index;
-                _imdbIndexBuilt = DateTime.UtcNow;
-                return index;
-            }
-        }
+        /// <summary>按 IMDb ID 列表解析豆瓣评分（Kodi 侧用外部 ID 定位）。</summary>
+        public List<DoubanImdbRatingInfo> GetRatingsByImdb(IEnumerable<string> imdbIds, User user) =>
+            _ratingService.GetRatingsByImdb(imdbIds, user);
 
         /// <summary>条目/ProviderIds 变化后让 IMDb 索引下次重建。</summary>
-        public void InvalidateImdbIndex()
-        {
-            lock (_imdbIndexLock)
-            {
-                _imdbItemIndex = null;
-            }
-        }
+        public void InvalidateImdbIndex() => _ratingService.InvalidateImdbIndex();
 
-        /// <summary>没有豆瓣 ID 时，评分快照按 IMDb 外部 ID 落盘（<c>imdb:tt...</c>）。</summary>
-        private static string GetImdbSnapshotKey(string imdbId)
-        {
-            return DoubanRatingResolver.GetImdbSnapshotKey(imdbId);
-        }
+        /// <summary>详情页 / 开始播放的按需评分刷新。</summary>
+        public bool TryScheduleRatingRefresh(BaseItem item, string origin) =>
+            _ratingService.TryScheduleRatingRefresh(item, origin);
 
-        /// <summary>
-        /// 统一评分解析：豆瓣条目分 → IMDb 快照 → legacy 兜底；legacy 成功时按解析出的键记快照。
-        /// 刷新路径与「统一社区评分」共用，保证两条入口的取分与降级行为一致。
-        /// </summary>
-        private async Task<DoubanRatingResolution> ResolveRatingAsync(BaseItem item, string doubanId,
-            double? subjectRating, long? subjectVotes, CancellationToken cancellationToken)
-        {
-            var resolution = await DoubanRatingResolver.ResolveAsync(
-                    doubanId,
-                    item.GetProviderId(MetadataProviders.Imdb),
-                    subjectRating,
-                    subjectVotes,
-                    key => TryGetSnapshotState(key, out var rating, out var votes, out var checkedAt)
-                        ? new DoubanSnapshotView { Rating = rating, Votes = votes, CheckedAt = checkedAt }
-                        : null,
-                    (imdbId, token) => _ratingClient.GetRatingAsync(imdbId, token),
-                    ImdbRatingCacheDuration,
-                    DateTime.UtcNow,
-                    cancellationToken)
-                .ConfigureAwait(false);
+        /// <summary>本地修复 ProviderIds["DoubanRating"]，不发豆瓣请求。</summary>
+        public void RepairRatingProviderIds(IEnumerable<BaseItem> items) =>
+            _ratingService.RepairRatingProviderIds(items);
 
-            if (resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok)
-            {
-                if (resolution.Source == DoubanRatingSource.LegacyImdb)
-                {
-                    RecordRatingSnapshot(resolution.SnapshotKey, resolution.Rating, resolution.Votes);
-                }
+        /// <summary>社区评分被其它来源接管时复位豆瓣应用标记。</summary>
+        public void InvalidateRatingApplied(BaseItem item) => _ratingService.InvalidateRatingApplied(item);
 
-                _logger.Debug("DoubanAssist - Rating {0} for {1} source={2}", resolution.Rating, item.Name,
-                    resolution.Source);
-            }
-
-            return resolution;
-        }
-
-        /// <summary>
-        /// 写入评分快照。key 可以是豆瓣 subject ID，也可以是 <see cref="GetImdbSnapshotKey"/> 的 IMDb key，
-        /// 两种来源共用同一份文件与同一套 Applied/Checked 语义。
-        /// </summary>
-        private void RecordRatingSnapshot(string key, double rating, long? votes)
-        {
-            if (string.IsNullOrEmpty(key)) return;
-
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) LoadRatings();
-
-                var now = DateTime.UtcNow;
-
-                if (_ratings.TryGetValue(key, out var existing))
-                {
-                    var ratingChanged = Math.Abs(existing.Rating - rating) >= 0.001 || existing.Votes != votes;
-
-                    existing.Checked = now;
-
-                    if (!ratingChanged)
-                    {
-                        // 评分未变也要落盘「检查时间」，否则按需刷新的冷却永远不推进；按节流窗口写盘。
-                        if (now - _lastRatingsSave >= RatingsSaveThrottle)
-                        {
-                            _lastRatingsSave = now;
-                            SaveRatings();
-                        }
-
-                        return;
-                    }
-
-                    existing.Rating = rating;
-                    existing.Votes = votes;
-                    existing.Updated = now;
-                    // 豆瓣分变了，CommunityRating 还停在旧分，两者已不同源：
-                    // 先置 false，等真正写入社区评分后再由 MarkRatingApplied 置 true。
-                    existing.Applied = false;
-                    existing.WrittenSource = null;
-
-                    SaveRatings();
-                    return;
-                }
-
-                _ratings[key] = new DoubanRatingSnapshot
-                {
-                    Rating = rating,
-                    Votes = votes,
-                    Updated = now,
-                    Checked = now,
-                    Applied = false,
-                    WrittenSource = null
-                };
-
-                SaveRatings();
-            }
-        }
-
-        /// <summary>
-        /// 距上次成功检查是否已超过按需刷新间隔。无快照（含首次）视为到期。
-        /// </summary>
-        private bool IsRatingCheckDue(string subjectId, int refreshDays)
-        {
-            if (refreshDays <= 0) return false;
-
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) LoadRatings();
-
-                if (!_ratings.TryGetValue(subjectId, out var snapshot)) return true;
-
-                var last = snapshot.Checked ?? (snapshot.Updated == default ? (DateTime?)null : snapshot.Updated);
-                if (!last.HasValue) return true;
-
-                return DateTime.UtcNow - last.Value >= TimeSpan.FromDays(refreshDays);
-            }
-        }
-
-        private bool TryGetSnapshotRating(string subjectId, out double rating)
-        {
-            rating = 0;
-
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) LoadRatings();
-
-                if (!_ratings.TryGetValue(subjectId, out var snapshot)) return false;
-
-                rating = snapshot.Rating;
-                return true;
-            }
-        }
-
-        /// <summary>读取指定 key（豆瓣 ID 或 IMDb key）的完整快照状态，供全库评分复用与降频。</summary>
-        private bool TryGetSnapshotState(string key, out double rating, out long? votes, out DateTime? checkedAt)
-        {
-            rating = 0;
-            votes = null;
-            checkedAt = null;
-
-            if (string.IsNullOrEmpty(key)) return false;
-
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) LoadRatings();
-
-                if (!_ratings.TryGetValue(key, out var snapshot)) return false;
-
-                rating = snapshot.Rating;
-                votes = snapshot.Votes;
-                checkedAt = snapshot.Checked ??
-                            (snapshot.Updated == default ? (DateTime?)null : snapshot.Updated);
-
-                return snapshot.Rating > 0;
-            }
-        }
-
-        /// <summary>
-        /// 按豆瓣分数同步 <c>ProviderIds["DoubanRating"]</c>，返回是否修改了条目。
-        /// 只看「同步豆瓣评分到 Kodi」开关，不再受「豆瓣辅助生效范围」影响；
-        /// 开关关闭时顺手移除遗留 key。
-        /// </summary>
-        private static bool SyncRatingProviderId(BaseItem item, double? rating, bool enabled)
-        {
-            if (enabled && rating.HasValue)
-            {
-                var value = rating.Value.ToString("0.#", CultureInfo.InvariantCulture);
-
-                if (!string.Equals(item.GetProviderId(DoubanRatingProviderId), value, StringComparison.Ordinal))
-                {
-                    item.ProviderIds[DoubanRatingProviderId] = value;
-                    return true;
-                }
-
-                return false;
-            }
-
-            if (!enabled && item.ProviderIds.ContainsKey(DoubanRatingProviderId))
-            {
-                item.ProviderIds.Remove(DoubanRatingProviderId);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// 「无评分时清空」：只清社区评分及其来源快照，保留独立的 DoubanRating 第三评分。
-        /// </summary>
-        private static bool ClearMainRating(BaseItem item)
-        {
-            var changed = false;
-
-            if (item.CommunityRating.HasValue)
-            {
-                item.CommunityRating = null;
-                changed = true;
-            }
-
-            foreach (var key in new[]
-                     {
-                         CommunityRatingService.SourceProviderId,
-                         CommunityRatingService.TmdbRatingProviderId,
-                         CommunityRatingService.ImdbRatingProviderId
-                     })
-            {
-                if (item.ProviderIds.Remove(key)) changed = true;
-            }
-
-            return changed;
-        }
-
-        /// <summary>
-        /// 按需刷新入口（详情页 / 开始播放）：冷却到期才抓豆瓣，异步执行，不阻塞调用方。
-        /// 只处理已有豆瓣 ID 的条目——缺 ID 的由扫库补全任务负责。
-        /// </summary>
-        public bool TryScheduleRatingRefresh(BaseItem item, string origin)
-        {
-            if (item == null) return false;
-
-            // 剧集播放/详情页拿到的是 Episode，豆瓣评分挂在剧集上，向上归一到 Series。
-            if (item is Episode episode && episode.Series != null) item = episode.Series;
-
-            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
-
-            if (!options.IsDoubanDataEnabled) return false;
-            if (options.DoubanAssist.DoubanRefreshIntervalDays <= 0) return false;
-            if (item.IsLocked) return false;
-
-            var subjectId = item.GetProviderId(DoubanProviderId);
-            if (string.IsNullOrEmpty(subjectId)) return false;
-
-            if (!IsRatingCheckDue(subjectId, options.DoubanAssist.DoubanRefreshIntervalDays)) return false;
-            if (IsBreakerEngaged()) return false;
-            if (!_refreshScheduled.TryAdd(item.InternalId, 0)) return false;
-
-            var suggestType = item is Movie ? "movie" : "tv";
-            var seasonNumber = (item as Season)?.IndexNumber;
-
-            _ = BackgroundTaskRunner.Run("Douban.Refresh", async () =>
-            {
-                try
-                {
-                    // 0–2 秒抖动，叠加请求频控，避免短时间内集中打豆瓣
-                    await Task.Delay(Random.Shared.Next(0, 2000)).ConfigureAwait(false);
-                    await ApplyAsync(item, suggestType, seasonNumber, CancellationToken.None).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    _logger.Debug("DoubanAssist - On-demand refresh failed ({0}): {1}", origin, e.Message);
-                }
-                finally
-                {
-                    _refreshScheduled.TryRemove(item.InternalId, out _);
-                }
-            });
-
-            _logger.Info("DoubanAssist - On-demand refresh scheduled ({0}): {1}", origin, item.Name);
-            return true;
-        }
-
-        /// <summary>
-        /// 本地修复 <c>ProviderIds["DoubanRating"]</c>：只读评分快照，不发任何豆瓣请求。
-        /// 覆盖两种场景：①「替换全部元数据」把 ProviderIds 重建后按快照补回；②关闭开关后清理遗留 key。
-        /// </summary>
-        public void RepairRatingProviderIds(IEnumerable<BaseItem> items)
-        {
-            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
-
-            if (!options.IsDoubanDataEnabled || items == null) return;
-
-            var writeKey = options.DoubanAssist.DoubanRatingToKodi;
-            var repaired = 0;
-            var cleared = 0;
-
-            foreach (var item in items)
-            {
-                try
-                {
-                    var current = item.GetProviderId(DoubanRatingProviderId);
-
-                    if (!writeKey)
-                    {
-                        if (string.IsNullOrEmpty(current)) continue;
-
-                        item.ProviderIds.Remove(DoubanRatingProviderId);
-                        item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                        cleared++;
-                        continue;
-                    }
-
-                    var subjectId = item.GetProviderId(DoubanProviderId);
-                    var snapshotKey = !string.IsNullOrEmpty(subjectId)
-                        ? subjectId
-                        : GetImdbSnapshotKey(item.GetProviderId(MetadataProviders.Imdb));
-                    if (string.IsNullOrEmpty(snapshotKey)) continue;
-                    if (!TryGetSnapshotRating(snapshotKey, out var rating)) continue;
-
-                    var desired = rating.ToString("0.#", CultureInfo.InvariantCulture);
-                    if (string.Equals(current, desired, StringComparison.Ordinal)) continue;
-
-                    item.ProviderIds[DoubanRatingProviderId] = desired;
-                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                    repaired++;
-                }
-                catch (Exception e)
-                {
-                    _logger.Debug("DoubanAssist - Rating ProviderId repair failed for {0}: {1}", item.Name, e.Message);
-                }
-            }
-
-            if (repaired > 0 || cleared > 0)
-            {
-                _logger.Info("DoubanAssist - Rating ProviderId repaired: {0}, cleared: {1}", repaired, cleared);
-            }
-        }
-
-        /// <summary>
-        /// 标记某豆瓣条目对应的 <c>CommunityRating</c> 是否已由豆瓣评分写入。
-        /// 只在快照已存在时生效（<see cref="RecordRatingSnapshot"/> 总是先于本方法执行）。
-        /// 全量填充时本方法会被逐条调用，因此写盘按时间节流，收尾由 <see cref="FlushRatings"/> 兜底。
-        /// </summary>
-        private void MarkRatingApplied(string subjectId, bool applied)
-        {
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) LoadRatings();
-
-                if (!_ratings.TryGetValue(subjectId, out var snapshot)) return;
-
-                var writtenSource = applied ? "douban" : null;
-
-                if (snapshot.Applied == applied && snapshot.WrittenSource == writtenSource) return;
-
-                snapshot.Applied = applied;
-                snapshot.WrittenSource = writtenSource;
-
-                if (DateTime.UtcNow - _lastRatingsSave < RatingsSaveThrottle) return;
-                _lastRatingsSave = DateTime.UtcNow;
-                SaveRatings();
-            }
-        }
-
-        /// <summary>
-        /// 社区评分被 TMDB / IMDb 接管或清空时，把该条目的豆瓣快照应用标记复位，
-        /// 避免前端继续凭旧标记显示豆瓣图标。批量任务收尾由 <see cref="FlushRatings"/> 落盘。
-        /// </summary>
-        public void InvalidateRatingApplied(BaseItem item)
-        {
-            if (item == null) return;
-
-            var subjectId = item.GetProviderId(DoubanProviderId);
-            if (!string.IsNullOrEmpty(subjectId)) MarkRatingApplied(subjectId, false);
-
-            var imdbKey = GetImdbSnapshotKey(item.GetProviderId(MetadataProviders.Imdb));
-            if (!string.IsNullOrEmpty(imdbKey)) MarkRatingApplied(imdbKey, false);
-        }
-
-        /// <summary>强制把评分快照落盘（批量任务收尾用，避免节流窗口内的最后一次改动丢失）。</summary>
-        public void FlushRatings()
-        {
-            lock (_ratingsLock)
-            {
-                if (_ratings == null) return;
-
-                SaveRatings();
-                _lastRatingsSave = DateTime.UtcNow;
-            }
-        }
+        /// <summary>强制把评分快照落盘。</summary>
+        public void FlushRatings() => _ratingService.FlushRatings();
 
         /// <summary>加载失败重试队列（仅在持有 <see cref="_retryLock"/> 时调用）。</summary>
         private void EnsureRetryLoaded()
@@ -1103,36 +303,6 @@ namespace StrmAssistant.Provider.Douban
             {
                 EnsureRetryLoaded();
                 _retry.Remove(itemId.ToString());
-            }
-        }
-
-        private void LoadRatings()
-        {
-            _ratings = new Dictionary<string, DoubanRatingSnapshot>();
-
-            try
-            {
-                if (File.Exists(_ratingsPath))
-                {
-                    var persisted = _jsonSerializer.DeserializeFromFile<Dictionary<string, DoubanRatingSnapshot>>(_ratingsPath);
-                    if (persisted != null) _ratings = persisted;
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Debug("DoubanAssist - Ratings load failed: {0}", e.Message);
-            }
-        }
-
-        private void SaveRatings()
-        {
-            try
-            {
-                _jsonSerializer.SerializeToFile(_ratings, _ratingsPath);
-            }
-            catch (Exception e)
-            {
-                _logger.Debug("DoubanAssist - Ratings save failed: {0}", e.Message);
             }
         }
 
@@ -1457,11 +627,14 @@ namespace StrmAssistant.Provider.Douban
                     {
                         var suggestType = item is Movie ? "movie" : "tv";
                         var seasonNumber = (item as Season)?.IndexNumber;
-                        await ApplyAsync(item, suggestType, seasonNumber, cancellationToken).ConfigureAwait(false);
+                        await ApplyAsync(item, suggestType, seasonNumber, cancellationToken, true)
+                            .ConfigureAwait(false);
                     }
                     else
                     {
-                        await UpdateMdbListRatingsAsync(item, options.CommunityRating?.MdbListApiKey, cancellationToken)
+                        await Plugin.RatingUnifier
+                            .UpdateMdbListCriticRatingAsync(item, options.CommunityRating?.MdbListApiKey,
+                                cancellationToken)
                             .ConfigureAwait(false);
                     }
 
@@ -1502,180 +675,10 @@ namespace StrmAssistant.Provider.Douban
             return report;
         }
 
-        /// <summary>
-        /// 豆瓣全库评分：优先使用已匹配豆瓣条目的评分（subject 缓存 / 页面 / V2 API），
-        /// 没有豆瓣 ID 或条目无评分时才回退到 IMDb → 第三方 API。
-        /// 两条通道的结果都会写入同一份评分快照；社区评分、来源标记与
-        /// <c>ProviderIds["DoubanRating"]</c>（受「同步到 Kodi」开关控制）由本方法统一写入。
-        /// </summary>
-        public async Task<DoubanUnifyReport> UnifyRatingsAsync(IProgress<double> progress,
-            CancellationToken cancellationToken)
-        {
-            var report = new DoubanUnifyReport();
-            var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
-
-            if (!options.IsDoubanRatingSource)
-            {
-                _logger.Warn("DoubanUnify - skipped: community rating source is not Douban");
-                progress?.Report(100);
-                return report;
-            }
-
-            if (Plugin.LibraryManager == null)
-            {
-                _logger.Warn("DoubanUnify - skipped: library manager not ready");
-                progress?.Report(100);
-                return report;
-            }
-
-            var lookbackDays = options.DoubanAssist.RatingUpdateLookbackDays;
-            var toKodi = options.DoubanAssist.DoubanRatingToKodi;
-
-            var items = Plugin.LibraryManager.GetItemList(new InternalItemsQuery
-            {
-                IncludeItemTypes = new[] { nameof(Movie), nameof(Series) }
-            });
-
-            report.Total = items.Length;
-            _logger.Info($"DoubanUnify - items={items.Length}");
-
-            var index = 0;
-
-            try
-            {
-                foreach (var item in items)
-                {
-                    try
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                        index++;
-                        progress?.Report(items.Length == 0 ? 100 : index * 100.0 / items.Length);
-
-                        if (CommunityRatingService.IsRatingLocked(item))
-                        {
-                            report.Locked++;
-                            continue;
-                        }
-
-                        if (lookbackDays > 0 && item.PremiereDate.HasValue &&
-                            item.PremiereDate.Value < DateTime.UtcNow.AddDays(-lookbackDays))
-                        {
-                            report.SkippedLookback++;
-                            continue;
-                        }
-
-                        var doubanId = item.GetProviderId(DoubanProviderId);
-
-                        DoubanSubject subject = null;
-
-                        // ① 条目本身已匹配豆瓣：优先用豆瓣条目分（subject 缓存命中时不发请求）。
-                        if (!string.IsNullOrEmpty(doubanId))
-                        {
-                            subject = await FetchSubjectAsync(doubanId, cancellationToken)
-                                .ConfigureAwait(false);
-                        }
-
-                        // ② 条目无评分（或没有豆瓣 ID）：统一走 IMDb 快照 / legacy 兜底。
-                        var resolution = await ResolveRatingAsync(item, doubanId, subject?.Rating, subject?.Votes,
-                            cancellationToken).ConfigureAwait(false);
-
-                        if (resolution.Status == DoubanRatingClient.DoubanLightStatus.Failed)
-                        {
-                            report.Failed++;
-                            continue;
-                        }
-
-                        var rating = resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok
-                            ? resolution.Rating
-                            : (double?)null;
-                        var snapshotKey = resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok
-                            ? resolution.SnapshotKey
-                            : null;
-
-                        if (!rating.HasValue)
-                        {
-                            if (options.CommunityRating.CommunityRatingClearWhenMissing && ClearMainRating(item))
-                            {
-                                item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                                report.Cleared++;
-                            }
-                            else if (resolution.Status == DoubanRatingClient.DoubanLightStatus.NoId)
-                            {
-                                report.NoId++;
-                            }
-                            else
-                            {
-                                report.NoRating++;
-                            }
-
-                            continue;
-                        }
-
-                        var target = (float)Math.Round(rating.Value, 1);
-                        var changed = false;
-
-                        if (!item.CommunityRating.HasValue ||
-                            Math.Abs(item.CommunityRating.Value - target) > 0.05f)
-                        {
-                            item.CommunityRating = target;
-                            changed = true;
-                        }
-
-                        if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
-                                StringComparison.OrdinalIgnoreCase))
-                        {
-                            item.ProviderIds[CommunityRatingService.SourceProviderId] = "douban";
-                            changed = true;
-                        }
-
-                        if (SyncRatingProviderId(item, rating, toKodi))
-                        {
-                            changed = true;
-                        }
-
-                        if (!string.IsNullOrEmpty(snapshotKey))
-                        {
-                            MarkRatingApplied(snapshotKey, true);
-                        }
-
-                        if (!changed)
-                        {
-                            report.Same++;
-                            continue;
-                        }
-
-                        item.UpdateToRepository(ItemUpdateType.MetadataEdit);
-                        report.Updated++;
-
-                        if (report.Samples.Count < 20)
-                        {
-                            report.Samples.Add($"update | {item.Name} | {item.InternalId}");
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        _logger.Info("DoubanUnify - cancelled");
-                        throw;
-                    }
-                    catch (Exception e)
-                    {
-                        report.Failed++;
-                        if (report.Failed <= 10)
-                        {
-                            _logger.Warn($"DoubanUnify - {item.Name}: {e.Message}");
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                FlushRatings();
-            }
-
-            _logger.Info(report.BuildSummary());
-            return report;
-        }
+        /// <summary>全库统一社区评分（手动任务；处理全库，不受评分回看期限制）。</summary>
+        public Task<DoubanUnifyReport> UnifyRatingsAsync(IProgress<double> progress,
+            CancellationToken cancellationToken) =>
+            _ratingService.UnifyRatingsAsync(progress, cancellationToken);
 
         /// <summary>
         /// 解析条目生效的元数据语言：条目级为空时回退到所属媒体库的 LibraryOptions。
@@ -1696,14 +699,13 @@ namespace StrmAssistant.Provider.Douban
         }
 
         private async Task ApplyAsync(BaseItem item, string suggestType, int? seasonNumber,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, bool ignoreRatingLookback = false)
         {
             var options = Plugin.Instance.MetadataEnhanceStore.GetOptions();
 
             if (!options.IsDoubanDataEnabled || item == null) return;
 
             // 社区评分由「社区评分来源」决定；本方法只处理豆瓣相关能力，每个能力独立开关。
-            var isDoubanRatingSource = options.IsDoubanRatingSource;
             var metadataEnabled = options.DoubanAssist.DoubanFillOverview ||
                                   options.DoubanAssist.DoubanCastChinese ||
                                   options.DoubanAssist.DoubanPosterFallback;
@@ -1748,30 +750,12 @@ namespace StrmAssistant.Provider.Douban
                 if (stats != null) Interlocked.Increment(ref stats.Matched);
                 _logger.Info("DoubanAssist - Matched {0} -> subject {1}", item.Name, subject.SubjectId);
 
-                var changed = false;
-
-                // 评分值：豆瓣条目分优先；条目本身无评分时才回退 IMDb 第三方 API。
-                // 只有需要豆瓣评分的能力（社区评分/徽章/Kodi）开启时才做这一步。
-                var needDoubanRating = isDoubanRatingSource ||
-                                       options.DoubanAssist.DoubanFetchRating ||
-                                       options.DoubanAssist.DoubanRatingToKodi;
-                var doubanRating = subject.Rating;
-
-                if (!doubanRating.HasValue && needDoubanRating)
-                {
-                    var resolution = await ResolveRatingAsync(item, subject.SubjectId, subject.Rating,
-                        subject.Votes, cancellationToken).ConfigureAwait(false);
-
-                    if (resolution.Status == DoubanRatingClient.DoubanLightStatus.Ok)
-                    {
-                        doubanRating = resolution.Rating;
-                    }
-                }
-
                 // 每个能力独立勾选，不再做「生效范围」二次门控。
                 var allowNameOverview = options.DoubanAssist.DoubanFillOverview && metadataAllowed;
                 var allowCast = options.DoubanAssist.DoubanCastChinese && metadataAllowed;
                 var allowPoster = options.DoubanAssist.DoubanPosterFallback && metadataAllowed;
+
+                var changed = false;
 
                 if (!string.Equals(item.GetProviderId(DoubanProviderId), subject.SubjectId, StringComparison.Ordinal))
                 {
@@ -1779,11 +763,16 @@ namespace StrmAssistant.Provider.Douban
                     changed = true;
                 }
 
-                // 第三形态：豆瓣分写入 ProviderIds，供 Kodi 皮肤独立读取；
-                // 与社区评分（CommunityRating）/ 次评分（CriticRating）互不影响。
-                if (SyncRatingProviderId(item, doubanRating, options.DoubanAssist.DoubanRatingToKodi))
+                // 评分（社区评分 / Web 徽章 / Kodi 第三评分）由评分服务统一处理。
+                var ratingResult = await _ratingService.ApplyToItemAsync(item, subject, ignoreRatingLookback,
+                    cancellationToken).ConfigureAwait(false);
+                changed = ratingResult.Changed || changed;
+
+                if (stats != null)
                 {
-                    changed = true;
+                    if (ratingResult.Applied) Interlocked.Increment(ref stats.RatingApplied);
+                    if (ratingResult.SkippedLookback) Interlocked.Increment(ref stats.RatingSkippedLookback);
+                    if (ratingResult.SkippedSource) Interlocked.Increment(ref stats.RatingSkippedSource);
                 }
 
                 if (allowNameOverview)
@@ -1824,61 +813,6 @@ namespace StrmAssistant.Provider.Douban
                     }
                 }
 
-                // 社区评分只由「社区评分来源」决定：选豆瓣时豆瓣无条件接管，
-                // 不再需要旧的「使用豆瓣评分覆盖」开关。
-                // 但 CommunityRating 字段被锁定时不写，与全库同步保持同一规则。
-                if (isDoubanRatingSource && doubanRating.HasValue &&
-                    !CommunityRatingService.IsRatingLocked(item))
-                {
-                    // RatingUpdateLookbackDays：评分更新只作用于首播日期在回看期内的条目
-                    var lookbackDays = options.DoubanAssist.RatingUpdateLookbackDays;
-                    var ratingAllowed = lookbackDays <= 0 || !item.PremiereDate.HasValue ||
-                                        item.PremiereDate.Value >= DateTime.UtcNow.AddDays(-lookbackDays);
-
-                    if (ratingAllowed)
-                    {
-                        var previousRating = item.CommunityRating;
-
-                        if (Math.Abs((previousRating ?? 0) - doubanRating.Value) > 0.05)
-                        {
-                            item.CommunityRating = (float)doubanRating.Value;
-                            changed = true;
-                            _logger.Info("DoubanAssist - Rating updated for {0}: {1} -> {2} (votes {3})",
-                                item.Name, previousRating?.ToString("0.0") ?? "N/A", doubanRating.Value,
-                                subject.Votes);
-                        }
-
-                        // 社区评分此刻归豆瓣所有：写来源标记，前端据此换豆瓣 logo，
-                        // 也避免「豆瓣分与 TMDB 分恰好相等」时把来源判错。
-                        if (!string.Equals(item.GetProviderId(CommunityRatingService.SourceProviderId), "douban",
-                                StringComparison.OrdinalIgnoreCase))
-                        {
-                            item.ProviderIds[CommunityRatingService.SourceProviderId] = "douban";
-                            changed = true;
-                        }
-
-                        // 走到这里说明 CommunityRating 此刻确为豆瓣分（含「本来就相等、无需改写」）
-                        MarkRatingApplied(subject.SubjectId, true);
-                        if (stats != null) Interlocked.Increment(ref stats.RatingApplied);
-                    }
-                    else
-                    {
-                        if (stats != null) Interlocked.Increment(ref stats.RatingSkippedLookback);
-                        _logger.Info("DoubanAssist - Rating skipped (reason=Lookback, {0}d): {1}", lookbackDays,
-                            item.Name);
-                    }
-                }
-                else if (isDoubanRatingSource && doubanRating.HasValue)
-                {
-                    _logger.Info("DoubanAssist - Rating skipped (reason=LockedField): {0}", item.Name);
-                }
-                else if (doubanRating.HasValue)
-                {
-                    if (stats != null) Interlocked.Increment(ref stats.RatingSkippedSource);
-
-                    _logger.Debug("DoubanAssist - Rating skipped (reason=SourceNotDouban): {0}", item.Name);
-                }
-
                 // 影评人评分独立于豆瓣社区评分，但与豆瓣数据层共用同一次刷新；
                 // 数据层未启用时由 Plugin 的独立 MdbList 钩子处理。
                 if (options.DoubanAssist.EnableMdbListCriticRating &&
@@ -1887,7 +821,8 @@ namespace StrmAssistant.Provider.Douban
                      item.PremiereDate.Value >= DateTime.UtcNow.AddDays(
                          -options.DoubanAssist.RatingUpdateLookbackDays)))
                 {
-                    await UpdateMdbListRatingsAsync(item, options.CommunityRating?.MdbListApiKey, cancellationToken)
+                    await Plugin.RatingUnifier
+                        .UpdateMdbListCriticRatingAsync(item, options.CommunityRating?.MdbListApiKey, cancellationToken)
                         .ConfigureAwait(false);
                 }
 
@@ -2413,10 +1348,10 @@ namespace StrmAssistant.Provider.Douban
             if (cached != null)
             {
                 // 快照文件与缓存文件生命周期独立，缓存命中时补记一次，
-                // 避免快照被删/生成晚于缓存时 7 天内徽章一直缺失（RecordRatingSnapshot 自身幂等）。
+                // 避免快照被删/生成晚于缓存时 7 天内徽章一直缺失（RecordSubjectRating 自身幂等）。
                 if (cached.Rating.HasValue)
                 {
-                    RecordRatingSnapshot(subjectId, cached.Rating.Value, cached.Votes);
+                    _ratingService.RecordSubjectRating(subjectId, cached.Rating.Value, cached.Votes);
                 }
 
                 return cached;
@@ -2435,7 +1370,7 @@ namespace StrmAssistant.Provider.Douban
                     SetCache(key, apiSubject);
                     if (apiSubject.Rating.HasValue)
                     {
-                        RecordRatingSnapshot(subjectId, apiSubject.Rating.Value, apiSubject.Votes);
+                        _ratingService.RecordSubjectRating(subjectId, apiSubject.Rating.Value, apiSubject.Votes);
                     }
 
                     return apiSubject;
@@ -2464,7 +1399,7 @@ namespace StrmAssistant.Provider.Douban
 
             if (subject.Rating.HasValue)
             {
-                RecordRatingSnapshot(subjectId, subject.Rating.Value, subject.Votes);
+                _ratingService.RecordSubjectRating(subjectId, subject.Rating.Value, subject.Votes);
             }
 
             return subject;
@@ -2781,38 +1716,6 @@ namespace StrmAssistant.Provider.Douban
         {
             return string.Format("DoubanSync - total={0} matched={1} skipped={2} failed={3}",
                 Total, Matched, Skipped, Failed);
-        }
-    }
-
-    /// <summary>豆瓣轻量统一（按 IMDb 查评分）的统计结果。</summary>
-    public sealed class DoubanUnifyReport
-    {
-        private const int MaxSamples = 20;
-
-        public int Total { get; set; }
-        public int Updated { get; set; }
-        public int Same { get; set; }
-        public int Cleared { get; set; }
-        public int Locked { get; set; }
-        public int NoId { get; set; }
-        public int NoRating { get; set; }
-        public int SkippedLookback { get; set; }
-        public int Failed { get; set; }
-        public List<string> Samples { get; } = new List<string>();
-
-        public string BuildSummary()
-        {
-            return string.Format(
-                "DoubanUnify - total={0} updated={1} same={2} cleared={3} locked={4} noId={5} noRating={6} lookback={7} failed={8}",
-                Total, Updated, Same, Cleared, Locked, NoId, NoRating, SkippedLookback, Failed);
-        }
-
-        public string BuildUserSummary()
-        {
-            var format = Resources.ResourceManager.GetString("DoubanUnify_Notify_Summary",
-                CultureInfo.CurrentUICulture);
-            return string.Format(format ?? string.Empty,
-                Total, Updated, Same, Cleared, Locked, NoId, NoRating, SkippedLookback, Failed);
         }
     }
 }

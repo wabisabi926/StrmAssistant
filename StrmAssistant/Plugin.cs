@@ -477,7 +477,7 @@ namespace StrmAssistant
                 {
                     var mdbKey = metadataOptions.CommunityRating.MdbListApiKey;
                     _ = BackgroundTaskRunner.Run("MdbList.CriticRating",
-                        () => DoubanAssist.UpdateMdbListRatingsAsync(mdbItem, mdbKey, CancellationToken.None));
+                        () => RatingUnifier.UpdateMdbListCriticRatingAsync(mdbItem, mdbKey, CancellationToken.None));
                 }
             }
 

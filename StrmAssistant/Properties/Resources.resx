@@ -618,16 +618,16 @@
     <value>Unify community rating now</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
-    <value>Unify CommunityRating across the library using the selected source. Save settings first; add a recurring trigger in Scheduled Tasks if needed.</value>
+    <value>Unify CommunityRating across the library using the selected source; the Douban source is not limited by the rating lookback. Save settings first; add a recurring trigger in Scheduled Tasks if needed.</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
-    <value>Douban ratings come from matched subjects first, then fall back to a third-party lookup by IMDb ID. Existing ratings are kept if the lookup fails. Continue?</value>
+    <value>Douban ratings come from matched subjects first, then fall back to a third-party lookup by IMDb ID. The whole library is processed regardless of the rating lookback; existing ratings are kept if the lookup fails. Continue?</value>
   </data>
   <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
     <value>Unify Community Rating</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
-    <value>Unifies community ratings for all movies and series using the selected source. No trigger by default; enable one in Scheduled Tasks if needed.</value>
+    <value>Unifies community ratings for all movies and series using the selected source. The Douban source covers the entire library and is not limited by the rating lookback. No trigger by default; enable one in Scheduled Tasks if needed.</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
     <value>Douban Enhancements</value>
@@ -1257,10 +1257,10 @@
     <value>Crop to 16:9 or 2:3, or generate a backdrop; leave blank for none.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
-    <value>Fetch Douban Rating</value>
+    <value>Douban Rating on Web</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>Fetches and caches the Douban rating for the detail-page badge without touching the community rating. Enabled automatically when the source is Douban. Default is OFF.</value>
+    <value>Fetches and caches the Douban rating for Web detail pages and cards without touching the community rating. For a new library, run the Sync Douban Data task once first. Enabled automatically when the source is Douban. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>Fill Overview and Genres</value>
@@ -1287,7 +1287,7 @@
     <value>Refreshes when an item is viewed or played and the last check is older than this many days. 0 disables it. Default is 7 days.</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Description" xml:space="preserve">
-    <value>Only updates items whose premiere date falls within this many days. 0 disables the limit. Default is 365 days.</value>
+    <value>Only updates items whose premiere date falls within this many days. First-time writes and manual full syncs are not limited. 0 disables the limit. Default is 365 days.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
     <value>Optional. Used for Douban web scraping, cast pages, and poster lookup/download; the Access Token does not cover these requests. Leave empty for anonymous access; set it if you hit risk control.</value>
@@ -1308,7 +1308,7 @@
     <value>Douban Access Token</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
-    <value>Sync Douban Rating to Kodi</value>
+    <value>Write Douban Rating for Kodi</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>On-Demand Refresh Interval (Days)</value>
@@ -2031,7 +2031,7 @@
     <value>Community rating dry run completed (nothing written): source {0}, {1} items; would update {2}, unchanged {3}, cleared {4}, locked {5}, no ID {6}, no rating {7}, low votes {8}, failed {9}.</value>
   </data>
   <data name="DoubanUnify_Notify_Summary" xml:space="preserve">
-    <value>Douban rating unify completed: {0} items; updated {1}, unchanged {2}, cleared {3}, locked {4}, no ID {5}, no rating {6}, outside lookback {7}, failed {8}.</value>
+    <value>Douban rating unify completed: {0} items; updated {1}, unchanged {2}, cleared {3}, locked {4}, no ID {5}, no rating {6}, failed {7}.</value>
   </data>
   <data name="MemoryGuard_Notify_Restart" xml:space="preserve">
     <value>Memory usage {0} MB exceeds the {1} MB limit; the server will restart automatically in {2} seconds.</value>

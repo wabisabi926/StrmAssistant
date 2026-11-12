@@ -14,15 +14,15 @@ namespace StrmAssistant.Web.Service
         public class DoubanRatingsResponse
         {
             public bool Enabled { get; set; }
-            public List<DoubanAssist.DoubanRatingInfo> Ratings { get; set; } = new List<DoubanAssist.DoubanRatingInfo>();
+            public List<DoubanRatingInfo> Ratings { get; set; } = new List<DoubanRatingInfo>();
         }
 
         public class DoubanImdbRatingsResponse
         {
             public bool Enabled { get; set; }
 
-            public List<DoubanAssist.DoubanImdbRatingInfo> Ratings { get; set; } =
-                new List<DoubanAssist.DoubanImdbRatingInfo>();
+            public List<DoubanImdbRatingInfo> Ratings { get; set; } =
+                new List<DoubanImdbRatingInfo>();
         }
 
         public object Get(GetDoubanRatings request)

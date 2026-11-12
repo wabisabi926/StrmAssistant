@@ -485,6 +485,100 @@ namespace StrmAssistant.Common
             return lookup;
         }
 
+        /// <summary>
+        /// 按 IMDb ID 拉取 MdbList 评分并写入影评人评分（烂番茄 %）。
+        /// 与社区评分共用 MdbList 限流；豆瓣数据层启用时由单条刷新顺带调用。
+        /// </summary>
+        public async Task<bool> UpdateMdbListCriticRatingAsync(BaseItem item, string apiKey,
+            CancellationToken cancellationToken)
+        {
+            var imdbId = item.GetProviderId(MetadataProviders.Imdb);
+            if (string.IsNullOrWhiteSpace(imdbId) || string.IsNullOrWhiteSpace(apiKey)) return false;
+
+            try
+            {
+                // MdbList 要求显式媒体类型：/imdb/movie/{id} 或 /imdb/show/{id}，缺类型会返回 405。
+                var mediaType = item is Movie ? "movie" : "show";
+                var url =
+                    $"{MdbListBaseUrl}/imdb/{mediaType}/{Uri.EscapeDataString(imdbId.Trim())}?apikey={Uri.EscapeDataString(apiKey.Trim())}&format=json";
+
+                var requestOptions = new HttpRequestOptions
+                {
+                    Url = url,
+                    CancellationToken = cancellationToken,
+                    AcceptHeader = "application/json",
+                    BufferContent = true,
+                    UserAgent = Plugin.Instance?.UserAgent
+                };
+
+                await ThrottleAsync(MdbListThrottle, () => _lastMdbListRequest, value => _lastMdbListRequest = value,
+                    MdbListRequestIntervalMs, cancellationToken).ConfigureAwait(false);
+
+                using var response = await Plugin.HttpClient.SendAsync(requestOptions, "GET").ConfigureAwait(false);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    Logger?.Debug("MdbList - Unexpected status {0} for {1}", response.StatusCode, imdbId);
+                    return false;
+                }
+
+                await using var contentStream = response.Content;
+                var payload = Plugin.JsonSerializer.DeserializeFromStream<MdbListResponse>(contentStream);
+                var ratings = payload?.ratings;
+                if (ratings == null || ratings.Count == 0) return false;
+
+                double? tomatoes = null;
+                double? imdb = null;
+                double? metacritic = null;
+
+                foreach (var rating in ratings)
+                {
+                    if (rating.value == null) continue;
+
+                    var source = rating.source ?? string.Empty;
+                    if (source.IndexOf("tomato", StringComparison.OrdinalIgnoreCase) >= 0)
+                        tomatoes = rating.value;
+                    else if (source.IndexOf("imdb", StringComparison.OrdinalIgnoreCase) >= 0)
+                        imdb = rating.value;
+                    else if (source.IndexOf("metacritic", StringComparison.OrdinalIgnoreCase) >= 0)
+                        metacritic = rating.value;
+                }
+
+                if (!tomatoes.HasValue) return false;
+
+                var changed = false;
+
+                var newCriticRating = (float)Math.Round(tomatoes.Value, 0);
+                if (Math.Abs((item.CriticRating ?? 0) - newCriticRating) > 0.01)
+                {
+                    item.CriticRating = newCriticRating;
+                    changed = true;
+                }
+
+                var summaryParts = new List<string>();
+                if (imdb.HasValue) summaryParts.Add($"IMDb: {imdb.Value:0.0}");
+                if (metacritic.HasValue) summaryParts.Add($"Metacritic: {metacritic.Value:0}");
+                summaryParts.Add($"Rotten Tomatoes: {tomatoes.Value:0}%");
+
+                if (changed)
+                {
+                    item.UpdateToRepository(ItemUpdateType.MetadataEdit);
+                    Logger?.Info("MdbList - Ratings updated for {0}: {1}", item.Name,
+                        string.Join(" · ", summaryParts));
+                }
+
+                return changed;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger?.Debug("MdbList - Request failed for {0}: {1}", imdbId, ex.Message);
+                return false;
+            }
+        }
+
         private static CommunityRatingUnifyOutcome ApplyRating(BaseItem item, RatingLookup lookup,
             CommunityRatingSourceOption source)
         {

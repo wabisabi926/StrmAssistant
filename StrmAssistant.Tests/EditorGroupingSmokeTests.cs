@@ -118,6 +118,41 @@ namespace StrmAssistant.Tests
                         "ScrapeEpisodeGroup", "EpisodeRefresh", "MetadataCache" },
                 groups.Select(g => g.Name).ToArray());
 
+            var community = groups.First(g => NameOrId(g, "CommunityRating"));
+            Assert.Contains(community.EditorItems, i => NameOrId(i, "EnableMdbListCriticRating"));
+            var communityItems = community.EditorItems.ToList();
+            Assert.True(communityItems.FindIndex(i => NameOrId(i, "EnableMdbListCriticRating")) <
+                        communityItems.FindIndex(i => NameOrId(i, "CommunityRatingMinVotes")));
+
+            // 豆瓣合回单组：评分 → 刷新参数 → 元数据 → 连接
+            var douban = groups.First(g => NameOrId(g, "DoubanAssist"));
+            var doubanItems = douban.EditorItems.ToList();
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanFetchRating"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanRatingToKodi"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanRefreshIntervalDays"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "RatingUpdateLookbackDays"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanFillOverview"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanCastChinese"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanPosterFallback"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanCookie"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "DoubanAccessToken"));
+            Assert.Contains(doubanItems, i => NameOrId(i, "ClearSeasonMapButton"));
+            Assert.DoesNotContain(doubanItems, i => NameOrId(i, "EnableMdbListCriticRating"));
+
+            Assert.True(doubanItems.FindIndex(i => NameOrId(i, "DoubanFetchRating")) <
+                        doubanItems.FindIndex(i => NameOrId(i, "DoubanRatingToKodi")));
+            Assert.True(doubanItems.FindIndex(i => NameOrId(i, "DoubanRatingToKodi")) <
+                        doubanItems.FindIndex(i => NameOrId(i, "DoubanRefreshIntervalDays")));
+            Assert.True(doubanItems.FindIndex(i => NameOrId(i, "DoubanRefreshIntervalDays")) <
+                        doubanItems.FindIndex(i => NameOrId(i, "RatingUpdateLookbackDays")));
+            Assert.True(doubanItems.FindIndex(i => NameOrId(i, "RatingUpdateLookbackDays")) <
+                        doubanItems.FindIndex(i => NameOrId(i, "DoubanFillOverview")));
+            Assert.True(doubanItems.FindIndex(i => NameOrId(i, "DoubanFillOverview")) <
+                        doubanItems.FindIndex(i => NameOrId(i, "DoubanCookie")));
+
+            // 合并只换容器，不复制、不丢失字段
+            Assert.Equal(doubanItems.Count, doubanItems.Select(i => i.Id).Distinct().Count());
+
             var refresh = groups.First(g => NameOrId(g, "EpisodeRefresh"));
             Assert.Contains(refresh.EditorItems, i => NameOrId(i, "EpisodeRefreshScope"));
             Assert.DoesNotContain(refresh.EditorItems, i => NameOrId(i, "MetadataCacheMode"));

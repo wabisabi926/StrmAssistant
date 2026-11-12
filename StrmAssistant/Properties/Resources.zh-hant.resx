@@ -531,16 +531,16 @@
     <value>立即統一社群評分</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Description" xml:space="preserve">
-    <value>依目前來源統一全庫社群評分。請先儲存設定；可在“計畫任務”中設定定期觸發器。</value>
+    <value>依目前來源統一全庫社群評分；豆瓣來源不受評分回看期限制。請先儲存設定；可在「計畫任務」中設定定期觸發器。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Douban_Confirmation" xml:space="preserve">
-    <value>豆瓣評分優先取自已比對的豆瓣條目，缺失時依 IMDb ID 查詢第三方介面。查詢失敗時保持原評分。繼續？</value>
+    <value>豆瓣評分優先取自已比對的豆瓣條目，缺失時依 IMDb ID 查詢第三方介面。將處理全庫，不受評分回看期限制；查詢失敗時保持原評分。繼續？</value>
   </data>
   <data name="UnifyCommunityRatingTask_Name_Unify_Community_Rating" xml:space="preserve">
     <value>統一社群評分</value>
   </data>
   <data name="UnifyCommunityRatingTask_Description_Unify_CommunityRating_to_the_configured_source" xml:space="preserve">
-    <value>依所選來源統一全庫電影與劇集的社群評分。預設無觸發器，可在計畫任務中依需啟用。</value>
+    <value>依所選來源統一全庫電影與劇集的社群評分；豆瓣來源會處理全庫，不受評分回看期限制。預設無觸發器，可在計畫任務中依需啟用。</value>
   </data>
   <data name="MetadataEnhanceOptions_Group_DoubanAssist" xml:space="preserve">
     <value>豆瓣增強</value>
@@ -1170,10 +1170,10 @@
     <value>裁剪為 16:9 或 2:3，或產生背景圖；留空不處理。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating" xml:space="preserve">
-    <value>抓取豆瓣評分</value>
+    <value>Web 詳細頁豆瓣評分</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>抓取並快取豆瓣評分，用於詳細頁徽章，不修改主評分。來源為豆瓣時自動生效。 預設關閉。</value>
+    <value>抓取並快取豆瓣評分，用於 Web 詳細頁與卡片的豆瓣標記，不修改主評分。新庫建議先執行一次「同步豆瓣資料」計畫任務。來源為豆瓣時自動生效。 預設關閉。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>補全簡介與類型</value>
@@ -1200,7 +1200,7 @@
     <value>條目被檢視或播放時，距上次檢查超過此天數才重新整理。0 表示關閉。 預設 7 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Description" xml:space="preserve">
-    <value>只更新首播日期在此天數內的條目。0 表示不限制。 預設 365 天。</value>
+    <value>只更新首播日期在此天數內的條目；首次寫入與手動全庫同步不受此限制。0 表示不限制。 預設 365 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
     <value>可選。用於豆瓣網頁抓取、演員表與海報搜尋/下載；Access Token 不涵蓋這些請求。留空時匿名存取，遇到風控再填。</value>
@@ -1221,7 +1221,7 @@
     <value>豆瓣 Access Token</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi" xml:space="preserve">
-    <value>同步豆瓣評分到 Kodi</value>
+    <value>寫入 Kodi 豆瓣評分</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_On_Demand_Refresh_Interval_Days" xml:space="preserve">
     <value>按需重新整理間隔（天）</value>
@@ -1944,7 +1944,7 @@
     <value>社群評分演練完成（未寫入）：來源 {0}，共 {1} 項；將更新 {2}，無變化 {3}，清空 {4}，已鎖定 {5}，無 ID {6}，無評分 {7}，票數不足 {8}，失敗 {9}。</value>
   </data>
   <data name="DoubanUnify_Notify_Summary" xml:space="preserve">
-    <value>豆瓣評分統一完成：共 {0} 項；更新 {1}，無變化 {2}，清空 {3}，已鎖定 {4}，無 ID {5}，無評分 {6}，超出回看 {7}，失敗 {8}。</value>
+    <value>豆瓣評分統一完成：共 {0} 項；更新 {1}，無變化 {2}，清空 {3}，已鎖定 {4}，無 ID {5}，無評分 {6}，失敗 {7}。</value>
   </data>
   <data name="MemoryGuard_Notify_Restart" xml:space="preserve">
     <value>記憶體 {0} MB 超過上限 {1} MB，伺服器將在 {2} 秒後自動重新啟動。</value>

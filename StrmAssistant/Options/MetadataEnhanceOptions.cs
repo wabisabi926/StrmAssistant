@@ -43,7 +43,10 @@ namespace StrmAssistant.Options
         [DisplayNameL("MetadataEnhanceOptions_Group_CommunityRating", typeof(Resources))]
         public CommunityRatingOptions CommunityRating { get; set; } = new CommunityRatingOptions();
 
-        /// <summary>豆瓣与附加评分：每个能力独立勾选，社区评分由「社区评分来源」决定。</summary>
+        /// <summary>
+        /// 豆瓣：单组展示，字段按 评分输出 → 刷新参数 → 元数据 → 连接 排序。
+        /// 每个能力独立勾选，社区评分由「社区评分来源」决定。
+        /// </summary>
         [DisplayNameL("MetadataEnhanceOptions_Group_DoubanAssist", typeof(Resources))]
         public DoubanAssistOptions DoubanAssist { get; set; } = new DoubanAssistOptions();
 
@@ -158,6 +161,18 @@ namespace StrmAssistant.Options
                         "EpisodeRefresh", "MetadataRefresh"),
                     new EditorGroupSpec(Resources.MetadataEnhanceOptions_Group_MetadataCache,
                         "MetadataCache", "MetadataCache"));
+
+                // 影评人评分来自 MdbList（IMDb 体系），归入社区评分组；只换 UI 位置。
+                EditorGroupHelper.MoveItems(editContainer, "DoubanAssist", "CommunityRating",
+                    "EnableMdbListCriticRating");
+                EditorGroupHelper.MoveItemBefore(editContainer, "CommunityRating",
+                    "EnableMdbListCriticRating", "CommunityRatingMinVotes");
+
+                // 豆瓣组内按 评分输出 → 刷新参数 → 元数据 → 连接 排序。
+                EditorGroupHelper.MoveItemBefore(editContainer, "DoubanAssist",
+                    "DoubanRefreshIntervalDays", "DoubanFillOverview");
+                EditorGroupHelper.MoveItemBefore(editContainer, "DoubanAssist",
+                    "RatingUpdateLookbackDays", "DoubanFillOverview");
 
                 // 清除标语是破坏性开关，放在人物增强之后、演员刷新偏好之前。
                 EditorGroupHelper.MoveItemBefore(editContainer, "PosterPerson",

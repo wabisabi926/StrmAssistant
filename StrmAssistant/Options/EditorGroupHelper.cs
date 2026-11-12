@@ -55,20 +55,26 @@ namespace StrmAssistant.Options
                     .SelectMany(group => group.EditorItems ?? Array.Empty<EditorBase>())
                     .ToList();
 
-                // 源组末尾的 SpacerItem 在合并后会变成新组前面的空白，清掉。
-                while (items.Count > 0 && items[items.Count - 1] is EditorSpacerItem)
-                {
-                    items.RemoveAt(items.Count - 1);
-                }
+                TrimTrailingSpacers(items);
 
                 result.Add(new EditorGroup(spec.Title, items.ToArray(), spec.Name, root.Id, null));
             }
 
-            // 没被 spec 覆盖的组保持原顺序，避免功能项静默消失。
-            result.AddRange(groups.Where(group => !used.Contains(group)));
+            // 没被 spec 覆盖的组保持原顺序，避免功能项静默消失；空组直接丢掉。
+            result.AddRange(groups.Where(group =>
+                !used.Contains(group) && group.EditorItems != null && group.EditorItems.Length > 0));
             result.AddRange(nonGroups);
 
             root.EditorItems = result.ToArray();
+        }
+
+        private static void TrimTrailingSpacers(List<EditorBase> items)
+        {
+            // 源组末尾的 SpacerItem 在合并后会变成新组前面的空白，清掉。
+            while (items.Count > 0 && items[items.Count - 1] is EditorSpacerItem)
+            {
+                items.RemoveAt(items.Count - 1);
+            }
         }
 
         private static bool NameOrId(EditorBase editor, string name)

@@ -10,6 +10,7 @@ using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Serialization;
 using StrmAssistant.Common;
 using StrmAssistant.Options;
+using StrmAssistant.Properties;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -2801,6 +2802,14 @@ namespace StrmAssistant.Provider.Douban
         {
             return string.Format(
                 "DoubanUnify - total={0} updated={1} same={2} cleared={3} locked={4} noId={5} noRating={6} lookback={7} failed={8}",
+                Total, Updated, Same, Cleared, Locked, NoId, NoRating, SkippedLookback, Failed);
+        }
+
+        public string BuildUserSummary()
+        {
+            var format = Resources.ResourceManager.GetString("DoubanUnify_Notify_Summary",
+                CultureInfo.CurrentUICulture);
+            return string.Format(format ?? string.Empty,
                 Total, Updated, Same, Cleared, Locked, NoId, NoRating, SkippedLookback, Failed);
         }
     }

@@ -197,7 +197,8 @@ namespace StrmAssistant.Common
         }
 
         public async Task SendMessageToAdmins(string text, long? timeout)
-        {            var message = new MessageCommand
+        {
+            var message = new MessageCommand
             {
                 Header = Resources.PluginOptions_EditorTitle_Strm_Assistant,
                 Text = text,

@@ -66,7 +66,7 @@ namespace StrmAssistant.Options.View
                                 .UnifyRatingsAsync(null, CancellationToken.None).ConfigureAwait(false);
                             Plugin.Instance.Logger.Info(doubanReport.BuildSummary());
                             Plugin.NotificationApi?.SendMessageToAdmins(
-                                $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {doubanReport.BuildSummary()}",
+                                $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {doubanReport.BuildUserSummary()}",
                                 15000);
                             return;
                         }
@@ -77,7 +77,7 @@ namespace StrmAssistant.Options.View
 
                         Plugin.Instance.Logger.Info(report.BuildSummary());
                         Plugin.NotificationApi?.SendMessageToAdmins(
-                            $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {report.BuildSummary()}", 15000);
+                            $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {report.BuildUserSummary()}", 15000);
                     }
                     catch (Exception e)
                     {

@@ -7,6 +7,7 @@ using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using StrmAssistant.Mod;
 using StrmAssistant.Options;
+using StrmAssistant.Properties;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -690,6 +691,16 @@ namespace StrmAssistant.Common
                 "CommunityRating - {0} source={1} total={2} {3}={4} same={5} cleared={6} locked={7} noId={8} noRating={9} lowVotes={10} failed={11}",
                 Applied ? "apply" : "dry-run", Source, Total, Applied ? "updated" : "wouldUpdate", Updated,
                 Same, Cleared, Locked, NoId, NoRating, LowVotes, Failed);
+        }
+
+        public string BuildUserSummary()
+        {
+            var format = Applied
+                ? Resources.ResourceManager.GetString("CommunityRating_Notify_Apply", CultureInfo.CurrentUICulture)
+                : Resources.ResourceManager.GetString("CommunityRating_Notify_DryRun", CultureInfo.CurrentUICulture);
+
+            return string.Format(format ?? string.Empty,
+                Source, Total, Updated, Same, Cleared, Locked, NoId, NoRating, LowVotes, Failed);
         }
     }
 }

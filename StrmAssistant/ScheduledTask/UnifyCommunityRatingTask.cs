@@ -56,7 +56,7 @@ namespace StrmAssistant.ScheduledTask
                 logger.Info(doubanReport.BuildSummary());
 
                 Plugin.NotificationApi?.SendMessageToAdmins(
-                    $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {doubanReport.BuildSummary()}", 15000);
+                    $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {doubanReport.BuildUserSummary()}", 15000);
 
                 return;
             }
@@ -89,7 +89,7 @@ namespace StrmAssistant.ScheduledTask
             }
 
             Plugin.NotificationApi?.SendMessageToAdmins(
-                $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {report.BuildSummary()}", 15000);
+                $"[{Resources.PluginOptions_EditorTitle_Strm_Assistant}] {report.BuildUserSummary()}", 15000);
         }
     }
 }

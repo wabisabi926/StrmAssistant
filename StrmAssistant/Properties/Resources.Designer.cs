@@ -5886,5 +5886,50 @@ namespace StrmAssistant.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CommunityRating_Notify_Apply {
+            get {
+                return ResourceManager.GetString("CommunityRating_Notify_Apply", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string CommunityRating_Notify_DryRun {
+            get {
+                return ResourceManager.GetString("CommunityRating_Notify_DryRun", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string DoubanUnify_Notify_Summary {
+            get {
+                return ResourceManager.GetString("DoubanUnify_Notify_Summary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string MemoryGuard_Notify_Restart {
+            get {
+                return ResourceManager.GetString("MemoryGuard_Notify_Restart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string.
+        /// </summary>
+        public static string ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages_Description {
+            get {
+                return ResourceManager.GetString("ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages_Description", resourceCulture);
+            }
+        }
+
     }
 }

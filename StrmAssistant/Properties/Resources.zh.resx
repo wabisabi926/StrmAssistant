@@ -129,7 +129,7 @@
     <value>TMDB 备选语言</value>
   </data>
   <data name="ModOptions_FallbackLanguages_Fallback_languages__Default_is_zh_SG_" xml:space="preserve">
-    <value>备选元数据语言，优先级从左至右。</value>
+    <value>备选元数据语言，优先级从左至右。 默认 zh-SG。</value>
   </data>
   <data name="Favorites" xml:space="preserve">
     <value>❤️最爱</value>
@@ -255,13 +255,13 @@
     <value>视频直链客户端黑名单</value>
   </data>
   <data name="ModOptions_StrmVideoDirectRedirectClientBlacklist_Client_name_keyword_match__matched_clients_are_blocked_from_video_strm_direct_link__Separated_by_comma__semicolon_or_newline" xml:space="preserve">
-    <value>按客户端名称关键字匹配，命中的客户端禁止视频 strm 直链。支持逗号、分号或换行分隔。</value>
+    <value>按客户端名称关键字匹配，命中的客户端禁止视频 strm 直链。支持逗号、分号或换行分隔。 默认留空。</value>
   </data>
   <data name="ModOptions_StrmAudioDirectRedirectClientBlacklist_Music_Direct_Link_Client_Blacklist" xml:space="preserve">
     <value>音乐直链客户端黑名单</value>
   </data>
   <data name="ModOptions_StrmAudioDirectRedirectClientBlacklist_Client_name_keyword_match__matched_clients_are_blocked_from_music_strm_direct_link__Separated_by_comma__semicolon_or_newline" xml:space="preserve">
-    <value>按客户端名称关键字匹配，命中的客户端禁止音乐 strm 直链。支持逗号、分号或换行分隔。</value>
+    <value>按客户端名称关键字匹配，命中的客户端禁止音乐 strm 直链。支持逗号、分号或换行分隔。 默认留空。</value>
   </data>
   <data name="ModOptions_PinyinSortName_Pinyin_Sort_Title" xml:space="preserve">
     <value>拼音首字母排序</value>
@@ -501,7 +501,7 @@
     <value>社区评分来源</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
-    <value>将 CommunityRating 统一为所选来源。选豆瓣则由豆瓣分直接接管社区评分；选 TMDB 或 IMDb 时豆瓣不修改社区评分。</value>
+    <value>将 CommunityRating 统一为所选来源。选豆瓣则由豆瓣分直接接管社区评分；选 TMDB 或 IMDb 时豆瓣不修改社区评分。 默认不统一。</value>
   </data>
   <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
     <value>不干预（保持现状）</value>
@@ -519,13 +519,13 @@
     <value>最低票数</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingMinVotes_Description" xml:space="preserve">
-    <value>TMDB 票数低于此值时跳过该条目，避免样本过少导致分数虚高。0 表示不限制。仅作用于 TMDB。</value>
+    <value>TMDB 票数低于此值时跳过该条目，避免样本过少导致分数虚高。0 表示不限制。仅作用于 TMDB。 默认 5。</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Clear_When_No_Rating" xml:space="preserve">
     <value>无评分时清空</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Description" xml:space="preserve">
-    <value>所选来源无可用评分时清空原有社区评分，条目将显示为无评分。</value>
+    <value>所选来源无可用评分时清空原有社区评分，条目将显示为无评分。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now" xml:space="preserve">
     <value>立即统一社区评分</value>
@@ -1173,43 +1173,43 @@
     <value>抓取豆瓣评分</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>抓取并缓存豆瓣评分，用于详情页徽章，不修改社区评分。来源为豆瓣时自动生效。</value>
+    <value>抓取并缓存豆瓣评分，用于详情页徽章，不修改社区评分。来源为豆瓣时自动生效。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>补全简介与类型</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Description" xml:space="preserve">
-    <value>仅补缺失的简介、类型与制片地区，不覆盖已有值。仅对中文条目生效。</value>
+    <value>仅补缺失的简介、类型与制片地区，不覆盖已有值。仅对中文条目生效。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings" xml:space="preserve">
     <value>更新影评人评分</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>将烂番茄评分写入影评人评分（CriticRating），不修改社区评分。需填写 MdbList API Key。</value>
+    <value>将烂番茄评分写入影评人评分（CriticRating），不修改社区评分。需填写 MdbList API Key。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
-    <value>将豆瓣评分写入 ProviderIds 供 Kodi 皮肤读取，不修改社区评分。</value>
+    <value>将豆瓣评分写入 ProviderIds 供 Kodi 皮肤读取，不修改社区评分。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCastChinese_Description" xml:space="preserve">
-    <value>将纯英文演员名替换为豆瓣中文名。仅对中文条目生效。</value>
+    <value>将纯英文演员名替换为豆瓣中文名。仅对中文条目生效。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanPosterFallback_Description" xml:space="preserve">
-    <value>电影无主图时使用豆瓣海报。</value>
+    <value>电影无主图时使用豆瓣海报。 默认关闭。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description" xml:space="preserve">
-    <value>条目被查看或播放时，距上次检查超过此天数才刷新。0 表示关闭。</value>
+    <value>条目被查看或播放时，距上次检查超过此天数才刷新。0 表示关闭。 默认 7 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Description" xml:space="preserve">
-    <value>只更新首播日期在此天数内的条目。0 表示不限制。</value>
+    <value>只更新首播日期在此天数内的条目。0 表示不限制。 默认 365 天。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
-    <value>用于通过豆瓣反爬验证。留空时以匿名身份访问。</value>
+    <value>用于通过豆瓣反爬验证。留空时以匿名身份访问。 默认留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
-    <value>豆瓣开放平台 V2 Token。配置后优先使用官方接口。</value>
+    <value>豆瓣开放平台 V2 Token。配置后优先使用官方接口。 默认留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>按 IMDb ID 取分：来源为 IMDb 时写入社区评分，启用影评人评分时写入烂番茄分。</value>
+    <value>按 IMDb ID 取分：来源为 IMDb 时写入社区评分，启用影评人评分时写入烂番茄分。 默认可留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>清除已缓存的季映射，让季条目重新匹配。</value>
@@ -1383,7 +1383,7 @@
     <value>元数据缓存根目录</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Description" xml:space="preserve">
-    <value>本地 TMDB 缓存/覆盖目录的根目录，模式非“关闭”时必填。</value>
+    <value>本地 TMDB 缓存/覆盖目录的根目录，模式非“关闭”时必填。 默认留空。</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days" xml:space="preserve">
     <value>缓存有效期（天）</value>
@@ -1491,7 +1491,7 @@
     <value>标注双层杜比视界为 Profile 7</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
-    <value>将 1080p 增强层标为 Profile 7.6；Emby 不区分 FEL/MEL。播放异常时关闭。</value>
+    <value>将 1080p 增强层标为 Profile 7.6；Emby 不区分 FEL/MEL。播放异常时关闭。 默认开启。</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>显示 HDR Vivid 标签</value>
@@ -1933,5 +1933,20 @@
   </data>
   <data name="MetadataEnhanceOptions_Group_EpisodeRefresh" xml:space="preserve">
     <value>剧集刷新</value>
+  </data>
+  <data name="ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages_Description" xml:space="preserve">
+    <value>TVDB 备选元数据语言，优先级从左至右。默认 zhtw,yue。</value>
+  </data>
+  <data name="CommunityRating_Notify_Apply" xml:space="preserve">
+    <value>社区评分统一完成：来源 {0}，共 {1} 项；更新 {2}，无变化 {3}，清空 {4}，已锁定 {5}，无 ID {6}，无评分 {7}，票数不足 {8}，失败 {9}。</value>
+  </data>
+  <data name="CommunityRating_Notify_DryRun" xml:space="preserve">
+    <value>社区评分演练完成（未写入）：来源 {0}，共 {1} 项；将更新 {2}，无变化 {3}，清空 {4}，已锁定 {5}，无 ID {6}，无评分 {7}，票数不足 {8}，失败 {9}。</value>
+  </data>
+  <data name="DoubanUnify_Notify_Summary" xml:space="preserve">
+    <value>豆瓣评分统一完成：共 {0} 项；更新 {1}，无变化 {2}，清空 {3}，已锁定 {4}，无 ID {5}，无评分 {6}，超出回看 {7}，失败 {8}。</value>
+  </data>
+  <data name="MemoryGuard_Notify_Restart" xml:space="preserve">
+    <value>内存 {0} MB 超过上限 {1} MB，服务器将在 {2} 秒后自动重启。</value>
   </data>
 </root>

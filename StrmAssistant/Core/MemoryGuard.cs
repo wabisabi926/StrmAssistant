@@ -1,5 +1,7 @@
 using MediaBrowser.Model.Logging;
+using StrmAssistant.Properties;
 using System;
+using System.Globalization;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,9 +102,11 @@ namespace StrmAssistant.Core
                 {
                     try
                     {
+                        var message = Resources.ResourceManager.GetString("MemoryGuard_Notify_Restart",
+                            CultureInfo.CurrentUICulture);
                         Plugin.NotificationApi?.SendMessageToAdmins(
-                            $"[Strm Assistant] 内存 {workingSetMb} MB 超过上限 {_thresholdMb} MB，" +
-                            $"服务器将在 {RestartCountdownSeconds} 秒后自动重启", 15000);
+                            string.Format(message ?? string.Empty,
+                                workingSetMb, _thresholdMb, RestartCountdownSeconds), 15000);
 
                         await Task.Delay(TimeSpan.FromSeconds(RestartCountdownSeconds)).ConfigureAwait(false);
 

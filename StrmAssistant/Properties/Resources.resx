@@ -216,7 +216,7 @@
     <value>TMDB Fallback Languages</value>
   </data>
   <data name="ModOptions_FallbackLanguages_Fallback_languages__Default_is_zh_SG_" xml:space="preserve">
-    <value>Fallback metadata languages, in priority order.</value>
+    <value>Fallback metadata languages, in priority order. Default is zh-SG.</value>
   </data>
   <data name="Favorites" xml:space="preserve">
     <value>❤️Favorites</value>
@@ -342,13 +342,13 @@
     <value>Video Direct Link Client Blacklist</value>
   </data>
   <data name="ModOptions_StrmVideoDirectRedirectClientBlacklist_Client_name_keyword_match__matched_clients_are_blocked_from_video_strm_direct_link__Separated_by_comma__semicolon_or_newline" xml:space="preserve">
-    <value>Client name keyword match, matched clients are blocked from video strm direct link. Separated by comma, semicolon or newline.</value>
+    <value>Client name keyword match, matched clients are blocked from video strm direct link. Separated by comma, semicolon or newline. Default is empty.</value>
   </data>
   <data name="ModOptions_StrmAudioDirectRedirectClientBlacklist_Music_Direct_Link_Client_Blacklist" xml:space="preserve">
     <value>Music Direct Link Client Blacklist</value>
   </data>
   <data name="ModOptions_StrmAudioDirectRedirectClientBlacklist_Client_name_keyword_match__matched_clients_are_blocked_from_music_strm_direct_link__Separated_by_comma__semicolon_or_newline" xml:space="preserve">
-    <value>Client name keyword match, matched clients are blocked from music strm direct link. Separated by comma, semicolon or newline.</value>
+    <value>Client name keyword match, matched clients are blocked from music strm direct link. Separated by comma, semicolon or newline. Default is empty.</value>
   </data>
   <data name="ModOptions_PinyinSortName_Pinyin_Sort_Title" xml:space="preserve">
     <value>Pinyin Initials Sort Title</value>
@@ -588,7 +588,7 @@
     <value>Community rating source</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingSource_Description" xml:space="preserve">
-    <value>Unifies CommunityRating to the selected source. With Douban the Douban score takes over the community rating; with TMDB or IMDb, Douban leaves it untouched.</value>
+    <value>Unifies CommunityRating to the selected source. With Douban the Douban score takes over the community rating; with TMDB or IMDb, Douban leaves it untouched. Default is no unification.</value>
   </data>
   <data name="CommunityRatingSourceOption_None_Do_Not_Interfere" xml:space="preserve">
     <value>Do not interfere (keep as is)</value>
@@ -606,13 +606,13 @@
     <value>Minimum votes</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingMinVotes_Description" xml:space="preserve">
-    <value>Skips items whose TMDB vote count is below this value to avoid inflated scores. 0 disables the check. Applies to TMDB only.</value>
+    <value>Skips items whose TMDB vote count is below this value to avoid inflated scores. 0 disables the check. Applies to TMDB only. Default is 5.</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Clear_When_No_Rating" xml:space="preserve">
     <value>Clear when no rating</value>
   </data>
   <data name="MetadataEnhanceOptions_CommunityRatingClearWhenMissing_Description" xml:space="preserve">
-    <value>Clears the existing community rating when the selected source has none, leaving the item unrated.</value>
+    <value>Clears the existing community rating when the selected source has none, leaving the item unrated. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_UnifyCommunityRatingButton_Unify_Now" xml:space="preserve">
     <value>Unify community rating now</value>
@@ -1260,43 +1260,43 @@
     <value>Fetch Douban Rating</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>Fetches and caches the Douban rating for the detail-page badge without touching the community rating. Enabled automatically when the source is Douban.</value>
+    <value>Fetches and caches the Douban rating for the detail-page badge without touching the community rating. Enabled automatically when the source is Douban. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>Fill Overview and Genres</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Description" xml:space="preserve">
-    <value>Fills missing overview, genres and production countries without overwriting existing values. Chinese items only.</value>
+    <value>Fills missing overview, genres and production countries without overwriting existing values. Chinese items only. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Update_Critic_Ratings" xml:space="preserve">
     <value>Update Critic Ratings</value>
   </data>
   <data name="MetadataEnhanceOptions_EnableMdbListCriticRating_Description" xml:space="preserve">
-    <value>Writes the Rotten Tomatoes score to the critic rating (CriticRating) without touching the community rating. Requires an MdbList API key.</value>
+    <value>Writes the Rotten Tomatoes score to the critic rating (CriticRating) without touching the community rating. Requires an MdbList API key. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRatingToKodi_Description" xml:space="preserve">
-    <value>Writes the Douban rating to ProviderIds for Kodi skins without touching the community rating.</value>
+    <value>Writes the Douban rating to ProviderIds for Kodi skins without touching the community rating. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCastChinese_Description" xml:space="preserve">
-    <value>Replaces English-only cast names with Douban Chinese names. Chinese items only.</value>
+    <value>Replaces English-only cast names with Douban Chinese names. Chinese items only. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanPosterFallback_Description" xml:space="preserve">
-    <value>Uses the Douban poster when a movie has no primary image.</value>
+    <value>Uses the Douban poster when a movie has no primary image. Default is OFF.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanRefreshIntervalDays_Description" xml:space="preserve">
-    <value>Refreshes when an item is viewed or played and the last check is older than this many days. 0 disables it.</value>
+    <value>Refreshes when an item is viewed or played and the last check is older than this many days. 0 disables it. Default is 7 days.</value>
   </data>
   <data name="MetadataEnhanceOptions_RatingUpdateLookbackDays_Description" xml:space="preserve">
-    <value>Only updates items whose premiere date falls within this many days. 0 disables the limit.</value>
+    <value>Only updates items whose premiere date falls within this many days. 0 disables the limit. Default is 365 days.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanCookie_Description" xml:space="preserve">
-    <value>Used to pass Douban anti-crawler checks. Leave empty for anonymous access.</value>
+    <value>Used to pass Douban anti-crawler checks. Leave empty for anonymous access. Default is empty.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanAccessToken_Description" xml:space="preserve">
-    <value>Douban open-platform V2 token. The official API is preferred when set.</value>
+    <value>Douban open-platform V2 token. The official API is preferred when set. Default is empty.</value>
   </data>
   <data name="MetadataEnhanceOptions_MdbListApiKey_Description" xml:space="preserve">
-    <value>Fetches ratings by IMDb ID: the IMDb score for the community rating and the Rotten Tomatoes score for the critic rating.</value>
+    <value>Fetches ratings by IMDb ID: the IMDb score for the community rating and the Rotten Tomatoes score for the critic rating. Default is empty; optional.</value>
   </data>
   <data name="MetadataEnhanceOptions_ClearSeasonMapButton_Description" xml:space="preserve">
     <value>Clears cached season mappings so season items are matched again.</value>
@@ -1470,7 +1470,7 @@
     <value>Metadata Cache Root Folder</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheRootFolder_Description" xml:space="preserve">
-    <value>Root folder for the local TMDB cache/override directories. Required when the mode is not OFF.</value>
+    <value>Root folder for the local TMDB cache/override directories. Required when the mode is not OFF. Default is empty.</value>
   </data>
   <data name="MetadataEnhanceOptions_MetadataCacheTtlDays_Cache_TTL_Days" xml:space="preserve">
     <value>Cache TTL (Days)</value>
@@ -1578,7 +1578,7 @@
     <value>Tag dual-layer Dolby Vision as Profile 7</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableDolbyVisionProfileTagging_Marks_the_1080p_enhancement_layer_as_Profile_7_6__Keep_ON_unless_your_player_mishandles_it_" xml:space="preserve">
-    <value>Mark the 1080p enhancement layer as Profile 7.6; Emby does not distinguish FEL/MEL. Disable if playback fails.</value>
+    <value>Mark the 1080p enhancement layer as Profile 7.6; Emby does not distinguish FEL/MEL. Disable if playback fails. Default is ON.</value>
   </data>
   <data name="MediaInfoExtractOptions_EnableHdrVividTagging_Show_HDR_Vivid_label" xml:space="preserve">
     <value>Show HDR Vivid label</value>
@@ -2020,5 +2020,20 @@
   </data>
   <data name="MetadataEnhanceOptions_Group_EpisodeRefresh" xml:space="preserve">
     <value>Episode Refresh</value>
+  </data>
+  <data name="ModOptions_TvdbFallbackLanguages_TVDB_Fallback_Languages_Description" xml:space="preserve">
+    <value>TVDB fallback metadata languages, priority left to right. Default is zhtw,yue.</value>
+  </data>
+  <data name="CommunityRating_Notify_Apply" xml:space="preserve">
+    <value>Community rating unify completed: source {0}, {1} items; updated {2}, unchanged {3}, cleared {4}, locked {5}, no ID {6}, no rating {7}, low votes {8}, failed {9}.</value>
+  </data>
+  <data name="CommunityRating_Notify_DryRun" xml:space="preserve">
+    <value>Community rating dry run completed (nothing written): source {0}, {1} items; would update {2}, unchanged {3}, cleared {4}, locked {5}, no ID {6}, no rating {7}, low votes {8}, failed {9}.</value>
+  </data>
+  <data name="DoubanUnify_Notify_Summary" xml:space="preserve">
+    <value>Douban rating unify completed: {0} items; updated {1}, unchanged {2}, cleared {3}, locked {4}, no ID {5}, no rating {6}, outside lookback {7}, failed {8}.</value>
+  </data>
+  <data name="MemoryGuard_Notify_Restart" xml:space="preserve">
+    <value>Memory usage {0} MB exceeds the {1} MB limit; the server will restart automatically in {2} seconds.</value>
   </data>
 </root>

@@ -1800,7 +1800,7 @@
     <value>　· 記憶體超限，{0} 秒後重啟</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_AutoOnDemand" xml:space="preserve">
-    <value>擷取時機</value>
+    <value>擷取策略</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_StorageCapture" xml:space="preserve">
     <value>儲存與截圖</value>

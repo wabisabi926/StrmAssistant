@@ -81,7 +81,7 @@ namespace StrmAssistant.Tests
 
             var groups = container.EditorRoot.EditorItems.OfType<EditorGroup>().ToList();
 
-            // 顺序：提取范围 → 提取时机 → 提取优化 → 存储与截图 → ISO 与 HDR
+            // 顺序：提取范围 → 提取策略 → 提取优化 → 存储与截图 → ISO 与 HDR
             Assert.Equal(
                 new[] { "ExtractionScope", "AutoOnDemand", "ExtractionPerformance",
                         "StorageCapture", "IsoHdr" },

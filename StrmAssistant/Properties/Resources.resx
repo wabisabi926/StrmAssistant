@@ -1887,7 +1887,7 @@
     <value>  · memory over limit, restarting in {0}s</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_AutoOnDemand" xml:space="preserve">
-    <value>Extraction Timing</value>
+    <value>Extraction Policy</value>
   </data>
   <data name="MediaInfoExtractOptions_Group_StorageCapture" xml:space="preserve">
     <value>Storage &amp; Capture</value>

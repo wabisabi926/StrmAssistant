@@ -1173,7 +1173,7 @@
     <value>Web 詳細頁豆瓣評分</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>抓取並快取豆瓣評分，用於 Web 詳細頁與卡片的豆瓣標記，不修改主評分。新庫建議先執行一次「同步豆瓣資料」計畫任務。來源為豆瓣時自動生效。 預設關閉。</value>
+    <value>抓取並快取豆瓣評分，用於 Web 詳細頁與卡片的豆瓣標記，不修改主評分。開啟後會存取豆瓣；無評分僅不顯示。新庫建議先執行一次「同步豆瓣資料」計畫任務。來源為豆瓣時自動生效。 預設開啟。</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>補全簡介與類型</value>

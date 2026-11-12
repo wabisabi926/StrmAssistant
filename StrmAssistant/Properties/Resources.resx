@@ -1260,7 +1260,7 @@
     <value>Douban Rating on Web</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFetchRating_Description" xml:space="preserve">
-    <value>Fetches and caches the Douban rating for Web detail pages and cards without touching the community rating. For a new library, run the Sync Douban Data task once first. Enabled automatically when the source is Douban. Default is OFF.</value>
+    <value>Fetches and caches the Douban rating for Web detail pages and cards without touching the community rating. Enabling it makes requests to Douban; missing ratings are simply not shown. For a new library, run the Sync Douban Data task once first. Enabled automatically when the source is Douban. Default is ON.</value>
   </data>
   <data name="MetadataEnhanceOptions_DoubanFillOverview_Fill_Overview_Genres_Productions" xml:space="preserve">
     <value>Fill Overview and Genres</value>

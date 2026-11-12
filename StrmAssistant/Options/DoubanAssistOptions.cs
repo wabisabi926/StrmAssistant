@@ -24,7 +24,7 @@ namespace StrmAssistant.Options
         [DisplayNameL("MetadataEnhanceOptions_DoubanFetchRating_Fetch_Douban_Rating", typeof(Resources))]
         [DescriptionL("MetadataEnhanceOptions_DoubanFetchRating_Description", typeof(Resources))]
         [Required]
-        public bool DoubanFetchRating { get; set; } = false;
+        public bool DoubanFetchRating { get; set; } = true;
 
         [DisplayNameL("MetadataEnhanceOptions_DoubanRatingToKodi_Sync_Douban_Rating_to_Kodi", typeof(Resources))]
         [DescriptionL("MetadataEnhanceOptions_DoubanRatingToKodi_Description", typeof(Resources))]

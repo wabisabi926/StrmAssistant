@@ -63,7 +63,14 @@ namespace StrmAssistant.Tests
             Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanCastChinese = true } }.IsDoubanDataEnabled);
             Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanPosterFallback = true } }.IsDoubanDataEnabled);
             Assert.True(new MetadataEnhanceOptions { DoubanAssist = { DoubanRatingToKodi = true } }.IsDoubanDataEnabled);
-            Assert.False(new MetadataEnhanceOptions().IsDoubanDataEnabled);
+            Assert.True(new MetadataEnhanceOptions().IsDoubanDataEnabled);
+            Assert.False(new MetadataEnhanceOptions { DoubanAssist = { DoubanFetchRating = false } }.IsDoubanDataEnabled);
+        }
+
+        [Fact]
+        public void DoubanBadge_IsEnabledByDefault()
+        {
+            Assert.True(new MetadataEnhanceOptions().DoubanAssist.DoubanFetchRating);
         }
 
         [Fact]
@@ -71,7 +78,8 @@ namespace StrmAssistant.Tests
         {
             var options = new MetadataEnhanceOptions
             {
-                CommunityRating = { MdbListApiKey = "test-key" }
+                CommunityRating = { MdbListApiKey = "test-key" },
+                DoubanAssist = { DoubanFetchRating = false }
             };
 
             // 凭据属于外部评分源：不影响豆瓣数据层，也不会让豆瓣能力隐式开启。

@@ -17,7 +17,21 @@ namespace StrmAssistant.Web.Helper
         /// </summary>
         public static string ModifiedMediaInfoString { get; private set; }
 
+        /// <summary>
+        /// 磁盘上的原始文件内容（未注入）。这两个 URL 覆盖了 Emby 自带的静态文件路由，
+        /// 插件停用或注入串生成失败时必须回退到这里；否则浏览器拿到的是 0 字节模块，
+        /// cardbuilder.js 解析失败会导致首页与媒体库卡片整体渲染崩溃。
+        /// </summary>
+        public static string OriginalShortcutsString { get; private set; }
+
+        public static string OriginalMediaInfoString { get; private set; }
+
         public static MemoryStream StrmAssistantJs { get; private set; }
+
+        private static readonly string ShortcutsRelativePath = Path.Combine("modules", "shortcuts.js");
+
+        private static readonly string MediaInfoRelativePath =
+            Path.Combine("modules", "mediainfo", "mediainfo.js");
 
         private static IServerConfigurationManager _configurationManager;
 
@@ -63,11 +77,77 @@ namespace StrmAssistant.Web.Helper
             return destination;
         }
 
+        /// <summary>
+        /// 解析 Emby Web 前端（dashboard-ui）根目录。
+        /// </summary>
+        public static string ResolveDashboardSourcePath(IServerConfigurationManager configurationManager)
+        {
+            if (configurationManager == null) return null;
+
+            var customPath = configurationManager.Configuration?.DashboardSourcePath;
+            if (!string.IsNullOrEmpty(customPath)) return customPath;
+
+            return Path.Combine(configurationManager.ApplicationPaths.ApplicationResourcesPath, "dashboard-ui");
+        }
+
+        /// <summary>
+        /// 返回下发给浏览器的 shortcuts.js。
+        /// 注入版不可用时回退到磁盘原文——这两个端点覆盖了 Emby 自带静态文件路由，
+        /// 「什么都不返回」等价于把 Emby 的前端模块打空，比不注入严重得多。
+        /// </summary>
+        public static string GetShortcutsJs(IServerConfigurationManager configurationManager, bool inject)
+        {
+            if (inject && !string.IsNullOrEmpty(ModifiedShortcutsString)) return ModifiedShortcutsString;
+
+            return OriginalShortcutsString ?? LoadOriginal(configurationManager, ShortcutsRelativePath);
+        }
+
+        public static string GetMediaInfoJs(IServerConfigurationManager configurationManager, bool inject)
+        {
+            if (inject && !string.IsNullOrEmpty(ModifiedMediaInfoString)) return ModifiedMediaInfoString;
+
+            return OriginalMediaInfoString ?? LoadOriginal(configurationManager, MediaInfoRelativePath);
+        }
+
+        /// <summary>
+        /// 插件在启动时就被禁用时 <see cref="Initialize"/> 不会执行，原始内容尚未缓存，
+        /// 这里按需读盘兜底，保证端点始终有内容可下发。
+        /// </summary>
+        private static string LoadOriginal(IServerConfigurationManager configurationManager, string relativePath)
+        {
+            if (configurationManager == null) return null;
+
+            try
+            {
+                var dashboardSourcePath = ResolveDashboardSourcePath(configurationManager);
+                if (string.IsNullOrEmpty(dashboardSourcePath)) return null;
+
+                var path = Path.Combine(dashboardSourcePath, relativePath);
+                if (!File.Exists(path)) return null;
+
+                var text = File.ReadAllText(path);
+                if (relativePath == ShortcutsRelativePath)
+                {
+                    OriginalShortcutsString = text;
+                }
+                else
+                {
+                    OriginalMediaInfoString = text;
+                }
+
+                return text;
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance?.Logger?.Error(
+                    $"{nameof(ShortcutMenuHelper)} - Failed to load original {relativePath}: {e.Message}");
+                return null;
+            }
+        }
+
         private static void ModifyShortcutMenu(IServerConfigurationManager configurationManager)
         {
-            var dashboardSourcePath = configurationManager.Configuration.DashboardSourcePath ??
-                                      Path.Combine(configurationManager.ApplicationPaths.ApplicationResourcesPath,
-                                          "dashboard-ui");
+            var dashboardSourcePath = ResolveDashboardSourcePath(configurationManager);
 
             const string injectShortcutCommand = @"
 const strmAssistantCommandSource = {
@@ -235,22 +315,34 @@ setTimeout(() => {
             var dataExplorer2Assembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(a => a.GetName().Name == "Emby.DataExplorer2");
 
-            ModifiedShortcutsString = File.ReadAllText(Path.Combine(dashboardSourcePath, "modules", "shortcuts.js")) +
-                                      injectShortcutCommand;
+            OriginalShortcutsString = File.ReadAllText(Path.Combine(dashboardSourcePath, ShortcutsRelativePath));
+            ModifiedShortcutsString = OriginalShortcutsString + injectShortcutCommand;
 
             const string injectDoubanBadgeBootstrap = @"
 // StrmAssistant Douban badge bootstrap
 // 版本日志：前端排障用——浏览器 console 里能直接确认加载的是哪次构建的脚本，
 // 避免「部署了新 DLL 但页面仍驻留旧模块」时误判为功能失效。
-console.log('[StrmAssistant] web ui script v' + 'SA_SCRIPT_VERSION');
-window.__saUI = { replaceUnplayedWithTotal: REPLACE_UNPLAYED_TOTAL, showLibraryItemCount: SHOW_LIB_COUNT, reverseLogLines: REVERSE_LOGS, blockSearchRecommend: BLOCK_SEARCH_RECS, showMediaInfo: SHOW_MEDIA_INFO };
-require(['components/strmassistant/strmassistant']).then(function (mods) {
-    var mod = mods && mods[0];
-    if (!mod || !mod.badges) { console.error('StrmAssistant: strmassistant module not loaded', mods); return; }
-    try { mod.badges.init(); } catch (e) { console.error('StrmAssistant: badges init failed', e); }
-    if (mod.versions) { try { mod.versions.init(); } catch (e) { console.error('StrmAssistant: versions init failed', e); } }
-    if (mod.ui) { try { mod.ui.init(); } catch (e) { console.error('StrmAssistant: ui init failed', e); } }
-}).catch(function (e) { console.error('StrmAssistant: module load failed', e); });
+// 整段包在 IIFE + try/catch 中：这段代码被追加在 Emby 模块文件末尾，
+// 一旦它抛出未捕获异常，整个模块会被判定加载失败，连带卡片渲染一起崩。
+(function () {
+    try {
+        console.log('[StrmAssistant] web ui script v' + 'SA_SCRIPT_VERSION');
+        window.__saUI = { replaceUnplayedWithTotal: REPLACE_UNPLAYED_TOTAL, showLibraryItemCount: SHOW_LIB_COUNT, reverseLogLines: REVERSE_LOGS, blockSearchRecommend: BLOCK_SEARCH_RECS, showMediaInfo: SHOW_MEDIA_INFO };
+        if (typeof require !== 'function') {
+            console.warn('StrmAssistant: AMD require unavailable, skip UI bootstrap');
+            return;
+        }
+        require(['components/strmassistant/strmassistant']).then(function (mods) {
+            var mod = mods && mods[0];
+            if (!mod || !mod.badges) { console.error('StrmAssistant: strmassistant module not loaded', mods); return; }
+            try { mod.badges.init(); } catch (e) { console.error('StrmAssistant: badges init failed', e); }
+            if (mod.versions) { try { mod.versions.init(); } catch (e) { console.error('StrmAssistant: versions init failed', e); } }
+            if (mod.ui) { try { mod.ui.init(); } catch (e) { console.error('StrmAssistant: ui init failed', e); } }
+        }).catch(function (e) { console.error('StrmAssistant: module load failed', e); });
+    } catch (e) {
+        console.error('StrmAssistant: bootstrap failed (Emby module unaffected)', e);
+    }
+})();
 ";
             var uiOptions = Plugin.Instance.ExperienceEnhanceStore.GetOptions();
             var scriptVersion = typeof(ShortcutMenuHelper).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -267,16 +359,16 @@ require(['components/strmassistant/strmassistant']).then(function (mods) {
             // 因此把同一份引导代码追加到 mediainfo.js，保证徽章在渲染评分的页面必定初始化。
             try
             {
-                ModifiedMediaInfoString =
-                    File.ReadAllText(Path.Combine(dashboardSourcePath, "modules", "mediainfo", "mediainfo.js")) +
-                    uiConfig;
+                OriginalMediaInfoString = File.ReadAllText(Path.Combine(dashboardSourcePath, MediaInfoRelativePath));
+                ModifiedMediaInfoString = OriginalMediaInfoString + uiConfig;
             }
             catch (Exception e)
             {
                 Plugin.Instance.Logger.Error($"{nameof(ShortcutMenuHelper)} - Media Info injection failed");
                 Plugin.Instance.Logger.Error(e.Message);
                 Plugin.Instance.Logger.Debug(e.StackTrace);
-                ModifiedMediaInfoString = null;
+                // 保留上一次成功生成的注入串：置空会让端点下发空内容，直接打断整个首页渲染。
+                // 原始文件已缓存在 OriginalMediaInfoString，端点会按需回退。
             }
 
             if (dataExplorer2Assembly != null)

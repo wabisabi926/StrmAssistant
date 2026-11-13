@@ -27,7 +27,9 @@ namespace StrmAssistant.Web.Service
 
         public object Get(GetDoubanRatings request)
         {
-            if (!Plugin.IsPluginEnabled) return null;
+            // 不要用 null 表达「插件已关闭」：ServiceStack 会把 null 响应写成 204 空体，
+            // 前端 response.json() 直接抛异常。统一返回带默认空列表的响应体。
+            if (!Plugin.IsPluginEnabled) return new DoubanRatingsResponse();
             var response = new DoubanRatingsResponse();
 
             // 必须登录：该端点会暴露「内部 ItemId ↔ 豆瓣 SubjectId」的对应关系，
@@ -86,7 +88,7 @@ namespace StrmAssistant.Web.Service
         /// </summary>
         public object Get(GetDoubanRatingsByImdb request)
         {
-            if (!Plugin.IsPluginEnabled) return null;
+            if (!Plugin.IsPluginEnabled) return new DoubanImdbRatingsResponse();
 
             var response = new DoubanImdbRatingsResponse();
 

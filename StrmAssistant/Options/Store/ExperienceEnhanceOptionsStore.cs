@@ -76,7 +76,8 @@ namespace StrmAssistant.Options.Store
                 if (changedProperties.Contains(nameof(ItemDisplayOptions.ReplaceUnplayedWithTotal)) ||
                     changedProperties.Contains(nameof(LibraryOrderOptions.ShowLibraryItemCount)) ||
                     changedProperties.Contains(nameof(SearchLogOptions.ReverseLogLines)) ||
-                    changedProperties.Contains(nameof(SearchLogOptions.BlockSearchRecommend)))
+                    changedProperties.Contains(nameof(SearchLogOptions.BlockSearchRecommend)) ||
+                    changedProperties.Contains(nameof(SearchLogOptions.ShowMediaInfo)))
                 {
                     Web.Helper.ShortcutMenuHelper.Refresh();
                 }

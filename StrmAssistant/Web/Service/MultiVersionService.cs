@@ -49,7 +49,7 @@ namespace StrmAssistant.Web.Service
 
         public object Get(GetMultiVersionInfo request)
         {
-            if (!Plugin.IsPluginEnabled) return null;
+            if (!Plugin.IsPluginEnabled) return new MultiVersionResponse();
 
             var response = new MultiVersionResponse();
             var user = GetUserForRequest(null, true);

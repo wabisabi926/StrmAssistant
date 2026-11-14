@@ -17,7 +17,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **4.0.0.5** |
+| Plugin Version | **4.0.0.7** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -28,7 +28,13 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > **Before upgrading to 4.0**: legacy config migrations are no longer bundled. Direct upgrade is supported only from **3.0.0.78 or later**. If you are on an older version, install 3.0.0.78 and start Emby once to complete the migration, then upgrade to 4.0.
 
-## Latest Optimizations (v3.0.0.66 ~ v4.0.0.5)
+## Latest Optimizations (v3.0.0.66 ~ v4.0.0.7)
+
+✅ **Scheduled task robustness fixes (4.0.0.6 ~ 4.0.0.7)**
+- Fixed the running flag staying true after cancelling a scheduled task, so the post-scan auto catch-up is no longer permanently skipped by a false "scheduled task is running" state
+- Fixed semaphore slot leaks on cancellation; batch tasks (extract / thumbnail / fingerprint) no longer throttle later concurrency
+- Auto catch-up now purges stale entries from the retry queue (deleted or already-processed items no longer linger); Restore mode aligned with the manual task
+- Disabled plugin no longer serves empty frontend modules, so home page and library card rendering no longer break wholesale
 
 ✅ **Playback and log fixes (4.0.0.5)**
 - Audio HLS/transcode requests are no longer redirected to the raw file; multichannel sources request AAC/HLS as 2-channel audio, fixing silent stops or track skipping after ~60 seconds

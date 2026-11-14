@@ -1,5 +1,17 @@
 # 更新日志 / Changelog
 
+## [4.0.0.7] - 2026-11-14
+
+### 修复
+- **自动补漏清理重试队列陈旧条目**：扫库后自动补提取处理重试候选时，对已删除或已不再需要提取的条目执行移除。这类条目原本永远等不到成功回执，会永驻重试队列（只受 5000 条总量上限保护），每次扫库都空查询一遍。
+- **Restore 模式行为对齐**：自动补漏与手动任务保持一致，Restore 模式下无 json 可恢复的条目（预期路径）不再被记为重试失败、不再白耗重试次数。
+- **计划任务取消后运行标记复位**：取消路径提前 return 时不复位 `IsRunning`，会卡 true 导致扫库自动补漏被"计划任务运行中"永久误判跳过。已用 try/finally 统一复位：ExtractMediaInfoTask、ExtractIntroFingerprintTask、ExtractVideoThumbnailTask、RefreshEpisodeTask、RefreshPersonTask。
+- **计划任务信号量泄漏**：`Task.Run(…, cancellationToken)` 在任务尚未启动时被取消，条目体（含 finally 中的信号量释放）不执行，MasterSemaphore/Tier2Semaphore 永久漏槽位且 `Task.WhenAll` 抛 OperationCanceledException 跳过收尾。统一改为传 `CancellationToken.None`（对齐 RestoreMediaInfoTask 的既有写法），条目体内部自行检查取消令牌并在 finally 释放。涉及 ExtractIntroFingerprintTask、ExtractVideoThumbnailTask、RefreshEpisodeTask、RefreshPersonTask、ScanExternalSubtitleTask、NormalizeTrackLanguageTask、PersistMediaInfoTask。
+
+### 测试
+- 构建 0 错误 0 警告；`dotnet test` 470 通过 0 失败。
+- 取消竞态属调度时序缺陷，无法稳定复现注入；以代码审查与测试验证。实机建议运行「提取媒体信息」中途取消一次，确认日志出现 Cancelled 且下一次扫库自动补漏正常执行。
+
 ## [4.0.0.6] - 2026-11-13
 
 ### 修复

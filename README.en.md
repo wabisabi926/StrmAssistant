@@ -30,10 +30,12 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 ## Latest Optimizations (v3.0.0.66 ~ v4.0.0.7)
 
-✅ **Scheduled task robustness fixes (4.0.0.6 ~ 4.0.0.7)**
+✅ **Scheduled task robustness fixes (4.0.0.7)**
 - Fixed the running flag staying true after cancelling a scheduled task, so the post-scan auto catch-up is no longer permanently skipped by a false "scheduled task is running" state
 - Fixed semaphore slot leaks on cancellation; batch tasks (extract / thumbnail / fingerprint) no longer throttle later concurrency
 - Auto catch-up now purges stale entries from the retry queue (deleted or already-processed items no longer linger); Restore mode aligned with the manual task
+
+✅ **Frontend injection fallback (4.0.0.6)**
 - Disabled plugin no longer serves empty frontend modules, so home page and library card rendering no longer break wholesale
 
 ✅ **Playback and log fixes (4.0.0.5)**

@@ -38,79 +38,85 @@ namespace StrmAssistant.ScheduledTask
 
             var tasks = new List<Task>();
 
-            foreach (var item in itemsToRefresh)
+            try
             {
-                try
-                {
-                    await QueueManager.Tier2Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch
-                {
-                    return;
-                }
-                
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    QueueManager.Tier2Semaphore.Release();
-                    _logger.Info("EpisodeRefresh - Scheduled Task Cancelled");
-                    return;
-                }
-
-                var taskIndex = ++index;
-                var taskItem = item;
-                var task = Task.Run(async () =>
+                foreach (var item in itemsToRefresh)
                 {
                     try
                     {
-                        await Task.Delay(
-                                Random.Next(0,
-                                    Math.Max(0, tier2MaxConcurrentCount - QueueManager.Tier2Semaphore.CurrentCount) *
-                                    MetadataApi.RequestIntervalMs), cancellationToken)
-                            .ConfigureAwait(false);
-
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            _logger.Info("EpisodeRefresh - Scheduled Task Cancelled");
-                            return;
-                        }
-
-                        EnableItemExclusiveFeatures(taskItem.InternalId, ExclusiveControl.CatchAllBlock,
-                            ExclusiveControl.IgnoreExtSubChange);
-
-                        await Plugin.LibraryApi.RefreshEpisodeMetadata(taskItem, cancellationToken)
-                            .ConfigureAwait(false);
+                        await QueueManager.Tier2Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch
                     {
-                        _logger.Info("EpisodeRefresh - Item cancelled: " + taskItem.Name + " - " + taskItem.Path);
+                        return;
                     }
-                    catch (Exception e)
-                    {
-                        _logger.Info("EpisodeRefresh - Item failed: " + taskItem.Name + " - " + taskItem.Path);
-                        _logger.Debug(e.Message);
-                        _logger.Debug(e.StackTrace);
-                    }
-                    finally
+
+                    if (cancellationToken.IsCancellationRequested)
                     {
                         QueueManager.Tier2Semaphore.Release();
-
-                        ClearItemExclusiveFeatures(taskItem.InternalId);
-
-                        var currentCount = Interlocked.Increment(ref current);
-                        progress.Report(currentCount / total * 100);
-                        _logger.Info("EpisodeRefresh - Progress " + currentCount + "/" + total + " - " +
-                                     "Task " + taskIndex + ": " + taskItem.Path);
+                        _logger.Info("EpisodeRefresh - Scheduled Task Cancelled");
+                        return;
                     }
-                }, cancellationToken);
-                tasks.Add(task);
-                Task.Delay(10).Wait();
+
+                    var taskIndex = ++index;
+                    var taskItem = item;
+                    var task = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await Task.Delay(
+                                    Random.Next(0,
+                                        Math.Max(0, tier2MaxConcurrentCount - QueueManager.Tier2Semaphore.CurrentCount) *
+                                        MetadataApi.RequestIntervalMs), cancellationToken)
+                                .ConfigureAwait(false);
+
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                _logger.Info("EpisodeRefresh - Scheduled Task Cancelled");
+                                return;
+                            }
+
+                            EnableItemExclusiveFeatures(taskItem.InternalId, ExclusiveControl.CatchAllBlock,
+                                ExclusiveControl.IgnoreExtSubChange);
+
+                            await Plugin.LibraryApi.RefreshEpisodeMetadata(taskItem, cancellationToken)
+                                .ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            _logger.Info("EpisodeRefresh - Item cancelled: " + taskItem.Name + " - " + taskItem.Path);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Info("EpisodeRefresh - Item failed: " + taskItem.Name + " - " + taskItem.Path);
+                            _logger.Debug(e.Message);
+                            _logger.Debug(e.StackTrace);
+                        }
+                        finally
+                        {
+                            QueueManager.Tier2Semaphore.Release();
+
+                            ClearItemExclusiveFeatures(taskItem.InternalId);
+
+                            var currentCount = Interlocked.Increment(ref current);
+                            progress.Report(currentCount / total * 100);
+                            _logger.Info("EpisodeRefresh - Progress " + currentCount + "/" + total + " - " +
+                                         "Task " + taskIndex + ": " + taskItem.Path);
+                        }
+                    }, CancellationToken.None);
+                    tasks.Add(task);
+                    Task.Delay(10).Wait();
+                }
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+
+                progress.Report(100.0);
+                _logger.Info("EpisodeRefresh - Scheduled Task Complete");
             }
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-
-            IsRunning = false;
-
-            progress.Report(100.0);
-            _logger.Info("EpisodeRefresh - Scheduled Task Complete");
+            finally
+            {
+                // 取消路径（含 WaitAsync 抛出）必须复位，否则互斥判断会一直误判任务在跑
+                IsRunning = false;
+            }
         }
 
         public string Category => Resources.ResourceManager.GetString("PluginOptions_EditorTitle_Strm_Assistant",

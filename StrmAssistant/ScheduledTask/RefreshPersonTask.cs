@@ -142,160 +142,166 @@ namespace StrmAssistant.ScheduledTask
             var fullImageRefresh = refreshPersonOptions.Contains(RefreshPersonOption.FullImageRefresh);
             var defaultImageRefresh = refreshPersonOptions.Contains(RefreshPersonOption.DefaultImageRefresh);
 
-            for (var startIndex = 0; startIndex < remainingCount; startIndex += batchSize)
+            try
             {
-                if (cancellationToken.IsCancellationRequested)
+                for (var startIndex = 0; startIndex < remainingCount; startIndex += batchSize)
                 {
-                    _logger.Info("RefreshPerson - Scheduled Task Cancelled");
-                    return;
-                }
-
-                personQuery.Limit = batchSize;
-                personQuery.StartIndex = startIndex;
-                personItems = _libraryManager.GetItemList(personQuery).Cast<Person>().ToList();
-
-                if (personItems.Count == 0) break;
-
-                foreach (var item in personItems)
-                {
-                    var taskItem = item;
-
-                    var metadataRefreshSkip =
-                        (taskItem.IsFieldLocked(MetadataFields.Name) &&
-                         taskItem.IsFieldLocked(MetadataFields.Overview)) ||
-                        (excludeIfChinese && IsChinese(taskItem.Name) && IsChinese(taskItem.Overview)) ||
-                        (!refreshPersonOptions.Contains(RefreshPersonOption.FullRefresh) && IsChinese(taskItem.Name) &&
-                         IsChinese(taskItem.Overview) && taskItem.DateLastSaved >= DateTimeOffset.UtcNow.AddDays(-30));
-                    // 图像刷新跳过判定：
-                    // - FullImageRefresh：永不跳过（强制全量刷新图像）
-                    // - DefaultImageRefresh：有主图即跳过（除非强制下载且该图为远程图）
-                    // - 均未勾选：沿用社区历史行为（有主图即跳过；或 30 天内刷新过且未 FullRefresh/
-                    //   DownloadImagesInAdvance 则跳过）
-                    bool imageRefreshSkip;
-                    if (fullImageRefresh)
-                    {
-                        imageRefreshSkip = false;
-                    }
-                    else if (defaultImageRefresh)
-                    {
-                        var primaryImageInfo = taskItem.GetImageInfo(ImageType.Primary, 0);
-                        imageRefreshSkip = primaryImageInfo != null &&
-                                           (!downloadImagesInAdvance || primaryImageInfo.IsLocalFile);
-                    }
-                    else
-                    {
-                        imageRefreshSkip = taskItem.HasImage(ImageType.Primary) ||
-                                           (!refreshPersonOptions.Contains(RefreshPersonOption.FullRefresh) &&
-                                            !downloadImagesInAdvance &&
-                                            taskItem.DateLastRefreshed >= DateTimeOffset.UtcNow.AddDays(-30));
-                    }
-
-                    if (metadataRefreshSkip && imageRefreshSkip)
-                    {
-                        var currentCount = Interlocked.Increment(ref current);
-                        progress.Report(currentCount / total * 100);
-                        _logger.Info("RefreshPerson - Task " + currentCount + "/" + total + " Skipped - " +
-                                     taskItem.Name);
-                        continue;
-                    }
-
-                    try
-                    {
-                        await QueueManager.Tier2Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        return;
-                    }
-                    
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        QueueManager.Tier2Semaphore.Release();
                         _logger.Info("RefreshPerson - Scheduled Task Cancelled");
                         return;
                     }
 
-                    var task = Task.Run(async () =>
+                    personQuery.Limit = batchSize;
+                    personQuery.StartIndex = startIndex;
+                    personItems = _libraryManager.GetItemList(personQuery).Cast<Person>().ToList();
+
+                    if (personItems.Count == 0) break;
+
+                    foreach (var item in personItems)
                     {
-                        try
+                        var taskItem = item;
+
+                        var metadataRefreshSkip =
+                            (taskItem.IsFieldLocked(MetadataFields.Name) &&
+                             taskItem.IsFieldLocked(MetadataFields.Overview)) ||
+                            (excludeIfChinese && IsChinese(taskItem.Name) && IsChinese(taskItem.Overview)) ||
+                            (!refreshPersonOptions.Contains(RefreshPersonOption.FullRefresh) && IsChinese(taskItem.Name) &&
+                             IsChinese(taskItem.Overview) && taskItem.DateLastSaved >= DateTimeOffset.UtcNow.AddDays(-30));
+                        // 图像刷新跳过判定：
+                        // - FullImageRefresh：永不跳过（强制全量刷新图像）
+                        // - DefaultImageRefresh：有主图即跳过（除非强制下载且该图为远程图）
+                        // - 均未勾选：沿用社区历史行为（有主图即跳过；或 30 天内刷新过且未 FullRefresh/
+                        //   DownloadImagesInAdvance 则跳过）
+                        bool imageRefreshSkip;
+                        if (fullImageRefresh)
                         {
-                            await Task.Delay(
-                                    Random.Next(0,
-                                        Math.Max(0,
-                                            tier2MaxConcurrentCount - QueueManager.Tier2Semaphore.CurrentCount) *
-                                        MetadataApi.RequestIntervalMs), cancellationToken)
-                                .ConfigureAwait(false);
-
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                _logger.Info("RefreshPerson - Scheduled Task Cancelled");
-                                return;
-                            }
-
-                            var refreshOptions = Plugin.MetadataApi.GetMetadataFullRefreshOptions();
-
-                            if (!metadataRefreshSkip)
-                            {
-                                var result = await Plugin.MetadataApi
-                                    .GetPersonMetadataFromMovieDb(taskItem, serverPreferredMetadataLanguage,
-                                        refreshOptions.DirectoryService, cancellationToken).ConfigureAwait(false);
-
-                                if (result?.Item != null)
-                                {
-                                    var newName = result.Item.Name;
-                                    if (!taskItem.IsFieldLocked(MetadataFields.Name) && !string.IsNullOrEmpty(newName))
-                                    {
-                                        taskItem.Name = Plugin.MetadataApi.ProcessPersonInfo(newName, true);
-                                    }
-
-                                    var newOverview = result.Item.Overview;
-                                    if (!taskItem.IsFieldLocked(MetadataFields.Overview) && !string.IsNullOrEmpty(newOverview))
-                                    {
-                                        taskItem.Overview = Plugin.MetadataApi.ProcessPersonInfo(newOverview, false);
-                                    }
-
-                                    _libraryManager.UpdateItems(new List<BaseItem> { taskItem }, null,
-                                        ItemUpdateType.MetadataDownload, true, false, null, CancellationToken.None);
-                                }
-                            }
-
-                            if (!imageRefreshSkip)
-                            {
-                                await taskItem.RefreshMetadata(refreshOptions, cancellationToken).ConfigureAwait(false);
-                            }
+                            imageRefreshSkip = false;
                         }
-                        catch (OperationCanceledException)
+                        else if (defaultImageRefresh)
                         {
-                            _logger.Info("RefreshPerson - Item Cancelled: " + taskItem.Name);
+                            var primaryImageInfo = taskItem.GetImageInfo(ImageType.Primary, 0);
+                            imageRefreshSkip = primaryImageInfo != null &&
+                                               (!downloadImagesInAdvance || primaryImageInfo.IsLocalFile);
                         }
-                        catch (Exception e)
+                        else
                         {
-                            _logger.Error("RefreshPerson - Item Failed: " + taskItem.Name);
-                            _logger.Error(e.Message);
-                            _logger.Debug(e.StackTrace);
+                            imageRefreshSkip = taskItem.HasImage(ImageType.Primary) ||
+                                               (!refreshPersonOptions.Contains(RefreshPersonOption.FullRefresh) &&
+                                                !downloadImagesInAdvance &&
+                                                taskItem.DateLastRefreshed >= DateTimeOffset.UtcNow.AddDays(-30));
                         }
-                        finally
-                        {
-                            QueueManager.Tier2Semaphore.Release();
 
+                        if (metadataRefreshSkip && imageRefreshSkip)
+                        {
                             var currentCount = Interlocked.Increment(ref current);
                             progress.Report(currentCount / total * 100);
-                            _logger.Info("RefreshPerson - Task " + currentCount + "/" + total + " - " + taskItem.Name);
+                            _logger.Info("RefreshPerson - Task " + currentCount + "/" + total + " Skipped - " +
+                                         taskItem.Name);
+                            continue;
                         }
-                    }, cancellationToken);
 
-                    tasks.Add(task);
-                    Task.Delay(10).Wait();
+                        try
+                        {
+                            await QueueManager.Tier2Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            return;
+                        }
+
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            QueueManager.Tier2Semaphore.Release();
+                            _logger.Info("RefreshPerson - Scheduled Task Cancelled");
+                            return;
+                        }
+
+                        var task = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await Task.Delay(
+                                        Random.Next(0,
+                                            Math.Max(0,
+                                                tier2MaxConcurrentCount - QueueManager.Tier2Semaphore.CurrentCount) *
+                                            MetadataApi.RequestIntervalMs), cancellationToken)
+                                    .ConfigureAwait(false);
+
+                                if (cancellationToken.IsCancellationRequested)
+                                {
+                                    _logger.Info("RefreshPerson - Scheduled Task Cancelled");
+                                    return;
+                                }
+
+                                var refreshOptions = Plugin.MetadataApi.GetMetadataFullRefreshOptions();
+
+                                if (!metadataRefreshSkip)
+                                {
+                                    var result = await Plugin.MetadataApi
+                                        .GetPersonMetadataFromMovieDb(taskItem, serverPreferredMetadataLanguage,
+                                            refreshOptions.DirectoryService, cancellationToken).ConfigureAwait(false);
+
+                                    if (result?.Item != null)
+                                    {
+                                        var newName = result.Item.Name;
+                                        if (!taskItem.IsFieldLocked(MetadataFields.Name) && !string.IsNullOrEmpty(newName))
+                                        {
+                                            taskItem.Name = Plugin.MetadataApi.ProcessPersonInfo(newName, true);
+                                        }
+
+                                        var newOverview = result.Item.Overview;
+                                        if (!taskItem.IsFieldLocked(MetadataFields.Overview) && !string.IsNullOrEmpty(newOverview))
+                                        {
+                                            taskItem.Overview = Plugin.MetadataApi.ProcessPersonInfo(newOverview, false);
+                                        }
+
+                                        _libraryManager.UpdateItems(new List<BaseItem> { taskItem }, null,
+                                            ItemUpdateType.MetadataDownload, true, false, null, CancellationToken.None);
+                                    }
+                                }
+
+                                if (!imageRefreshSkip)
+                                {
+                                    await taskItem.RefreshMetadata(refreshOptions, cancellationToken).ConfigureAwait(false);
+                                }
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                _logger.Info("RefreshPerson - Item Cancelled: " + taskItem.Name);
+                            }
+                            catch (Exception e)
+                            {
+                                _logger.Error("RefreshPerson - Item Failed: " + taskItem.Name);
+                                _logger.Error(e.Message);
+                                _logger.Debug(e.StackTrace);
+                            }
+                            finally
+                            {
+                                QueueManager.Tier2Semaphore.Release();
+
+                                var currentCount = Interlocked.Increment(ref current);
+                                progress.Report(currentCount / total * 100);
+                                _logger.Info("RefreshPerson - Task " + currentCount + "/" + total + " - " + taskItem.Name);
+                            }
+                        }, CancellationToken.None);
+
+                        tasks.Add(task);
+                        Task.Delay(10).Wait();
+                    }
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                    tasks.Clear();
+                    personItems.Clear();
                 }
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-                tasks.Clear();
-                personItems.Clear();
+
+                progress.Report(100.0);
+                _logger.Info("RefreshPerson - Scheduled Task Complete");
             }
-
-            IsRunning = false;
-
-            progress.Report(100.0);
-            _logger.Info("RefreshPerson - Scheduled Task Complete");
+            finally
+            {
+                // 取消路径（含 WaitAsync 抛出）必须复位，否则互斥判断会一直误判任务在跑
+                IsRunning = false;
+            }
         }
 
         public string Category => Resources.ResourceManager.GetString("PluginOptions_EditorTitle_Strm_Assistant",

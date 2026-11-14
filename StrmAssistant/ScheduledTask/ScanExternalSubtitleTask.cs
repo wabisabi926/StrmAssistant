@@ -115,7 +115,7 @@ namespace StrmAssistant.ScheduledTask
                         _logger.Info("ExternalSubtitle - Progress " + currentCount + "/" + total + " - " +
                                      "Task " + taskIndex + ": " + taskItem.Path);
                     }
-                }, cancellationToken);
+                }, CancellationToken.None);
                 tasks.Add(task);
                 Task.Delay(10).Wait();
             }

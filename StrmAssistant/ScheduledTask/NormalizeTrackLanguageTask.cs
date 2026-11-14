@@ -117,7 +117,7 @@ namespace StrmAssistant.ScheduledTask
                         var current = Interlocked.Increment(ref processed);
                         progress.Report(total > 0 ? current / (double)total * 100 : 100);
                     }
-                }, cancellationToken);
+                }, CancellationToken.None);
 
                 tasks.Add(task);
                 await Task.Delay(10).ConfigureAwait(false);

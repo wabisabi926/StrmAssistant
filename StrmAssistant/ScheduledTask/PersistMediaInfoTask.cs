@@ -98,7 +98,7 @@ namespace StrmAssistant
                         var currentCount = Interlocked.Increment(ref current);
                         progress.Report(currentCount / total * 100);
                     }
-                }, cancellationToken);
+                }, CancellationToken.None);
                 tasks.Add(task);
                 Task.Delay(10).Wait();
             }

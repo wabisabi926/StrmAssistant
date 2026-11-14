@@ -455,6 +455,8 @@ namespace StrmAssistant.Common
             var timeoutMs = options.ExtractionPerformance.MediaInfoExtractionTimeoutMs;
             var imageMultiplier = options.ExtractionPerformance.ImageExtractionTimeoutMultiplier;
             var enableImageCapture = options.ImageCapture.EnableImageCapture;
+            var mediaInfoRestoreMode =
+                options.MediaInfoPersist.PersistMediaInfoMode == PersistMediaInfoOption.Restore.ToString();
 
             var items = new List<BaseItem>();
             var seen = new HashSet<long>();
@@ -475,6 +477,26 @@ namespace StrmAssistant.Common
                     {
                         if (seen.Add(item.InternalId)) items.Add(item);
                     }
+
+                    // 清理陈旧条目：条目已删除、或已不再需要提取（如已被其他途径补齐）。
+                    // 这类条目不会进入本次处理，永远等不到 RecordSuccess/淘汰，会永驻重试队列
+                    // （只受 5000 条总量限制），每次扫库都空查询一遍。
+                    var remaining = new HashSet<long>(items.Select(i => i.InternalId));
+                    var cleaned = 0;
+                    foreach (var retryId in retryIds)
+                    {
+                        if (remaining.Contains(retryId)) continue;
+
+                        var existing = retryItems.FirstOrDefault(i => i.InternalId == retryId);
+                        if (existing is null || !IsExtractNeeded(existing, enableImageCapture))
+                        {
+                            MediaInfoRetryQueue.RecordSuccess(retryId);
+                            cleaned++;
+                        }
+                    }
+
+                    if (cleaned > 0)
+                        _logger.Info("MediaInfoExtract - Auto catch-up retry cleaned stale entries: " + cleaned);
 
                     _logger.Info("MediaInfoExtract - Auto catch-up retry candidates: " + items.Count);
                 }
@@ -549,9 +571,14 @@ namespace StrmAssistant.Common
                         }
                         else if (result is null)
                         {
-                            MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, "skipped or non-existent");
-                            _logger.Info("MediaInfoExtract - Auto catch-up item skipped: " + taskItem.Name + " - " +
-                                         taskItem.Path);
+                            // 与 ExtractMediaInfoTask 保持一致：Restore 模式下 null（无 json 可恢复）
+                            // 是预期路径，不应计入重试失败
+                            if (!mediaInfoRestoreMode)
+                            {
+                                MediaInfoRetryQueue.RecordFailure(taskItem.InternalId, "skipped or non-existent");
+                                _logger.Info("MediaInfoExtract - Auto catch-up item skipped: " + taskItem.Name + " - " +
+                                             taskItem.Path);
+                            }
                         }
                     }
                     catch (OperationCanceledException)

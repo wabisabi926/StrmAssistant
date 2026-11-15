@@ -118,3 +118,8 @@ Task.WhenAll 返回，大批量刮削期间 RSS 持续上涨。
 
 跨机器的待办与发布后观察项写在根目录 [`ROADMAP.md`](ROADMAP.md)（入库、随仓库同步）；
 完成一项就删掉对应小节，并把行为变更写进 `CHANGELOG.md`。
+
+**脱敏**：入库文档（README / CHANGELOG / CONTRIBUTING / ROADMAP / API）不写内网 IP、
+本机绝对路径、服务器名、设备名，以及任何真实 token / API Key；示例统一用
+`<emby-host>`、`<api_key>`、`<media-library>` 占位。本地 `docs/` 的实机记录在对外分享前
+也要按同一标准脱敏（这类文件不入库，但会被整目录拷贝）。

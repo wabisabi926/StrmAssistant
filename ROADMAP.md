@@ -10,7 +10,7 @@
 
 **背景**：TheIntroDB v4 支持 `mapping=default|official|dvd|alternate|absolute|regional`，用于把调用方的季集号换算成 TVDB default 序。当前只按 Emby 里存的季集号查询，DVD/绝对序的剧集可能取到别的集的数据。
 
-**为什么还没做**：本机测试库 9 部剧全部是 `DisplayOrder = Aired`，没有 DVD/绝对序样本，无法实机验证——按项目约定不做无法真机验证的改动。
+**为什么还没做**：当前测试库中没有 DVD/绝对序样本（均为 `Aired`），无法实机验证——按项目约定不做无法真机验证的改动。
 
 **实现要点**：
 - 仅在走 `tvdb_id` 定位时传 `mapping`；`tmdb_id` / `imdb_id` 路径不传

@@ -121,7 +121,7 @@ POST /Douban/RefreshRating?Id=27820
 
 ```bash
 curl -H "X-Emby-Token: <api_key>" \
-  "http://192.168.1.10:8096/Douban/RatingsByImdb?Ids=tt0111161,tt0068646"
+  "http://<emby-host>:8096/Douban/RatingsByImdb?Ids=tt0111161,tt0068646"
 ```
 
 Kodi Python 示例：
@@ -132,7 +132,7 @@ import urllib.request
 from urllib.parse import urlencode
 
 req = urllib.request.Request(
-    "http://192.168.1.10:8096/Douban/RatingsByImdb?" + urlencode({"Ids": "tt0111161"}),
+    "http://<emby-host>:8096/Douban/RatingsByImdb?" + urlencode({"Ids": "tt0111161"}),
     headers={"X-Emby-Token": "<api_key>"})
 
 with urllib.request.urlopen(req, timeout=5) as resp:

@@ -17,7 +17,7 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **4.0.0.8** |
+| Plugin Version | **4.0.0.9** |
 | Minimum Emby Version | 4.9.1.0 |
 | Advertised Version | 4.10.2.0+ |
 | Tested On | 4.10.2.0 |
@@ -28,7 +28,14 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > **Before upgrading to 4.0**: legacy config migrations are no longer bundled. Direct upgrade is supported only from **3.0.0.78 or later**. If you are on an older version, install 3.0.0.78 and start Emby once to complete the migration, then upgrade to 4.0.
 
-## Latest Optimizations (v3.0.0.66 ~ v4.0.0.8)
+## Latest Optimizations (v3.0.0.66 ~ v4.0.0.9)
+
+✅ **TheIntroDB v4 migration and dual-source strategy (4.0.0.9)**
+- Migrated to TheIntroDB API v4 (v2/v3 are frozen and will be removed): reads go to `/v4`, movies no longer send `type`, throttling follows v4 quotas (400ms anonymous / 200ms with a key), and 429 enters a cooldown
+- Dual-source resolution now prefers a complete source: intro and credits for one episode come from the same source instead of being stitched together (the two sources differed by up to 156.7s on credits start); movies prefer TheIntroDB because it matches release versions by duration
+- Fixed TheIntroDB 404 responses being counted as request failures: Emby throws on non-2xx, so the old status-code branch never ran; no-data now caches negatively and no longer logs warnings
+- Titles are addressed by TMDB first (TMDB -> TVDB -> IMDb), with the episode TVDB id attached as an extra pin when available; TMDB is no longer mandatory
+- Added per-source circuit breaking: after 5 consecutive failures (timeout/429/5xx) a source is skipped for the rest of the run
 
 ✅ **Scheduled task robustness fixes (4.0.0.7 ~ 4.0.0.8)**
 - Fixed the running flag staying true after cancelling a scheduled task, so the post-scan auto catch-up is no longer permanently skipped by a false "scheduled task is running" state

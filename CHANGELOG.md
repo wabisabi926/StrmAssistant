@@ -1,5 +1,27 @@
 # 更新日志 / Changelog
 
+## [4.0.0.9] - 2026-11-15
+
+### 变更
+- **TheIntroDB 迁移到 API v4**：官方已冻结 v2/v3（仅保留 `GET /media`，不再修复、将被移除），v4 是唯一维护面。请求地址由 `/v3/media` 改为 `/v4/media`；v4 不再接受 `type` 参数，电影改为“不带 season/episode”由服务端推断。
+- **双源决策改为“完整源优先”**：按序查询，第一个同时提供片头与片尾的源整条采用并立即停止；只有所有源都不完整时才做字段级拼接。此前是字段互补，实测会出现“片头来自 A、片尾来自 B”，两源片尾起点最大相差 156.7 秒（行尸走肉 S2E1），混源写入后可能整体错位。电影强制 TheIntroDB 先（支持 `duration_ms` 版本匹配），剧集保持配置顺序（默认 IntroDb 先，额度更宽）。
+- **ID 定位改为 TMDB 优先**：`tmdb_id` → `tvdb_id` → `imdb_id`，单集存在 TVDB id 时附加 `tvdb_episode_id` 做精确定位；同时取消“必须有 TMDB 才刮削”的硬门槛，三种 id 任一即可。实测 v4 单独传 `tvdb_episode_id` 会返回 400（`tmdb_id, imdb_id, or tvdb_id is required`），必须与媒体 id + 季集号同传。
+- **单源配置不再被自动补全**：此前只填 `IntroDb` 也会被偷偷补上 `Tidb`，无法真正单源；现按配置严格执行，空配置才用默认 `IntroDb,Tidb`。
+- **限流适配 v4 配额**：v4 匿名 `/media` 为 30 次/10 秒、认证 120 次/10 秒，原固定 250ms（40 次/10s）匿名必然超限。现按是否配置 API Key 分档（匿名 400ms、认证 200ms），两源共用一条串行节流时间线；命中 429 后进入 10 秒冷却。
+- **源级熔断**：某源连续 5 次失败（超时/429/5xx）后，本轮任务剩余部分不再请求它，避免对着不可用的源空转。
+- 任务启动日志输出端点与匿名额度（5,000 次/天；认证 100,000 次/天）；收尾汇总增加 `Requests: IntroDb=…, Tidb=…` 与 `Mixed-source merges`。
+
+### 修复
+- **TheIntroDB“无数据”被误判为请求失败**：Emby 的 HTTP 客户端对非 2xx 是抛 `HttpException` 而非返回状态码，原有 `StatusCode == NotFound` 分支从未命中。结果 404（该集尚无提交）被记为请求失败、反复刷提示，且不做负缓存导致 6 小时内重复查询。现按异常状态码区分：404 = 无数据并入负缓存、429 = 冷却并聚合、其他状态计入失败汇总；超时按 `HttpException.IsTimedOut` 归类。
+
+### 测试
+- 构建 0 警告 0 错误；`dotnet test` 485 通过（新增完整源优先、字段拼接、电影排序、单源配置、ID 优先级与 URL 构造等 15 条断言）。
+- 本机 Emby 4.10.2.0 实测（插件 4.0.0.9）：
+  - 迁移轮：日志输出 `TheIntroDB endpoint: https://api.theintrodb.org/v4`，8 部剧写入 96 集标记；404 全部归入 `Source coverage: no data`，无 429。
+  - 双源策略轮：97 集写入；`Requests: IntroDb=167, Tidb=164`；`Mixed-source merges` 为空（0 例）；0 次 400/429/超时。
+  - 实际请求采样：`/v4/media?tmdb_id=294636&season=1&episode=5&tvdb_episode_id=11925078&duration_ms=2813611`。
+  - 期间也观测到本机到 theintrodb.org 的网络抖动（一轮 91 次超时，另一轮为 0），属环境因素，已由源级熔断兜底。
+
 ## [4.0.0.8] - 2026-11-14
 
 ### 修复

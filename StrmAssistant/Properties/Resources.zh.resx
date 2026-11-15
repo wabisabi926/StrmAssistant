@@ -1146,7 +1146,7 @@
     <value>数据源顺序</value>
   </data>
   <data name="IntroSkipOptions_UnifiedIntroDbProviders_Tried_in_order_until_one_succeeds__Default_is_IntroDb_Tidb_" xml:space="preserve">
-    <value>按顺序尝试；默认 IntroDb,Tidb，两者始终都会尝试，此项只调整顺序。</value>
+    <value>查询顺序。第一个同时提供片头与片尾的源会被整条采用；都没有完整数据时才按字段互补。留空 = IntroDb,Tidb（电影始终先查 TheIntroDB）。</value>
   </data>
   <data name="ScrapeIntroDbTask_Name_Scrape_Intro_Credits_from_IntroDb" xml:space="preserve">
     <value>刮削片头片尾</value>

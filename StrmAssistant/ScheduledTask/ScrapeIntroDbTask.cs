@@ -5,6 +5,7 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Tasks;
+using StrmAssistant.Common;
 using StrmAssistant.Properties;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,8 @@ namespace StrmAssistant.ScheduledTask
             var scrapeOptions = Plugin.Instance.IntroSkipStore.GetOptions().Scrape;
             var scrapePaths = Plugin.IntroDbApi.ScrapeLibraryPaths;
 
+            Plugin.IntroDbApi.BeginRun();
+
             // 选了范围但解析不到任何有效库时，宁可什么都不刮，也不能退化成全库。
             if (!string.IsNullOrWhiteSpace(scrapeOptions.LibraryScope) && scrapePaths.Count == 0)
             {
@@ -56,7 +59,7 @@ namespace StrmAssistant.ScheduledTask
 
             var series = _libraryManager.GetItemList(seriesQuery)
                 .OfType<Series>()
-                .Where(s => !string.IsNullOrEmpty(s.GetProviderId(MetadataProviders.Tmdb)))
+                .Where(s => HasAnyProviderId(s))
                 .ToList();
 
             var movies = new List<Movie>();
@@ -67,14 +70,21 @@ namespace StrmAssistant.ScheduledTask
                         IncludeItemTypes = new[] { nameof(Movie) }
                     })
                     .OfType<Movie>()
-                    .Where(m => !string.IsNullOrEmpty(m.GetProviderId(MetadataProviders.Tmdb)) &&
-                                !Plugin.ChapterApi.HasIntro(m))
+                    .Where(m => HasAnyProviderId(m) && !Plugin.ChapterApi.HasIntro(m))
                     .ToList();
             }
 
             var targets = series.Concat<BaseItem>(movies).ToList();
             _logger.Info("IntroDbScrape - Scheduled Task Start: {0} series, {1} movies, IncludeMovies={2}",
                 series.Count, movies.Count, scrapeOptions.IncludeMovies);
+            _logger.Info("IntroDbScrape - TheIntroDB endpoint: {0}", IntroDbApi.TheIntroDbBaseUrl);
+
+            // v4 匿名额度 5,000 次/天，认证 100,000 次/天；大库匿名跑会中途开始 429，先提示一次。
+            if (string.IsNullOrWhiteSpace(scrapeOptions.TidbApiKey))
+            {
+                _logger.Info(
+                    "IntroDbScrape - TheIntroDB API key not configured: anonymous quota is 5,000 requests/day (v4), configure a key to raise it to 100,000/day");
+            }
 
             var completed = 0;
             var marked = 0;
@@ -114,6 +124,14 @@ namespace StrmAssistant.ScheduledTask
 
             Plugin.IntroDbApi.LogRequestSummary();
             _logger.Info("IntroDbScrape - Scheduled Task Complete: {0} item(s) marked", marked);
+        }
+
+        /// <summary>TMDB/TVDB/IMDb 任一存在即可参与刮削，不再以 TMDB 作为硬门槛。</summary>
+        private static bool HasAnyProviderId(BaseItem item)
+        {
+            return !string.IsNullOrEmpty(item.GetProviderId(MetadataProviders.Tmdb)) ||
+                   !string.IsNullOrEmpty(item.GetProviderId(MetadataProviders.Tvdb)) ||
+                   !string.IsNullOrEmpty(item.GetProviderId(MetadataProviders.Imdb));
         }
 
         public string Category => Resources.ResourceManager.GetString("PluginOptions_EditorTitle_Strm_Assistant",

@@ -110,6 +110,13 @@ namespace StrmAssistant.Common
             /// </summary>
             public long SourceBytes;
 
+            /// <summary>
+            /// 探测输入是否已被替换成我们自己的样本/挂载正片。
+            /// false 表示 ffprobe 探测的还是原始 ISO —— 这时不能按样本语义改：
+            /// 只补章节/时长，绝不改写码率或编解码器标签。
+            /// </summary>
+            public bool InputReplaced;
+
             public bool IsEmpty => !IsProbeSample && Chapters.Count == 0 && AudioStreams.Count == 0 &&
                                    SubtitleStreams.Count == 0 && DurationSeconds <= 0;
         }
@@ -412,6 +419,7 @@ namespace StrmAssistant.Common
                         SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                         DurationSeconds = title.DurationSeconds,
                         IsProbeSample = true,
+                        InputReplaced = true,
                         SourceSize = image.Length,
                         SourceBytes = title.TotalBytes
                     };
@@ -646,6 +654,7 @@ namespace StrmAssistant.Common
                             SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                             DurationSeconds = title.DurationSeconds,
                             IsProbeSample = true,
+                            InputReplaced = true,
                             SourceSize = length,
                             SourceBytes = title.TotalBytes
                         };
@@ -690,7 +699,7 @@ namespace StrmAssistant.Common
                 return null;
             }
 
-            RememberTitle(isoPath, info);
+            RememberTitle(isoPath, info, inputReplaced: true);
 
             if (!string.IsNullOrEmpty(info?.RelativePath))
             {
@@ -735,7 +744,7 @@ namespace StrmAssistant.Common
             }
             if (logger == null) return;
 
-            RememberTitle(isoPath, info);
+            RememberTitle(isoPath, info, inputReplaced: false);
 
             if (info == null)
             {
@@ -751,7 +760,7 @@ namespace StrmAssistant.Common
         /// <summary>
         /// 记录一次解析得到的章节（仅当有内容时覆盖；解析失败/为空时不覆盖既有缓存）。
         /// </summary>
-        private static void RememberTitle(string isoPath, UdfTitleResolver.TitleInfo info)
+        private static void RememberTitle(string isoPath, UdfTitleResolver.TitleInfo info, bool inputReplaced)
         {
             if (!string.IsNullOrEmpty(info?.UnsupportedReason))
             {
@@ -765,7 +774,8 @@ namespace StrmAssistant.Common
                 Chapters = info.Chapters != null ? new List<double>(info.Chapters) : new List<double>(),
                 AudioStreams = info.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                 SubtitleStreams = info.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
-                DurationSeconds = info.DurationSeconds
+                DurationSeconds = info.DurationSeconds,
+                InputReplaced = inputReplaced
             };
 
             // 什么都没解析出来时不要覆盖既有缓存（避免一次失败把上一轮的好结果清掉）

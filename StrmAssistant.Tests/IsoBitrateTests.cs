@@ -62,6 +62,30 @@ namespace StrmAssistant.Tests
         }
 
         [Fact]
+        public void ScalesVideoStreams_EvenWhenAudioBitrateLooksReal()
+        {
+            // 真机场景：样本把视频算成 17 kbps，但 TrueHD 音频带真实 4 Mbps 标记。
+            // 旧实现把音频一起求和（ratio >> 5）导致整段跳过，视频永远停在 17 kbps。
+            var mediaInfo = Probed(17_000,
+                17_000, 17_000);
+            mediaInfo.MediaStreams.Add(new MediaStream
+            {
+                Type = MediaStreamType.Audio,
+                Codec = "truehd",
+                BitRate = 4_000_000
+            });
+            var hint = Hint(39_800_000_000, 10_355); // 39.8GB / 2:52:35 → 约 30.8 Mbps
+
+            IsoExtraction.ApplyBitrate(mediaInfo, hint);
+
+            Assert.True(mediaInfo.Bitrate > 30_000_000);
+            // 两路视频按比例分掉真实总码率，音频保持自己的真实值
+            Assert.True(mediaInfo.MediaStreams[0].BitRate > 15_000_000);
+            Assert.True(mediaInfo.MediaStreams[1].BitRate > 15_000_000);
+            Assert.Equal(4_000_000, mediaInfo.MediaStreams[2].BitRate);
+        }
+
+        [Fact]
         public void KeepsStreamBitrates_WhenTheyLookReal()
         {
             // 流码率之和(80M)远大于容器脏值(12k) → 是码流内 VUI 真实值，不应缩放

@@ -275,7 +275,9 @@ namespace StrmAssistant.Mod
                 ApplyRuntime(mediaInfo, hint);
                 ApplyBitrate(mediaInfo, hint);
                 ApplyChapters(mediaInfo, hint);
-                ClearMisleadingCodecTags(mediaInfo);
+                // 只有探测输入确实被换成了样本/挂载正片时，才清容器注册标签。
+                // 裸 ISO 回退探测的结果不能按样本语义改写（否则会留下“清了一半”的假象）。
+                if (hint.InputReplaced) ClearMisleadingCodecTags(mediaInfo);
                 ApplyStreamDetails(mediaInfo, hint);
             }
             catch (Exception e)
@@ -317,34 +319,39 @@ namespace StrmAssistant.Mod
             var probedBitrate = mediaInfo.Bitrate.GetValueOrDefault();
             mediaInfo.Bitrate = trueBitrate;
 
-            // 各流是否也被样本污染，需要判断后再决定缩放：
-            // ffprobe 的 stream.bit_rate 有两种来源——按「样本字节/时间跨度」推算（与容器同样被低估），
-            // 或读码流内 VUI/HRD 标记（已是真实值）。把待缩放的流码率求和，与容器原值比数量级：
-            // - 两者接近（同一数量级）→ 同样被污染，按比例缩放；
-            // - 流码率之和远大于容器原值 → 流码率是码流内的真实标记，保持不动。
-            // 容器原值缺失时也保持不动，避免误伤。
+            // 只对**视频流**做缩放判断。
+            //
+            // 音频流的 bit_rate 往往来自码流内真实标记（TrueHD 约 4 Mbps），而容器与视频流
+            // 才是「样本字节 / 全片时长」的低估值。若把音频一起求和，video 17 kbps + audio 4 Mbps
+            // 会让 sum/container 远大于 5，缩放被误判为“真实值”而整段跳过 —— 视频就永远停在
+            // 17 kbps（真机 4K 原盘实测）。所以这里只统计视频流，且只缩放视频流。
             if (mediaInfo.MediaStreams == null || probedBitrate <= 0) return;
-            var probedStreamSum = 0L;
-            foreach (var stream in mediaInfo.MediaStreams)
-            {
-                if (stream.BitRate.HasValue && stream.BitRate.Value > 0)
-                    probedStreamSum += stream.BitRate.Value;
-            }
-            if (probedStreamSum <= 0) return;
+            var videoStreams = mediaInfo.MediaStreams
+                .Where(s => s.Type == MediaStreamType.Video && s.BitRate.HasValue && s.BitRate.Value > 0)
+                .ToList();
+            if (videoStreams.Count == 0) return;
 
-            var ratio = probedStreamSum / (double)probedBitrate;
-            if (ratio < 0.2 || ratio > 5.0) return;
+            var probedVideoSum = videoStreams.Sum(s => (long)s.BitRate.Value);
+            if (probedVideoSum <= 0) return;
 
-            var scale = trueBitrate / (double)probedStreamSum;
-            foreach (var stream in mediaInfo.MediaStreams)
+            // 视频流之和与容器原值同数量级 → 同样是样本污染，按比例缩放到真实总码率；
+            // 远大于容器原值 → 是码流内 VUI 真实值，保持不动。
+            var ratio = probedVideoSum / (double)probedBitrate;
+            if (ratio < 0.2 || ratio > 5.0)
             {
-                if (stream.BitRate.HasValue && stream.BitRate.Value > 0)
-                    stream.BitRate = (int)Math.Min(Math.Round(stream.BitRate.Value * scale), int.MaxValue);
+                Plugin.Instance?.Logger?.Info(
+                    $"IsoExtraction - video bitrates look real ({probedVideoSum} bps vs container " +
+                    $"{probedBitrate} bps); scaling skipped");
+                return;
             }
+
+            var scale = trueBitrate / (double)probedVideoSum;
+            foreach (var stream in videoStreams)
+                stream.BitRate = (int)Math.Min(Math.Round(stream.BitRate.Value * scale), int.MaxValue);
 
             Plugin.Instance?.Logger?.Info(
                 $"IsoExtraction - corrected bitrate from title bytes: {trueBitrate / 1000000.0:F1} Mbps " +
-                $"({hint.SourceBytes} bytes / {hint.DurationSeconds:F1}s)");
+                $"({hint.SourceBytes} bytes / {hint.DurationSeconds:F1}s, {videoStreams.Count} video stream(s))");
         }
 
         /// <summary>

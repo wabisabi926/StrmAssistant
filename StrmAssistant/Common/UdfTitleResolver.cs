@@ -187,25 +187,45 @@ namespace StrmAssistant.Common
                 string.IsNullOrEmpty(title.RelativePath) ? new List<string>() : new List<string> { title.RelativePath };
             if (paths.Count == 0 || paths.Any(path => !disc.FileExists(path)))
                 throw new InvalidDataException("The selected playlist contains missing media streams");
-            if (paths.Count > 256) throw new InvalidDataException("Playlist exceeds metadata sample limit (256 clips)");
+
+            // 正片真实字节数用于事后重算码率。只读元数据，不打开每个文件，
+            // 避免几百段的无缝分支盘在采样阶段产生额外 I/O。
+            long totalBytes = 0;
+            foreach (var path in paths)
+            {
+                try
+                {
+                    totalBytes += disc.GetFileInfo(path).Length;
+                }
+                catch
+                {
+                    // 单个文件长度拿不到就放弃整段修正，保持 ffprobe 原值
+                    totalBytes = 0;
+                    break;
+                }
+            }
+
+            // 采样只取前 128 + 后 128 段：PMT/码流参数在每个 m2ts 开头都有，
+            // 取首尾足以让 ffprobe 识别全部视频/音频流，同时避免 >256 段时整段放弃
+            // （真机 4K 无缝分支盘曾因此回退到裸 ISO 探测，只剩一路视频、码率也不对）。
+            var samplePaths = paths.Count <= 256
+                ? paths
+                : paths.Take(128).Concat(paths.Skip(paths.Count - 128)).ToList();
 
             // Reserve a tail segment as well, so MPEG streams without a playlist duration can
             // expose their final timestamps. Bound aggregate I/O regardless of playlist length.
             var alignment = title.IsBluray ? 192 : 2048;
-            var perPart = Math.Min(8L * 1024 * 1024, maxBytes / (paths.Count + 1));
+            var perPart = Math.Min(8L * 1024 * 1024, maxBytes / (samplePaths.Count + 1));
             perPart = perPart / alignment * alignment;
             if (perPart < 64 * 1024) throw new InvalidDataException("Playlist too large for the metadata budget");
             using var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
-            long totalBytes = 0;
-            for (var i = 0; i < paths.Count; i++)
+            for (var i = 0; i < samplePaths.Count; i++)
             {
-                using var input = disc.OpenFile(paths[i], FileMode.Open, FileAccess.Read);
+                using var input = disc.OpenFile(samplePaths[i], FileMode.Open, FileAccess.Read);
                 if (input.Length == 0) throw new InvalidDataException("Empty media stream in ISO");
-                // 正片真实长度（不是截断样本的长度），用于事后重算码率
-                totalBytes += input.Length;
                 var head = Math.Min(input.Length, perPart);
                 CopyProbeBytes(input, output, head);
-                if (i == paths.Count - 1 && input.Length > head)
+                if (i == samplePaths.Count - 1 && input.Length > head)
                 {
                     var tailStart = Math.Max(head, input.Length - perPart);
                     tailStart = (tailStart + alignment - 1) / alignment * alignment;

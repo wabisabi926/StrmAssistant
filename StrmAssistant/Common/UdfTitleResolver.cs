@@ -29,6 +29,12 @@ namespace StrmAssistant.Common
         private const string DvdMainTitle = @"VIDEO_TS\VTS_01_1.VOB";
         private const double TicksPerSecond = 45000.0;
 
+        /// <summary>
+        /// 元数据采样允许的最大片段数（防御性上限，远高于蓝光规范的单 playlist 999 段）。
+        /// 采样本身只用首尾各 128 段，与片段总数无关。
+        /// </summary>
+        private const int MaxMetadataProbeClips = 4096;
+
         internal sealed class TitleInfo
         {
             /// <summary>蓝光碟片（true）还是 DVD（false）。</summary>
@@ -183,6 +189,9 @@ namespace StrmAssistant.Common
             using var disc = OpenDisc(image);
             var title = Resolve(new UdfDiscFs(disc), true);
             if (title == null) throw new InvalidDataException("No supported Blu-ray/DVD title found in ISO");
+            // 选片被拒时带上真实原因，别再统一报「缺媒体文件」误导排查
+            if (!string.IsNullOrEmpty(title.UnsupportedReason))
+                throw new InvalidDataException(title.UnsupportedReason);
             var paths = title.ProbePaths.Count > 0 ? title.ProbePaths :
                 string.IsNullOrEmpty(title.RelativePath) ? new List<string>() : new List<string> { title.RelativePath };
             if (paths.Count == 0 || paths.Any(path => !disc.FileExists(path)))
@@ -264,9 +273,12 @@ namespace StrmAssistant.Common
             }
         }
 
+        /// <summary>测试用入口：直接对内存盘结构跑选片，不依赖真实 UDF 镜像。</summary>
+        internal static TitleInfo ResolveFromFileSystem(IDiscFs fs, bool metadataProbe = false) =>
+            Resolve(fs, metadataProbe);
+
         private static TitleInfo Resolve(IDiscFs fs, bool metadataProbe = false)
-        {
-            if (fs.DirectoryExists(BlurayPlaylistDir) && fs.DirectoryExists(BlurayStreamDir))
+        {            if (fs.DirectoryExists(BlurayPlaylistDir) && fs.DirectoryExists(BlurayStreamDir))
             {
                 var bluray = ResolveBluray(fs, metadataProbe);
                 if (bluray != null) return bluray;
@@ -305,8 +317,11 @@ namespace StrmAssistant.Common
                 var reason = GetPlaylistRejectionReason(entry);
                 var uniquePaths = entry.Clips.Select(c => BlurayStreamDir + "\\" + c.Name + ".m2ts")
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-                if (reason == null && metadataProbe && uniquePaths.Length > 256)
-                    reason = "more than 256 distinct stream files exceed the metadata sampling budget";
+                // 采样阶段只取首尾各 128 段（见 WriteProbeSample），代价与片段数无关，
+                // 因此这里不再按片段数拒绝播放列表；仅保留一个防御性上限，避免异常镜像
+                // 触发几十万次 UDF 目录查询。蓝光规范单个 playlist 最多 999 个 PlayItem。
+                if (reason == null && metadataProbe && uniquePaths.Length > MaxMetadataProbeClips)
+                    reason = $"more than {MaxMetadataProbeClips} distinct stream files exceed the metadata sampling limit";
                 if (reason == null && uniquePaths.Any(path => !fs.FileExists(path)))
                     reason = "playlist references missing stream files";
                 if (reason != null)
@@ -958,7 +973,7 @@ namespace StrmAssistant.Common
         }
 
         /// <summary>碟内文件系统的最小抽象：进程内 UDF 与已挂载卷各实现一份，路径统一为 <c>\</c> 分隔的相对路径。</summary>
-        private interface IDiscFs
+        internal interface IDiscFs
         {
             bool DirectoryExists(string relativeDir);
             bool FileExists(string relativePath);

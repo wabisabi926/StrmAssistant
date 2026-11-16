@@ -49,6 +49,14 @@ namespace StrmAssistant.Common
             /// <summary>蓝光为 playlist 总时长（秒）；无法计算时为 0。</summary>
             public double DurationSeconds;
 
+            /// <summary>
+            /// 选中正片（<see cref="ProbePaths"/> / <see cref="RelativePath"/>）的真实字节数之和。
+            /// 由 <see cref="WriteProbeSample"/> 在采样时累加各 m2ts 长度得到。
+            /// 供 IsoExtraction 用「真实字节 × 8 / 时长」重算码率：
+            /// ffprobe 探测的是截断样本，其 Bitrate 按「样本大小 / 全片时间跨度」计算会严重偏低。
+            /// </summary>
+            public long TotalBytes;
+
             /// <summary>MPLS STN_table 解析出的主音轨（语言/编码/声道）；可能为空。</summary>
             public List<MplsStreamInfo> AudioStreams = new List<MplsStreamInfo>();
 
@@ -188,10 +196,13 @@ namespace StrmAssistant.Common
             perPart = perPart / alignment * alignment;
             if (perPart < 64 * 1024) throw new InvalidDataException("Playlist too large for the metadata budget");
             using var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
+            long totalBytes = 0;
             for (var i = 0; i < paths.Count; i++)
             {
                 using var input = disc.OpenFile(paths[i], FileMode.Open, FileAccess.Read);
                 if (input.Length == 0) throw new InvalidDataException("Empty media stream in ISO");
+                // 正片真实长度（不是截断样本的长度），用于事后重算码率
+                totalBytes += input.Length;
                 var head = Math.Min(input.Length, perPart);
                 CopyProbeBytes(input, output, head);
                 if (i == paths.Count - 1 && input.Length > head)
@@ -203,6 +214,7 @@ namespace StrmAssistant.Common
                 }
             }
             output.Flush();
+            title.TotalBytes = totalBytes;
             return title;
         }
 

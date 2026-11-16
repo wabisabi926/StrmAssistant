@@ -273,7 +273,9 @@ namespace StrmAssistant.Mod
             {
                 // 顺序有意义：先补时长，章节校验才有依据（远程 ISO 的 ffprobe 给不出时长）
                 ApplyRuntime(mediaInfo, hint);
+                ApplyBitrate(mediaInfo, hint);
                 ApplyChapters(mediaInfo, hint);
+                ClearMisleadingCodecTags(mediaInfo);
                 ApplyStreamDetails(mediaInfo, hint);
             }
             catch (Exception e)
@@ -284,6 +286,117 @@ namespace StrmAssistant.Mod
             }
 
             return mediaInfo;
+        }
+
+        /// <summary>
+        /// 用正片真实字节数与 playlist 时长重算码率。
+        ///
+        /// ffprobe 探测的是「头 8MB + 尾 8MB」的截断样本，但样本保留了整片的原始时间戳。
+        /// 对 MPEG-TS，ffprobe 的 bit_rate ≈ 文件字节 × 8 / 时间跨度，
+        /// 于是把 16MB 样本套在 2.5 小时的跨度上，算出约 12 kbps 的荒谬值（实测 3 小时 4K 原盘）。
+        /// ApplyRuntime 已把 Size / RunTimeTicks 覆盖成真实值，但 Bitrate 仍是这个脏数据，
+        /// 会被 MediaInfoApi 原样写入 TotalBitrate，导致详情页/客户端显示错误码率。
+        ///
+        /// 这里用 UDF 选片时记录的正片真实字节数（非 ISO 总大小、非样本大小）重算：
+        /// 容器码率 = 正片字节 × 8 / playlist 时长。
+        /// 各媒体流按同一比例缩放（ffprobe 对各流的低估比例与容器一致），保持流间相对关系。
+        /// 缺任一输入则整段跳过，保留 ffprobe 原值，绝不写入 0 或负数码率。
+        /// </summary>
+        internal static void ApplyBitrate(ProbeMediaInfo mediaInfo, IsoMounter.TitleHint hint)
+        {
+            if (!hint.IsProbeSample || hint.SourceBytes <= 0) return;
+            if (hint.DurationSeconds <= 0 || double.IsNaN(hint.DurationSeconds) ||
+                double.IsInfinity(hint.DurationSeconds)) return;
+
+            var rawBitrate = hint.SourceBytes * 8.0 / hint.DurationSeconds;
+            // MediaInfo.Bitrate / MediaStream.BitRate 都是 int?（bit/s），封顶到 int.MaxValue 防止溢出
+            if (rawBitrate <= 0) return;
+            var trueBitrate = (int)Math.Min(Math.Round(rawBitrate), int.MaxValue);
+            if (trueBitrate <= 0) return;
+
+            var probedBitrate = mediaInfo.Bitrate.GetValueOrDefault();
+            mediaInfo.Bitrate = trueBitrate;
+
+            // 各流是否也被样本污染，需要判断后再决定缩放：
+            // ffprobe 的 stream.bit_rate 有两种来源——按「样本字节/时间跨度」推算（与容器同样被低估），
+            // 或读码流内 VUI/HRD 标记（已是真实值）。把待缩放的流码率求和，与容器原值比数量级：
+            // - 两者接近（同一数量级）→ 同样被污染，按比例缩放；
+            // - 流码率之和远大于容器原值 → 流码率是码流内的真实标记，保持不动。
+            // 容器原值缺失时也保持不动，避免误伤。
+            if (mediaInfo.MediaStreams == null || probedBitrate <= 0) return;
+            var probedStreamSum = 0L;
+            foreach (var stream in mediaInfo.MediaStreams)
+            {
+                if (stream.BitRate.HasValue && stream.BitRate.Value > 0)
+                    probedStreamSum += stream.BitRate.Value;
+            }
+            if (probedStreamSum <= 0) return;
+
+            var ratio = probedStreamSum / (double)probedBitrate;
+            if (ratio < 0.2 || ratio > 5.0) return;
+
+            var scale = trueBitrate / (double)probedStreamSum;
+            foreach (var stream in mediaInfo.MediaStreams)
+            {
+                if (stream.BitRate.HasValue && stream.BitRate.Value > 0)
+                    stream.BitRate = (int)Math.Min(Math.Round(stream.BitRate.Value * scale), int.MaxValue);
+            }
+
+            Plugin.Instance?.Logger?.Info(
+                $"IsoExtraction - corrected bitrate from title bytes: {trueBitrate / 1000000.0:F1} Mbps " +
+                $"({hint.SourceBytes} bytes / {hint.DurationSeconds:F1}s)");
+        }
+
+        /// <summary>
+        /// 清掉 MPEG-TS / 蓝光容器层的注册标识被 ffprobe 当成「编解码器标签」写出的误导值。
+        ///
+        /// 蓝光 TS 的 PMT 里，TrueHD 用 stream_type 0x81（名义上的 AC-3）承载，
+        /// HEVC/H.264 则注册为 HDMV。ffprobe 会同时给出真实的 codec（truehd / hevc）
+        /// 和容器标签（"AC-3" / "HDMV"），客户端于是显示成「TRUEHD (AC-3)」这类自相矛盾的文案，
+        /// 让人误以为音轨是 AC-3 或存在多条编码。
+        ///
+        /// 只清**明确不一致**的容器标签：
+        /// - <c>AC-3</c> 只在 codec 确实是 ac3 时保留，其余（truehd / eac3 …）清空；
+        /// - <c>HDMV</c> 是容器名而非编解码器，一律清空；
+        /// 正常的四字符码（hev1 / hvc1 / avc1 / mp4a / ec-3 / dvhe …）一律不动。
+        /// </summary>
+        internal static int ClearMisleadingCodecTags(ProbeMediaInfo mediaInfo)
+        {
+            var streams = mediaInfo?.MediaStreams;
+            if (streams == null || streams.Count == 0) return 0;
+
+            var cleared = 0;
+            foreach (var stream in streams)
+            {
+                var tag = stream.CodecTag;
+                var codec = stream.Codec;
+                if (string.IsNullOrWhiteSpace(tag) || string.IsNullOrWhiteSpace(codec)) continue;
+
+                bool misleading;
+                switch (tag.Trim().ToLowerInvariant())
+                {
+                    case "ac-3":
+                        // AC-3 在 MP4 里还有 "ac-3"/"ec-3" 两种写法，只有 ac3 本体该保留
+                        misleading = !codec.Trim().Equals("ac3", StringComparison.OrdinalIgnoreCase);
+                        break;
+                    case "hdmv":
+                        // 蓝光容器注册名，不是编解码器
+                        misleading = true;
+                        break;
+                    default:
+                        misleading = false;
+                        break;
+                }
+
+                if (!misleading) continue;
+                stream.CodecTag = null;
+                cleared++;
+            }
+
+            if (cleared > 0)
+                Plugin.Instance?.Logger?.Info(
+                    $"IsoExtraction - cleared {cleared} misleading codec tag(s) from probe result");
+            return cleared;
         }
 
         /// <summary>探测结果没有时长时，用 playlist 各 PlayItem 时长之和补上。</summary>

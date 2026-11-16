@@ -104,6 +104,12 @@ namespace StrmAssistant.Common
             public int? OriginalProtocol;
             public long SourceSize;
 
+            /// <summary>
+            /// 选中正片 m2ts 的真实字节数（非 ISO 总大小、非截断样本大小）。
+            /// 用于 IsoExtraction 按「真实字节 × 8 / playlist 时长」重算码率。
+            /// </summary>
+            public long SourceBytes;
+
             public bool IsEmpty => !IsProbeSample && Chapters.Count == 0 && AudioStreams.Count == 0 &&
                                    SubtitleStreams.Count == 0 && DurationSeconds <= 0;
         }
@@ -406,7 +412,8 @@ namespace StrmAssistant.Common
                         SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                         DurationSeconds = title.DurationSeconds,
                         IsProbeSample = true,
-                        SourceSize = image.Length
+                        SourceSize = image.Length,
+                        SourceBytes = title.TotalBytes
                     };
                     // Multi-clip metadata samples cover each play item. This does not enable
                     // returning one clip as a complete mounted playback title.
@@ -639,7 +646,8 @@ namespace StrmAssistant.Common
                             SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                             DurationSeconds = title.DurationSeconds,
                             IsProbeSample = true,
-                            SourceSize = length
+                            SourceSize = length,
+                            SourceBytes = title.TotalBytes
                         };
 
                         LocalSamples[isoPath] = new LocalSampleEntry

@@ -17,9 +17,9 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 | Item | Value |
 |---|---|
-| Plugin Version | **4.0.0.9** |
+| Plugin Version | **4.0.1.0** |
 | Minimum Emby Version | 4.9.1.0 |
-| Advertised Version | 4.10.2.0+ |
+| Advertised Version | 4.10.2.0 |
 | Tested On | 4.10.2.0 |
 | Target Framework | .NET 6.0 |
 | Architecture | x64 / ARM64 (all features) |
@@ -28,7 +28,12 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 > **Before upgrading to 4.0**: legacy config migrations are no longer bundled. Direct upgrade is supported only from **3.0.0.78 or later**. If you are on an older version, install 3.0.0.78 and start Emby once to complete the migration, then upgrade to 4.0.
 
-## Latest Optimizations (v3.0.0.66 ~ v4.0.0.9)
+## Latest Optimizations (v3.0.0.66 ~ v4.0.1.0)
+
+✅ **Precise ISO media info (4.0.1.0)**
+- Fixed extremely low ISO probing bitrate: recalculates from actual title bytes instead of reporting a few kbps
+- Removed misleading ISO codec tags: dropped redundant HDMV / AC-3 labels, so TrueHD/EAC3 audio and video codecs display correctly
+- Aligned the displayed text with Emby 4.10.2.0 and removed extra symbols / spaces
 
 ✅ **TheIntroDB v4 migration and dual-source strategy (4.0.0.9)**
 - Migrated to TheIntroDB API v4 (v2/v3 are frozen and will be removed): reads go to `/v4`, movies no longer send `type`, throttling follows v4 quotas (400ms anonymous / 200ms with a key), and 429 enters a cooldown

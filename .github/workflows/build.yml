@@ -71,13 +71,24 @@ jobs:
         run: |
           $version = "${{ steps.version.outputs.value }}"
           $content = Get-Content "CHANGELOG.md" -Raw -Encoding UTF8
-          $pattern = "(?ms)^## \[$([regex]::Escape($version))\].*?(?=^## \[|\z)"
+          $escaped = [regex]::Escape($version)
+          # Accept both the legacy "## [x.y.z] - date" heading and the new
+          # "## StrmAssistantPlus vx.y.z（date）" heading.
+          $pattern = "(?ms)^## (?:\[$escaped\]|StrmAssistantPlus v$escaped（).*?(?=^## |\z)"
           $match = [regex]::Match($content, $pattern)
           if (-not $match.Success) { throw "CHANGELOG section for $version not found" }
+          $section = $match.Value.Trim()
+          $title = "# StrmAssistantPlus v$version"
+          # New-style heading carries the release date; use it as the title
+          # instead of leaving a duplicate heading inside the release notes.
+          if ($section -match '^## StrmAssistantPlus v[^\r\n]+（[^\r\n]+）') {
+            $title = '#' + $Matches[0].Substring(2)
+            $section = $section.Substring($Matches[0].Length).Trim()
+          }
           $lines = @(
-            "# StrmAssistantPlus v$version",
+            $title,
             "",
-            $match.Value.Trim(),
+            $section,
             "",
             "## 安装",
             '下载下方 DLL，重命名为 `StrmAssistantPlus.dll`，覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。',

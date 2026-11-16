@@ -45,12 +45,16 @@ dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj -c Release
 - 推送 `v*` 标签会**自动触发** CI 构建并发布 Release；CI 会校验「标签名 == `v` + 工程版本号」，
   不一致直接失败。也可在 Actions 页面手动 `Run workflow`。
 - `CHANGELOG.md` 的版本段要与代码版本同步；README 的「插件版本」表格同理。
+- **CHANGELOG 写法**：从 4.0.1.0 起用「短标题：用户视角一句话」的简洁风格
+  （`## StrmAssistantPlus vX.Y.Z（日期）` + 🐛 修复 / ✨ 新增 / ⚡ 优化分组），
+  只写用户能看到的结果，不写实现细节、类名或测试数字；技术证据留在提交信息与本地 `docs/`。
+  模板与反例见 [`docs/dev/changelog-style.md`](docs/dev/changelog-style.md)（本地开发文档）。
 
 ## 提交前自查
 
 - [ ] `dotnet build` **0 警告 0 错误**
 - [ ] 构建输出 `[OK] resx keys consistent`
-- [ ] `dotnet test` 全绿（当前基线：485 通过 / 0 跳过）
+- [ ] `dotnet test` 全绿（当前基线：501 通过 / 0 跳过）
 - [ ] 涉及 Emby 内部行为的改动，在真机上验证过，并把日志原文贴进提交信息
 - [ ] 新增选项同步了三语 resx（Designer 会自动补）
 

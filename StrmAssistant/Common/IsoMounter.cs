@@ -140,11 +140,20 @@ namespace StrmAssistant.Common
         /// </summary>
         private static readonly TimeSpan NegativeSupportCacheDuration = TimeSpan.FromMinutes(5);
 
+        /// <summary>
+        /// 测试开关：设为 <c>1</c> 时禁用 OS 原生挂载，强制走 Linux/Docker 的
+        /// 「进程内 UDF 选片 + 正片采样」路径。Windows 上验证采样缺陷时必须打开它 ——
+        /// 挂载成功会掩盖采样分支的问题（真机 300 段事故就是这样漏掉的）。
+        /// </summary>
+        internal const string DisableNativeMountEnvVar = "STRMASSISTANT_NO_NATIVE_MOUNT";
+
         /// <summary>当前平台是否支持「OS 原生挂载」（Windows + 存在 Mount-DiskImage）。</summary>
         public static bool IsSupported
         {
             get
             {
+                if (Environment.GetEnvironmentVariable(DisableNativeMountEnvVar) == "1") return false;
+
                 // 成功结果永久有效
                 if (_supported == true) return true;
 

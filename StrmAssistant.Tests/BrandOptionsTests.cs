@@ -10,8 +10,10 @@ namespace StrmAssistant.Tests
         {
             var text = new BrandOptions().PluginVersion.Text;
 
-            Assert.Contains("Support Emby Server_v4.10.2.0 +", text);
+            Assert.Contains("Support Emby Server_v4.10.2.0", text);
             Assert.DoesNotContain("Support 4.", text);
+            // 品牌行结尾不再带 " +"（空格加号）
+            Assert.DoesNotContain("+", text);
         }
     }
 }

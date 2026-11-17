@@ -338,21 +338,41 @@ namespace StrmAssistant.Mod
         /// 容器码率 = 正片字节 × 8 / playlist 时长。
         /// 各媒体流按同一比例缩放（ffprobe 对各流的低估比例与容器一致），保持流间相对关系。
         /// 缺任一输入则整段跳过，保留 ffprobe 原值，绝不写入 0 或负数码率。
+        ///
+        /// 每路视频的**分配**另有一层：ffprobe 对 mpegts 的视频流给不出 bit_rate（全部 N/A），
+        /// Emby 只能把容器码率平均分给各路视频 —— 带画中画的原盘会把 PiP 报成和主画面同码率。
+        /// 有可统计的输入路径时（<see cref="IsoMounter.TitleHint.SamplePath"/>），
+        /// 按 TS 的 PID 字节占比还原真实比例，见 <see cref="ApplyBitrateByPidBytes"/>。
         /// </summary>
         internal static void ApplyBitrate(ProbeMediaInfo mediaInfo, IsoMounter.TitleHint hint)
         {
-            if (!hint.IsProbeSample || hint.SourceBytes <= 0) return;
-            if (hint.DurationSeconds <= 0 || double.IsNaN(hint.DurationSeconds) ||
-                double.IsInfinity(hint.DurationSeconds)) return;
+            if (mediaInfo == null || hint == null) return;
 
-            var rawBitrate = hint.SourceBytes * 8.0 / hint.DurationSeconds;
-            // MediaInfo.Bitrate / MediaStream.BitRate 都是 int?（bit/s），封顶到 int.MaxValue 防止溢出
-            if (rawBitrate <= 0) return;
-            var trueBitrate = (int)Math.Min(Math.Round(rawBitrate), int.MaxValue);
-            if (trueBitrate <= 0) return;
+            var totalBitrate = mediaInfo.Bitrate.GetValueOrDefault();
+            // ffprobe 的容器原值（样本截断时是被污染的低估值）。判断「各流码率是不是真实值」
+            // 必须拿它做基准 —— 换成重算后的真实值会把「流被低估」误判成「流远小于容器」。
+            var probedBitrate = totalBitrate;
+            var correctedBitrate = 0;
 
-            var probedBitrate = mediaInfo.Bitrate.GetValueOrDefault();
-            mediaInfo.Bitrate = trueBitrate;
+            // 第一步：样本截断时用正片真实字节重算容器码率（挂载路径的 ffprobe 值本来就对）
+            if (hint.IsProbeSample && hint.SourceBytes > 0 &&
+                hint.DurationSeconds > 0 && !double.IsNaN(hint.DurationSeconds) &&
+                !double.IsInfinity(hint.DurationSeconds))
+            {
+                var rawBitrate = hint.SourceBytes * 8.0 / hint.DurationSeconds;
+                // MediaInfo.Bitrate / MediaStream.BitRate 都是 int?（bit/s），封顶到 int.MaxValue 防止溢出
+                if (rawBitrate > 0)
+                {
+                    correctedBitrate = (int)Math.Min(Math.Round(rawBitrate), int.MaxValue);
+                    if (correctedBitrate > 0)
+                    {
+                        mediaInfo.Bitrate = correctedBitrate;
+                        totalBitrate = correctedBitrate;
+                    }
+                }
+            }
+
+            if (totalBitrate <= 0) return;
 
             // 只对**视频流**做缩放判断。
             //
@@ -369,7 +389,7 @@ namespace StrmAssistant.Mod
             var probedVideoSum = videoStreams.Sum(s => (long)s.BitRate.Value);
             if (probedVideoSum <= 0) return;
 
-            // 视频流之和与容器原值同数量级 → 同样是样本污染，按比例缩放到真实总码率；
+            // 视频流之和与容器**原值**同数量级 → 同样是样本污染（或 Emby 的等分），需要重新分配；
             // 远大于容器原值 → 是码流内 VUI 真实值，保持不动。
             var ratio = probedVideoSum / (double)probedBitrate;
             if (ratio < 0.2 || ratio > 5.0)
@@ -380,13 +400,70 @@ namespace StrmAssistant.Mod
                 return;
             }
 
-            var scale = trueBitrate / (double)probedVideoSum;
+            // 第二步：优先按 PID 字节占比还原真实比例（多路视频才有意义）
+            if (ApplyBitrateByPidBytes(hint, videoStreams, totalBitrate)) return;
+
+            // 第三步：没有可统计的输入时退回「按 ffprobe 的比例整体缩放」。
+            // 注意：ffprobe 对 mpegts 的每路视频都给 N/A，Emby 填的是等分值，
+            // 所以这条路径对多路视频只能给出等分结果 —— 有样本时不会被走到。
+            if (correctedBitrate <= 0) return;
+
+            var scale = correctedBitrate / (double)probedVideoSum;
             foreach (var stream in videoStreams)
                 stream.BitRate = (int)Math.Min(Math.Round(stream.BitRate.Value * scale), int.MaxValue);
 
             Plugin.Instance?.Logger?.Info(
-                $"IsoExtraction - corrected bitrate from title bytes: {trueBitrate / 1000000.0:F1} Mbps " +
+                $"IsoExtraction - corrected bitrate from title bytes: {correctedBitrate / 1000000.0:F1} Mbps " +
                 $"({hint.SourceBytes} bytes / {hint.DurationSeconds:F1}s, {videoStreams.Count} video stream(s))");
+        }
+
+        /// <summary>
+        /// 按探测输入的 TS 字节占比，把容器码率分配给各路视频。
+        ///
+        /// 只在「PMT 声明的视频 PID 数 == 探测到的视频流数」时生效：
+        /// 数量对不上说明样本没覆盖全部视频流，硬套会把码率分给错的流，宁可不做。
+        /// 分配口径用**全部 PID 的字节**作分母，即视频只拿到属于视频的那部分，
+        /// 音频开销不再被算进视频码率。
+        /// </summary>
+        private static bool ApplyBitrateByPidBytes(IsoMounter.TitleHint hint,
+            List<MediaStream> videoStreams, int totalBitrate)
+        {
+            if (string.IsNullOrEmpty(hint.SamplePath)) return false;
+            // 单路视频时 Emby 本来就把整个容器码率给它，改了只会引入偏差，不碰
+            if (videoStreams.Count < 2) return false;
+            // 探测的若不是我们替换过的输入（裸 ISO 直扫），结果不可信，一律不动
+            if (!hint.InputReplaced) return false;
+
+            var usage = TsByteAccounting.TryCount(hint.SamplePath);
+            if (usage == null || usage.Count == 0) return false;
+
+            var videoUsage = usage.Where(u => TsByteAccounting.IsVideoStreamType(u.StreamType)).ToList();
+            if (videoUsage.Count != videoStreams.Count)
+            {
+                Plugin.Instance?.Logger?.Info(
+                    $"IsoExtraction - TS byte accounting found {videoUsage.Count} video PID(s) " +
+                    $"but probe returned {videoStreams.Count} video stream(s); per-stream split skipped");
+                return false;
+            }
+
+            var totalBytes = usage.Sum(u => u.Bytes);
+            var videoBytes = videoUsage.Sum(u => u.Bytes);
+            if (totalBytes <= 0 || videoBytes <= 0) return false;
+
+            for (var i = 0; i < videoStreams.Count; i++)
+            {
+                var share = videoUsage[i].Bytes / (double)totalBytes;
+                videoStreams[i].BitRate =
+                    (int)Math.Min(Math.Round(totalBitrate * share), int.MaxValue);
+            }
+
+            Plugin.Instance?.Logger?.Info(
+                $"IsoExtraction - per-stream bitrate from TS byte accounting: " +
+                $"{string.Join(" / ", videoStreams.Select(s => ((s.BitRate ?? 0) / 1000000.0).ToString("F2")))} Mbps " +
+                $"(video {videoBytes}/{totalBytes} bytes, PIDs " +
+                $"{string.Join(",", videoUsage.Select(u => "0x" + u.Pid.ToString("X4")))}; " +
+                $"container {totalBitrate / 1000000.0:F1} Mbps)");
+            return true;
         }
 
         /// <summary>

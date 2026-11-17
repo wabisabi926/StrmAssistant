@@ -150,6 +150,13 @@ namespace StrmAssistant.Common
             /// </summary>
             public bool InputReplaced;
 
+            /// <summary>
+            /// 实际交给 ffprobe 的本地路径（样本 .ts 或挂载出来的正片 .m2ts）。
+            /// 用于按 PID 统计字节占比，还原每路视频的真实码率比例（ffprobe 对 mpegts 给不出）。
+            /// 为空表示没有可统计的输入，按比例缩放的老路径照旧。
+            /// </summary>
+            public string SamplePath;
+
             public bool IsEmpty => !IsProbeSample && Chapters.Count == 0 && AudioStreams.Count == 0 &&
                                    SubtitleStreams.Count == 0 && DurationSeconds <= 0;
         }
@@ -463,6 +470,7 @@ namespace StrmAssistant.Common
                         DurationSeconds = title.DurationSeconds,
                         IsProbeSample = true,
                         InputReplaced = true,
+                        SamplePath = tempFile,
                         SourceSize = image.Length,
                         SourceBytes = title.TotalBytes,
                         SourceName = title.SourceName,
@@ -703,6 +711,7 @@ namespace StrmAssistant.Common
                             DurationSeconds = title.DurationSeconds,
                             IsProbeSample = true,
                             InputReplaced = true,
+                            SamplePath = tempFile,
                             SourceSize = length,
                             SourceBytes = title.TotalBytes,
                             SourceName = title.SourceName,
@@ -760,6 +769,10 @@ namespace StrmAssistant.Common
 
                 if (File.Exists(path))
                 {
+                    // 挂载出来的就是正片本体：记下路径，供 IsoExtraction 按 PID 字节还原每路视频码率
+                    if (TitleHints.TryGetValue(isoPath, out var mountedHint))
+                        mountedHint.SamplePath = path;
+
                     Plugin.Instance?.Logger?.Info(
                         $"IsoExtraction - selected {info.RelativePath} " +
                         $"(playlist {info.SourceName}, {info.DurationSeconds:F1}s) from {isoPath}");

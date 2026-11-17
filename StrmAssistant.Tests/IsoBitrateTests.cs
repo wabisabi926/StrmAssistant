@@ -147,5 +147,58 @@ namespace StrmAssistant.Tests
 
             Assert.Equal(3_840_000, mediaInfo.Bitrate);
         }
+
+        /// <summary>
+        /// 有可统计的探测输入时，每路视频码率必须按 PID 字节占比分配，而不是 Emby 的等分。
+        ///
+        /// 这就是真机上的现场：容器 1,572,864 bps、两路视频各 786,432 bps（正好一半），
+        /// 而样本里两个视频 PID 的字节是 214080 : 78912（≈73% : 27%）。
+        /// </summary>
+        [Fact]
+        public void SplitsPerStreamBitrate_ByPidBytes()
+        {
+            var sample = System.IO.Path.Combine(System.AppContext.BaseDirectory,
+                "fixtures/two-video-streams.m2ts");
+            if (!System.IO.File.Exists(sample)) return;   // fixture 缺失时不断言
+
+            var mediaInfo = Probed(1_572_864, 786_432, 786_432);
+            var hint = Hint(4_800_000, 10);               // 真实总码率 3.84 Mbps
+            hint.SamplePath = sample;
+            hint.InputReplaced = true;
+
+            IsoExtraction.ApplyBitrate(mediaInfo, hint);
+
+            Assert.Equal(3_840_000, mediaInfo.Bitrate);
+            var main = mediaInfo.MediaStreams[0].BitRate.Value;
+            var pip = mediaInfo.MediaStreams[1].BitRate.Value;
+            Assert.True(main > pip * 2,
+                $"主画面码率应明显高于画中画，实际 {main} vs {pip}（等分时两者相等）");
+            // 视频只拿属于视频的那部分：两者之和小于容器码率（音频也占字节）
+            Assert.True(main + pip < 3_840_000);
+        }
+
+        /// <summary>
+        /// PMT 声明的视频 PID 数与探测到的视频流数不一致时，宁可不动：
+        /// 说明样本没覆盖全部视频流，硬套会把码率分给错的流。
+        /// </summary>
+        [Fact]
+        public void FallsBack_WhenPidCountMismatchesProbe()
+        {
+            var sample = System.IO.Path.Combine(System.AppContext.BaseDirectory,
+                "fixtures/two-video-streams.m2ts");
+            if (!System.IO.File.Exists(sample)) return;
+
+            // 探测到 3 路视频，但样本 PMT 只有 2 个视频 PID
+            var mediaInfo = Probed(3_000, 1_000, 1_000, 1_000);
+            var hint = Hint(4_800_000, 10);
+            hint.SamplePath = sample;
+            hint.InputReplaced = true;
+
+            IsoExtraction.ApplyBitrate(mediaInfo, hint);
+
+            // 退回按比例整体缩放：3 路等分真实总码率
+            Assert.Equal(1_280_000, mediaInfo.MediaStreams[0].BitRate);
+            Assert.Equal(1_280_000, mediaInfo.MediaStreams[2].BitRate);
+        }
     }
 }

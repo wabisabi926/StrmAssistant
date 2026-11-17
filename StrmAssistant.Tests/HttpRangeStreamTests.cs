@@ -75,6 +75,31 @@ namespace StrmAssistant.Tests
         }
 
         [Fact]
+        public void Reads_LargerThanBlockCache_EvictsCorrectly()
+        {
+            // 20MB > 16MB 缓存上限：顺序读完整文件，验证 LRU 淘汰后数据仍正确
+            var content = BuildContent(20 * 1024 * 1024);
+            using var server = new RangeHttpServer(content);
+
+            Assert.True(HttpRangeStream.TryOpen(server.Url, out var stream, out var error), error);
+
+            using (stream)
+            {
+                var buffer = new byte[1 << 20];
+                var offset = 0;
+                int n;
+
+                while ((n = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    Assert.Equal(content.AsSpan(offset, n).ToArray(), buffer.AsSpan(0, n).ToArray());
+                    offset += n;
+                }
+
+                Assert.Equal(content.Length, offset);
+            }
+        }
+
+        [Fact]
         public void SeekThenRead_HandlesNonAlignedOffset()
         {
             var content = BuildContent(2 * 1024 * 1024 + 5);

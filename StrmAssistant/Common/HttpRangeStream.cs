@@ -24,8 +24,11 @@ namespace StrmAssistant.Common
         /// <summary>块大小。UDF 元数据区通常几百 KB，1MB 块足够覆盖一次解析的读放大。</summary>
         private const int BlockSize = 1 << 20;
 
-        /// <summary>块缓存上限（64 块 = 64MB）。超出按 LRU 淘汰。</summary>
-        private const int MaxCachedBlocks = 64;
+        /// <summary>
+        /// 块缓存上限（16 块 = 16MB）。元数据解析只需要 UDF 元数据区，1MB 块足够；
+        /// 上限压低后，即使用户把提取并发调高，内存也不会被放大。
+        /// </summary>
+        internal const int MaxCachedBlocks = 16;
 
         private const int MaxAttempts = 3;
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(30);

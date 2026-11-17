@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace StrmAssistant.Common
 {
@@ -197,7 +198,26 @@ namespace StrmAssistant.Common
             }
         }
 
+        /// <summary>
+        /// 同一时刻最多两份采样：远程 ISO 每份在 HttpRangeStream 里最多占 16MB 块缓存，
+        /// 本地每份只占 64KB 复制缓冲。用独立闸门限制，避免用户把提取并发调到 10 时内存被放大。
+        /// </summary>
+        private static readonly SemaphoreSlim ProbeGate = new SemaphoreSlim(2, 2);
+
         internal static TitleInfo WriteProbeSample(Stream image, string destination, long maxBytes)
+        {
+            ProbeGate.Wait();
+            try
+            {
+                return WriteProbeSampleCore(image, destination, maxBytes);
+            }
+            finally
+            {
+                ProbeGate.Release();
+            }
+        }
+
+        private static TitleInfo WriteProbeSampleCore(Stream image, string destination, long maxBytes)
         {
             using var disc = OpenDisc(image);
             var title = Resolve(new UdfDiscFs(disc), true);

@@ -66,3 +66,49 @@ jobs:
           name: test-results-${{ github.sha }}
           path: TestResults/*.trx
           retention-days: 7
+
+  # Linux 运行环境门禁：ISO 链路在 Docker/NAS 上跑的是这块。
+  # Windows 只能验证逻辑，覆盖不了 Unix 路径、临时目录、文件权限与大小写。
+  test-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup .NET 6
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.x'
+
+      - name: Setup .NET 8 for tests
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore StrmAssistant/StrmAssistant.csproj
+
+      - name: Build the plugin
+        run: dotnet build StrmAssistant/StrmAssistant.csproj --no-restore --configuration Release -p:UseSharedCompilation=false -p:StrmAssistantPluginOutputDir=
+
+      - name: Run unit tests
+        run: dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj --configuration Release --logger "trx;LogFileName=test-results-linux.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux-${{ github.sha }}
+          path: TestResults/*.trx
+          retention-days: 7

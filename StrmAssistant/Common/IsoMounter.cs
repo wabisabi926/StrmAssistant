@@ -48,7 +48,7 @@ namespace StrmAssistant.Common
         private const long MinAcceptableBytes = 1L * 1024 * 1024;
 
         private static readonly TimeSpan IdleTimeout = TimeSpan.FromMinutes(10);
-        private static readonly TimeSpan RemoteCacheTtl = TimeSpan.FromMinutes(30);
+        private static readonly TimeSpan RemoteCacheTtl = TimeSpan.FromMinutes(10);
         private static readonly object _lock = new object();
 
         private sealed class MountEntry
@@ -73,6 +73,28 @@ namespace StrmAssistant.Common
         }
 
         private const long LocalProbeSampleMaxBytes = 64L * 1024 * 1024;
+
+        /// <summary>采样临时文件上限（按最后使用时间淘汰），防止扫库把磁盘/内存占满。</summary>
+        private const int MaxCachedSampleFiles = 8;
+
+        /// <summary>
+        /// 采样临时目录：优先 Emby 的临时目录（Docker 里通常不是 tmpfs，不会把 64MB 样本算进内存），
+        /// 可用 STRMASSISTANT_ISO_SAMPLE_DIR 覆盖；都没有时退回系统临时目录。
+        /// </summary>
+        internal static string SampleDirectory
+        {
+            get
+            {
+                var custom = Environment.GetEnvironmentVariable("STRMASSISTANT_ISO_SAMPLE_DIR");
+                if (!string.IsNullOrWhiteSpace(custom)) return custom;
+
+                var embyTemp = Plugin.Instance?.ApplicationPaths?.TempDirectory;
+                if (!string.IsNullOrWhiteSpace(embyTemp))
+                    return Path.Combine(embyTemp, "strmassistant_iso");
+
+                return Path.Combine(Path.GetTempPath(), "strmassistant_iso");
+            }
+        }
 
         private static readonly ConcurrentDictionary<string, RemoteEntry> RemoteIsos =
             new ConcurrentDictionary<string, RemoteEntry>(StringComparer.Ordinal);
@@ -425,7 +447,7 @@ namespace StrmAssistant.Common
                 }
                 using (image)
                 {
-                    var tempDir = Path.Combine(Path.GetTempPath(), "strmassistant_iso");
+                    var tempDir = SampleDirectory;
                     Directory.CreateDirectory(tempDir);
                     tempFile = Path.Combine(tempDir, "title_" + Guid.NewGuid().ToString("N") + ".ts");
                     var title = UdfTitleResolver.WriteProbeSample(image, tempFile, 64L * 1024 * 1024);
@@ -448,6 +470,7 @@ namespace StrmAssistant.Common
                     // returning one clip as a complete mounted playback title.
                     RemoteHints[isoUrl] = new RemoteHintEntry { Hint = hint, LastUsedUtc = DateTime.UtcNow };
                     RemoteIsos[isoUrl] = new RemoteEntry { TempFile = tempFile, LastUsedUtc = DateTime.UtcNow };
+                    TrimSampleCaches();
                     Plugin.Instance?.Logger?.Info($"IsoExtraction - remote title sample saved: {new FileInfo(tempFile).Length} bytes, playlist={title.SourceName}, duration={title.DurationSeconds:F1}s");
                     return tempFile;
                 }
@@ -655,7 +678,7 @@ namespace StrmAssistant.Common
                     // ISO 被替换或样本丢失：旧临时文件先清掉
                     if (LocalSamples.TryRemove(isoPath, out var stale)) TryDelete(stale.TempFile);
 
-                    var tempDir = Path.Combine(Path.GetTempPath(), "strmassistant_iso");
+                    var tempDir = SampleDirectory;
                     Directory.CreateDirectory(tempDir);
                     var tempFile = Path.Combine(tempDir, "local_" + Guid.NewGuid().ToString("N") + ".ts");
 
@@ -691,6 +714,8 @@ namespace StrmAssistant.Common
                             SourceLength = length,
                             SourceLastWriteTicks = lastWriteTicks
                         };
+
+                        TrimSampleCaches();
 
                         Plugin.Instance?.Logger?.Info(
                             $"IsoExtraction - local title sample saved: {new FileInfo(tempFile).Length} bytes, " +
@@ -1102,6 +1127,45 @@ namespace StrmAssistant.Common
             lock (_lock)
             {
                 _sweeper ??= new Timer(_ => SweepIdle(), null, IdleTimeout, TimeSpan.FromMinutes(1));
+            }
+        }
+
+        /// <summary>采样缓存只保留最近 N 份，超出立即删文件（TTL 之外的第二道保险）。</summary>
+        private static void TrimSampleCaches()
+        {
+            TrimLocalSamples();
+            TrimRemoteSamples();
+        }
+
+        private static void TrimLocalSamples()
+        {
+            if (LocalSamples.Count <= MaxCachedSampleFiles) return;
+
+            var stale = LocalSamples.ToArray()
+                .OrderBy(kv => kv.Value.LastUsedUtc)
+                .Take(LocalSamples.Count - MaxCachedSampleFiles)
+                .ToArray();
+
+            foreach (var kv in stale)
+            {
+                if (LocalSamples.TryRemove(kv.Key, out var removed)) TryDelete(removed.TempFile);
+            }
+        }
+
+        private static void TrimRemoteSamples()
+        {
+            if (RemoteIsos.Count <= MaxCachedSampleFiles) return;
+
+            var stale = RemoteIsos.ToArray()
+                .OrderBy(kv => kv.Value.LastUsedUtc)
+                .Take(RemoteIsos.Count - MaxCachedSampleFiles)
+                .ToArray();
+
+            foreach (var kv in stale)
+            {
+                if (!RemoteIsos.TryRemove(kv.Key, out var removed)) continue;
+                TryDelete(removed.TempFile);
+                RemoteHints.TryRemove(kv.Key, out _);
             }
         }
 

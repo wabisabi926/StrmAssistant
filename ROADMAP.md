@@ -46,17 +46,7 @@ CHANGELOG / README 已按最终行为更新；**不要移动或重打该 tag**�
 
 **验收标准**：找一部 DVD 或绝对序的剧（可临时改 `DisplayOrder` 并刷新元数据），对比加/不加 `mapping` 时同一集取到的片头时间是否对应同一集；日志确认无 400。
 
-### 2. 404 响应体 `code` 分类（4.0.0.9 的 P2 遗留）
-
-**背景**：v4 的 404 带 `code`：`no_submissions`（该集没人提交）、`episode_not_found`（季集不存在）、`media_not_found`（媒体 id 解析不到）。当前统一按“无数据”处理，日志里无法区分是覆盖不足还是元数据 id 有问题。
-
-**实现要点**：读取错误响应体解析 `code`，分别计数并在任务汇总输出；`media_not_found` 过高说明 id 映射有问题，值得单独提示。
-
-**触发条件**：4.0.0.9 跑几天后，若日志显示大量 404 且需要判断是哪一类，再做。
-
-**注意**：Emby 的 `IHttpClient` 对非 2xx 抛 `HttpException`，错误体需要从异常/响应流单独读取，不能依赖 `response.StatusCode` 分支。
-
-### 3. 修复 `test-linux` CI 构建（阻塞 4.0.1.0 发版）
+### 2. 修复 `test-linux` CI 构建（阻塞 4.0.1.0 发版）
 
 **背景**：2026-11-17 给 `test.yml` 加了 ubuntu-latest job（与 Windows 跑同一套 509 项单测），
 构建插件步骤失败（约 8 秒即退出，exit 1）。
@@ -94,7 +84,7 @@ Build FAILED. (2 Error(s))
 **✅ CI 复验通过（run `43998522801`）**：`test` 与 `test-linux` 两 job 均 success；
 Linux job `Build succeeded` + ILRepack 跑到 + 509/509 passed。本待办完成。
 
-### 4. NAS 真盘验证（发版门槛）— ✅ 已完成（2026-11-17，合成 300 段盘，本地 ISO + 远程 strm 双路径）
+### 3. NAS 真盘验证（发版门槛）— ✅ 已完成（2026-11-17，合成 300 段盘，本地 ISO + 远程 strm 双路径）
 
 **环境**：内网 NAS 的 Emby 4.10.2.0（Linux）。本机无 Docker、WSL 被禁，故用本仓自建的
 300 段无缝分支合成 ISO（119,197,696 B，600s，2 路视频 4K+1080p + TrueHD）代替真实盘——
@@ -123,14 +113,14 @@ title sample` / `probe summary: 256/300 clips, probe=2V/2A/0S` / `corrected bitr
 无 mismatch，落库 mpegts/600s/2 路 hevc。测试用临时库/文件已清理，**ISO 测试库与文件保留在 NAS**
 （`strmassistant-iso-test`），便于复测；验证用 API Key 不入库。
 
-### 5. BDMV 目录支持（下一版）
+### 4. BDMV 目录支持（下一版）
 
 合成 BDMV 目录（占位 CLPI/index）入库后 Emby 未给出流/码率/时长，无 BlurayMounter 日志。
 占位 CLPI 可能让 BDInfo 扫描失败，**不足以判定不支持**——先用真实 BDMV 目录复测；
 若仍为空，评估插件侧 `HostMounter` 路径：复用本仓 MPLS/STN 解析只补章节/语言，不引入 BDInfo。
 测试台：`.workbuddy-ai/iso-test/build_bdmv_folder.py`。
 
-### 6. ISO 采样精度与弱网（P1）
+### 5. ISO 采样精度与弱网（P1）
 
 - ~~单流码率改按样本内各 PID 字节占比分配~~ ✅ 已完成（`TsByteAccounting`）：ffprobe 对 mpegts 的
   视频流一律给 `bit_rate=N/A`，Emby 只能把容器码率**等分**给各路视频，带画中画的原盘会把 PiP

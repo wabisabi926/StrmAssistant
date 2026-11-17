@@ -24,8 +24,11 @@
 按轨道标题与原始文件名写出「配置」文案，TrueHD 为 `Dolby TrueHD + Dolby Atmos`。
 注意分母是**全部 PID**（用户明确要求），视频拿 `视频 PID 字节 / 全部 PID 字节` 的份额。
 
-**发版状态**：版本仍为 **4.0.1.0**，CHANGELOG / README 已按最终行为更新；
-**未提交本轮源码改动、未打 tag、未发 Release**，等用户明确指令（详见本地 `docs/handoff.md`）。
+**发版状态**：**已发布**。提交 `80013d6` → `Test` run `44023582529`（Windows + Linux 双 job）
+全绿 → tag `v4.0.1.0` → `Build Plugin` run `44024073093` 成功 → Release
+[`StrmAssistantPlus v4.0.1.0`](https://github.com/wabisabi926/StrmAssistant/releases/tag/v4.0.1.0)
+已创建，资产 `StrmAssistantPlus_v4.0.1.0.dll`（8,210,432 B）。
+CHANGELOG / README 已按最终行为更新；**不要移动或重打该 tag**。详见本地 `docs/handoff.md`。
 
 ## 待办
 

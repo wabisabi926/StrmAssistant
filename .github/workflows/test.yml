@@ -100,7 +100,17 @@ jobs:
         run: dotnet restore StrmAssistant/StrmAssistant.csproj
 
       - name: Build the plugin
-        run: dotnet build StrmAssistant/StrmAssistant.csproj --no-restore --configuration Release -p:UseSharedCompilation=false -p:StrmAssistantPluginOutputDir=
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet build StrmAssistant/StrmAssistant.csproj --no-restore --configuration Release -p:UseSharedCompilation=false -p:StrmAssistantPluginOutputDir= 2>&1 | tee build.log
+          status=$?
+          if [ $status -ne 0 ]; then
+            grep -E "error [A-Z]+[0-9]+|error MSB|error NETSDK" build.log | head -10 | while IFS= read -r line; do
+              echo "::error title=Linux build failure::$line"
+            done
+          fi
+          exit $status
 
       - name: Run unit tests
         run: dotnet test StrmAssistant.Tests/StrmAssistant.Tests.csproj --configuration Release --logger "trx;LogFileName=test-results-linux.trx" --results-directory TestResults

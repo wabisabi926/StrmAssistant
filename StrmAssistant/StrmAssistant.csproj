@@ -77,8 +77,10 @@
     <StrmAssistantPackageAssembly>$(StrmAssistantBuildOutputDir)StrmAssistantPlus_v$(Version).dll</StrmAssistantPackageAssembly>
 
     <!-- ILRepack 可执行文件：优先使用 NuGet 包目录，避免 $(ILRepack) 这类空属性 -->
-    <ILRepackExe Condition="'$(ILRepackExe)'=='' and '$(NuGetPackageRoot)'!=''">$(NuGetPackageRoot)ilrepack\2.0.42\tools\ILRepack.exe</ILRepackExe>
-    <ILRepackExe Condition="'$(ILRepackExe)'=='' and '$(UserProfile)'!=''">$(UserProfile)\.nuget\packages\ilrepack\2.0.42\tools\ILRepack.exe</ILRepackExe>
+    <ILRepackExe Condition="'$(ILRepackExe)'=='' and '$(NuGetPackageRoot)'!='' and '$(OS)'=='Windows_NT'">$(NuGetPackageRoot)ilrepack\2.0.42\tools\ILRepack.exe</ILRepackExe>
+    <ILRepackExe Condition="'$(ILRepackExe)'=='' and '$(NuGetPackageRoot)'!='' and '$(OS)'!='Windows_NT'">$(NuGetPackageRoot)ilrepack/2.0.42/tools/ILRepack.exe</ILRepackExe>
+    <ILRepackExe Condition="'$(ILRepackExe)'=='' and '$(UserProfile)'!='' and '$(OS)'=='Windows_NT'">$(UserProfile)\.nuget\packages\ilrepack\2.0.42\tools\ILRepack.exe</ILRepackExe>
+    <ILRepackExe Condition="'$(ILRepackExe)'=='' and '$(UserProfile)'!='' and '$(OS)'!='Windows_NT'">$(UserProfile)/.nuget/packages/ilrepack/2.0.42/tools/ILRepack.exe</ILRepackExe>
 
     <!-- ILRepack.exe 是 net6.0 托管程序：Windows 直接执行；Linux/macOS 需要用 dotnet 前缀 -->
     <ILRepackRunner Condition="'$(OS)'!='Windows_NT'">dotnet </ILRepackRunner>

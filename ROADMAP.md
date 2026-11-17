@@ -32,11 +32,13 @@ CHANGELOG / README 已按最终行为更新；**不要移动或重打该 tag**�
 
 ## 待办
 
-### 1. TheIntroDB `mapping` 集序转换（4.0.0.9 的 P2 遗留）
+### 1. TheIntroDB `mapping` 集序转换（暂缓）
+
+**结论（2026-11-17）**：暂不实现。本机 371/371 部剧的 `DisplayOrder` 均为 `Aired`；多数单集已有 TVDB 单集 id（有 id 时服务端直接精确 pin，不需要 mapping）；且 mapping 只作用于 TheIntroDB 源的 `tvdb_id` 路径，而 NAS 上 TheIntroDB 不可达。当前库无样本、无收益。
+
+**恢复条件**：库里出现 DVD/绝对序的剧，且该集没有 TVDB 单集 id、TheIntroDB 可达时再补。
 
 **背景**：TheIntroDB v4 支持 `mapping=default|official|dvd|alternate|absolute|regional`，用于把调用方的季集号换算成 TVDB default 序。当前只按 Emby 里存的季集号查询，DVD/绝对序的剧集可能取到别的集的数据。
-
-**为什么还没做**：当前测试库中没有 DVD/绝对序样本（均为 `Aired`），无法实机验证——按项目约定不做无法真机验证的改动。
 
 **实现要点**：
 - 仅在走 `tvdb_id` 定位时传 `mapping`；`tmdb_id` / `imdb_id` 路径不传

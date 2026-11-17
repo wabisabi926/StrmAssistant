@@ -74,8 +74,11 @@ namespace StrmAssistant.Common
 
         private const long LocalProbeSampleMaxBytes = 64L * 1024 * 1024;
 
-        /// <summary>采样临时文件上限（按最后使用时间淘汰），防止扫库把磁盘/内存占满。</summary>
-        private const int MaxCachedSampleFiles = 8;
+        /// <summary>
+        /// 采样临时文件上限：本地/远程各 4 份，合计 ≤8 份（约 512MB），按最后使用时间淘汰。
+        /// 防止扫库把磁盘/内存占满。
+        /// </summary>
+        private const int MaxCachedSampleFiles = 4;
 
         /// <summary>
         /// 采样临时目录：优先 Emby 的临时目录（Docker 里通常不是 tmpfs，不会把 64MB 样本算进内存），

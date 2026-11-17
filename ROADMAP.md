@@ -30,6 +30,42 @@
 
 **注意**：Emby 的 `IHttpClient` 对非 2xx 抛 `HttpException`，错误体需要从异常/响应流单独读取，不能依赖 `response.StatusCode` 分支。
 
+### 3. 修复 `test-linux` CI 构建（阻塞 4.0.1.0 发版）
+
+**背景**：2026-11-17 给 `test.yml` 加了 ubuntu-latest job（与 Windows 跑同一套 509 项单测），
+构建插件步骤失败（约 8 秒即退出，exit 1）。
+
+**已做**：`ILRepack.exe`（net6.0 托管程序）在 Linux 需要 `dotnet` 前缀（已修）；
+`ILRepackExe` 路径按 OS 选择分隔符（已修）；构建失败时会把 error 行写成 check-run 注解。
+
+**怎么查**：job 日志 API 匿名 403，用网页 UI 打开失败 job 看日志，或
+`gh run view <run-id> --log-failed`（需 gh 登录）。注解接口匿名可读：
+`GET /repos/wabisabi926/StrmAssistant/check-runs/{id}/annotations`。
+
+**候选原因**（未验证）：MSBuild 在 Unix 下对 csproj 里 `Tokenizer\win\libsimple.so` 这类
+反斜杠 Include 的处理；`python`（资源检查目标，ContinueOnError 不应阻断）；
+ILRepack 在 Linux 上的行为差异。
+
+**验收**：`test` 与 `test-linux` 两个 job 都绿。
+
+### 4. NAS 真盘验证（发版门槛，不是代码工作）
+
+用真实 4K 原盘（别人的 300 段盘）在 Linux Emby 上跑一次提取：
+日志出现 `probe summary: playlist=..., N/N clips, probe=2V/...`、`corrected bitrate`，
+且无 `probe stream mismatch`；客户端媒体信息两路视频（4K + 1080p）、总码率接近真实值。
+
+### 5. BDMV 目录支持（下一版）
+
+合成 BDMV 目录（占位 CLPI/index）入库后 Emby 未给出流/码率/时长，无 BlurayMounter 日志。
+占位 CLPI 可能让 BDInfo 扫描失败，**不足以判定不支持**——先用真实 BDMV 目录复测；
+若仍为空，评估插件侧 `HostMounter` 路径：复用本仓 MPLS/STN 解析只补章节/语言，不引入 BDInfo。
+测试台：`.workbuddy-ai/iso-test/build_bdmv_folder.py`。
+
+### 6. ISO 采样精度与弱网（P1）
+
+- 单流码率改按样本内各 PID 字节占比分配（当前按 ffprobe 比例缩放）；
+- 远程采样预算自适应（弱网降到 32MB/128 段），需真机弱网验证。
+
 ## 观察项（4.0.0.9 上线后）
 
 任务日志收尾三行用于判断是否需要下一个版本：

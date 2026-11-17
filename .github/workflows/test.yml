@@ -106,7 +106,9 @@ jobs:
           dotnet build StrmAssistant/StrmAssistant.csproj --no-restore --configuration Release -p:UseSharedCompilation=false -p:StrmAssistantPluginOutputDir= 2>&1 | tee build.log
           status=$?
           if [ $status -ne 0 ]; then
-            grep -E "error [A-Z]+[0-9]+|error MSB|error NETSDK" build.log | head -10 | while IFS= read -r line; do
+            # MSBuild 内联 Task 的错误形如 "MSBUILD : error : ..."，不带 error CS####/MSB#### 前缀，
+            # 必须一并纳入，否则只剩 exit code 1，定位不到根因。
+            grep -E "error [A-Z]+[0-9]+|error MSB|error NETSDK|MSBUILD : error|Failed injecting|Build FAILED" build.log | head -10 | while IFS= read -r line; do
               echo "::error title=Linux build failure::$line"
             done
           fi

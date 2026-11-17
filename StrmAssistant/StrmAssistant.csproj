@@ -41,7 +41,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Resource.Embedder" Version="2.2.0" />
+    <!-- 卫星资源嵌入只在 Windows 发布构建需要（build.yml 跑在 windows-latest）。
+         Resource.Embedder 2.2.0 的 MSBuild Task 在 Linux 上用反斜杠拼自身 Core.dll 路径且丢开头 /，
+         会让 test-linux 在卫星注入阶段编译失败；Linux CI 只跑单测，不需要嵌入卫星资源。 -->
+    <PackageReference Include="Resource.Embedder" Version="2.2.0" Condition="'$(OS)'=='Windows_NT'" />
     <PackageReference Include="SQLitePCL.pretty.core" Version="1.2.2" />
     <PackageReference Include="TinyPinyin" Version="1.1.0">
     </PackageReference>

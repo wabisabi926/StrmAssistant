@@ -35,20 +35,36 @@
 **背景**：2026-11-17 给 `test.yml` 加了 ubuntu-latest job（与 Windows 跑同一套 509 项单测），
 构建插件步骤失败（约 8 秒即退出，exit 1）。
 
-**已做**：`ILRepack.exe`（net6.0 托管程序）在 Linux 需要 `dotnet` 前缀（已修）；
-`ILRepackExe` 路径按 OS 选择分隔符（已修）；构建失败时会把 error 行写成 check-run 注解。
+**✅ 根因已确认（2026-11-17 取证，非推测）**：不是 ILRepack。
+是 `Resource.Embedder` 2.2.0 的 MSBuild Task（`SatelliteAssemblyEmbedderTask`，挂在
+`CoreGenerateSatelliteAssemblies` 之后）在 Linux 上解析自身 `ResourceEmbedder.Core.dll` 路径出错：
 
-**怎么查**：job 日志 API 匿名 403，用网页 UI 打开失败 job 看日志，或
-`gh run view <run-id> --log-failed`（需 gh 登录）。注解接口匿名可读：
-`GET /repos/wabisabi926/StrmAssistant/check-runs/{id}/annotations`。
+```
+MSBUILD : error : Failed injecting code. Could not find file '/home/runner/work/StrmAssistant/StrmAssistant/StrmAssistant/home\runner\.nuget\packages\resource.embedder\2.2.0\tasks\netstandard2.0\ResourceEmbedder.Core.dll'.
+MSBUILD : error : Failed to inject required code into assembly: .../obj/Release/net6.0/StrmAssistant.dll
+Build FAILED. (2 Error(s))
+```
 
-**候选原因**（未验证）：MSBuild 在 Unix 下对 csproj 里 `Tokenizer\win\libsimple.so` 这类
-反斜杠 Include 的处理；`python`（资源检查目标，ContinueOnError 不应阻断）；
-ILRepack 在 Linux 上的行为差异。
+它用 `$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\...` 拼路径，Unix 下反斜杠不作分隔符、
+开头的 `/` 又丢了，于是把包根当相对路径拼到项目目录后 → 找不到 DLL → 编译阶段即失败。
+日志里没有 `StrmAssistant: ILRepack merge ->`，说明 ILRepack 根本没跑到；
+之前 `d7e6894`/`54627ec` 修的 ILRepack 路径不是本次失败点。
 
-**验收**：`test` 与 `test-linux` 两个 job 都绿。
+**为什么注解只有 exit code**：工作流的 grep 是 `error [A-Z]+[0-9]+|error MSB|error NETSDK`，
+匹配不上 `MSBUILD : error :` 这种行 → 没有生成注解。取证需带凭据调 jobs logs API
+（本机 `git credential fill` 有缓存 token；匿名 403），详见本地 `docs/handoff.md` 专节。
+
+**已修复（2026-11-17）**：`StrmAssistant.csproj` 把 `Resource.Embedder` 的 PackageReference 加上
+`Condition="'$(OS)'=='Windows_NT'"` —— Linux 构建不引入该包、跳过卫星注入，Windows 发布构建
+（`build.yml` 跑 windows-latest）行为不变。`test.yml` 的 grep 正则补上 `MSBUILD : error` /
+`Failed injecting` / `Build FAILED`，让今后这类失败直接进注解。
+本地用 `-p:OS=Unix` 模拟过 Linux 构建：跳过 `Finished embedding cultures`、ILRepack 正常、0/0；
+Windows 正常构建 509 项单测全绿。**待 CI 复验两个 job 都绿。**
 
 ### 4. NAS 真盘验证（发版门槛，不是代码工作）
+
+**环境已就绪**：内网 NAS 上已部署 Emby（Linux），可用于真盘验证与 Linux 行为；
+本机只有 Windows Emby，无 Docker、WSL 被禁。具体地址只记在本地 `docs/handoff.md`，不入库。
 
 用真实 4K 原盘（别人的 300 段盘）在 Linux Emby 上跑一次提取：
 日志出现 `probe summary: playlist=..., N/N clips, probe=2V/...`、`corrected bitrate`，

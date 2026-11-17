@@ -97,12 +97,20 @@ namespace StrmAssistant.Common
         internal sealed class TitleHint
         {
             public List<double> Chapters = new List<double>();
+            public List<UdfTitleResolver.MplsStreamInfo> VideoStreams = new List<UdfTitleResolver.MplsStreamInfo>();
             public List<UdfTitleResolver.MplsStreamInfo> AudioStreams = new List<UdfTitleResolver.MplsStreamInfo>();
             public List<UdfTitleResolver.MplsStreamInfo> SubtitleStreams = new List<UdfTitleResolver.MplsStreamInfo>();
             public double DurationSeconds;
             public bool IsProbeSample;
             public int? OriginalProtocol;
             public long SourceSize;
+
+            /// <summary>选中的 playlist 名，仅用于诊断日志。</summary>
+            public string SourceName;
+
+            /// <summary>playlist 总片段数 / 实际采样片段数（非采样路径为 0）。</summary>
+            public int TotalClips;
+            public int SampledClips;
 
             /// <summary>
             /// 选中正片 m2ts 的真实字节数（非 ISO 总大小、非截断样本大小）。
@@ -424,13 +432,17 @@ namespace StrmAssistant.Common
                     var hint = new TitleHint
                     {
                         Chapters = title.Chapters ?? new List<double>(),
+                        VideoStreams = title.VideoStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                         AudioStreams = title.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                         SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                         DurationSeconds = title.DurationSeconds,
                         IsProbeSample = true,
                         InputReplaced = true,
                         SourceSize = image.Length,
-                        SourceBytes = title.TotalBytes
+                        SourceBytes = title.TotalBytes,
+                        SourceName = title.SourceName,
+                        TotalClips = title.TotalClips,
+                        SampledClips = title.SampledClips
                     };
                     // Multi-clip metadata samples cover each play item. This does not enable
                     // returning one clip as a complete mounted playback title.
@@ -659,13 +671,17 @@ namespace StrmAssistant.Common
                         TitleHints[isoPath] = new TitleHint
                         {
                             Chapters = title.Chapters ?? new List<double>(),
+                            VideoStreams = title.VideoStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                             AudioStreams = title.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                             SubtitleStreams = title.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                             DurationSeconds = title.DurationSeconds,
                             IsProbeSample = true,
                             InputReplaced = true,
                             SourceSize = length,
-                            SourceBytes = title.TotalBytes
+                            SourceBytes = title.TotalBytes,
+                            SourceName = title.SourceName,
+                            TotalClips = title.TotalClips,
+                            SampledClips = title.SampledClips
                         };
 
                         LocalSamples[isoPath] = new LocalSampleEntry
@@ -781,10 +797,12 @@ namespace StrmAssistant.Common
             var hint = new TitleHint
             {
                 Chapters = info.Chapters != null ? new List<double>(info.Chapters) : new List<double>(),
+                VideoStreams = info.VideoStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                 AudioStreams = info.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                 SubtitleStreams = info.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                 DurationSeconds = info.DurationSeconds,
-                InputReplaced = inputReplaced
+                InputReplaced = inputReplaced,
+                SourceName = info.SourceName
             };
 
             // 什么都没解析出来时不要覆盖既有缓存（避免一次失败把上一轮的好结果清掉）
@@ -911,9 +929,11 @@ namespace StrmAssistant.Common
                             ? new TitleHint
                             {
                                 Chapters = info.Chapters ?? new List<double>(),
+                                VideoStreams = info.VideoStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                                 AudioStreams = info.AudioStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
                                 SubtitleStreams = info.SubtitleStreams ?? new List<UdfTitleResolver.MplsStreamInfo>(),
-                                DurationSeconds = info.DurationSeconds
+                                DurationSeconds = info.DurationSeconds,
+                                SourceName = info.SourceName
                             }
                             : null;
 

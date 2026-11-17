@@ -35,6 +35,9 @@ namespace StrmAssistant.Common
         /// </summary>
         private const int MaxMetadataProbeClips = 4096;
 
+        /// <summary>单次元数据采样最多包含的片段数（均匀抽取，代价与总段数无关）。</summary>
+        internal const int MetadataSampleMaxClips = 256;
+
         internal sealed class TitleInfo
         {
             /// <summary>蓝光碟片（true）还是 DVD（false）。</summary>
@@ -63,11 +66,20 @@ namespace StrmAssistant.Common
             /// </summary>
             public long TotalBytes;
 
+            /// <summary>MPLS STN_table 解析出的视频流（编码/PID）；可能为空。</summary>
+            public List<MplsStreamInfo> VideoStreams = new List<MplsStreamInfo>();
+
             /// <summary>MPLS STN_table 解析出的主音轨（语言/编码/声道）；可能为空。</summary>
             public List<MplsStreamInfo> AudioStreams = new List<MplsStreamInfo>();
 
             /// <summary>MPLS STN_table 解析出的字幕（语言）；可能为空。</summary>
             public List<MplsStreamInfo> SubtitleStreams = new List<MplsStreamInfo>();
+
+            /// <summary>选中的 playlist 总片段数（用于诊断采样覆盖率）。</summary>
+            public int TotalClips;
+
+            /// <summary>实际参与采样的片段数（≤ <see cref="TotalClips"/>）。</summary>
+            public int SampledClips;
 
             /// <summary>MPLS PlayListMark 解析出的章节（秒，升序，首个通常为 0）；可能为空。</summary>
             public List<double> Chapters = new List<double>();
@@ -110,7 +122,8 @@ namespace StrmAssistant.Common
             Audio = 1,
             Subtitle = 2,
             Interactive = 3,
-            Text = 4
+            Text = 4,
+            Video = 5
         }
 
         internal enum BlurayCodingType
@@ -214,12 +227,10 @@ namespace StrmAssistant.Common
                 }
             }
 
-            // 采样只取前 128 + 后 128 段：PMT/码流参数在每个 m2ts 开头都有，
-            // 取首尾足以让 ffprobe 识别全部视频/音频流，同时避免 >256 段时整段放弃
-            // （真机 4K 无缝分支盘曾因此回退到裸 ISO 探测，只剩一路视频、码率也不对）。
-            var samplePaths = paths.Count <= 256
-                ? paths
-                : paths.Take(128).Concat(paths.Skip(paths.Count - 128)).ToList();
+            // 采样最多 256 段：超过时按等步长**均匀抽**（而非只取首尾），
+            // 避免「某路流只存在于中间片段」被漏掉。PMT/码流参数在每个 m2ts 开头都有，
+            // 每段取头部即可让 ffprobe 识别全部视频/音频流。
+            var samplePaths = SelectSamplePaths(paths, MetadataSampleMaxClips);
 
             // Reserve a tail segment as well, so MPEG streams without a playlist duration can
             // expose their final timestamps. Bound aggregate I/O regardless of playlist length.
@@ -244,7 +255,36 @@ namespace StrmAssistant.Common
             }
             output.Flush();
             title.TotalBytes = totalBytes;
+            title.TotalClips = paths.Count;
+            title.SampledClips = samplePaths.Count;
             return title;
+        }
+
+        /// <summary>
+        /// 从完整片段列表里挑出参与采样的片段：不超过 <paramref name="maxParts"/> 段时全取，
+        /// 超过时按等步长均匀抽取（保证首段与末段都在内，且不重复、保持原顺序）。
+        /// 均匀抽取而非只取首尾，是为了覆盖「只在中间片段出现」的流（如分支版本）。
+        /// </summary>
+        internal static List<string> SelectSamplePaths(IReadOnlyList<string> paths, int maxParts)
+        {
+            if (paths == null || paths.Count == 0) return new List<string>();
+            if (maxParts <= 0) maxParts = 1;
+            if (paths.Count <= maxParts) return paths.ToList();
+
+            var result = new List<string>(maxParts);
+            var lastIndex = -1;
+            for (var i = 0; i < maxParts; i++)
+            {
+                var index = i == maxParts - 1
+                    ? paths.Count - 1
+                    : (int)Math.Round(i * (paths.Count - 1) / (double)(maxParts - 1));
+                if (index <= lastIndex) index = lastIndex + 1;
+                if (index >= paths.Count) index = paths.Count - 1;
+                if (index == lastIndex) continue;
+                result.Add(paths[index]);
+                lastIndex = index;
+            }
+            return result;
         }
 
         private static void CopyProbeBytes(Stream input, Stream output, long count)
@@ -369,6 +409,7 @@ namespace StrmAssistant.Common
                             : new List<string>(),
                         SourceName = best.Name,
                         DurationSeconds = best.TotalSeconds,
+                        VideoStreams = streams.Where(s => s.Kind == BlurayStreamKind.Video).ToList(),
                         AudioStreams = streams.Where(s => s.Kind == BlurayStreamKind.Audio).ToList(),
                         SubtitleStreams = streams.Where(s => s.Kind == BlurayStreamKind.Subtitle).ToList(),
                         Chapters = chapters
@@ -621,7 +662,7 @@ namespace StrmAssistant.Common
             // STN 自身长度不含开头 2 字节；PlayItem 长度可能更宽，取较紧的那个
             var end = Math.Min(stnStart + 2 + stnLength, hardEnd);
 
-            for (var i = 0; i < numVideo; i++) ReadStream(data, ref pos, end, false, output);
+            for (var i = 0; i < numVideo; i++) ReadStream(data, ref pos, end, true, output);
             for (var i = 0; i < numAudio; i++) ReadStream(data, ref pos, end, true, output);
             for (var i = 0; i < numPg + numPipPg; i++) ReadStream(data, ref pos, end, true, output);
             for (var i = 0; i < numIg; i++) ReadStream(data, ref pos, end, true, output);
@@ -788,7 +829,7 @@ namespace StrmAssistant.Common
                 case 0x1b:
                 case 0x24:
                 case 0xea:
-                    info.Kind = BlurayStreamKind.Unknown;
+                    info.Kind = BlurayStreamKind.Video;
                     info.Coding = BlurayCodingType.Other;
                     break;
 

@@ -176,6 +176,7 @@ namespace StrmAssistant.Tests
             Assert.Null(info.UnsupportedReason);
             Assert.Equal(ClipCount, info.ProbePaths.Count);
             Assert.Equal(ClipCount * SecondsPerClip, info.DurationSeconds, 3);
+            Assert.Equal(2, info.VideoStreams.Count);
             Assert.Single(info.AudioStreams);
         }
 
@@ -197,6 +198,48 @@ namespace StrmAssistant.Tests
             Assert.Null(info.UnsupportedReason);
             Assert.Equal(@"BDMV\STREAM\00001.m2ts", info.RelativePath);
             Assert.Equal(SecondsPerClip, info.DurationSeconds, 3);
+        }
+
+        // ---------- 采样覆盖 ----------
+
+        [Fact]
+        public void SampleSelection_KeepsEveryClipWhenUnderLimit()
+        {
+            var paths = Enumerable.Range(1, 100).Select(i => "clip" + i).ToList();
+
+            var sampled = UdfTitleResolver.SelectSamplePaths(paths, 256);
+
+            Assert.Equal(paths, sampled);
+        }
+
+        [Fact]
+        public void SampleSelection_IsUniformAcrossLongPlaylist()
+        {
+            var paths = Enumerable.Range(1, 300).Select(i => "clip" + i).ToList();
+
+            var sampled = UdfTitleResolver.SelectSamplePaths(paths, 256);
+
+            Assert.Equal(256, sampled.Count);
+            Assert.Equal(paths[0], sampled[0]);
+            Assert.Equal(paths[^1], sampled[^1]);
+            Assert.Equal(sampled.Count, sampled.Distinct().Count());
+            // 保持原顺序，且不是「前 128 + 后 128」那种两段式
+            var indices = sampled.Select(p => paths.IndexOf(p)).ToList();
+            Assert.True(indices.Zip(indices.Skip(1), (a, b) => b > a).All(x => x));
+            Assert.Contains(indices, i => i > 100 && i < 200);
+        }
+
+        [Fact]
+        public void SampleSelection_HandlesThousandClips()
+        {
+            var paths = Enumerable.Range(1, 1000).Select(i => "clip" + i).ToList();
+
+            var sampled = UdfTitleResolver.SelectSamplePaths(paths, 256);
+
+            Assert.Equal(256, sampled.Count);
+            Assert.Equal(paths[0], sampled[0]);
+            Assert.Equal(paths[^1], sampled[^1]);
+            Assert.Equal(256, sampled.Distinct().Count());
         }
     }
 }

@@ -279,6 +279,7 @@ namespace StrmAssistant.Mod
                 // 裸 ISO 回退探测的结果不能按样本语义改写（否则会留下“清了一半”的假象）。
                 if (hint.InputReplaced) ClearMisleadingCodecTags(mediaInfo);
                 ApplyStreamDetails(mediaInfo, hint);
+                LogProbeSummary(mediaInfo, hint);
             }
             catch (Exception e)
             {
@@ -288,6 +289,40 @@ namespace StrmAssistant.Mod
             }
 
             return mediaInfo;
+        }
+
+        /// <summary>
+        /// 输出一条可检索的探测摘要，并在「STN 声明的流数 &gt; 实际探测到的流数」时告警。
+        ///
+        /// 采样只覆盖 playlist 的一部分片段；如果某路视频/音轨只出现在未采样的片段里，
+        /// ffprobe 就会少报。静默接受会让客户端少一路流，必须留下明确日志。
+        /// 字幕不参与告警：STN 的 PG/PIP 计数与 ffprobe 的可见字幕流口径不完全一致。
+        /// </summary>
+        private static void LogProbeSummary(ProbeMediaInfo mediaInfo, IsoMounter.TitleHint hint)
+        {
+            var streams = mediaInfo?.MediaStreams;
+            var probedVideo = streams?.Count(s => s.Type == MediaStreamType.Video) ?? 0;
+            var probedAudio = streams?.Count(s => s.Type == MediaStreamType.Audio) ?? 0;
+            var probedSubtitle = streams?.Count(s => s.Type == MediaStreamType.Subtitle) ?? 0;
+            var declaredVideo = hint.VideoStreams?.Count ?? 0;
+            var declaredAudio = hint.AudioStreams?.Count ?? 0;
+            var declaredSubtitle = hint.SubtitleStreams?.Count ?? 0;
+
+            var coverage = hint.TotalClips > 0
+                ? $"{hint.SampledClips}/{hint.TotalClips} clips"
+                : "not sampled";
+            Plugin.Instance?.Logger?.Info(
+                $"IsoExtraction - probe summary: playlist={hint.SourceName ?? "?"}, {coverage}, " +
+                $"probe={probedVideo}V/{probedAudio}A/{probedSubtitle}S, " +
+                $"playlist declares={declaredVideo}V/{declaredAudio}A/{declaredSubtitle}S");
+
+            if (hint.TotalClips <= 0) return;
+            if (declaredVideo <= probedVideo && declaredAudio <= probedAudio) return;
+
+            Plugin.Instance?.Logger?.Warn(
+                $"IsoExtraction - probe stream mismatch: playlist declares " +
+                $"{declaredVideo}V/{declaredAudio}A but probe returned {probedVideo}V/{probedAudio}A; " +
+                $"sample covers {hint.SampledClips}/{hint.TotalClips} clips, some streams may be outside the sample");
         }
 
         /// <summary>

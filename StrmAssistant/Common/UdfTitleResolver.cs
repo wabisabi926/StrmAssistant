@@ -82,6 +82,12 @@ namespace StrmAssistant.Common
             /// <summary>实际参与采样的片段数（≤ <see cref="TotalClips"/>）。</summary>
             public int SampledClips;
 
+            /// <summary>
+            /// 单段长 m2ts 的「沿全片均匀采样」统计样本路径，仅用于 PID 字节占比统计。
+            /// 为空表示多段盘（探测样本已均匀覆盖）或生成失败，调用方退回用探测样本。
+            /// </summary>
+            public string StatsSamplePath;
+
             /// <summary>MPLS PlayListMark 解析出的章节（秒，升序，首个通常为 0）；可能为空。</summary>
             public List<double> Chapters = new List<double>();
         }
@@ -204,12 +210,13 @@ namespace StrmAssistant.Common
         /// </summary>
         private static readonly SemaphoreSlim ProbeGate = new SemaphoreSlim(2, 2);
 
-        internal static TitleInfo WriteProbeSample(Stream image, string destination, long maxBytes)
+        internal static TitleInfo WriteProbeSample(Stream image, string destination, long maxBytes,
+            long statsBudget = 8L * 1024 * 1024)
         {
             ProbeGate.Wait();
             try
             {
-                return WriteProbeSampleCore(image, destination, maxBytes);
+                return WriteProbeSampleCore(image, destination, maxBytes, statsBudget);
             }
             finally
             {
@@ -217,7 +224,8 @@ namespace StrmAssistant.Common
             }
         }
 
-        private static TitleInfo WriteProbeSampleCore(Stream image, string destination, long maxBytes)
+        private static TitleInfo WriteProbeSampleCore(Stream image, string destination, long maxBytes,
+            long statsBudget)
         {
             using var disc = OpenDisc(image);
             var title = Resolve(new UdfDiscFs(disc), true);
@@ -274,10 +282,99 @@ namespace StrmAssistant.Common
                 }
             }
             output.Flush();
+
+            // 单段长 m2ts 的「头 8MB + 尾 8MB」探测样本会让 PID 字节占比失真
+            // （音频小包在头部过度代表、视频 GOP 在截断处比例偏移）：实测某 2 小时原盘
+            // 样本里视频只占 56.9%，而 BDInfo 整片统计是 85.5%。多段盘因每段取头已均匀覆盖全片，
+            // 不需要额外采样。这里额外写一份「沿全片均匀分布窗口」的统计样本，
+            // 只供 TsByteAccounting 数 PID 字节；探测样本本身不动（章节/时长/流清单仍用它）。
+            title.StatsSamplePath = null;
+            if (paths.Count == 1)
+            {
+                try
+                {
+                    var statsPath = Path.ChangeExtension(destination, ".stats.ts");
+                    using (var src = disc.OpenFile(paths[0], FileMode.Open, FileAccess.Read))
+                    {
+                        // 用 title.TotalBytes（选片时累加的真实 m2ts 长度）而非 src.Length：
+                        // 远程 HttpRangeStream 上的 Stream.Length 未必等于片段真实长度。
+                        var streamLength = totalBytes > 0 ? totalBytes : src.Length;
+                        if (streamLength > 32L * 1024 * 1024)
+                        {
+                            WriteUniformStatsSample(src, statsPath, alignment, statsBudget, streamLength);
+                            title.StatsSamplePath = statsPath;
+                            System.Diagnostics.Debug.WriteLine(
+                                $"UdfTitleResolver - uniform stats sample written: {statsPath}");
+                            Plugin.Instance?.Logger?.Info(
+                                $"UdfTitleResolver - uniform stats sample written: {statsPath} " +
+                                $"({new FileInfo(statsPath).Length} bytes from {streamLength:N0})");
+                        }
+                        else
+                        {
+                            Plugin.Instance?.Logger?.Info(
+                                $"UdfTitleResolver - stats sample skipped: streamLength={streamLength:N0}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 统计样本是增强项，失败就退回用探测样本，绝不影响探测本身
+                    title.StatsSamplePath = null;
+                    Plugin.Instance?.Logger?.Warn(
+                        "UdfTitleResolver - uniform stats sample failed: " + ex.Message);
+                }
+            }
+
             title.TotalBytes = totalBytes;
             title.TotalClips = paths.Count;
             title.SampledClips = samplePaths.Count;
             return title;
+        }
+
+        /// <summary>
+        /// 沿单个 m2ts 全片均匀取若干窗口拼成统计样本，用于还原各 PID 的真实字节占比。
+        /// 窗口起点按 (length / count) 等距分布，每窗口取一小段 TS 包（alignment 对齐），
+        /// 这样长盘的音频/视频字节比例不会被头尾窗口扭曲。总字节受 statsBudget 约束。
+        /// </summary>
+        /// <summary>统计采样窗口数：远程 HTTP Range 上最多这么多次请求。</summary>
+        internal const int StatsWindowCount = 32;
+
+        /// <summary>
+        /// 沿全片等距分布的窗口起点，首尾各一个；全部按 alignment 对齐且不超过合法范围。
+        /// 抽成纯函数便于单测：验证长盘不会退化成「只取头尾」。
+        /// </summary>
+        internal static long[] GetStatsWindowStarts(long streamLength, long perWindow, int alignment,
+            int windowCount = StatsWindowCount)
+        {
+            if (windowCount <= 1) return new[] { 0L };
+            var maxStart = Math.Max(0, streamLength - perWindow);
+            var starts = new long[windowCount];
+            for (var i = 0; i < windowCount; i++)
+            {
+                var start = (long)Math.Round(i * maxStart / (double)(windowCount - 1));
+                start = start / alignment * alignment;
+                if (start > maxStart) start = maxStart / alignment * alignment;
+                starts[i] = Math.Max(0, start);
+            }
+            return starts;
+        }
+
+        private static void WriteUniformStatsSample(Stream src, string destination, int alignment,
+            long statsBudget, long streamLength)
+        {
+            var perWindow = Math.Max(64L * 1024, statsBudget / StatsWindowCount);
+            perWindow = perWindow / alignment * alignment;
+            if (perWindow < alignment) return;
+
+            var starts = GetStatsWindowStarts(streamLength, perWindow, alignment);
+            using var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read,
+                1 << 16, FileOptions.SequentialScan);
+            foreach (var start in starts)
+            {
+                src.Position = start;
+                CopyProbeBytes(src, output, perWindow);
+            }
+            output.Flush();
         }
 
         /// <summary>

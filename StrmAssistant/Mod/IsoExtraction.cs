@@ -278,6 +278,7 @@ namespace StrmAssistant.Mod
                 // 只有探测输入确实被换成了样本/挂载正片时，才清容器注册标签。
                 // 裸 ISO 回退探测的结果不能按样本语义改写（否则会留下“清了一半”的假象）。
                 if (hint.InputReplaced) ClearMisleadingCodecTags(mediaInfo);
+                ApplyAudioProfiles(mediaInfo, hint);
                 ApplyStreamDetails(mediaInfo, hint);
                 LogProbeSummary(mediaInfo, hint);
             }
@@ -434,7 +435,14 @@ namespace StrmAssistant.Mod
             // 探测的若不是我们替换过的输入（裸 ISO 直扫），结果不可信，一律不动
             if (!hint.InputReplaced) return false;
 
-            var usage = TsByteAccounting.TryCount(hint.SamplePath);
+            // 优先用沿全片均匀采样的统计样本：单段长 m2ts 的头尾探测样本会让字节占比失真。
+            // 多段盘没有统计样本，退回探测样本（每段取头，本来已均匀覆盖）。
+            var useStats = !string.IsNullOrEmpty(hint.StatsSamplePath) && File.Exists(hint.StatsSamplePath);
+            var countPath = useStats ? hint.StatsSamplePath : hint.SamplePath;
+            Plugin.Instance?.Logger?.Info(
+                $"IsoExtraction - PID count source: {(useStats ? "uniform-stats" : "probe-sample")} " +
+                $"(stats={hint.StatsSamplePath ?? "null"}, exists={File.Exists(hint.StatsSamplePath ?? "")})");
+            var usage = TsByteAccounting.TryCount(countPath);
             if (usage == null || usage.Count == 0) return false;
 
             var videoUsage = usage.Where(u => TsByteAccounting.IsVideoStreamType(u.StreamType)).ToList();
@@ -463,6 +471,12 @@ namespace StrmAssistant.Mod
                 $"(video {videoBytes}/{totalBytes} bytes, PIDs " +
                 $"{string.Join(",", videoUsage.Select(u => "0x" + u.Pid.ToString("X4")))}; " +
                 $"container {totalBitrate / 1000000.0:F1} Mbps)");
+            // 每路视频的独立字节数：单片段截断样本的音频字节会被过度代表，
+            // 需要它来判断视频占比是否合理。格式：0x1011=8100480,0x1015=1380864
+            Plugin.Instance?.Logger?.Info(
+                "IsoExtraction - TS video PID bytes: " +
+                string.Join(",", videoUsage.Select(u => $"0x{u.Pid:X4}={u.Bytes}")) +
+                $" (videoShare={videoBytes / (double)totalBytes:F4}, sampleClips={hint.SampledClips}/{hint.TotalClips})");
             return true;
         }
 
@@ -516,6 +530,45 @@ namespace StrmAssistant.Mod
                 Plugin.Instance?.Logger?.Info(
                     $"IsoExtraction - cleared {cleared} misleading codec tag(s) from probe result");
             return cleared;
+        }
+
+        /// <summary>
+        /// 给音轨写「配置」文案（<c>MediaStream.Profile</c>）：Emby 详情页/客户端读这个字段，
+        /// 但 ffprobe 对 Atmos / DTS:X 没有对应输出。用 <see cref="AudioProfileBuilder"/> 按
+        /// 编码 + 轨道标题 + 原始文件名拼出 <c>Dolby TrueHD + Dolby Atmos</c> 这类文案。
+        ///
+        /// 只在探测输入被替换（样本/挂载正片）时写：裸 ISO 直扫的结果不按样本语义改写。
+        /// 识别不到标识时 builder 返回 null，保持原 Profile 不变（不误标、不覆盖）。
+        /// </summary>
+        private static void ApplyAudioProfiles(ProbeMediaInfo mediaInfo, IsoMounter.TitleHint hint)
+        {
+            var streams = mediaInfo?.MediaStreams;
+            if (streams == null || streams.Count == 0) return;
+            if (hint == null || !hint.InputReplaced) return;
+
+            // 优先级：轨道标题 > 原始 ISO 文件名 / URL。
+            // 探测结果的 Path 是临时样本文件，不含 Atmos 字样，不能用。
+            // 远程 strm 的 URL 里 path 参数是 %20 / %2F 编码的，AudioProfileBuilder 会先解码。
+            var sourceName = !string.IsNullOrEmpty(hint.OriginalName)
+                ? hint.OriginalName
+                : hint.SourceName;
+
+            var written = 0;
+            foreach (var stream in streams)
+            {
+                if (stream.Type != MediaStreamType.Audio || string.IsNullOrWhiteSpace(stream.Codec)) continue;
+
+                var profile = AudioProfileBuilder.Build(stream.Codec, stream.Title, sourceName);
+                if (string.IsNullOrEmpty(profile) ||
+                    string.Equals(profile, stream.Profile, StringComparison.Ordinal)) continue;
+
+                stream.Profile = profile;
+                written++;
+            }
+
+            if (written > 0)
+                Plugin.Instance?.Logger?.Info(
+                    $"IsoExtraction - wrote {written} audio profile label(s) from title/source name");
         }
 
         /// <summary>探测结果没有时长时，用 playlist 各 PlayItem 时长之和补上。</summary>
@@ -611,13 +664,16 @@ namespace StrmAssistant.Mod
             List<UdfTitleResolver.MplsStreamInfo> fromPlaylist, bool fillAudioDetails)
         {
             if (probed == null || fromPlaylist == null || probed.Count == 0 ||
-                fromPlaylist.Count != probed.Count) return 0;
+                fromPlaylist.Count == 0) return 0;
+
+            var map = MapPlaylistToProbed(probed, fromPlaylist.Count, fillAudioDetails, out var ac3CoreIndex);
+            if (map == null) return 0;
 
             var filled = 0;
 
-            for (var i = 0; i < probed.Count; i++)
+            for (var i = 0; i < map.Count; i++)
             {
-                var target = probed[i];
+                var target = probed[map[i]];
                 var source = fromPlaylist[i];
 
                 if (IsUnknownLanguage(target.Language) && !IsUnknownLanguage(source.Language))
@@ -641,7 +697,60 @@ namespace StrmAssistant.Mod
                 }
             }
 
+            // TrueHD 的 AC3 核心：ffprobe 会把它拆成两条（truehd + ac3），MPLS 只声明一条。
+            // 跳过核心做对齐后，把核心的语言设为 TrueHD 那条的语言 —— 两者本就是同一音轨。
+            if (fillAudioDetails && ac3CoreIndex >= 0 && ac3CoreIndex < probed.Count)
+            {
+                var core = probed[ac3CoreIndex];
+                var main = probed[ac3CoreIndex - 1];
+                if (IsUnknownLanguage(core.Language) && !IsUnknownLanguage(main.Language))
+                {
+                    core.Language = main.Language;
+                    filled++;
+                }
+            }
+
             return filled;
+        }
+
+        /// <summary>
+        /// 建立 MPLS 声明流 → ffprobe 探测流的下标映射。返回 null 表示无法安全对齐，调用方整段放弃。
+        ///
+        /// 正常情况两者数量相等，直接按序对齐（保持原「宁可标不出也不能标错」）。
+        /// 唯一特例：音频侧 ffprobe 比 MPLS 多一条，且多出的形态是
+        /// <c>truehd</c> 紧跟一条 <c>ac3</c>（TrueHD 内嵌的 AC3 核心）——
+        /// 这是蓝光标准封装，跳过核心后其余按序对齐，并把核心语言设为 TrueHD 的语言。
+        /// 字幕、或其它数量差异一律返回 null。
+        /// </summary>
+        internal static List<int> MapPlaylistToProbed(List<MediaStream> probed,
+            int playlistCount, bool fillAudioDetails, out int ac3CoreIndex)
+        {
+            ac3CoreIndex = -1;
+            if (probed == null || probed.Count == 0 || playlistCount <= 0) return null;
+
+            if (playlistCount == probed.Count)
+                return Enumerable.Range(0, probed.Count).ToList();
+
+            if (!fillAudioDetails || playlistCount != probed.Count - 1) return null;
+
+            // 找唯一的 truehd → ac3 相邻对；有多处或没有都不敢猜
+            var coreIdx = -1;
+            for (var i = 0; i + 1 < probed.Count; i++)
+            {
+                if (probed[i].Type != MediaStreamType.Audio || probed[i + 1].Type != MediaStreamType.Audio)
+                    continue;
+                if (!string.Equals(probed[i].Codec, "truehd", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!string.Equals(probed[i + 1].Codec, "ac3", StringComparison.OrdinalIgnoreCase)) continue;
+                if (coreIdx >= 0) return null; // 多处匹配，放弃
+                coreIdx = i + 1;
+            }
+            if (coreIdx < 0) return null;
+
+            ac3CoreIndex = coreIdx;
+            var map = new List<int>(probed.Count - 1);
+            for (var i = 0; i < probed.Count; i++)
+                if (i != coreIdx) map.Add(i);
+            return map;
         }
 
         private static bool IsUnknownLanguage(string language) =>

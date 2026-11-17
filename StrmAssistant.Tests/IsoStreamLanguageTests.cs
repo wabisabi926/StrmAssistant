@@ -27,12 +27,13 @@ namespace StrmAssistant.Tests
         }
 
         private static MediaStream Probed(string language, MediaStreamType type = MediaStreamType.Audio,
-            int channels = 0, int sampleRate = 0)
+            int channels = 0, int sampleRate = 0, string codec = null)
         {
             return new MediaStream
             {
                 Type = type,
                 Language = language,
+                Codec = codec,
                 Channels = channels,
                 SampleRate = sampleRate
             };
@@ -173,6 +174,54 @@ namespace StrmAssistant.Tests
             Assert.Equal(0, IsoExtraction.FillMissingStreamDetails(probed, playlist, true));
             Assert.Equal(2, probed[0].Channels);
             Assert.Equal(44100, probed[0].SampleRate);
+        }
+
+        [Fact]
+        public void SkipsTrueHdAc3Core_WhenProbedHasOneExtra()
+        {
+            // 蓝光 TrueHD 必带 AC3 核心：ffprobe 拆成 truehd + ac3 两条，MPLS 只声明 truehd 一条。
+            // 跳过核心后按序对齐，且核心继承 TrueHD 的语言。
+            var probed = new List<MediaStream>
+            {
+                Probed(null, codec: "truehd"),
+                Probed(null, codec: "ac3"),        // 核心，跳过
+                Probed(null, codec: "ac3"),
+                Probed(null, codec: "ac3")
+            };
+            var playlist = new List<UdfTitleResolver.MplsStreamInfo>
+            {
+                Stn("eng", UdfTitleResolver.BlurayStreamKind.Audio),
+                Stn("spa", UdfTitleResolver.BlurayStreamKind.Audio),
+                Stn("fra", UdfTitleResolver.BlurayStreamKind.Audio)
+            };
+
+            var filled = IsoExtraction.FillMissingStreamDetails(probed, playlist, true);
+
+            Assert.Equal("eng", probed[0].Language);   // truehd
+            Assert.Equal("eng", probed[1].Language);   // 核心继承同一音轨语言
+            Assert.Equal("spa", probed[2].Language);
+            Assert.Equal("fra", probed[3].Language);
+            Assert.True(filled >= 3);
+        }
+
+        [Fact]
+        public void DoesNotSkipCore_WhenExtraIsNotAfterTrueHd()
+        {
+            // 多出的不是 truehd 紧邻的 ac3（如两个普通 ac3），不敢猜 → 整体放弃
+            var probed = new List<MediaStream>
+            {
+                Probed(null, codec: "ac3"),
+                Probed(null, codec: "ac3"),
+                Probed(null, codec: "ac3")
+            };
+            var playlist = new List<UdfTitleResolver.MplsStreamInfo>
+            {
+                Stn("eng", UdfTitleResolver.BlurayStreamKind.Audio),
+                Stn("spa", UdfTitleResolver.BlurayStreamKind.Audio)
+            };
+
+            Assert.Equal(0, IsoExtraction.FillMissingStreamDetails(probed, playlist, true));
+            Assert.All(probed, p => Assert.Null(p.Language));
         }
 
         [Fact]

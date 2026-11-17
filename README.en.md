@@ -32,6 +32,10 @@ Community Edition based on StrmAssistant, continuously adapted to the latest Emb
 
 ✅ **Precise ISO media info (4.0.1.0)**
 - Fixed extremely low ISO probing bitrate: recalculates from actual title bytes instead of reporting a few kbps
+- Fixed bitrate being split evenly across video tracks: picture-in-picture and dual-layer Dolby Vision titles now show a realistic bitrate for each video
+- Fixed underestimated bitrate on single-clip discs: statistics are sampled evenly across the whole title instead of only its head and tail
+- Fixed missing audio languages: TrueHD and its AC-3 core are treated as one track, and subtitle languages are filled in as well
+- Added audio "Profile" display: shows Dolby Atmos / DTS:X labels such as "Dolby TrueHD + Dolby Atmos"
 - Removed misleading ISO codec tags: dropped redundant HDMV / AC-3 labels, so TrueHD/EAC3 audio and video codecs display correctly
 - Aligned the displayed text with Emby 4.10.2.0 and removed extra symbols / spaces
 

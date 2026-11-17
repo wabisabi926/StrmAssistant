@@ -133,6 +133,12 @@ namespace StrmAssistant.Common
             /// <summary>选中的 playlist 名，仅用于诊断日志。</summary>
             public string SourceName;
 
+            /// <summary>
+            /// 原始 ISO 的文件名 / URL（非临时样本路径）。音轨的 Atmos / DTS:X 标识
+            /// 只在文件名里出现（ffprobe 与 m2ts 都没有该字段），用于写「配置」文案。
+            /// </summary>
+            public string OriginalName;
+
             /// <summary>playlist 总片段数 / 实际采样片段数（非采样路径为 0）。</summary>
             public int TotalClips;
             public int SampledClips;
@@ -156,6 +162,12 @@ namespace StrmAssistant.Common
             /// 为空表示没有可统计的输入，按比例缩放的老路径照旧。
             /// </summary>
             public string SamplePath;
+
+            /// <summary>
+            /// 单段长 m2ts 的沿全片均匀采样统计样本。TsByteAccounting 用它数 PID 字节，
+            /// 比「头尾探测样本」更能反映真实占比。为空时退回 SamplePath。
+            /// </summary>
+            public string StatsSamplePath;
 
             public bool IsEmpty => !IsProbeSample && Chapters.Count == 0 && AudioStreams.Count == 0 &&
                                    SubtitleStreams.Count == 0 && DurationSeconds <= 0;
@@ -471,9 +483,11 @@ namespace StrmAssistant.Common
                         IsProbeSample = true,
                         InputReplaced = true,
                         SamplePath = tempFile,
+                        StatsSamplePath = title.StatsSamplePath,
                         SourceSize = image.Length,
                         SourceBytes = title.TotalBytes,
                         SourceName = title.SourceName,
+                        OriginalName = isoUrl,
                         TotalClips = title.TotalClips,
                         SampledClips = title.SampledClips
                     };
@@ -567,7 +581,15 @@ namespace StrmAssistant.Common
 
         private static void TryDelete(string path)
         {
-            try { if (!string.IsNullOrEmpty(path) && File.Exists(path)) File.Delete(path); } catch { /* ignore */ }
+            try
+            {
+                if (string.IsNullOrEmpty(path)) return;
+                if (File.Exists(path)) File.Delete(path);
+                // 统计样本与探测样本同生命周期，一起清理（命名见 UdfTitleResolver.WriteUniformStatsSample）
+                var statsPath = Path.ChangeExtension(path, ".stats.ts");
+                if (File.Exists(statsPath)) File.Delete(statsPath);
+            }
+            catch { /* ignore */ }
         }
 
         /// <summary>
@@ -712,9 +734,11 @@ namespace StrmAssistant.Common
                             IsProbeSample = true,
                             InputReplaced = true,
                             SamplePath = tempFile,
+                            StatsSamplePath = title.StatsSamplePath,
                             SourceSize = length,
                             SourceBytes = title.TotalBytes,
                             SourceName = title.SourceName,
+                            OriginalName = isoPath,
                             TotalClips = title.TotalClips,
                             SampledClips = title.SampledClips
                         };

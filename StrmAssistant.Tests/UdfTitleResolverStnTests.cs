@@ -253,7 +253,7 @@ namespace StrmAssistant.Tests
             // 视频流现在也参与解析：1 视频 + 1 音频 + 1 字幕，两个 PlayItem 同 PID 只保留一份
             Assert.Equal(3, entry.Streams.Count);
             Assert.Equal(3, entry.Streams.Select(s => s.Pid).Distinct().Count());
-            Assert.Single(entry.Streams.Where(s => s.Kind == UdfTitleResolver.BlurayStreamKind.Video));
+            Assert.Single(entry.Streams, s => s.Kind == UdfTitleResolver.BlurayStreamKind.Video);
         }
 
         [Fact]

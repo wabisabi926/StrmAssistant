@@ -4,6 +4,29 @@
 
 约定：完成一项就删掉对应小节，并把行为变更写进 `CHANGELOG.md`。
 
+## ✅ 4.0.1.0 ISO 码率 / 语言 / 配置收尾已完成（2026-11-17，Win + NAS 双平台）
+
+同一张真实 4K 原盘的远程 strm（`死侍与金刚狼 (2024) UHD原盘`，7675.4s、2V+6A+10S、
+容器 60.9 Mbps）在 Windows 与 NAS 的 Emby 4.10.2.0 上各自 `DeleteMediaInfo` → `ExtractMediaInfo`：
+
+| 平台 | 条目 | 修复前（Emby 等分） | 最终落库 |
+|---|---|---|---|
+| Win | 28049 | 各 30,428,576 bps | **47,283,051 / 3,584,448 bps** |
+| NAS | 287304 | 各 30,428,576 bps | **47,283,051 / 3,584,448 bps** |
+
+用户 BDInfo 真值：4K 基础层 45.20 Mbps、1080p 增强层 3.98 Mbps、视频合计 49.18 Mbps；
+当前结果与真值同量级。两端日志一致：`PID count source: uniform-stats`、
+`per-stream bitrate from TS byte accounting: 47.28 / 3.58 Mbps`、
+`TS video PID bytes: 0x1011=6478656,0x1015=491136 (videoShare=0.8359)`、
+`filled 6 audio / 10 subtitle field(s)`、`wrote 1 audio profile label(s)`，无 `probe stream mismatch`。
+
+音频侧同轮补齐：TrueHD 与其 AC-3 核心按顺序对齐并继承语言，6 条音轨 / 10 条字幕全部拿到语言；
+按轨道标题与原始文件名写出「配置」文案，TrueHD 为 `Dolby TrueHD + Dolby Atmos`。
+注意分母是**全部 PID**（用户明确要求），视频拿 `视频 PID 字节 / 全部 PID 字节` 的份额。
+
+**发版状态**：版本仍为 **4.0.1.0**，CHANGELOG / README 已按最终行为更新；
+**未提交本轮源码改动、未打 tag、未发 Release**，等用户明确指令（详见本地 `docs/handoff.md`）。
+
 ## 待办
 
 ### 1. TheIntroDB `mapping` 集序转换（4.0.0.9 的 P2 遗留）
@@ -109,11 +132,13 @@ title sample` / `probe summary: 256/300 clips, probe=2V/2A/0S` / `corrected bitr
 - ~~单流码率改按样本内各 PID 字节占比分配~~ ✅ 已完成（`TsByteAccounting`）：ffprobe 对 mpegts 的
   视频流一律给 `bit_rate=N/A`，Emby 只能把容器码率**等分**给各路视频，带画中画的原盘会把 PiP
   报成和主画面同码率（实测样本两路视频字节 214080 : 78912 ≈ 73% : 27%，界面显示 50% : 50%）。
-  现按探测输入的 TS PID 字节占比还原真实比例，分母含全部基本流（视频不再吃掉音频那份）；
+  现按探测输入的 TS PID 字节占比还原真实比例，分母含全部基本流（用户明确要求，不要改成视频 PID 之和）；
   PMT 声明视频 PID 数与探测视频流数不一致时跳过，宁可不改。日志
   `per-stream bitrate from TS byte accounting: …`。
+- ✅ 单段长 m2ts 的头尾采样会低估视频占比（`29.60 / 5.05` vs BDInfo `45.20 / 3.98`）：
+  探测样本保持不动，另写沿全片 32 窗口的 `.stats.ts` 只供 PID 字节统计（约 8MB）。
+  两端最终 `47.28 / 3.58`，见文首完成记录。
 - 远程采样预算自适应（弱网降到 32MB/128 段），需真机弱网验证。
-- 待补：**同一张盘上跑一次端到端**，确认界面每路视频码率随之改变（当前只有单测钉住比例）。
 
 ## 观察项（4.0.0.9 上线后）
 

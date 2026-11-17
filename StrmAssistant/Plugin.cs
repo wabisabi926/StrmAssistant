@@ -348,7 +348,7 @@ namespace StrmAssistant
             MediaInfoApi = new MediaInfoApi(libraryManager, fileSystem, providerManager, mediaSourceManager,
                 itemRepository, jsonSerializer, libraryMonitor);
             ChapterApi = new ChapterApi(libraryManager, itemRepository);
-            IntroDbApi = new IntroDbApi(httpClient, jsonSerializer, libraryManager);
+            IntroDbApi = new IntroDbApi(jsonSerializer, libraryManager);
             ImagePostProcessor = new ImagePostProcessor(ffmpegManager, providerManager, fileSystem);
             DoubanAssist = new global::StrmAssistant.Provider.Douban.DoubanAssist(httpClient, jsonSerializer,
                 providerManager, fileSystem);

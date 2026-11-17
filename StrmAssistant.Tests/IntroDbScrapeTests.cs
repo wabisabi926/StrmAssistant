@@ -18,6 +18,32 @@ namespace StrmAssistant.Tests
             Credits = credits ? Seg(3000, 4000) : null
         };
 
+        [Theory]
+        [InlineData("{\"error\":\"No submissions for this episode\",\"code\":\"no_submissions\"}", "no_submissions")]
+        [InlineData("{\"error\":\"Episode not found\",\"code\":\"episode_not_found\",\"details\":\"S1E2\"}", "episode_not_found")]
+        [InlineData("{\"error\":\"Media not found\",\"code\":\"media_not_found\"}", "media_not_found")]
+        [InlineData("{\"code\":\" NO_SUBMISSIONS \"}", "no_submissions")]
+        [InlineData("{\"code\":\"specific_media_usage_limit_exceeded\"}", "specific_media_usage_limit_exceeded")]
+        public void ParseNoDataCode_ReadsTopLevelCode(string body, string expected)
+        {
+            Assert.Equal(expected, IntroDbApi.ParseNoDataCode(body));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        [InlineData("Not Found")]
+        [InlineData("{}")]
+        [InlineData("{\"error\":\"No submissions\"}")]
+        [InlineData("{\"code\":123}")]
+        [InlineData("{\"error\":{\"code\":\"no_submissions\"}}")]
+        [InlineData("[1,2]")]
+        public void ParseNoDataCode_ReturnsNullWhenNoUsableCode(string body)
+        {
+            Assert.Null(IntroDbApi.ParseNoDataCode(body));
+        }
+
         [Fact]
         public void ResolveResults_PrefersCompleteSourceOverMerging()
         {

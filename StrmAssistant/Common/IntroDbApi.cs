@@ -1,4 +1,3 @@
-using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
@@ -14,6 +13,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,6 +50,21 @@ namespace StrmAssistant.Common
 
         /// <summary>混源拼接时两源同字段起点差异超过该值（毫秒）才升级为 Warn。</summary>
         internal const long MixedSourceWarnThresholdMs = 30_000;
+
+        // 独立走 System.Net.Http：Emby 的 IHttpClient 对非 2xx 直接抛 HttpException，
+        // 既不返回 HttpResponseMessage 也不带响应体，读不到 404 的 code。
+        private static readonly HttpClient IntroDbHttpClient = CreateHttpClient();
+
+        private static HttpClient CreateHttpClient()
+        {
+            var handler = new HttpClientHandler
+            {
+                AllowAutoRedirect = true,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            return new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
+        }
 
         public class IntroDbSegment
         {
@@ -96,7 +112,6 @@ namespace StrmAssistant.Common
             public List<IntroDbSegment> credits { get; set; }
         }
 
-        private readonly IHttpClient _httpClient;
         private readonly IJsonSerializer _jsonSerializer;
         private readonly ILogger _logger;
         private readonly ILibraryManager _libraryManager;
@@ -121,6 +136,8 @@ namespace StrmAssistant.Common
             new ConcurrentDictionary<string, int>();
         private readonly ConcurrentDictionary<string, int> _consecutiveFailures =
             new ConcurrentDictionary<string, int>();
+        private readonly ConcurrentDictionary<string, int> _noDataCodes =
+            new ConcurrentDictionary<string, int>();
         private readonly ConcurrentDictionary<string, byte> _disabledSources =
             new ConcurrentDictionary<string, byte>();
         private bool _firstFailureLogged;
@@ -132,10 +149,9 @@ namespace StrmAssistant.Common
         // 节流需跨请求串行，否则并发刮削时时间线互相覆盖，实际速率仍会超限。
         private readonly SemaphoreSlim _throttleLock = new SemaphoreSlim(1, 1);
 
-        public IntroDbApi(IHttpClient httpClient, IJsonSerializer jsonSerializer, ILibraryManager libraryManager)
+        public IntroDbApi(IJsonSerializer jsonSerializer, ILibraryManager libraryManager)
         {
             _logger = Plugin.Instance.Logger;
-            _httpClient = httpClient;
             _jsonSerializer = jsonSerializer;
             _libraryManager = libraryManager;
 
@@ -177,6 +193,7 @@ namespace StrmAssistant.Common
         {
             _requestFailures.Clear();
             _requestCounts.Clear();
+            _noDataCodes.Clear();
             _consecutiveFailures.Clear();
             _disabledSources.Clear();
             Interlocked.Exchange(ref _noDataCount, 0);
@@ -408,26 +425,31 @@ namespace StrmAssistant.Common
 
             _requestCounts.AddOrUpdate(provider, 1, (_, c) => c + 1);
 
-            var requestOptions = new HttpRequestOptions
-            {
-                Url = url,
-                CancellationToken = cancellationToken,
-                AcceptHeader = "application/json",
-                BufferContent = true,
-                UserAgent = Plugin.Instance.UserAgent
-            };
-
-            if (!string.IsNullOrWhiteSpace(apiKey))
-            {
-                requestOptions.RequestHeaders["Authorization"] = "Bearer " + apiKey.Trim();
-            }
-
             try
             {
-                using var response = await _httpClient.SendAsync(requestOptions, "GET").ConfigureAwait(false);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.TryAddWithoutValidation("Accept", "application/json");
+
+                var userAgent = Plugin.Instance.UserAgent;
+                if (!string.IsNullOrWhiteSpace(userAgent))
+                {
+                    request.Headers.TryAddWithoutValidation("User-Agent", userAgent);
+                }
+
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                {
+                    request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + apiKey.Trim());
+                }
+
+                using var response = await IntroDbHttpClient
+                    .SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)
+                    .ConfigureAwait(false);
 
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
+                    // 404 响应体带 code：no_submissions / episode_not_found / media_not_found，
+                    // 分类计数后仍按“无数据”处理，不计入请求失败。
+                    RecordNoDataCode(await ReadNoDataCodeAsync(response, cancellationToken).ConfigureAwait(false));
                     HandleNoData(provider, url);
                     return null;
                 }
@@ -447,7 +469,8 @@ namespace StrmAssistant.Common
                     return null;
                 }
 
-                await using var contentStream = response.Content;
+                await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken)
+                    .ConfigureAwait(false);
                 var result = ParseResponse(provider, contentStream);
 
                 if (result == null || !result.HasAny)
@@ -461,49 +484,21 @@ namespace StrmAssistant.Common
 
                 return result;
             }
+            catch (OperationCanceledException e) when (!cancellationToken.IsCancellationRequested)
+            {
+                // HttpClient.Timeout 触发的取消算网络失败，不能把整个刮削任务带停。
+                RecordAndLogFailure(provider, url, "timeout", e);
+                return null;
+            }
             catch (OperationCanceledException)
             {
                 throw;
-            }
-            catch (HttpException e) when (e.StatusCode == HttpStatusCode.NotFound)
-            {
-                // Emby 的 HttpClient 对非 2xx 是抛 HttpException，不是返回状态码。
-                // 404 表示该媒体/该集没有提交，属正常“无数据”，不能算请求失败。
-                HandleNoData(provider, url);
-                return null;
-            }
-            catch (HttpException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
-            {
-                HandleRateLimit(provider, url);
-                return null;
-            }
-            catch (HttpException e) when (e.StatusCode.HasValue)
-            {
-                RecordSourceFailure(provider);
-                RecordRequestFailure("status " + (int)e.StatusCode.Value);
-                _logger.Debug("IntroDbScrape - {0} unexpected status {1} for {2}", provider,
-                    (int)e.StatusCode.Value, url);
-                return null;
             }
             catch (Exception e)
             {
                 // 超时/连接失败等网络异常：首条保留 Warn 提示用户，后续逐集降为 Debug，
                 // 任务收尾时由 LogRequestSummary 聚合输出，避免整季刷屏。
-                var reason = ClassifyRequestFailure(e);
-                RecordSourceFailure(provider);
-                RecordRequestFailure(reason);
-
-                if (!_firstFailureLogged)
-                {
-                    _firstFailureLogged = true;
-                    _logger.Warn("IntroDbScrape - {0} request failed for {1}: {2} (further failures will be aggregated)",
-                        provider, url, e.Message);
-                }
-                else
-                {
-                    _logger.Debug("IntroDbScrape - {0} request failed ({1}) for {2}", provider, reason, url);
-                }
-
+                RecordAndLogFailure(provider, url, ClassifyRequestFailure(e), e);
                 return null;
             }
         }
@@ -608,6 +603,72 @@ namespace StrmAssistant.Common
             _requestFailures.AddOrUpdate(reason, 1, (_, c) => c + 1);
         }
 
+        private void RecordAndLogFailure(string provider, string url, string reason, Exception e)
+        {
+            RecordSourceFailure(provider);
+            RecordRequestFailure(reason);
+
+            if (!_firstFailureLogged)
+            {
+                _firstFailureLogged = true;
+                _logger.Warn("IntroDbScrape - {0} request failed for {1}: {2} (further failures will be aggregated)",
+                    provider, url, e.Message);
+            }
+            else
+            {
+                _logger.Debug("IntroDbScrape - {0} request failed ({1}) for {2}", provider, reason, url);
+            }
+        }
+
+        private void RecordNoDataCode(string code)
+        {
+            _noDataCodes.AddOrUpdate(string.IsNullOrWhiteSpace(code) ? "unknown" : code, 1, (_, c) => c + 1);
+        }
+
+        private static async Task<string> ReadNoDataCodeAsync(HttpResponseMessage response,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                return ParseNoDataCode(await response.Content.ReadAsStringAsync(cancellationToken)
+                    .ConfigureAwait(false));
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// TheIntroDB v4 的 404 响应体为 {"error": "...", "code": "..."}（code 可省略）。
+        /// 只取顶层字符串 code，统一小写；解析不到返回 null（计入 unknown）。
+        /// </summary>
+        internal static string ParseNoDataCode(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body)) return null;
+
+            try
+            {
+                using var document = JsonDocument.Parse(body);
+
+                if (document.RootElement.ValueKind != JsonValueKind.Object) return null;
+
+                if (!document.RootElement.TryGetProperty("code", out var code) ||
+                    code.ValueKind != JsonValueKind.String) return null;
+
+                var value = code.GetString()?.Trim().ToLowerInvariant();
+                return string.IsNullOrEmpty(value) ? null : value;
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
+
         /// <summary>混源拼接时记录来源；两源同字段偏差过大时升级为 Warn（通常是版本不一致）。</summary>
         private void LogMergeDecision(List<SourceResult> results, IntroDbMedia merged, string introSource,
             string creditsSource, string tmdbId, int? season, int? episode)
@@ -672,6 +733,22 @@ namespace StrmAssistant.Common
             var noData = Interlocked.Exchange(ref _noDataCount, 0);
             if (noData > 0)
                 _logger.Info("IntroDbScrape - Source coverage: no data for {0} episode request(s) (normal for partially covered sources)", noData);
+
+            if (!_noDataCodes.IsEmpty)
+            {
+                var codes = _noDataCodes
+                    .OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
+                    .ToList();
+                _noDataCodes.Clear();
+
+                _logger.Info("IntroDbScrape - No-data codes: {0}",
+                    string.Join(", ", codes.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value))));
+
+                var mediaNotFound = codes.FirstOrDefault(kvp => kvp.Key == "media_not_found").Value;
+                if (mediaNotFound > 0)
+                    _logger.Warn("IntroDbScrape - media_not_found: {0} request(s); check TMDB/TVDB/IMDb id mapping for affected items",
+                        mediaNotFound);
+            }
 
             var mixed = Interlocked.Exchange(ref _mixedCount, 0);
             if (mixed > 0)

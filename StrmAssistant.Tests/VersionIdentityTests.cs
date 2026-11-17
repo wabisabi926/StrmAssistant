@@ -1,3 +1,4 @@
+using System.IO;
 using StrmAssistant.Common;
 using Xunit;
 
@@ -15,6 +16,10 @@ namespace StrmAssistant.Tests
         private static bool Same(string targetPath, string targetName, string candidatePath, string candidateName,
             out string reason) =>
             VersionIdentity.IsSameVersion(targetPath, targetName, candidatePath, candidateName, out reason);
+
+        // 测试路径必须用平台分隔符拼：Linux 上 '\' 不是分隔符，
+        // Path.GetDirectoryName(@"D:\TV\A\f.mkv") 会返回空串，导致「不同目录」用例误判。
+        private static string Dir(params string[] parts) => Path.Combine(parts);
 
         [Theory]
         [InlineData("A.Show.S01E01.1080p.WEB-DL.H.264-GRP", "1080")]
@@ -55,44 +60,46 @@ namespace StrmAssistant.Tests
         public void RejectsDifferentResolution_InSameFolder()
         {
             // 审查报告给出的真实场景：长文件名、仅分辨率不同，旧实现相似度 0.944 > 0.92
-            const string dir = @"D:\TV\Show\Season 1\";
+            var dir = Dir("D:", "TV", "Show", "Season 1");
             const string targetName = "A.Very.Long.Television.Series.Name.S01E01.1080p.WEB-DL.DDP5.1.H.264-GROUP";
             const string candidateName = "A.Very.Long.Television.Series.Name.S01E02.2160p.WEB-DL.DDP5.1.H.264-GROUP";
 
-            Assert.False(Same(dir + targetName + ".mkv", targetName,
-                dir + candidateName + ".mkv", candidateName, out var reason));
+            Assert.False(Same(Path.Combine(dir, targetName + ".mkv"), targetName,
+                Path.Combine(dir, candidateName + ".mkv"), candidateName, out var reason));
             Assert.Contains("resolution", reason);
         }
 
         [Fact]
         public void AcceptsSameResolution_AcrossEpisodes()
         {
-            const string dir = @"D:\TV\Show\Season 1\";
+            var dir = Dir("D:", "TV", "Show", "Season 1");
             const string a = "Show.S01E01.1080p.WEB-DL.H.264-GRP";
             const string b = "Show.S01E02.1080p.WEB-DL.H.264-GRP";
 
-            Assert.True(Same(dir + a + ".mkv", a, dir + b + ".mkv", b, out _));
+            Assert.True(Same(Path.Combine(dir, a + ".mkv"), a, Path.Combine(dir, b + ".mkv"), b, out _));
         }
 
         [Fact]
         public void RejectsDifferentCodec()
         {
-            const string dir = @"D:\TV\Show\";
+            var dir = Dir("D:", "TV", "Show");
             const string a = "Show.S01E01.1080p.WEB-DL.H.264-GRP";
             const string b = "Show.S01E02.1080p.WEB-DL.HEVC-GRP";
 
-            Assert.False(Same(dir + a + ".mkv", a, dir + b + ".mkv", b, out var reason));
+            Assert.False(Same(Path.Combine(dir, a + ".mkv"), a, Path.Combine(dir, b + ".mkv"), b, out var reason));
             Assert.Contains("codec", reason);
         }
 
         [Fact]
         public void RejectsDifferentFolder()
         {
+            var dirA = Dir("D:", "TV", "Show", "A");
+            var dirB = Dir("D:", "TV", "Show", "B");
             const string a = "Show.S01E01.1080p.WEB-DL";
             const string b = "Show.S01E02.1080p.WEB-DL";
 
-            Assert.False(Same(@"D:\TV\Show\A\" + a + ".mkv", a,
-                @"D:\TV\Show\B\" + b + ".mkv", b, out var reason));
+            Assert.False(Same(Path.Combine(dirA, a + ".mkv"), a,
+                Path.Combine(dirB, b + ".mkv"), b, out var reason));
             Assert.Contains("folder", reason);
         }
 
@@ -100,11 +107,11 @@ namespace StrmAssistant.Tests
         public void RejectsWhenResolutionTokenMissing()
         {
             // 分辨率标记缺失时无法可靠区分版本 → 保守排除，避免误删
-            const string dir = @"D:\TV\Show\";
+            var dir = Dir("D:", "TV", "Show");
             const string a = "Show.S01E01.WEB-DL";
             const string b = "Show.S01E02.WEB-DL";
 
-            Assert.False(Same(dir + a + ".mkv", a, dir + b + ".mkv", b, out var reason));
+            Assert.False(Same(Path.Combine(dir, a + ".mkv"), a, Path.Combine(dir, b + ".mkv"), b, out var reason));
             Assert.Contains("missing", reason);
         }
     }

@@ -58,8 +58,15 @@ Build FAILED. (2 Error(s))
 `Condition="'$(OS)'=='Windows_NT'"` —— Linux 构建不引入该包、跳过卫星注入，Windows 发布构建
 （`build.yml` 跑 windows-latest）行为不变。`test.yml` 的 grep 正则补上 `MSBUILD : error` /
 `Failed injecting` / `Build FAILED`，让今后这类失败直接进注解。
-本地用 `-p:OS=Unix` 模拟过 Linux 构建：跳过 `Finished embedding cultures`、ILRepack 正常、0/0；
-Windows 正常构建 509 项单测全绿。**待 CI 复验两个 job 都绿。**
+本地用 `-p:OS=Unix` 模拟过 Linux 构建：跳过 `Finished embedding cultures`、ILRepack 正常、0/0。
+
+构建修复后 CI 又暴露一个被 Windows-only CI 掩盖的用例缺陷：`VersionIdentityTests` 硬编码
+`@"D:\TV\Show\..."`，Linux 上 `\` 不是分隔符 → `Path.GetDirectoryName` 返回空串 →
+`RejectsDifferentFolder` 两个目录判等（期望 False 得 True）。已改 `Path.Combine`（`072389a`），
+生产代码无问题（路径来自 Emby）。
+
+**✅ CI 复验通过（run `43998522801`）**：`test` 与 `test-linux` 两 job 均 success；
+Linux job `Build succeeded` + ILRepack 跑到 + 509/509 passed。本待办完成。
 
 ### 4. NAS 真盘验证（发版门槛，不是代码工作）
 

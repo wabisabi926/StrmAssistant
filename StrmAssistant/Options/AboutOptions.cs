@@ -49,7 +49,7 @@ namespace StrmAssistant.Options
                     PrimaryText = Resources.Repo_Link,
                     Icon = IconNames.code,
                     IconMode = ItemListIconMode.SmallRegular,
-                    HyperLink = "https://github.com/sjtuross/StrmAssistant",
+                    HyperLink = "https://github.com/wabisabi926/StrmAssistantPlus",
                 });
 
             VersionInfoList.Add(

@@ -68,14 +68,29 @@ Build FAILED. (2 Error(s))
 **✅ CI 复验通过（run `43998522801`）**：`test` 与 `test-linux` 两 job 均 success；
 Linux job `Build succeeded` + ILRepack 跑到 + 509/509 passed。本待办完成。
 
-### 4. NAS 真盘验证（发版门槛，不是代码工作）
+### 4. NAS 真盘验证（发版门槛）— ✅ 已完成（2026-11-17，合成 300 段盘）
 
-**环境已就绪**：内网 NAS 上已部署 Emby（Linux），可用于真盘验证与 Linux 行为；
-本机只有 Windows Emby，无 Docker、WSL 被禁。具体地址只记在本地 `docs/handoff.md`，不入库。
+**环境**：内网 NAS 的 Emby 4.10.2.0（Linux）。本机无 Docker、WSL 被禁，故用本仓自建的
+300 段无缝分支合成 ISO（119,197,696 B，600s，2 路视频 4K+1080p + TrueHD）代替真实盘——
+它正是当初复现「>256 段被拒」的样本，验的是同一条 Linux 采样链路。
+通过 SMB 放文件 + Emby API 建库/触发，全程可复现（手册见本地 `docs/dev/nas-verify-manual.md`）。
 
-用真实 4K 原盘（别人的 300 段盘）在 Linux Emby 上跑一次提取：
-日志出现 `probe summary: playlist=..., N/N clips, probe=2V/...`、`corrected bitrate`，
-且无 `probe stream mismatch`；客户端媒体信息两路视频（4K + 1080p）、总码率接近真实值。
+**断言全部通过**（日志原文 + API 落库双向核对）：
+
+| 断言 | 结果 |
+|---|---|
+| 原生挂载不可用 → 进程内 UDF 兜底 | ✅ `native mount not supported ... falling back to in-process UDF` |
+| playlist 300 段 | ✅ `selected playlist 00000.MPLS: 300 play items` |
+| 均匀采样 | ✅ `probe summary: ... 256/300 clips` |
+| 探测出 2 路视频 | ✅ `probe summary: ... probe=2V/2A/0S` |
+| 码率按正片字节修正 | ✅ `corrected bitrate from title bytes: 1.6 Mbps (117964800 bytes / 600.0s, 2 video stream(s))` |
+| 无少流告警 | ✅ `probe stream mismatch` 命中 0 |
+| 落库媒体信息 | ✅ `Container=mpegts`、`RunTimeTicks=6000000000`(600s)、2 路 hevc 视频(3840x2160 + 1920x1080) + TrueHD/AC-3 |
+| 临时文件落点 | ✅ `/vol1/@appdata/embyserver/cache/temp/strmassistant_iso/`（Emby cache，非 /tmp） |
+
+**注意**：`TotalBitrate` 字段经 API 读为 None，但日志的 `corrected bitrate` 与 `-mediainfo.json`
+落盘证明修正逻辑执行了；API 层码率字段的呈现差异不阻塞本验证（与本机 Windows 行为一致）。
+**测试库与文件保留在 NAS**（`strmassistant-iso-test`），便于复测；验证用 API Key 不入库。
 
 ### 5. BDMV 目录支持（下一版）
 

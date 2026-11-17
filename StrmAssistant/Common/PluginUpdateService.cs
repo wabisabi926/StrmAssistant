@@ -45,7 +45,7 @@ namespace StrmAssistant.Common
     internal static class PluginUpdateService
     {
         public const string RepoOwner = "wabisabi926";
-        public const string RepoName = "StrmAssistant";
+        public const string RepoName = "StrmAssistantPlus";
         public const string RepoWebUrl = "https://github.com/" + RepoOwner + "/" + RepoName;
         public const string LatestReleaseUrl =
             "https://api.github.com/repos/" + RepoOwner + "/" + RepoName + "/releases/latest";

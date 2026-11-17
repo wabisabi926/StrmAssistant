@@ -26,7 +26,7 @@
 
 **发版状态**：**已发布**。提交 `80013d6` → `Test` run `44023582529`（Windows + Linux 双 job）
 全绿 → tag `v4.0.1.0` → `Build Plugin` run `44024073093` 成功 → Release
-[`StrmAssistantPlus v4.0.1.0`](https://github.com/wabisabi926/StrmAssistant/releases/tag/v4.0.1.0)
+[`StrmAssistantPlus v4.0.1.0`](https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/v4.0.1.0)
 已创建，资产 `StrmAssistantPlus_v4.0.1.0.dll`（8,210,432 B）。
 CHANGELOG / README 已按最终行为更新；**不要移动或重打该 tag**。详见本地 `docs/handoff.md`。
 

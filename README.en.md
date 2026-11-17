@@ -302,7 +302,7 @@ CI can be triggered two ways:
 - **Automatic on tag push**: `git push origin v3.0.0.73` builds and publishes that version (the tag name is validated against the project version)
 - **Manually**: open the Actions tab, choose `Build Plugin`, then click `Run workflow`
 
-When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.73`) from [Releases](https://github.com/wabisabi926/StrmAssistant/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
+When done, download `StrmAssistantPlus_v<version>.dll` for the matching tag (e.g. `v3.0.0.73`) from [Releases](https://github.com/wabisabi926/StrmAssistantPlus/releases), rename it to `StrmAssistantPlus.dll`, overwrite `config/plugins/StrmAssistantPlus.dll`, then restart Emby.
 
 > Always use the filename `StrmAssistantPlus.dll`. If an older copy such as `StrmAssistant.dll` is still in the plugins folder, delete it — Emby loads both and you end up with a duplicate plugin.
 
@@ -348,4 +348,4 @@ This is a GPL-3.0 open-source project not affiliated with, authorized, or endors
 
 ### Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wabisabi926/StrmAssistant&type=Date)](https://www.star-history.com/#wabisabi926/StrmAssistant&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=wabisabi926/StrmAssistantPlus&type=Date)](https://www.star-history.com/#wabisabi926/StrmAssistantPlus&Date)

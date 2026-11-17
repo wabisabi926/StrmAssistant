@@ -107,9 +107,11 @@ namespace StrmAssistant.Tests
         }
 
         [Theory]
+        [InlineData("https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/v4.0.0.3", "v4.0.0.3")]
+        [InlineData("https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/4.0.0.3/", "4.0.0.3")]
+        // 旧仓库名仍会通过 GitHub 重定向出现，解析器要兼容
         [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/tag/v4.0.0.3", "v4.0.0.3")]
-        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/tag/4.0.0.3/", "4.0.0.3")]
-        [InlineData("https://ghproxy.example/https://github.com/wabisabi926/StrmAssistant/releases/tag/v4.1.0?x=1",
+        [InlineData("https://ghproxy.example/https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/v4.1.0?x=1",
             "v4.1.0")]
         public void TryParseTagFromReleaseUrl_ParsesVersionTag(string url, string expected)
         {
@@ -120,8 +122,8 @@ namespace StrmAssistant.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/latest")]
-        [InlineData("https://github.com/wabisabi926/StrmAssistant/releases/tag/latest")]
+        [InlineData("https://github.com/wabisabi926/StrmAssistantPlus/releases/latest")]
+        [InlineData("https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/latest")]
         [InlineData("not-a-url")]
         public void TryParseTagFromReleaseUrl_RejectsNonVersionUrl(string url)
         {
@@ -133,7 +135,7 @@ namespace StrmAssistant.Tests
         public void BuildReleaseAssetUrl_UsesFixedAssetName()
         {
             Assert.Equal(
-                "https://github.com/wabisabi926/StrmAssistant/releases/download/v4.0.0.3/StrmAssistantPlus_v4.0.0.3.dll",
+                "https://github.com/wabisabi926/StrmAssistantPlus/releases/download/v4.0.0.3/StrmAssistantPlus_v4.0.0.3.dll",
                 PluginUpdateService.BuildReleaseAssetUrl("v4.0.0.3", new Version(4, 0, 0, 3)));
             Assert.Null(PluginUpdateService.BuildReleaseAssetUrl(null, new Version(4, 0, 0, 3)));
             Assert.Null(PluginUpdateService.BuildReleaseAssetUrl("v4.0.0.3", null));

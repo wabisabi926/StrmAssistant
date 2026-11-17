@@ -309,7 +309,7 @@ CI 支持两种触发方式：
 - **推送标签自动构建**：`git push origin v3.0.0.73` 即自动构建并发布对应版本（会校验标签名与工程版本号一致）
 - **手动触发**：在 GitHub 仓库的 Actions 页面选择 `Build Plugin`，点击 `Run workflow` 执行
 
-构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistant/releases) 下载对应版本 tag（如 `v3.0.0.73`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
+构建完成后从 [Releases](https://github.com/wabisabi926/StrmAssistantPlus/releases) 下载对应版本 tag（如 `v3.0.0.73`）的 `StrmAssistantPlus_v<版本>.dll`，重命名为 `StrmAssistantPlus.dll` 覆盖到 `config/plugins/StrmAssistantPlus.dll` 后重启 Emby。
 
 > 插件文件名固定用 `StrmAssistantPlus.dll`。如果插件目录里还存在 `StrmAssistant.dll` 之类的旧副本，请一并删除——两个文件并存时 Emby 会同时加载，表现为重复插件。
 
@@ -355,4 +355,4 @@ bash build-local.sh
 
 ### 星星数
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wabisabi926/StrmAssistant&type=Date)](https://www.star-history.com/#wabisabi926/StrmAssistant&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=wabisabi926/StrmAssistantPlus&type=Date)](https://www.star-history.com/#wabisabi926/StrmAssistantPlus&Date)

@@ -68,7 +68,7 @@ Build FAILED. (2 Error(s))
 **✅ CI 复验通过（run `43998522801`）**：`test` 与 `test-linux` 两 job 均 success；
 Linux job `Build succeeded` + ILRepack 跑到 + 509/509 passed。本待办完成。
 
-### 4. NAS 真盘验证（发版门槛）— ✅ 已完成（2026-11-17，合成 300 段盘）
+### 4. NAS 真盘验证（发版门槛）— ✅ 已完成（2026-11-17，合成 300 段盘，本地 ISO + 远程 strm 双路径）
 
 **环境**：内网 NAS 的 Emby 4.10.2.0（Linux）。本机无 Docker、WSL 被禁，故用本仓自建的
 300 段无缝分支合成 ISO（119,197,696 B，600s，2 路视频 4K+1080p + TrueHD）代替真实盘——
@@ -90,7 +90,12 @@ Linux job `Build succeeded` + ILRepack 跑到 + 509/509 passed。本待办完成
 
 **注意**：`TotalBitrate` 字段经 API 读为 None，但日志的 `corrected bitrate` 与 `-mediainfo.json`
 落盘证明修正逻辑执行了；API 层码率字段的呈现差异不阻塞本验证（与本机 Windows 行为一致）。
-**测试库与文件保留在 NAS**（`strmassistant-iso-test`），便于复测；验证用 API Key 不入库。
+**远程 strm（ISO over HTTP Range）同日补验通过**：本机起 `0.0.0.0` Range 服务器，strm 指向
+`http://<LAN IP>:18101/multi300.iso`；注意 strm 入库必须触发 `Scan media library` 计划任务
+（`Items/Refresh` 发现不了新 strm）。日志 `remote title sample saved` / `remote iso probing via
+title sample` / `probe summary: 256/300 clips, probe=2V/2A/0S` / `corrected bitrate 1.6 Mbps`，
+无 mismatch，落库 mpegts/600s/2 路 hevc。测试用临时库/文件已清理，**ISO 测试库与文件保留在 NAS**
+（`strmassistant-iso-test`），便于复测；验证用 API Key 不入库。
 
 ### 5. BDMV 目录支持（下一版）
 

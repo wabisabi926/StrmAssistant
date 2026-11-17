@@ -4,6 +4,17 @@
 
 约定：完成一项就删掉对应小节，并把行为变更写进 `CHANGELOG.md`。
 
+## ✅ 4.0.1.1 片头片尾刮削 404 分类已发布（2026-11-17）
+
+- 提交 `82bff1f` → `Test` run `44035367020`（Windows + Linux 双 job）全绿 → tag `v4.0.1.1` →
+  `Build Plugin` run `44035376015` 成功 → Release
+  [`StrmAssistantPlus v4.0.1.1`](https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/v4.0.1.1)
+  已创建，资产 `StrmAssistantPlus_v4.0.1.1.dll`（8,213,504 B，sha256 `c6dd8831…`）。
+- 验证：Windows 本机真实 404 三类 code 汇总（`media_not_found=80, no_submissions=72`）；
+  NAS 上新传输可用（IntroDb 225 请求成功、写入 116 条标记），TheIntroDB 从 NAS 不可达
+  （30 秒超时 → 5 次后熔断），属出网环境限制，非本次改动回归。
+- **不要移动或重打该 tag**。
+
 ## ✅ 4.0.1.0 ISO 码率 / 语言 / 配置收尾已完成（2026-11-17，Win + NAS 双平台）
 
 同一张真实 4K 原盘的远程 strm（`死侍与金刚狼 (2024) UHD原盘`，7675.4s、2V+6A+10S、

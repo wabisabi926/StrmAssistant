@@ -24,19 +24,17 @@ namespace StrmAssistant.Options
         [Browsable(false)]
         public string GitHubProxy { get; set; } = string.Empty;
         
-        private static string NormalizeVersion(string version)
-        {
-            if (string.IsNullOrWhiteSpace(version)) return version;
-            return version.EndsWith(".0") ? version.Substring(0, version.Length - 2) : version;
-        }
-
         /// <summary>
-        /// 显示用版本号：只返回程序集版本（如 3.0.0.55），不再拼接 git commit hash。
+        /// 显示用版本号：返回完整四段程序集版本（如 4.0.1.0）。
         /// 供品牌区（BrandOptions）与关于页共用。
+        ///
+        /// 历史：早期版本第四位恒非零（3.0.0.65 等），曾把结尾 ".0" 砍掉让显示更短；
+        /// 自 4.0.1.0 起版本体系改为第四位归零（补丁号在第三位），再砍 ".0" 会把
+        /// 4.0.1.0 显示成 4.0.1，与 tag/CHANGELOG/Release 名称不一致，故不再裁剪。
         /// </summary>
         internal static string GetVersion()
         {
-            return NormalizeVersion(Assembly.GetExecutingAssembly().GetName().Version?.ToString()) ?? "0.0.0.0";
+            return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
         }
 
         public void Initialize()

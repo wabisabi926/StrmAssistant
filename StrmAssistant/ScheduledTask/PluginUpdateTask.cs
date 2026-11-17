@@ -10,6 +10,7 @@ using StrmAssistant.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.Json;
@@ -24,6 +25,9 @@ namespace StrmAssistant.ScheduledTask
     /// </summary>
     public class PluginUpdateTask : IScheduledTask
     {
+        // 在线更新备份保留份数：只留最近 N 份，避免每次更新都永久留下一个 .bak。
+        internal const int BackupRetentionCount = 3;
+
         private readonly IActivityManager _activityManager;
 
         public PluginUpdateTask(IActivityManager activityManager)
@@ -163,6 +167,20 @@ namespace StrmAssistant.ScheduledTask
                 LogActivity(Resources.PluginUpdate_Activity_Updated, status.Message, LogSeverity.Info);
                 Plugin.Instance.ApplicationHost.NotifyPendingRestart();
                 Plugin.Instance.Logger.Info($"PluginUpdate - 已更新到 {latestVersion}，等待重启生效");
+
+                // 更新成功后清理过旧的备份，只保留最近 BackupRetentionCount 份。
+                // best-effort：清理失败只记日志，不影响已经成功的更新。
+                try
+                {
+                    var deleted = PruneOldBackups(localDll, BackupRetentionCount);
+                    if (deleted > 0)
+                        Plugin.Instance.Logger.Info($"PluginUpdate - 已清理 {deleted} 份旧 DLL 备份（保留最近 {BackupRetentionCount} 份）");
+                }
+                catch (Exception e)
+                {
+                    Plugin.Instance.Logger.Warn("PluginUpdate - 清理旧 DLL 备份失败（不影响更新）: " + e.Message);
+                }
+
                 progress.Report(100);
             }
             catch (OperationCanceledException)
@@ -194,6 +212,43 @@ namespace StrmAssistant.ScheduledTask
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 清理旧 DLL 备份，只保留最近的 keep 份。
+        /// 备份文件名形如 StrmAssistant.dll.bak-4.0.1.0-20261117-103000，
+        /// 按最后写入时间倒序保留；只处理本 DLL 的 .bak- 前缀文件，不碰其它文件。
+        /// 返回实际删除的份数。
+        /// </summary>
+        internal static int PruneOldBackups(string localDll, int keep)
+        {
+            if (string.IsNullOrWhiteSpace(localDll) || keep < 0) return 0;
+
+            var dir = Path.GetDirectoryName(localDll);
+            var prefix = Path.GetFileName(localDll) + ".bak-";
+            if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return 0;
+
+            var backups = Directory.GetFiles(dir, prefix + "*")
+                .Select(p => new FileInfo(p))
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .ThenByDescending(f => f.Name)
+                .Skip(keep)
+                .ToList();
+
+            var deleted = 0;
+            foreach (var file in backups)
+            {
+                try
+                {
+                    file.Delete();
+                    deleted++;
+                }
+                catch
+                {
+                    // 单个备份删除失败不影响其余，留给下次更新再试。
+                }
+            }
+            return deleted;
         }
 
         private static async Task<PluginReleaseInfo> GetLatestReleaseAsync(PluginUpdateOptions options,

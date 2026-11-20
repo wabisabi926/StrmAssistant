@@ -1,6 +1,6 @@
 # 更新日志 / Changelog
 
-## 未发布
+## StrmAssistantPlus v4.0.1.2（2026-11-20）
 
 🐛 修复
 

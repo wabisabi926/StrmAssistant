@@ -70,7 +70,8 @@ namespace StrmAssistant.ScheduledTask
                         IncludeItemTypes = new[] { nameof(Movie) }
                     })
                     .OfType<Movie>()
-                    .Where(m => HasAnyProviderId(m) && !Plugin.ChapterApi.HasIntro(m))
+                    .Where(m => HasAnyProviderId(m) &&
+                                ShouldScrapeMovie(Plugin.ChapterApi.HasNonDbIntro(m), Plugin.ChapterApi.HasCredits(m)))
                     .ToList();
             }
 
@@ -124,6 +125,15 @@ namespace StrmAssistant.ScheduledTask
 
             Plugin.IntroDbApi.LogRequestSummary();
             _logger.Info("IntroDbScrape - Scheduled Task Complete: {0} item(s) marked", marked);
+        }
+
+        /// <summary>
+        /// 与剧集同一套完整性判断：已有非 #DB 片头且已有片尾才跳过；
+        /// 缺片尾、或只有 #DB 标记的电影仍会参与刮削（补缺 / 刷新自身数据）。
+        /// </summary>
+        internal static bool ShouldScrapeMovie(bool hasNonDbIntro, bool hasCredits)
+        {
+            return !(hasNonDbIntro && hasCredits);
         }
 
         /// <summary>TMDB/TVDB/IMDb 任一存在即可参与刮削，不再以 TMDB 作为硬门槛。</summary>

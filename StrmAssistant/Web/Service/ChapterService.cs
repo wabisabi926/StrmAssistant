@@ -1,5 +1,6 @@
 ﻿using MediaBrowser.Controller.Api;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Logging;
@@ -27,7 +28,7 @@ namespace StrmAssistant.Web.Service
 
             var itemById = _libraryManager.GetItemById(request.Id);
 
-            if (!(itemById is Series || itemById is Season)) return;
+            if (!(itemById is Series || itemById is Season || itemById is Episode || itemById is Movie)) return;
 
             var episodes = Plugin.ChapterApi.FetchClearTaskItems(new List<BaseItem> { itemById });
 

@@ -474,7 +474,7 @@
     <value>Shared by extraction, backup and restore; blank uses the media folder.</value>
   </data>
   <data name="IntroSkipOptions_ClearIntro_Confirmation" xml:space="preserve">
-    <value>Clear intro/credits markers for episodes in scope? Movie markers are not cleared. Continue?</value>
+    <value>Clear intro/credits markers for episodes in the configured scopes (playback / fingerprint / online scrape)? If all three scopes are blank, all TV libraries are cleared. Movie markers are not cleared. Continue?</value>
   </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
     <value>Clear Intro &amp; Credits Markers</value>

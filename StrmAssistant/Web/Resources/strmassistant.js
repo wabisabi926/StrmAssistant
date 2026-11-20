@@ -389,8 +389,8 @@ define([
 
         clear_intro: function (itemIds) {
             const locale = globalize.getCurrentLocale().toLowerCase();
-            const commandName = locale === 'zh-cn' ? '\u6E05\u9664\u7247\u5934\u6807\u8BB0' :
-                    (['zh-hk', 'zh-tw'].includes(locale) ? '\u6E05\u9664\u7247\u982D\u6A19\u8A18' : 'Clear Intro Markers');
+            const commandName = locale === 'zh-cn' ? '\u6E05\u9664\u7247\u5934\u7247\u5C3E\u6807\u8BB0' :
+                    (['zh-hk', 'zh-tw'].includes(locale) ? '\u6E05\u9664\u7247\u982D\u7247\u5C3E\u6A19\u8A18' : 'Clear Intro & Credits Markers');
             batchClear(itemIds, 'ClearIntro', commandName);
         },
 

@@ -1,5 +1,6 @@
 using StrmAssistant.Options;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Persistence;
@@ -579,8 +580,14 @@ namespace StrmAssistant.Common
 
         /// <summary>
         /// 清除动作覆盖三种行为的并集：播放探测、片头指纹检测、在线刮削。
-        /// 任一范围留空即视为全部剧集/混合库；电影库不参与。
+        /// 只有三项范围全空才清除全部剧集/混合库；任一范围已配置时只清已配置范围的并集，
+        /// 避免“只限制了某一项的库范围”却把其他库的标记一起清掉。电影库不参与。
         /// </summary>
+        internal static bool ShouldIncludeAllClearLibraries(IEnumerable<string> scopes)
+        {
+            return scopes == null || scopes.All(string.IsNullOrWhiteSpace);
+        }
+
         private List<string> GetClearLibraryPaths()
         {
             var options = Plugin.Instance.IntroSkipStore.GetOptions();
@@ -592,16 +599,11 @@ namespace StrmAssistant.Common
             };
 
             var selectedIds = new HashSet<string>(StringComparer.Ordinal);
-            var includeAll = false;
+            var includeAll = ShouldIncludeAllClearLibraries(scopes);
+            var configuredScopes = scopes.Where(scope => !string.IsNullOrWhiteSpace(scope));
 
-            foreach (var scope in scopes)
+            foreach (var scope in configuredScopes)
             {
-                if (string.IsNullOrWhiteSpace(scope))
-                {
-                    includeAll = true;
-                    break;
-                }
-
                 var ids = GetValidLibraryIds(scope);
 
                 if (ids.Length == 0)
@@ -677,6 +679,10 @@ namespace StrmAssistant.Common
 
                         _logger.Info(
                             $"IntroSkipClear - {season.SeriesName} - {season.Name} ({season.InternalId}) - {season.ContainingFolderPath}");
+                    }
+                    else if (item is Episode || item is Movie)
+                    {
+                        results.Add(item);
                     }
                 }
 

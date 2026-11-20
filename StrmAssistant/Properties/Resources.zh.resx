@@ -387,7 +387,7 @@
     <value>提取、备份、恢复共用；留空与媒体文件同目录。</value>
   </data>
   <data name="IntroSkipOptions_ClearIntro_Confirmation" xml:space="preserve">
-    <value>将清除所选范围内剧集的片头片尾标记；电影标记不处理。继续？</value>
+    <value>将清除已设置范围（播放探测/指纹检测/在线刮削）内剧集的片头片尾标记；三项都未设置时清除全部剧集；电影标记不处理。继续？</value>
   </data>
   <data name="ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers" xml:space="preserve">
     <value>清除片头片尾标记</value>

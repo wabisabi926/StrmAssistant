@@ -201,10 +201,10 @@ const strmAssistantCommandSource = {
                     result.push({ name: lockCommandName, id: 'lock', icon: 'lock' });
                 }
             }
-            if ((options.items[0].Type === 'Series' || options.items[0].Type === 'Season') &&
+            if (['Series', 'Season', 'Episode', 'Movie'].includes(options.items[0].Type) &&
                 (options.user && options.user.Policy.IsAdministrator || false)) {
-                const commandName = locale === 'zh-cn' ? '\u6E05\u9664\u7247\u5934\u6807\u8BB0' :
-                    (['zh-hk', 'zh-tw'].includes(locale) ? '\u6E05\u9664\u7247\u982D\u6A19\u8A18' : 'Clear Intro Markers');
+                const commandName = locale === 'zh-cn' ? '\u6E05\u9664\u7247\u5934\u7247\u5C3E\u6807\u8BB0' :
+                    (['zh-hk', 'zh-tw'].includes(locale) ? '\u6E05\u9664\u7247\u982D\u7247\u5C3E\u6A19\u8A18' : 'Clear Intro & Credits Markers');
                 result.push({ name: commandName, id: 'clear_intro', icon: 'clear_all' });
             }
             if (['Movie', 'Episode', 'Series', 'Season'].includes(options.items[0].Type) &&
@@ -225,16 +225,16 @@ const strmAssistantCommandSource = {
             const result = [];
             const types = [...new Set(options.items.map(item => item.Type))];
             const allMovies = types.length === 1 && types[0] === 'Movie';
-            const allSeriesScope = types.every(t => t === 'Series' || t === 'Season');
+            const allIntroClearScope = types.every(t => ['Series', 'Season', 'Episode', 'Movie'].includes(t));
             const allMediaScope = types.every(t => ['Movie', 'Episode', 'Series', 'Season'].includes(t));
             const allClearScope = types.every(t => ['Movie', 'Episode', 'Series', 'Season'].includes(t));
 
             if (allMovies) {
                 result.push({ name: this.globalize.translate('HeaderScanLibraryFiles'), id: 'traverse', icon: 'refresh' });
             }
-            if (allSeriesScope) {
-                const commandName = locale === 'zh-cn' ? '\u6E05\u9664\u7247\u5934\u6807\u8BB0' :
-                    (['zh-hk', 'zh-tw'].includes(locale) ? '\u6E05\u9664\u7247\u982D\u6A19\u8A18' : 'Clear Intro Markers');
+            if (allIntroClearScope) {
+                const commandName = locale === 'zh-cn' ? '\u6E05\u9664\u7247\u5934\u7247\u5C3E\u6807\u8BB0' :
+                    (['zh-hk', 'zh-tw'].includes(locale) ? '\u6E05\u9664\u7247\u982D\u7247\u5C3E\u6A19\u8A18' : 'Clear Intro & Credits Markers');
                 result.push({ name: commandName, id: 'clear_intro', icon: 'clear_all' });
             }
             if (allClearScope) {

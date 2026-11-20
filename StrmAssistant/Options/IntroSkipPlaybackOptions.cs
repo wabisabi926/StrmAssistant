@@ -95,7 +95,6 @@ namespace StrmAssistant.Options
         [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
         public string IntroSkipPreferences { get; set; } = string.Empty;
 
-        [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
         public ButtonItem ClearIntroButton =>
             new ButtonItem(
                 Resources.ClearChapterMarkersTask_Description_Clears_behavior_based_intro_and_credits_markers)
@@ -104,10 +103,8 @@ namespace StrmAssistant.Options
                 ConfirmationPrompt = Resources.IntroSkipOptions_ClearIntro_Confirmation
             };
 
-        [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
         public GenericItemList ClearIntroResult { get; set; } = new GenericItemList();
 
-        [VisibleCondition(nameof(EnableIntroSkip), SimpleCondition.IsTrue)]
         public SpacerItem ClearIntroResultSeparator { get; set; } = new SpacerItem(SpacerSize.Small);
 
         public void Initialize(ILibraryManager libraryManager)

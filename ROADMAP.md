@@ -4,6 +4,17 @@
 
 约定：完成一项就删掉对应小节，并把行为变更写进 `CHANGELOG.md`。
 
+## ✅ 4.0.1.2 片头片尾清除与电影补缺已发布（2026-11-20）
+
+- 功能提交 `b02092f` → `Test` run `44690493786`（Windows + Linux 双 job）全绿；
+  发版提交 `0a715c0` → `Test` run `44691032908` 全绿 → tag `v4.0.1.2` →
+  `Build Plugin` run `44691071173` 成功 → Release
+  [`StrmAssistantPlus v4.0.1.2`](https://github.com/wabisabi926/StrmAssistantPlus/releases/tag/v4.0.1.2)
+  已创建，资产 `StrmAssistantPlus_v4.0.1.2.dll`（8,215,040 B，sha256 `5b230600…`，FileVersion 4.0.1.2）。
+- 本机 Windows 实测：播放探测关闭时清除按钮可见；电影/单集菜单清除流程到达服务端；
+  任务候选 `8 series, 442 movies` 与按新规则计算一致，启动后立即取消、无写库；567 项单测通过。
+- **不要移动或重打该 tag**。
+
 ## ✅ 4.0.1.1 片头片尾刮削 404 分类已发布（2026-11-17）
 
 - 提交 `82bff1f` → `Test` run `44035367020`（Windows + Linux 双 job）全绿 → tag `v4.0.1.1` →
